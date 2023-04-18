@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "GPTipsBot": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
