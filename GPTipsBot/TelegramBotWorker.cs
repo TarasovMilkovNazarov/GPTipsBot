@@ -1,10 +1,5 @@
 ﻿using OpenAI.GPT3.ObjectModels.RequestModels;
 using OpenAI.GPT3.ObjectModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot;
@@ -22,6 +17,7 @@ namespace GPTipsBot
         private readonly ILogger<TelegramBotWorker> _logger;
 
         private OpenAIService openAiService;
+        private readonly string openaiBaseUrl = "https://api.openai.com/v1/engines/davinci-codex";
 
         public TelegramBotWorker(ILogger<TelegramBotWorker> logger)
         {
@@ -29,8 +25,7 @@ namespace GPTipsBot
 
             openAiService = new OpenAIService(new OpenAiOptions()
             {
-                //ApiKey =  Environment.GetEnvironmentVariable("MY_OPEN_AI_API_KEY"),
-                ApiKey = "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"
+                ApiKey = AppConfig.OpenAiToken
             });
             openAiService.SetDefaultModelId(Models.Davinci);
         }
@@ -82,7 +77,7 @@ namespace GPTipsBot
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            var botClient = new TelegramBotClient("6272630353:AAG6zDC3BTBQ0dt09nHE6_mN4RpDRUEjPDM");
+            var botClient = new TelegramBotClient(AppConfig.TelegramToken);
 
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
             ReceiverOptions receiverOptions = new()
