@@ -1,7 +1,10 @@
 {
   "profiles": {
     "GPTipsBot": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "dev"
+      }
     },
     "Docker": {
       "commandName": "Docker"

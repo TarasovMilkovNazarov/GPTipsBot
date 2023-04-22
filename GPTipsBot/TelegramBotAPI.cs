@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RestSharp;
 
 namespace GPTipsBot
 {
-    using RestSharp;
-    using System.Net;
-
     public class TelegramBotAPI
     {
         private string _botToken;

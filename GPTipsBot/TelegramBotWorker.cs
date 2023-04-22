@@ -1,5 +1,5 @@
-﻿using OpenAI.GPT3.ObjectModels.RequestModels;
-using OpenAI.GPT3.ObjectModels;
+﻿using GptModels = OpenAI.GPT3.ObjectModels;
+using OpenAI.GPT3.ObjectModels.RequestModels;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot;
@@ -9,25 +9,29 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
+using Dapper;
+using GPTipsBot.Repositories;
+using GPTipsBot.Dtos;
 
 namespace GPTipsBot
 {
     public class TelegramBotWorker : IHostedService, IDisposable
     {
         private readonly ILogger<TelegramBotWorker> _logger;
-
+        private readonly IUserRepository userRepository;
         private OpenAIService openAiService;
         private readonly string openaiBaseUrl = "https://api.openai.com/v1/engines/davinci-codex";
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository)
         {
             _logger = logger;
-
+            this.userRepository = userRepository;
             openAiService = new OpenAIService(new OpenAiOptions()
             {
                 ApiKey = AppConfig.OpenAiToken
             });
-            openAiService.SetDefaultModelId(Models.Davinci);
+            openAiService.SetDefaultModelId(GptModels.Models.Davinci);
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -42,13 +46,39 @@ namespace GPTipsBot
             var chatId = message.Chat.Id;
 
             Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
+            
+
+            try
+            {
+                if (message.From == null)
+                {
+                    throw new Exception();
+                }
+
+                var userDto = new CreateEditUser()
+                {
+                    Id = message.From.Id,
+                    TelegramId = message.From.Id,
+                    FirstName = message.From.FirstName,
+                    LastName = message.From.LastName,
+                    Message = message.Text,
+                    TimeStamp = DateTime.UtcNow
+                };
+                userRepository.CreateUser(userDto);
+            }
+            catch (Exception)
+            {
+                _logger.LogError("Can't define user telegramId for message");
+            }
+            
+
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
                 Messages = new List<ChatMessage>
                 {
                     ChatMessage.FromUser(messageText),
                 },
-                Model = Models.ChatGpt3_5Turbo,
+                Model = GptModels.Models.ChatGpt3_5Turbo,
                 MaxTokens = 1//optional
             });
             if (completionResult.Successful)
