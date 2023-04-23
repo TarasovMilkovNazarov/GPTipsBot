@@ -14,5 +14,6 @@ namespace GPTipsBot.Dtos
         public long TelegramId { get; set; }
         public string Message { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

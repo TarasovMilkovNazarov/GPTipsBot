@@ -9,10 +9,9 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Npgsql;
-using Dapper;
 using GPTipsBot.Repositories;
 using GPTipsBot.Dtos;
+using GPTipsBot.Services;
 
 namespace GPTipsBot
 {
@@ -21,7 +20,6 @@ namespace GPTipsBot
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly IUserRepository userRepository;
         private OpenAIService openAiService;
-        private readonly string openaiBaseUrl = "https://api.openai.com/v1/engines/davinci-codex";
 
         public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository)
         {
@@ -36,6 +34,12 @@ namespace GPTipsBot
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+            if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Kicked)
+            {
+                userRepository.SoftlyRemoveUser(update.MyChatMember.From.Id);
+                return;
+            }
+
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (update.Message is not { } message)
                 return;
@@ -45,8 +49,7 @@ namespace GPTipsBot
 
             var chatId = message.Chat.Id;
 
-            Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
-            
+            _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
 
             try
             {
@@ -70,7 +73,26 @@ namespace GPTipsBot
             {
                 _logger.LogError("Can't define user telegramId for message");
             }
-            
+
+            if (!MessageService.UserToMessageCount.TryGetValue(message.From.Id, out var existingValue))
+            {
+                MessageService.UserToMessageCount[message.From.Id] = (1, DateTime.UtcNow);
+            }
+            else
+            {
+                if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
+                {
+                    _logger.LogError("Max messages limit reached");
+                    Message sentMessage = await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Слишком много запросов, попробуйте заново через 1 минуту",
+                    cancellationToken: cancellationToken);
+
+                    return;
+                }
+
+                MessageService.UserToMessageCount[message.From.Id] = (existingValue.messageCount++, DateTime.UtcNow);
+            }
 
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
@@ -79,8 +101,9 @@ namespace GPTipsBot
                     ChatMessage.FromUser(messageText),
                 },
                 Model = GptModels.Models.ChatGpt3_5Turbo,
-                MaxTokens = 1//optional
+                MaxTokens = 10//optional
             });
+
             if (completionResult.Successful)
             {
                 Console.WriteLine(completionResult.Choices.First().Message.Content);
@@ -89,7 +112,14 @@ namespace GPTipsBot
                     chatId: chatId,
                     text: completionResult.Choices.First().Message.Content,
                     cancellationToken: cancellationToken);
+
+                return;
             }
+
+            await botClient.SendTextMessageAsync(
+                    chatId: chatId,
+                    text: "Вероятно превышен лимит запросов, попробуйте позже",
+                    cancellationToken: cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -101,7 +131,8 @@ namespace GPTipsBot
                 _ => exception.ToString()
             };
 
-            Console.WriteLine(ErrorMessage);
+            _logger.LogError(ErrorMessage);
+
             return Task.CompletedTask;
         }
 
@@ -122,7 +153,7 @@ namespace GPTipsBot
             );
 
             var me = await botClient.GetMeAsync();
-            Console.WriteLine($"Start listening for @{me.Username}");
+            _logger.LogInformation($"Start listening for @{me.Username}");
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

@@ -8,10 +8,10 @@ using Dapper;
 using GPTipsBot.Db;
 using Microsoft.Extensions.Configuration;
 using GPTipsBot.Repositories;
+using GPTipsBot.Services;
 
-var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"); 
 var builder = new ConfigurationBuilder()
-                 .AddJsonFile($"appsettings.{environment}.json", true, true);
+                 .AddJsonFile($"appsettings.{AppConfig.Env}.json", true, true);
 var config = builder.Build();
 
 var hostBuilder = new HostBuilder()
@@ -24,10 +24,11 @@ var hostBuilder = new HostBuilder()
         .AddHostedService<TelegramBotWorker>()
         .AddSingleton<DapperContext>()
         .AddSingleton<IConfiguration>(config)
+        //.AddSingleton<MessageService>()
         .AddTransient<IUserRepository, UserRepository>();
     });
 
-await hostBuilder.RunConsoleAsync();
-
 var tgBotApi = new TelegramBotAPI(AppConfig.TelegramToken, AppConfig.СhatId);
-tgBotApi.SetMyDescription("DescriptionExample");
+//tgBotApi.SetMyDescription("DescriptionExample");
+
+await hostBuilder.RunConsoleAsync();

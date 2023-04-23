@@ -10,5 +10,6 @@ namespace GPTipsBot.Repositories
     public interface IUserRepository
     {
         public long CreateUser(CreateEditUser user);
+        long SoftlyRemoveUser(long telegramId);
     }
 }

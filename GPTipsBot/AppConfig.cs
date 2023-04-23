@@ -8,12 +8,14 @@ namespace GPTipsBot
 {
     public static class AppConfig
     {
+        public static string Env { get; private set; }
         public static string TelegramToken { get; }
         public static string OpenAiToken { get; }
         public const long СhatId = 486363646;
 
         static AppConfig()
         {
+            Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "dev";
             TelegramToken = Environment.GetEnvironmentVariable("TELEGRAM_TOKEN") ?? "";
             OpenAiToken =  Environment.GetEnvironmentVariable("OPENAI_TOKEN") ?? "";
             

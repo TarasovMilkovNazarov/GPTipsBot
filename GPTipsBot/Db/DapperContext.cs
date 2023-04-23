@@ -17,6 +17,13 @@ namespace GPTipsBot.Db
             _configuration = configuration;
         }
         public IDbConnection CreateConnection()
-            => new NpgsqlConnection(_configuration["ConnectionString"]);
+        {
+            if (AppConfig.Env == "Production")
+            {
+                return new NpgsqlConnection(Environment.GetEnvironmentVariable("PG_CONNECTION_STRING"));
+            }
+
+            return new NpgsqlConnection(_configuration["ConnectionString"]);
+        }
     }
 }

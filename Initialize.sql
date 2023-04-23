@@ -1,8 +1,0 @@
-CREATE TABLE IF NOT EXISTS users (
-    Id BIGSERIAL PRIMARY KEY,
-    FirstName TEXT NOT NULL,
-    LastName TEXT,
-    TelegramId BIGINT NOT NULL,
-    Message TEXT,
-    TimeStamp TIMESTAMP WITH TIME ZONE NOT NULL
-);

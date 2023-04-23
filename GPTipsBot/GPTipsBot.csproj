@@ -16,12 +16,13 @@
     <PackageReference Include="Npgsql" Version="7.0.2" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="Telegram.Bot" Version="18.0.0" />
+    <PackageReference Include="TiktokenSharp" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.dev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="appsettings.json">
+    <None Update="appsettings.Production.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
