@@ -15,13 +15,15 @@ RUN dotnet build "GPTipsBot.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "GPTipsBot.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Используем образ с установленным PostgreSQL для запуска приложения и БД
+# use last postgres image
 FROM postgres:latest
 WORKDIR /app
 
-# copy script and set permissions
-COPY /usr/local/bin/set_env.sh .
+# copy script, set permissions and run
+COPY /usr/local/bin/set_env.sh /scripts
+WORKDIR /scripts
 RUN chmod +x set_env.sh
+RUN ./set_env.sh
 
 # run script to set environment variables
 RUN ./set_env.sh

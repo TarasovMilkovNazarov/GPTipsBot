@@ -2,20 +2,25 @@
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Services;
+using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories
 {
     public class UserRepository : IUserRepository
     {
+        private readonly ILogger<TelegramBotWorker> logger;
         private readonly DapperContext context;
 
-        public UserRepository(DapperContext context)
+        public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
         {
+            this.logger = logger;
             this.context = context;
         }
 
         public long CreateUser(CreateEditUser user)
         {
+            logger.LogInformation("CreateUser");
+
             var query = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, message, isactive) " +
                 "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @Message, @IsActive);" +
                 "SELECT currval('users_id_seq')";
