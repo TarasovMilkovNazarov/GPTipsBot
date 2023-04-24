@@ -25,9 +25,6 @@ WORKDIR /scripts
 RUN chmod +x set_env.sh
 RUN ./set_env.sh
 
-# run script to set environment variables
-RUN ./set_env.sh
-
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
