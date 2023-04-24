@@ -35,11 +35,11 @@ namespace GPTipsBot
 
             if (response != null && response.IsSuccessful)
             {
-                Console.WriteLine("Message sent successfully!");
+                Console.WriteLine("Description was set successfully!");
             }
             else
             {
-                 Console.WriteLine("Error sending message: " + response.StatusDescription);
+                Console.WriteLine("Error sending message: " + response.StatusDescription);
             }
         }
     }

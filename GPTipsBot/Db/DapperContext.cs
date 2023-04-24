@@ -23,10 +23,10 @@ namespace GPTipsBot.Db
         {
             if (AppConfig.Env == "Production")
             {
-                //var connectionString = Environment.GetEnvironmentVariable("PG_CONNECTION_STRING");
-                //_logger.LogInformation("Get postgres connection string: ", connectionString);
+                var connectionString = Environment.GetEnvironmentVariable("PG_CONNECTION_STRING");
+                _logger.LogInformation("Get postgres connection string: ", connectionString);
 
-                return new NpgsqlConnection(AppConfig.PG_CONNECTION_STRING);
+                return new NpgsqlConnection(connectionString);
             }
 
             return new NpgsqlConnection(_configuration["ConnectionString"]);

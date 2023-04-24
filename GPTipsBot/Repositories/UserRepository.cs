@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
+using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 
@@ -16,7 +17,7 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
             this.context = context;
         }
-
+        
         public long CreateUser(CreateEditUser user)
         {
             logger.LogInformation("CreateUser");
@@ -24,7 +25,7 @@ namespace GPTipsBot.Repositories
             var query = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, message, isactive) " +
                 "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @Message, @IsActive);" +
                 "SELECT currval('users_id_seq')";
-            string sql = $"SELECT COUNT(*) FROM Users WHERE TelegramId = @TelegramId";
+            string sql = $"SELECT COUNT(*) FROM Users WHERE TelegramId = @TelegramId;";
 
             using (var connection = context.CreateConnection())
             {
@@ -41,11 +42,31 @@ namespace GPTipsBot.Repositories
                 return user.TelegramId;
             }
         }
+
+        public IEnumerable<User> GetAll()
+        {
+            logger.LogInformation("GetAll");
+
+            using (var connection = context.CreateConnection())
+            {
+                const string sql = @"SELECT * FROM Users";
+                try
+                {
+                    connection.Query<User>(sql);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError($"GetAll error {ex.Message}");
+                }
+
+                return connection.Query<User>(sql);
+            }
+        }
         
         public long SoftlyRemoveUser(long telegramId)
         {
-            var query = "Update Users SET isactive = FALSE WHERE telegramid = @telegramId";
-            string sql = $"SELECT COUNT(*) FROM Users WHERE telegramid = @telegramId";
+            var query = "Update Users SET isactive = FALSE WHERE telegramid = @telegramId;";
+            string sql = $"SELECT COUNT(*) FROM Users WHERE telegramid = @telegramId;";
 
             using (var connection = context.CreateConnection())
             {

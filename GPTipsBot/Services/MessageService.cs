@@ -8,7 +8,7 @@ namespace GPTipsBot.Services
 {
     public class MessageService
     {
-        public const int MaxMessagesCountPerMinute = 2;
+        public const int MaxMessagesCountPerMinute = 5;
         public static Dictionary<long, (int messageCount, DateTime lastMessage)> UserToMessageCount { get; set; }
 
         static MessageService()

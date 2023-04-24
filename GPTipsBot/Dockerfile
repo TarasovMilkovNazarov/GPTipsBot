@@ -19,12 +19,6 @@ RUN dotnet publish "GPTipsBot.csproj" -c Release -o /app/publish /p:UseAppHost=f
 FROM postgres:latest
 WORKDIR /app
 
-# copy script, set permissions and run
-COPY /usr/local/bin/set_env.sh /scripts
-WORKDIR /scripts
-RUN chmod +x set_env.sh
-RUN ./set_env.sh
-
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

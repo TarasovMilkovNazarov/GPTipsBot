@@ -69,9 +69,9 @@ namespace GPTipsBot
                 };
                 userRepository.CreateUser(userDto);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.LogError("Can't define user telegramId for message");
+                _logger.LogError("Can't create user ", ex.Message);
             }
 
             if (!MessageService.UserToMessageCount.TryGetValue(message.From.Id, out var existingValue))
@@ -101,7 +101,7 @@ namespace GPTipsBot
                     ChatMessage.FromUser(messageText),
                 },
                 Model = GptModels.Models.ChatGpt3_5Turbo,
-                MaxTokens = 10//optional
+                MaxTokens = AppConfig.ChatGptTokensLimitPerMessage//optional
             });
 
             if (completionResult.Successful)
