@@ -19,21 +19,20 @@ namespace GPTipsBot
     {
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly IUserRepository userRepository;
-        private OpenAIService openAiService;
+        private readonly GptAPI gptAPI;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, GptAPI gptAPI)
         {
             _logger = logger;
             this.userRepository = userRepository;
-            openAiService = new OpenAIService(new OpenAiOptions()
-            {
-                ApiKey = AppConfig.OpenAiToken
-            });
-            openAiService.SetDefaultModelId(GptModels.Models.Davinci);
+            this.gptAPI = gptAPI;
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+            var sendViaTelegramBotClient = async (long chatId, string message, CancellationToken ct) => 
+                await botClient.SendTextMessageAsync(chatId, message, cancellationToken: ct);
+
             if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Kicked)
             {
                 userRepository.SoftlyRemoveUser(update.MyChatMember.From.Id);
@@ -83,10 +82,7 @@ namespace GPTipsBot
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     _logger.LogError("Max messages limit reached");
-                    Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: "Слишком много запросов, попробуйте заново через 1 минуту",
-                    cancellationToken: cancellationToken);
+                    await sendViaTelegramBotClient(chatId, "Слишком много запросов, попробуйте заново через 1 минуту", cancellationToken);
 
                     return;
                 }
@@ -94,32 +90,16 @@ namespace GPTipsBot
                 MessageService.UserToMessageCount[message.From.Id] = (existingValue.messageCount++, DateTime.UtcNow);
             }
 
-            var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
+            var sendMessage = await gptAPI.SendMessage(messageText);
+            
+            if (sendMessage.isSuccessful)
             {
-                Messages = new List<ChatMessage>
-                {
-                    ChatMessage.FromUser(messageText),
-                },
-                Model = GptModels.Models.ChatGpt3_5Turbo,
-                MaxTokens = AppConfig.ChatGptTokensLimitPerMessage//optional
-            });
-
-            if (completionResult.Successful)
-            {
-                Console.WriteLine(completionResult.Choices.First().Message.Content);
-                // Echo received message text
-                Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: completionResult.Choices.First().Message.Content,
-                    cancellationToken: cancellationToken);
+                await sendViaTelegramBotClient(chatId, sendMessage.response, cancellationToken);
 
                 return;
             }
 
-            await botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: "Вероятно превышен лимит запросов, попробуйте позже",
-                    cancellationToken: cancellationToken);
+            await sendViaTelegramBotClient(chatId, "Вероятно превышен лимит запросов, попробуйте позже", cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

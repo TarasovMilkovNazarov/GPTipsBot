@@ -65,7 +65,7 @@ namespace GPTipsBot.Repositories
         
         public long SoftlyRemoveUser(long telegramId)
         {
-            var query = "Update Users SET isactive = FALSE WHERE telegramid = @telegramId;";
+            var query = "Update Users set isactive = 'false' WHERE telegramid = @telegramId;";
             string sql = $"SELECT COUNT(*) FROM Users WHERE telegramid = @telegramId;";
 
             using (var connection = context.CreateConnection())
@@ -76,7 +76,7 @@ namespace GPTipsBot.Repositories
                     return -1;
                 }
 
-                connection.ExecuteScalar(query, telegramId);
+                connection.Execute(query, telegramId);
 
                 return telegramId;
             }
