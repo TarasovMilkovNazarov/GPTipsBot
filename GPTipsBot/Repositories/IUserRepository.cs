@@ -10,7 +10,7 @@ namespace GPTipsBot.Repositories
 {
     public interface IUserRepository
     {
-        public long CreateUser(CreateEditUser user);
+        public long CreateUpdateUser(CreateEditUser user);
         long SoftlyRemoveUser(long telegramId);
         IEnumerable<User> GetAll();
     }

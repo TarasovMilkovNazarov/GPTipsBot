@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using GPTipsBot.Repositories;
 using GPTipsBot.Dtos;
 using GPTipsBot.Services;
+using GPTipsBot.Api;
 
 namespace GPTipsBot
 {
@@ -49,7 +50,7 @@ namespace GPTipsBot
             var chatId = message.Chat.Id;
 
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
-            await sendViaTelegramBotClient(chatId, "Обработка запросов займет время, но я буду ждать ответа сервера и сообщу вам о результатах. Благодарю за терпение!", cancellationToken);
+            await sendViaTelegramBotClient(chatId, BotResponse.Typing, cancellationToken);
 
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken waitResponseCancellationToken = source.Token;
@@ -75,7 +76,7 @@ namespace GPTipsBot
                     Message = message.Text,
                     TimeStamp = DateTime.UtcNow
                 };
-                userRepository.CreateUser(userDto);
+                userRepository.CreateUpdateUser(userDto);
             }
             catch (Exception ex)
             {
@@ -91,7 +92,7 @@ namespace GPTipsBot
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     _logger.LogError("Max messages limit reached");
-                    await sendViaTelegramBotClient(chatId, "Слишком много запросов, повторите отправку через 1 минуту", cancellationToken);
+                    await sendViaTelegramBotClient(chatId, BotResponse.TooManyRequests, cancellationToken);
 
                     return;
                 }
@@ -110,7 +111,7 @@ namespace GPTipsBot
                 return;
             }
 
-            await sendViaTelegramBotClient(chatId, "Что-то пошло не так, попробуйте ещё раз", cancellationToken);
+            await sendViaTelegramBotClient(chatId, BotResponse.SomethingWentWrong, cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

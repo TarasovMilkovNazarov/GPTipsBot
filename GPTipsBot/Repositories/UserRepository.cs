@@ -11,6 +11,14 @@ namespace GPTipsBot.Repositories
     {
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly DapperContext context;
+        
+        private readonly string insertUserQuery = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, message, isactive) " +
+                "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @Message, @IsActive);" +
+                "SELECT currval('users_id_seq')";
+        private readonly string updateUserQuery = "Update Users SET isactive = 'true', message = @message, messagescount = @messagesCount WHERE telegramid = @telegramId;";
+        private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE TelegramId = @TelegramId;";
+        private readonly string isUserExistsQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
+        private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
 
         public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
         {
@@ -18,28 +26,24 @@ namespace GPTipsBot.Repositories
             this.context = context;
         }
         
-        public long CreateUser(CreateEditUser user)
+        public long CreateUpdateUser(CreateEditUser dtoUser)
         {
             logger.LogInformation("CreateUser");
 
-            var query = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, message, isactive) " +
-                "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @Message, @IsActive);" +
-                "SELECT currval('users_id_seq')";
-            string sql = $"SELECT COUNT(*) FROM Users WHERE TelegramId = @TelegramId;";
-
             using (var connection = context.CreateConnection())
             {
-                long id = 0;
-                int count = connection.ExecuteScalar<int>(sql, user);
-                if (count == 0)
+                User? dbUser;
+                dbUser = connection.Query<User>(selectUserByTelegramId, dtoUser).FirstOrDefault();
+                if (dbUser == null)
                 {
-                    id = connection.QuerySingle<long>(query, user);
+                    dbUser = connection.QuerySingle<User>(insertUserQuery, dtoUser);
+
+                    return dbUser.Id;
                 }
 
-                var updateIsActiveQuery =  "Update Users SET isactive = 'true' WHERE telegramid = @telegramId;";
-                connection.ExecuteScalar(updateIsActiveQuery, new { telegramId = user.TelegramId });
+                connection.ExecuteScalar(updateUserQuery, new { telegramId = dtoUser.TelegramId, message = dtoUser.Message, messagesCount = ++dbUser.MessagesCount });
 
-                return user.TelegramId;
+                return dtoUser.TelegramId;
             }
         }
 
@@ -65,18 +69,15 @@ namespace GPTipsBot.Repositories
         
         public long SoftlyRemoveUser(long telegramId)
         {
-            var query = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
-            string sql = $"SELECT COUNT(*) FROM Users WHERE telegramid = @telegramId;";
-
             using (var connection = context.CreateConnection())
             {
-                int count = connection.ExecuteScalar<int>(sql, new { telegramId });
+                int count = connection.ExecuteScalar<int>(isUserExistsQuery, new { telegramId });
                 if (count == 0)
                 {
                     return -1;
                 }
 
-                connection.Execute(query, new { telegramId });
+                connection.Execute(removeUserQuery, new { telegramId });
 
                 return telegramId;
             }
