@@ -36,8 +36,8 @@ namespace GPTipsBot.Repositories
                     id = connection.QuerySingle<long>(query, user);
                 }
 
-                var updateIsActiveQuery =  "Update Users SET isactive = 'true' WHERE TelegramId = @telegramId;";
-                connection.ExecuteScalar(updateIsActiveQuery, user.TelegramId);
+                var updateIsActiveQuery =  "Update Users SET isactive = 'true' WHERE telegramid = @telegramId;";
+                connection.ExecuteScalar(updateIsActiveQuery, new { telegramId = user.TelegramId });
 
                 return user.TelegramId;
             }
@@ -65,18 +65,18 @@ namespace GPTipsBot.Repositories
         
         public long SoftlyRemoveUser(long telegramId)
         {
-            var query = "Update Users set isactive = 'false' WHERE telegramid = @telegramId;";
+            var query = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
             string sql = $"SELECT COUNT(*) FROM Users WHERE telegramid = @telegramId;";
 
             using (var connection = context.CreateConnection())
             {
-                int count = connection.ExecuteScalar<int>(sql, telegramId);
+                int count = connection.ExecuteScalar<int>(sql, new { telegramId });
                 if (count == 0)
                 {
                     return -1;
                 }
 
-                connection.Execute(query, telegramId);
+                connection.Execute(query, new { telegramId });
 
                 return telegramId;
             }

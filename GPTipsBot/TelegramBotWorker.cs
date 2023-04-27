@@ -49,14 +49,23 @@ namespace GPTipsBot
             var chatId = message.Chat.Id;
 
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
+            await sendViaTelegramBotClient(chatId, "Обработка запросов займет время, но я буду ждать ответа сервера и сообщу вам о результатах. Благодарю за терпение!", cancellationToken);
+
+            CancellationTokenSource source = new CancellationTokenSource();
+            CancellationToken waitResponseCancellationToken = source.Token;
+            var sendChatActionTasks = new List<Task>();
+            Timer timer = new Timer((Object o) =>
+            {
+                botClient.SendChatActionAsync(chatId, ChatAction.Typing, waitResponseCancellationToken);
+            }, null, 0, 7 * 1000);
+
+            if (message.From == null)
+            {
+                throw new Exception();
+            }
 
             try
             {
-                if (message.From == null)
-                {
-                    throw new Exception();
-                }
-
                 var userDto = new CreateEditUser()
                 {
                     Id = message.From.Id,
@@ -82,7 +91,7 @@ namespace GPTipsBot
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     _logger.LogError("Max messages limit reached");
-                    await sendViaTelegramBotClient(chatId, "Слишком много запросов, попробуйте заново через 1 минуту", cancellationToken);
+                    await sendViaTelegramBotClient(chatId, "Слишком много запросов, повторите отправку через 1 минуту", cancellationToken);
 
                     return;
                 }
@@ -91,6 +100,8 @@ namespace GPTipsBot
             }
 
             var sendMessage = await gptAPI.SendMessage(messageText);
+            source.Cancel();
+            timer.Dispose();
             
             if (sendMessage.isSuccessful)
             {
@@ -99,7 +110,7 @@ namespace GPTipsBot
                 return;
             }
 
-            await sendViaTelegramBotClient(chatId, "Вероятно превышен лимит запросов, попробуйте позже", cancellationToken);
+            await sendViaTelegramBotClient(chatId, "Что-то пошло не так, попробуйте ещё раз", cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

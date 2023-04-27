@@ -20,8 +20,8 @@ namespace GPTipsBot
             Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
             TelegramToken = Environment.GetEnvironmentVariable("TELEGRAM_TOKEN") ?? "";
             OpenAiToken = Environment.GetEnvironmentVariable("OPENAI_TOKEN") ?? "";
-            Console.WriteLine($"TELEGRAM_TOKEN {TelegramToken}");
-            Console.WriteLine($"OPENAI_TOKEN {OpenAiToken}");
+            //Console.WriteLine($"TELEGRAM_TOKEN {TelegramToken}");
+            //Console.WriteLine($"OPENAI_TOKEN {OpenAiToken}");
 
             if (TelegramToken == "")
             {
