@@ -1,13 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GPTipsBot.Services;
 
 namespace GPTipsBot.Dtos
 {
     public class CreateEditUser
     {
+        public CreateEditUser(Telegram.Bot.Types.Message message)
+        {
+            Id = message.From.Id;
+            TelegramId = message.From.Id;
+            FirstName = message.From.FirstName;
+            LastName = message.From.LastName;
+            Message = message.Text;
+            TimeStamp = DateTime.UtcNow;
+            Source = TelegramService.GetSource(message.Text);
+        }
+
         public long Id { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
@@ -15,5 +22,6 @@ namespace GPTipsBot.Dtos
         public string Message { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
         public bool IsActive { get; set; } = true;
+        public string? Source { get; set; }
     }
 }

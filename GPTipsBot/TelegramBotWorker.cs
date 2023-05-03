@@ -1,10 +1,6 @@
-﻿using GptModels = OpenAI.GPT3.ObjectModels;
-using OpenAI.GPT3.ObjectModels.RequestModels;
-using Telegram.Bot.Exceptions;
+﻿using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +9,7 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Dtos;
 using GPTipsBot.Services;
 using GPTipsBot.Api;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot
 {
@@ -21,18 +18,21 @@ namespace GPTipsBot
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly IUserRepository userRepository;
         private readonly GptAPI gptAPI;
+        private readonly TelegramBotAPI telegramBotApi;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, GptAPI gptAPI)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, 
+            GptAPI gptAPI, TelegramBotAPI telegramBotApi)
         {
             _logger = logger;
             this.userRepository = userRepository;
             this.gptAPI = gptAPI;
+            this.telegramBotApi = telegramBotApi;
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            var sendViaTelegramBotClient = async (long chatId, string message, CancellationToken ct) => 
-                await botClient.SendTextMessageAsync(chatId, message, cancellationToken: ct);
+            var sendViaTelegramBotClient = async (long chatId, string message, CancellationToken ct, IReplyMarkup markup) => 
+                await botClient.SendTextMessageAsync(chatId, message, cancellationToken: ct, replyMarkup: markup);
 
             if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Kicked)
             {
@@ -47,41 +47,39 @@ namespace GPTipsBot
             if (message.Text is not { } messageText)
                 return;
 
-            var chatId = message.Chat.Id;
-
-            _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
-            await sendViaTelegramBotClient(chatId, BotResponse.Typing, cancellationToken);
-
-            CancellationTokenSource source = new CancellationTokenSource();
-            CancellationToken waitResponseCancellationToken = source.Token;
-            var sendChatActionTasks = new List<Task>();
-            Timer timer = new Timer((Object o) =>
-            {
-                botClient.SendChatActionAsync(chatId, ChatAction.Typing, waitResponseCancellationToken);
-            }, null, 0, 7 * 1000);
-
             if (message.From == null)
             {
                 throw new Exception();
             }
 
-            try
+            var chatId = message.Chat.Id;
+
+            if (message.Text.StartsWith("/start"))
             {
-                var userDto = new CreateEditUser()
-                {
-                    Id = message.From.Id,
-                    TelegramId = message.From.Id,
-                    FirstName = message.From.FirstName,
-                    LastName = message.From.LastName,
-                    Message = message.Text,
-                    TimeStamp = DateTime.UtcNow
-                };
+                var userDto = new CreateEditUser(message);
                 userRepository.CreateUpdateUser(userDto);
+
+                await sendViaTelegramBotClient(chatId, "Привет! Чем могу помочь?", cancellationToken, null);
+                return;
             }
-            catch (Exception ex)
+            else if (message.Text == "/help")
             {
-                _logger.LogError("Can't create user ", ex.Message);
+                var desc = telegramBotApi.GetMyDescription();
+
+                await sendViaTelegramBotClient(chatId, desc, cancellationToken, null);
+                return;
             }
+
+            _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
+            await sendViaTelegramBotClient(chatId, BotResponse.Typing, cancellationToken, null);
+
+            CancellationTokenSource source = new CancellationTokenSource();
+            CancellationToken waitResponseCancellationToken = source.Token;
+            var sendChatActionTasks = new List<Task>();
+            Timer timer = new((object o) =>
+            {
+                botClient.SendChatActionAsync(chatId, ChatAction.Typing, waitResponseCancellationToken);
+            }, null, 0, 8 * 1000);
 
             if (!MessageService.UserToMessageCount.TryGetValue(message.From.Id, out var existingValue))
             {
@@ -92,7 +90,7 @@ namespace GPTipsBot
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     _logger.LogError("Max messages limit reached");
-                    await sendViaTelegramBotClient(chatId, BotResponse.TooManyRequests, cancellationToken);
+                    await sendViaTelegramBotClient(chatId, BotResponse.TooManyRequests, cancellationToken, null);
 
                     return;
                 }
@@ -106,12 +104,12 @@ namespace GPTipsBot
             
             if (sendMessage.isSuccessful)
             {
-                await sendViaTelegramBotClient(chatId, sendMessage.response, cancellationToken);
+                await sendViaTelegramBotClient(chatId, sendMessage.response, cancellationToken, null);
 
                 return;
             }
 
-            await sendViaTelegramBotClient(chatId, BotResponse.SomethingWentWrong, cancellationToken);
+            await sendViaTelegramBotClient(chatId, BotResponse.SomethingWentWrong, cancellationToken, null);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -143,6 +141,11 @@ namespace GPTipsBot
                 pollingErrorHandler: HandlePollingErrorAsync,
                 receiverOptions: receiverOptions
             );
+
+            await botClient.SetMyCommandsAsync(new List<BotCommand>() { 
+                new BotCommand { Command = "/start", Description = "Начать пользоваться ботом" },
+                new BotCommand { Command = "/help", Description = "Инструкция по применению" },
+            });
 
             var me = await botClient.GetMeAsync();
             _logger.LogInformation($"Start listening for @{me.Username}");
