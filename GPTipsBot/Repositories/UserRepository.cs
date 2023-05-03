@@ -17,7 +17,6 @@ namespace GPTipsBot.Repositories
                 "SELECT currval('users_id_seq')";
         private readonly string updateUserQuery = "Update Users SET isactive = 'true', message = @message, messagescount = @messagesCount WHERE telegramid = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE TelegramId = @TelegramId;";
-        private readonly string isUserExistsQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
         private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
 
         public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
@@ -76,7 +75,7 @@ namespace GPTipsBot.Repositories
         {
             using (var connection = context.CreateConnection())
             {
-                int count = connection.ExecuteScalar<int>(isUserExistsQuery, new { telegramId });
+                int count = connection.ExecuteScalar<int>(selectUserByTelegramId, new { telegramId });
                 if (count == 0)
                 {
                     return -1;

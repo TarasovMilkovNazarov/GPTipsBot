@@ -34,7 +34,4 @@ var hostBuilder = new HostBuilder()
         services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
     });
 
-var tgBotApi = new TelegramBotAPI(AppConfig.TelegramToken, AppConfig.СhatId);
-//tgBotApi.SetMyDescription("DescriptionExample");
-
 await hostBuilder.RunConsoleAsync();
