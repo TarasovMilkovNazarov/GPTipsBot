@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenAI.GPT3.Interfaces;
-using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 using RestSharp;
-using static System.Net.WebRequestMethods;
 using GptModels = OpenAI.GPT3.ObjectModels;
 
 namespace GPTipsBot
@@ -13,6 +12,7 @@ namespace GPTipsBot
     {
         private readonly string baseUrl1 = "https://chatgpt-api.shn.hk/v1";
         private readonly string baseUrl2 = "https://free.churchless.tech/v1/chat/completions";
+        private readonly string baseUrl3 = "https://api.jeeves.ai/generate/v3/chat";
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly IOpenAIService openAiService;
 
@@ -58,7 +58,7 @@ namespace GPTipsBot
             }
             catch (Exception ex)
             {
-                logger.LogError(ex.Message);
+                logger.LogWithStackTrace(LogLevel.Error, ex.Message);
             }
 
             return (response?.IsSuccessful ?? false, responseText);

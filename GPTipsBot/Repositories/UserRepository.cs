@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
+using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -64,7 +65,7 @@ namespace GPTipsBot.Repositories
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError($"GetAll error {ex.Message}");
+                    logger.LogWithStackTrace(LogLevel.Error, $"GetAll error {ex.Message}");
                 }
 
                 return connection.Query<User>(sql);

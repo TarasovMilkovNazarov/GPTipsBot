@@ -1,5 +1,4 @@
-﻿using Telegram.Bot.Exceptions;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
@@ -48,6 +47,10 @@ namespace GPTipsBot
             var chatId = message.Chat.Id;
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
 
+            if (messageText == "maintenance" && chatId == AppConfig.AdminId)
+            {
+                onMaintenance = !onMaintenance;
+            }
             if (onMaintenance)
             {
                 await botClient.SendTextMessageAsync(chatId, BotResponse.OnMaintenance, cancellationToken:cancellationToken);

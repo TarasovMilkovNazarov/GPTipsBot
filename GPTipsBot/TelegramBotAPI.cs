@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
@@ -90,7 +91,7 @@ namespace GPTipsBot
         public string? LogErrorMessageFromApiResponse(Exception ex)
         {
             var ErrorMessage = GetErrorMessageFromApiResponse(ex);
-            logger.LogError(ErrorMessage);
+            logger.LogWithStackTrace(LogLevel.Error,ErrorMessage);
 
             return ErrorMessage;
         }
