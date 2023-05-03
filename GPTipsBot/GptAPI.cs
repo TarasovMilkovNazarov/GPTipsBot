@@ -43,6 +43,7 @@ namespace GPTipsBot
             {
                 model = "gpt-3.5-turbo",
                 messages = new object[] { new { role = "user", content = messageText } },
+                stream = false
             });
             RestResponse response = null;
             var responseText = "";

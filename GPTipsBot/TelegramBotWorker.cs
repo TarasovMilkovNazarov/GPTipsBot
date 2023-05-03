@@ -19,7 +19,7 @@ namespace GPTipsBot
         private readonly IUserRepository userRepository;
         private readonly GptAPI gptAPI;
         private readonly TelegramBotAPI telegramBotApi;
-        private bool onMaintenance = true;
+        private bool onMaintenance = false;
 
         public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, 
             GptAPI gptAPI, TelegramBotAPI telegramBotApi)
