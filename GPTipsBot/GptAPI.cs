@@ -26,8 +26,6 @@ namespace GPTipsBot
 
         public async Task<(bool isSuccessful, string? response)> SendMessage(string messageText)
         {
-            (bool, string) res;
-
             if (isFreeApi)
             {
                 return SendViaFreeProxy(messageText);

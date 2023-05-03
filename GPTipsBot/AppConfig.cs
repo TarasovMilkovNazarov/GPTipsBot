@@ -13,6 +13,7 @@ namespace GPTipsBot
         public static string OpenAiToken { get; private set; }
 
         public const long СhatId = 486363646;
+        public const long AdminId = 486363646;
         public const int ChatGptTokensLimitPerMessage = 100;
 
         static AppConfig()

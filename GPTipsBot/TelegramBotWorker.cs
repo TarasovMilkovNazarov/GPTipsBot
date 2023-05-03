@@ -1,10 +1,6 @@
-﻿using GptModels = OpenAI.GPT3.ObjectModels;
-using OpenAI.GPT3.ObjectModels.RequestModels;
-using Telegram.Bot.Exceptions;
+﻿using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +9,7 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Dtos;
 using GPTipsBot.Services;
 using GPTipsBot.Api;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot
 {
@@ -21,19 +18,20 @@ namespace GPTipsBot
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly IUserRepository userRepository;
         private readonly GptAPI gptAPI;
+        private readonly TelegramBotAPI telegramBotApi;
+        private bool onMaintenance = true;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, GptAPI gptAPI)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, 
+            GptAPI gptAPI, TelegramBotAPI telegramBotApi)
         {
             _logger = logger;
             this.userRepository = userRepository;
             this.gptAPI = gptAPI;
+            this.telegramBotApi = telegramBotApi;
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            var sendViaTelegramBotClient = async (long chatId, string message, CancellationToken ct) => 
-                await botClient.SendTextMessageAsync(chatId, message, cancellationToken: ct);
-
             if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Kicked)
             {
                 userRepository.SoftlyRemoveUser(update.MyChatMember.From.Id);
@@ -48,40 +46,49 @@ namespace GPTipsBot
                 return;
 
             var chatId = message.Chat.Id;
-
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
-            await sendViaTelegramBotClient(chatId, BotResponse.Typing, cancellationToken);
 
-            CancellationTokenSource source = new CancellationTokenSource();
-            CancellationToken waitResponseCancellationToken = source.Token;
-            var sendChatActionTasks = new List<Task>();
-            Timer timer = new Timer((Object o) =>
+            if (onMaintenance)
             {
-                botClient.SendChatActionAsync(chatId, ChatAction.Typing, waitResponseCancellationToken);
-            }, null, 0, 7 * 1000);
-
-            if (message.From == null)
-            {
-                throw new Exception();
+                await botClient.SendTextMessageAsync(chatId, BotResponse.OnMaintenance, cancellationToken:cancellationToken);
+                return;
             }
 
+            if (message.Text.StartsWith("/start"))
+            {
+                var userDto = new CreateEditUser(message);
+                userRepository.CreateUpdateUser(userDto);
+                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
+                return;
+            }
+            else if (message.Text == "/help")
+            {
+                var desc = telegramBotApi.GetMyDescription();
+
+                await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
+                return;
+            }
+            
             try
             {
-                var userDto = new CreateEditUser()
-                {
-                    Id = message.From.Id,
-                    TelegramId = message.From.Id,
-                    FirstName = message.From.FirstName,
-                    LastName = message.From.LastName,
-                    Message = message.Text,
-                    TimeStamp = DateTime.UtcNow
-                };
-                userRepository.CreateUpdateUser(userDto);
+                await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError("Can't create user ", ex.Message);
+                telegramBotApi.LogErrorMessageFromApiResponse(ex);
             }
+            
+
+            var sendChatActionTasks = new List<Task>();
+            Timer timer = new((object o) =>
+            {
+                try
+                {
+                    botClient.SendChatActionAsync(chatId, ChatAction.Typing, cancellationToken);
+                }
+                catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
+                
+            }, null, 0, 8 * 1000);
 
             if (!MessageService.UserToMessageCount.TryGetValue(message.From.Id, out var existingValue))
             {
@@ -92,7 +99,14 @@ namespace GPTipsBot
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     _logger.LogError("Max messages limit reached");
-                    await sendViaTelegramBotClient(chatId, BotResponse.TooManyRequests, cancellationToken);
+                    try
+                    {
+                        await botClient.SendTextMessageAsync(chatId, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        telegramBotApi.LogErrorMessageFromApiResponse(ex);
+                    }
 
                     return;
                 }
@@ -101,29 +115,24 @@ namespace GPTipsBot
             }
 
             var sendMessage = await gptAPI.SendMessage(messageText);
-            source.Cancel();
             timer.Dispose();
             
             if (sendMessage.isSuccessful)
             {
-                await sendViaTelegramBotClient(chatId, sendMessage.response, cancellationToken);
-
-                return;
+                try
+                {
+                    await botClient.SendTextMessageAsync(chatId, sendMessage.response, cancellationToken: cancellationToken);
+                }
+                catch (Exception ex) {
+                    telegramBotApi.LogErrorMessageFromApiResponse(ex);
+                    await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                }
             }
-
-            await sendViaTelegramBotClient(chatId, BotResponse.SomethingWentWrong, cancellationToken);
         }
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            var ErrorMessage = exception switch
-            {
-                ApiRequestException apiRequestException
-                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
-                _ => exception.ToString()
-            };
-
-            _logger.LogError(ErrorMessage);
+            telegramBotApi.LogErrorMessageFromApiResponse(exception);
 
             return Task.CompletedTask;
         }
@@ -143,6 +152,11 @@ namespace GPTipsBot
                 pollingErrorHandler: HandlePollingErrorAsync,
                 receiverOptions: receiverOptions
             );
+
+            await botClient.SetMyCommandsAsync(new List<BotCommand>() { 
+                new BotCommand { Command = "/start", Description = "Начать пользоваться ботом" },
+                new BotCommand { Command = "/help", Description = "Инструкция по применению" },
+            });
 
             var me = await botClient.GetMeAsync();
             _logger.LogInformation($"Start listening for @{me.Username}");
