@@ -12,7 +12,6 @@ namespace GPTipsBot.Dtos
             LastName = message.From.LastName;
             Message = message.Text;
             TimeStamp = DateTime.UtcNow;
-            Source = TelegramService.GetSource(message.Text);
         }
 
         public long Id { get; set; }

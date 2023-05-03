@@ -54,10 +54,11 @@ namespace GPTipsBot
                 return;
             }
 
+            var userDto = new CreateEditUser(message);
+
             if (message.Text.StartsWith("/start"))
             {
-                var userDto = new CreateEditUser(message);
-                userRepository.CreateUpdateUser(userDto);
+                userDto.Source = TelegramService.GetSource(message.Text);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
                 return;
             }
@@ -71,13 +72,13 @@ namespace GPTipsBot
             
             try
             {
+                userRepository.CreateUpdateUser(userDto);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
             }
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
             }
-            
 
             var sendChatActionTasks = new List<Task>();
             Timer timer = new((object o) =>
