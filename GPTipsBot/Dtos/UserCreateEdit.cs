@@ -6,7 +6,6 @@ namespace GPTipsBot.Dtos
     {
         public CreateEditUser(Telegram.Bot.Types.Message message)
         {
-            Id = message.From.Id;
             TelegramId = message.From.Id;
             FirstName = message.From.FirstName;
             LastName = message.From.LastName;
@@ -19,8 +18,10 @@ namespace GPTipsBot.Dtos
         public string? LastName { get; set; }
         public long TelegramId { get; set; }
         public string Message { get; set; }
+        public long MessageId { get; set; }
         public DateTimeOffset TimeStamp { get; set; }
         public bool IsActive { get; set; } = true;
         public string? Source { get; set; }
+        public long ContextId { get; internal set; }
     }
 }

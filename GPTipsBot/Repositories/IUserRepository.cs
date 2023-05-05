@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository : IDisposable
     {
         public long CreateUpdateUser(CreateEditUser user);
         long SoftlyRemoveUser(long telegramId);

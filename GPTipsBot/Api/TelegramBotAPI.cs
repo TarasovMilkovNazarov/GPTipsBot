@@ -5,7 +5,7 @@ using RestSharp;
 using System;
 using Telegram.Bot.Exceptions;
 
-namespace GPTipsBot
+namespace GPTipsBot.Api
 {
     public class TelegramBotAPI
     {
@@ -24,7 +24,7 @@ namespace GPTipsBot
             baseUrl = $"https://api.telegram.org/bot{_botToken}";
             telegramHttpClient = new RestClient(baseUrl);
         }
-        
+
         public void SetMyDescription(string messageText)
         {
             var request = new RestRequest("setMyDescription", Method.Post);
@@ -76,7 +76,7 @@ namespace GPTipsBot
 
             return botDescription;
         }
-        
+
         public string? GetErrorMessageFromApiResponse(Exception ex)
         {
             var ErrorMessage = ex switch
@@ -91,7 +91,7 @@ namespace GPTipsBot
         public string? LogErrorMessageFromApiResponse(Exception ex)
         {
             var ErrorMessage = GetErrorMessageFromApiResponse(ex);
-            logger.LogWithStackTrace(LogLevel.Error,ErrorMessage);
+            logger.LogWithStackTrace(LogLevel.Error, ErrorMessage);
 
             return ErrorMessage;
         }

@@ -9,6 +9,7 @@ using GPTipsBot.Dtos;
 using GPTipsBot.Services;
 using GPTipsBot.Api;
 using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot
 {
@@ -62,6 +63,7 @@ namespace GPTipsBot
             if (message.Text.StartsWith("/start"))
             {
                 userDto.Source = TelegramService.GetSource(message.Text);
+                userRepository.CreateUpdateUser(userDto);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
                 return;
             }
@@ -73,6 +75,7 @@ namespace GPTipsBot
                 return;
             }
             
+            long messageId = 0;
             try
             {
                 userRepository.CreateUpdateUser(userDto);
@@ -118,27 +121,42 @@ namespace GPTipsBot
                 MessageService.UserToMessageCount[message.From.Id] = (existingValue.messageCount++, DateTime.UtcNow);
             }
 
-            var sendMessage = await gptAPI.SendMessage(messageText);
+            (bool isSuccessful, string? text) response = (isSuccessful: false, text: null);
+            try
+            {
+                response = await gptAPI.SendMessage(userDto);
+            }
+            catch (Exception ex)
+            {
+                timer.Dispose();
+                await botClient.SendTextMessageAsync(chatId, ex.Message, cancellationToken: cancellationToken);
+                return;
+            }
+
             timer.Dispose();
             
-            if (sendMessage.isSuccessful)
+            if (response.isSuccessful)
             {
                 try
                 {
-                    await botClient.SendTextMessageAsync(chatId, sendMessage.response, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, response.text, cancellationToken: cancellationToken);
+
+                    return;
                 }
                 catch (Exception ex) {
                     telegramBotApi.LogErrorMessageFromApiResponse(ex);
-                    await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
                 }
             }
+
+            await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
         }
 
-        Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             telegramBotApi.LogErrorMessageFromApiResponse(exception);
-
-            return Task.CompletedTask;
+            // Cooldown in case of network connection error
+            if (exception is RequestException)
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

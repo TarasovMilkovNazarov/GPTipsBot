@@ -5,71 +5,93 @@ using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
+using System.Data;
+using System.Data.Common;
 
 namespace GPTipsBot.Repositories
 {
     public class UserRepository : IUserRepository
     {
+        private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly DapperContext context;
-        
-        private readonly string insertUserQuery = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, message, isactive, source) " +
-                "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @Message, @IsActive, @Source);" +
-                "SELECT currval('users_id_seq')";
-        private readonly string updateUserQuery = "Update Users SET isactive = 'true', message = @message, messagescount = @messagesCount WHERE telegramid = @telegramId;";
+        private readonly MessageContextRepository messageRepository;
+        private readonly string insertUserQuery = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, isactive, source) " +
+                "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @IsActive, @Source) RETURNING id";
+        private readonly string insertMessageQuery = "INSERT INTO Messages (text, userId, telegramId) " +
+                "VALUES (@Text, @UserId, @TelegramId) RETURNING id";
+        private readonly string updateUserQuery = "Update Users SET isactive = 'true', messagescount = @messagesCount WHERE telegramid = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE TelegramId = @TelegramId;";
+        private readonly string selectAllUserMessagesQuery = $"SELECT * FROM Messages WHERE TelegramId = @TelegramId;";
         private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
 
-        public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
+        public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context, MessageContextRepository messageRepository)
         {
+            _connection = context.CreateConnection();
+            _connection.Open(); 
+
             this.logger = logger;
             this.context = context;
+            this.messageRepository = messageRepository;
         }
         
         public long CreateUpdateUser(CreateEditUser dtoUser)
         {
             logger.LogInformation("CreateUser");
 
-            using (var connection = context.CreateConnection())
+            User? dbUser;
+            dbUser = _connection.Query<User>(selectUserByTelegramId, dtoUser).FirstOrDefault();
+            if (dbUser == null)
             {
-                User? dbUser;
-                dbUser = connection.Query<User>(selectUserByTelegramId, dtoUser).FirstOrDefault();
-                if (dbUser == null)
-                {
-                    dbUser = connection.QuerySingle<User>(insertUserQuery, dtoUser);
-
-                    return dbUser.Id;
-                }
-
-                connection.ExecuteScalar(updateUserQuery, new { 
-                    telegramId = dtoUser.TelegramId, 
-                    message = dtoUser.Message, 
+                dtoUser.Id = _connection.QuerySingle<long>(insertUserQuery, dtoUser);
+            }
+            else
+            {
+                dtoUser.Id = dbUser.Id;
+                _connection.ExecuteScalar(updateUserQuery, new { 
+                    telegramId = dtoUser.TelegramId,
                     messagesCount = ++dbUser.MessagesCount,
                     source = dtoUser.Source
                 });
-
-                return dtoUser.TelegramId;
             }
+
+            messageRepository.AddUserMessage(dtoUser);
+
+            return dtoUser.Id;
         }
 
         public IEnumerable<User> GetAll()
         {
-            logger.LogInformation("GetAll");
+            const string sql = @"SELECT * FROM Users";
+            IEnumerable<User> users = null;
 
-            using (var connection = context.CreateConnection())
+            try
             {
-                const string sql = @"SELECT * FROM Users";
-                try
-                {
-                    connection.Query<User>(sql);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWithStackTrace(LogLevel.Error, $"GetAll error {ex.Message}");
-                }
-
-                return connection.Query<User>(sql);
+                users = _connection.Query<User>(sql);
             }
+            catch (Exception ex)
+            {
+                logger.LogWithStackTrace(LogLevel.Error, $"GetAll error {ex.Message}");
+            }
+
+            return users;
+        }
+
+        
+        public IEnumerable<Message> GetAllUserMessages(long telegramId)
+        {
+            IEnumerable<Message> messages = null;
+
+            try
+            {
+                messages = _connection.Query<Message>(selectAllUserMessagesQuery, new { telegramId });
+            }
+            catch (Exception ex)
+            {
+                logger.LogWithStackTrace(LogLevel.Error, $"GetAllMessages for {telegramId}. Error {ex.Message}");
+            }
+
+            return messages;
         }
         
         public long SoftlyRemoveUser(long telegramId)
@@ -86,6 +108,12 @@ namespace GPTipsBot.Repositories
 
                 return telegramId;
             }
+        }
+
+        public void Dispose()
+        {
+            _connection.Close(); // Close the connection when the service is disposed
+            _connection.Dispose(); // Dispose the connection resources
         }
     }
 }
