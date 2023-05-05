@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Python;
-using GPTipsBot.Repositories;
+﻿using GPTipsBot.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,11 +44,9 @@ namespace GPTipsBot.Services
 
         public static string TryToPruneMessage(string message)
         {
-            var py = new PythonScript();
+            throw new NotImplementedException();
 
-            var result = py.RunFromString<string>("candidate");
-
-            return result;
+            return message;
         }
     }
 }

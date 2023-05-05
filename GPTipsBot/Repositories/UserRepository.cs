@@ -10,7 +10,7 @@ using System.Data.Common;
 
 namespace GPTipsBot.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : IDisposable
     {
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
@@ -18,11 +18,9 @@ namespace GPTipsBot.Repositories
         private readonly MessageContextRepository messageRepository;
         private readonly string insertUserQuery = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, isactive, source) " +
                 "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @IsActive, @Source) RETURNING id";
-        private readonly string insertMessageQuery = "INSERT INTO Messages (text, userId, telegramId) " +
-                "VALUES (@Text, @UserId, @TelegramId) RETURNING id";
         private readonly string updateUserQuery = "Update Users SET isactive = 'true', messagescount = @messagesCount WHERE telegramid = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE TelegramId = @TelegramId;";
-        private readonly string selectAllUserMessagesQuery = $"SELECT * FROM Messages WHERE TelegramId = @TelegramId;";
+        
         private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
 
         public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context, MessageContextRepository messageRepository)
@@ -75,23 +73,6 @@ namespace GPTipsBot.Repositories
             }
 
             return users;
-        }
-
-        
-        public IEnumerable<Message> GetAllUserMessages(long telegramId)
-        {
-            IEnumerable<Message> messages = null;
-
-            try
-            {
-                messages = _connection.Query<Message>(selectAllUserMessagesQuery, new { telegramId });
-            }
-            catch (Exception ex)
-            {
-                logger.LogWithStackTrace(LogLevel.Error, $"GetAllMessages for {telegramId}. Error {ex.Message}");
-            }
-
-            return messages;
         }
         
         public long SoftlyRemoveUser(long telegramId)

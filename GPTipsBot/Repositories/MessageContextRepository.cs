@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
+using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -11,15 +12,13 @@ namespace GPTipsBot.Repositories
     {
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
-        private readonly DapperContext context;
         
-        private readonly string insertMesWithContext = "INSERT INTO Messages (text, contextId, telegramId, timeStamp) " +
-                "VALUES (@Text, @ContextId, @TelegramId, @TimeStamp) RETURNING id";
+        private readonly string insertMesWithContext = "INSERT INTO Messages (text, contextId, telegramId, chatId, timeStamp) " +
+                "VALUES (@Text, @ContextId, @TelegramId, @ChatId, @TimeStamp) RETURNING id";
         private readonly string recentContextMessagesQuery = $"SELECT * FROM Messages WHERE contextid = @ContextId OrderBy TimeStamp desc Limit @Count;";
         private readonly string getLastMessage = $"SELECT * FROM Messages OrderBy TimeStamp DESC LIMIT 1;";
         private readonly string getLastContextId = $"SELECT contextid FROM Messages OrderBy ContextId DESC LIMIT 1;";
-
-        private long MaxTokensCount = 2000;
+        private readonly string selectAllUserMessagesQuery = $"SELECT * FROM Messages WHERE TelegramId = @TelegramId;";
 
         public MessageContextRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
         {
@@ -27,7 +26,6 @@ namespace GPTipsBot.Repositories
             _connection.Open(); 
 
             this.logger = logger;
-            this.context = context;
         }
 
         public long AddUserMessage(CreateEditUser dtoUser)
@@ -44,10 +42,26 @@ namespace GPTipsBot.Repositories
 
             return dtoUser.MessageId;
         }
+
+        public IEnumerable<Message> GetAllUserMessages(long telegramId)
+        {
+            IEnumerable<Message> messages = null;
+
+            try
+            {
+                messages = _connection.Query<Message>(selectAllUserMessagesQuery, new { telegramId });
+            }
+            catch (Exception ex)
+            {
+                logger.LogWithStackTrace(LogLevel.Error, $"GetAllMessages for {telegramId}. Error {ex.Message}");
+            }
+
+            return messages;
+        }
         
         public long GetLastContext(long telegramId)
         {
-            var context = _connection.QuerySingle<MessageContext>(getLastMessage, new {
+            var context = _connection.QuerySingle<Message>(getLastMessage, new {
                 telegramId
             });
 
@@ -69,6 +83,18 @@ namespace GPTipsBot.Repositories
             });
 
             return messages;
+        }
+
+        public void ResetContext(CreateEditUser userDto, long chatId)
+        {
+            userDto.MessageId = _connection.QuerySingle<long>(insertMesWithContext, new { 
+                text = "/reset", 
+                userId = userDto.Id,
+                contextId = 0,
+                chatId,
+                telegramId = userDto.TelegramId,
+                timeStamp = DateTime.UtcNow
+            });
         }
 
         public void Dispose()

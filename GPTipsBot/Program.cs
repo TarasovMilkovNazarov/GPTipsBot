@@ -31,7 +31,7 @@ var hostBuilder = new HostBuilder()
         .AddTransient<GptAPI>()
         .AddTransient(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
         .AddTransient<MessageContextRepository>()
-        .AddTransient<IUserRepository, UserRepository>();
+        .AddTransient<UserRepository>();
 
         services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
     });

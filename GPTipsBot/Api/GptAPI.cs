@@ -32,6 +32,7 @@ namespace GPTipsBot.Api
             var textWithContext = messageService.PrepareContext(userDto.ContextId);
             if (textWithContext.Length == 0)
             {
+                //todo reset context or suggest user to reset: send inline command with reset
                 throw new Exception(BotResponse.TokensLimitExceeded);
             }
 
