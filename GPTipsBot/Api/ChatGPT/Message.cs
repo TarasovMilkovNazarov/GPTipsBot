@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot.Api.ChatGPT
 {
-    public class Message
+    public class MessageDto
     {
+        public string Role { get; set; }
+        public string Content { get; set; }
     }
 }

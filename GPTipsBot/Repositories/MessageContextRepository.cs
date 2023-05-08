@@ -3,6 +3,7 @@ using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Models;
+using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Data;
 
@@ -37,7 +38,7 @@ namespace GPTipsBot.Repositories
 
         public long AddBotResponse(TelegramGptMessage telegramGptMessage)
         {
-            return AddMessage(telegramGptMessage, GptRolesEnum.Asisstant);
+            return AddMessage(telegramGptMessage, GptRolesEnum.Assistant);
         }
 
         private long AddMessage(TelegramGptMessage telegramGptMessage, GptRolesEnum role)
@@ -48,7 +49,7 @@ namespace GPTipsBot.Repositories
 
             switch (role)
             {
-                case GptRolesEnum.Asisstant:
+                case GptRolesEnum.Assistant:
                     text = telegramGptMessage.Reply;
                     replyToId = telegramGptMessage.MessageId;
                     break;
@@ -103,11 +104,11 @@ namespace GPTipsBot.Repositories
             return lastMes?.ContextId;
         }
 
-        public List<Message> GetRecentContextMessages(long contextId, int contextMessagesLimit = 5)
+        public List<Message> GetRecentContextMessages(long contextId)
         {
             var messages = _connection.Query<Message>(recentContextMessagesQuery, new {
                 contextId,
-                count = contextMessagesLimit
+                count = ContextWindow.WindowSize
             });
 
             return messages.ToList();

@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Repositories;
+using OpenAI.GPT3.ObjectModels.RequestModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,36 +11,35 @@ namespace GPTipsBot.Services
 {
     public class ContextWindow
     {
-        private LinkedList<string> messages;
-        private int windowSize;
+        private LinkedList<ChatMessage> messages;
+        public static readonly int WindowSize = 30;
         private readonly ChatGptService chatGptService;
         private long tokensCount;
 
-        public ContextWindow(ChatGptService chatGptService, int size = 10)
+        public ContextWindow(ChatGptService chatGptService)
         {
-            messages = new LinkedList<string>();
-            windowSize = size;
+            messages = new LinkedList<ChatMessage>();
             this.chatGptService = chatGptService;
             tokensCount = 0;
         }
 
-        public void AddMessage(string message)
+        public void AddMessage(string message, string role)
         {
-            if (messages.Count < windowSize)
+            if (messages.Count < WindowSize)
             {
                 var messageTokensCount = chatGptService.CountTokens(message);
                 if (messageTokensCount + tokensCount <= ChatGptService.MaxTokensLimit)
                 {
                     tokensCount += messageTokensCount;
-                    messages.AddFirst(message);
+                    messages.AddFirst(new ChatMessage(role, message));
                     return;
                 }
             }
         }
 
-        public string GetContext()
+        public ChatMessage[] GetContext()
         {
-            return string.Join(Environment.NewLine, messages);
+            return messages.ToArray();
         }
 
         public static string TryToPruneMessage(string message)

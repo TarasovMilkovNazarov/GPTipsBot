@@ -44,7 +44,7 @@ namespace GPTipsBot.Api
             return await SendViaOpenAiApi(textWithContext);
         }
 
-        public (bool isSuccessful, string? response) SendViaFreeProxy(string messageText)
+        public (bool isSuccessful, string? response) SendViaFreeProxy(ChatMessage[] messages)
         {
             var freeGptClient = new RestClient(baseUrl2);
             var request = new RestRequest("", Method.Post);
@@ -52,7 +52,7 @@ namespace GPTipsBot.Api
             var gptDto = new
             {
                 model = "gpt-3.5-turbo",
-                messages = new object[] { new { role = "user", content = messageText } },
+                messages,
                 stream = false
             };
 
@@ -77,14 +77,11 @@ namespace GPTipsBot.Api
             return (response?.IsSuccessful ?? false, responseText);
         }
 
-        public async Task<(bool isSuccessful, string? response)> SendViaOpenAiApi(string message)
+        public async Task<(bool isSuccessful, string? response)> SendViaOpenAiApi(ChatMessage[] messages)
         {
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
-                Messages = new List<ChatMessage>
-                    {
-                        ChatMessage.FromUser(message),
-                    },
+                Messages = messages,
                 Model = GptModels.Models.ChatGpt3_5Turbo,
                 MaxTokens = AppConfig.ChatGptTokensLimitPerMessage//optional
             });

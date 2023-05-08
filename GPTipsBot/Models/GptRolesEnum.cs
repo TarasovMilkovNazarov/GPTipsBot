@@ -10,7 +10,7 @@ namespace GPTipsBot.Models
     {
         None = 0,
         System,
-        Asisstant,
+        Assistant,
         User,
     }
 }
