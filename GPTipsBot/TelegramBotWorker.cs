@@ -9,22 +9,25 @@ using GPTipsBot.Dtos;
 using GPTipsBot.Services;
 using GPTipsBot.Api;
 using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot
 {
-    public class TelegramBotWorker : IHostedService, IDisposable
+    public partial class TelegramBotWorker : IHostedService, IDisposable
     {
         private readonly ILogger<TelegramBotWorker> _logger;
-        private readonly IUserRepository userRepository;
+        private readonly UserRepository userRepository;
+        private readonly MessageContextRepository messageRepository;
         private readonly GptAPI gptAPI;
         private readonly TelegramBotAPI telegramBotApi;
         private bool onMaintenance = false;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, IUserRepository userRepository, 
-            GptAPI gptAPI, TelegramBotAPI telegramBotApi)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, UserRepository userRepository, 
+            MessageContextRepository messageRepository, GptAPI gptAPI, TelegramBotAPI telegramBotApi)
         {
             _logger = logger;
             this.userRepository = userRepository;
+            this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
             this.telegramBotApi = telegramBotApi;
         }
@@ -47,36 +50,15 @@ namespace GPTipsBot
             var chatId = message.Chat.Id;
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
 
-            if (messageText == "maintenance" && chatId == AppConfig.AdminId)
-            {
-                onMaintenance = !onMaintenance;
-            }
-            if (onMaintenance)
-            {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.OnMaintenance, cancellationToken:cancellationToken);
-                return;
-            }
+            var telegramGptMessage = new TelegramGptMessage(message);
+            await ProccessCommand(botClient, telegramGptMessage, messageText, chatId, cancellationToken);
+            Message serviceMessage = null;
 
-            var userDto = new CreateEditUser(message);
-
-            if (message.Text.StartsWith("/start"))
-            {
-                userDto.Source = TelegramService.GetSource(message.Text);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
-                return;
-            }
-            else if (message.Text == "/help")
-            {
-                var desc = telegramBotApi.GetMyDescription();
-
-                await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
-                return;
-            }
-            
             try
             {
-                userRepository.CreateUpdateUser(userDto);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
+                userRepository.CreateUpdateUser(telegramGptMessage);
+                messageRepository.AddUserMessage(telegramGptMessage);
+                serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
             }
             catch (Exception ex)
             {
@@ -118,64 +100,41 @@ namespace GPTipsBot
                 MessageService.UserToMessageCount[message.From.Id] = (existingValue.messageCount++, DateTime.UtcNow);
             }
 
-            var sendMessage = await gptAPI.SendMessage(messageText);
+            (bool isSuccessful, string? text) gtpResponse = (isSuccessful: false, text: null);
+            try
+            {
+                gtpResponse = await gptAPI.SendMessage(telegramGptMessage);
+                telegramGptMessage.Reply = gtpResponse.text;
+                messageRepository.AddBotResponse(telegramGptMessage);
+            }
+            catch (Exception ex)
+            {
+                timer.Dispose();
+                await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                return;
+            }
+
             timer.Dispose();
             
-            if (sendMessage.isSuccessful)
+            if (gtpResponse.isSuccessful)
             {
                 try
                 {
-                    await botClient.SendTextMessageAsync(chatId, sendMessage.response, cancellationToken: cancellationToken);
+                    if (serviceMessage != null)
+                    {
+                        await botClient.DeleteMessageAsync(chatId, serviceMessage.MessageId, cancellationToken: cancellationToken);
+                    }
+                    
+                    await botClient.SendTextMessageAsync(chatId, gtpResponse.text, cancellationToken: cancellationToken);
+
+                    return;
                 }
                 catch (Exception ex) {
                     telegramBotApi.LogErrorMessageFromApiResponse(ex);
-                    await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
                 }
             }
-        }
 
-        Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            telegramBotApi.LogErrorMessageFromApiResponse(exception);
-
-            return Task.CompletedTask;
-        }
-
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            var botClient = new TelegramBotClient(AppConfig.TelegramToken);
-
-            // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
-            ReceiverOptions receiverOptions = new()
-            {
-                AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
-            };
-
-            botClient.StartReceiving(
-                updateHandler: HandleUpdateAsync,
-                pollingErrorHandler: HandlePollingErrorAsync,
-                receiverOptions: receiverOptions
-            );
-
-            await botClient.SetMyCommandsAsync(new List<BotCommand>() { 
-                new BotCommand { Command = "/start", Description = "Начать пользоваться ботом" },
-                new BotCommand { Command = "/help", Description = "Инструкция по применению" },
-            });
-
-            var me = await botClient.GetMeAsync();
-            _logger.LogInformation($"Start listening for @{me.Username}");
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Telegram background service is stopping.");
-
-            return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
-            _logger.LogInformation("Telegram bs disposing");
+            await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
         }
     }
 }

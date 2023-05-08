@@ -11,6 +11,8 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.Extensions;
+using GPTipsBot.Api;
+using GPTipsBot.Models;
 
 var builder = new ConfigurationBuilder()
                  .AddJsonFile($"appsettings.{AppConfig.Env}.json", true, true);
@@ -26,10 +28,12 @@ var hostBuilder = new HostBuilder()
         .AddHostedService<TelegramBotWorker>()
         .AddSingleton<DapperContext>()
         .AddSingleton<IConfiguration>(config)
-        //.AddSingleton<MessageService>()
+        .AddTransient<MessageService>()
         .AddTransient<GptAPI>()
+        .AddTransient<ChatGptService>()
         .AddTransient(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
-        .AddTransient<IUserRepository, UserRepository>();
+        .AddTransient<MessageContextRepository>()
+        .AddTransient<UserRepository>();
 
         services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
     });

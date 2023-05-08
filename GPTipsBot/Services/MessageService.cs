@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GPTipsBot.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,17 @@ namespace GPTipsBot.Services
 {
     public class MessageService
     {
+        private readonly MessageContextRepository messageContextRepository;
+        private readonly ChatGptService chatGptService;
         public const int MaxMessagesCountPerMinute = 5;
+
         public static Dictionary<long, (int messageCount, DateTime lastMessage)> UserToMessageCount { get; set; }
+
+        public MessageService(MessageContextRepository messageContextRepository, ChatGptService chatGptService)
+        {
+            this.messageContextRepository = messageContextRepository;
+            this.chatGptService = chatGptService;
+        }
 
         static MessageService()
         {
@@ -23,6 +33,22 @@ namespace GPTipsBot.Services
             {
                 UserToMessageCount[userId] = (0, DateTime.MinValue);
             }
+        }
+
+        public string PrepareContext(long contextId)
+        {
+            var messages = messageContextRepository.GetRecentContextMessages(contextId);
+            var contextWindow = new ContextWindow(new ChatGptService());
+
+            foreach (var item in messages)
+            {
+                if (chatGptService.CountTokens(item.Text) < ChatGptService.MaxTokensLimit)
+                {
+                    contextWindow.AddMessage(item.Text);
+                }
+            }
+
+            return contextWindow.GetContext();
         }
     }
 }
