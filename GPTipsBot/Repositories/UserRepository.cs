@@ -16,46 +16,44 @@ namespace GPTipsBot.Repositories
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly DapperContext context;
         private readonly MessageContextRepository messageRepository;
-        private readonly string insertUserQuery = "INSERT INTO Users (firstname, lastname, telegramid, timestamp, isactive, source) " +
-                "VALUES (@FirstName, @LastName, @TelegramId, @TimeStamp, @IsActive, @Source) RETURNING id";
-        private readonly string updateUserQuery = "Update Users SET isactive = 'true', messagescount = @messagesCount WHERE telegramid = @telegramId;";
-        private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE TelegramId = @TelegramId;";
-        
-        private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE telegramid = @telegramId;";
+        private readonly string insertUserQuery = "INSERT INTO Users (id, firstname, lastname, createdat, isactive, source) " +
+                "VALUES (@TelegramId, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
+        private readonly string updateUserQuery = "Update Users SET isactive = 'true', messagescount = @messagesCount WHERE id = @telegramId;";
+        private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE id = @TelegramId;";
+
+        private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE id = @telegramId;";
 
         public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context, MessageContextRepository messageRepository)
         {
             _connection = context.CreateConnection();
-            _connection.Open(); 
+            _connection.Open();
 
             this.logger = logger;
             this.context = context;
             this.messageRepository = messageRepository;
         }
-        
-        public long CreateUpdateUser(CreateEditUser dtoUser)
+
+        public long CreateUpdateUser(TelegramGptMessage telegramGptMessage)
         {
             logger.LogInformation("CreateUser");
 
             User? dbUser;
-            dbUser = _connection.Query<User>(selectUserByTelegramId, dtoUser).FirstOrDefault();
+            dbUser = _connection.Query<User>(selectUserByTelegramId, telegramGptMessage).FirstOrDefault();
             if (dbUser == null)
             {
-                dtoUser.Id = _connection.QuerySingle<long>(insertUserQuery, dtoUser);
+                _connection.QuerySingle<long>(insertUserQuery, telegramGptMessage);
             }
             else
             {
-                dtoUser.Id = dbUser.Id;
-                _connection.ExecuteScalar(updateUserQuery, new { 
-                    telegramId = dtoUser.TelegramId,
+                _connection.ExecuteScalar(updateUserQuery, new
+                {
+                    telegramId = telegramGptMessage.TelegramId,
                     messagesCount = ++dbUser.MessagesCount,
-                    source = dtoUser.Source
+                    source = telegramGptMessage.Source
                 });
             }
 
-            messageRepository.AddUserMessage(dtoUser);
-
-            return dtoUser.Id;
+            return telegramGptMessage.TelegramId;
         }
 
         public IEnumerable<User> GetAll()
@@ -74,7 +72,7 @@ namespace GPTipsBot.Repositories
 
             return users;
         }
-        
+
         public long SoftlyRemoveUser(long telegramId)
         {
             using (var connection = context.CreateConnection())

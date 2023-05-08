@@ -14,7 +14,7 @@ namespace GPTipsBot
 {
     public partial class TelegramBotWorker
     {
-        public async Task ProccessCommand(ITelegramBotClient botClient, CreateEditUser userDto, 
+        public async Task ProccessCommand(ITelegramBotClient botClient, TelegramGptMessage telegramGptMessage, 
             string? messageText, long chatId, CancellationToken cancellationToken)
         {
             if (messageText == "maintenance" && chatId == AppConfig.AdminId)
@@ -29,8 +29,8 @@ namespace GPTipsBot
 
             if (messageText.StartsWith("/start"))
             {
-                userDto.Source = TelegramService.GetSource(messageText);
-                userRepository.CreateUpdateUser(userDto);
+                telegramGptMessage.Source = TelegramService.GetSource(messageText);
+                userRepository.CreateUpdateUser(telegramGptMessage);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
                 return;
             }
@@ -41,13 +41,13 @@ namespace GPTipsBot
                 await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
                 return;
             }
-            else if (messageText == "/resetContext")
-            {
-                messageRepository.ResetContext(userDto, chatId);
+            //else if (messageText == "/resetContext")
+            //{
+            //    messageRepository.ResetContext(telegramGptMessage, chatId);
 
-                await botClient.SendTextMessageAsync(chatId, BotResponse.ContextUpdated, cancellationToken:cancellationToken);
-                return;
-            }
+            //    await botClient.SendTextMessageAsync(chatId, BotResponse.ContextUpdated, cancellationToken:cancellationToken);
+            //    return;
+            //}
         }
     }
 }

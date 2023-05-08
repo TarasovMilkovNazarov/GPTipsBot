@@ -50,14 +50,15 @@ namespace GPTipsBot
             var chatId = message.Chat.Id;
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
 
-            var userDto = new CreateEditUser(message);
-            await ProccessCommand(botClient, userDto, messageText, chatId, cancellationToken);
-            
-            long messageId = 0;
+            var telegramGptMessage = new TelegramGptMessage(message);
+            await ProccessCommand(botClient, telegramGptMessage, messageText, chatId, cancellationToken);
+            Message serviceMessage = null;
+
             try
             {
-                userRepository.CreateUpdateUser(userDto);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
+                userRepository.CreateUpdateUser(telegramGptMessage);
+                messageRepository.AddUserMessage(telegramGptMessage);
+                serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
             }
             catch (Exception ex)
             {
@@ -102,12 +103,14 @@ namespace GPTipsBot
             (bool isSuccessful, string? text) gtpResponse = (isSuccessful: false, text: null);
             try
             {
-                gtpResponse = await gptAPI.SendMessage(userDto);
+                gtpResponse = await gptAPI.SendMessage(telegramGptMessage);
+                telegramGptMessage.Reply = gtpResponse.text;
+                messageRepository.AddBotResponse(telegramGptMessage);
             }
             catch (Exception ex)
             {
                 timer.Dispose();
-                await botClient.SendTextMessageAsync(chatId, ex.Message, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
                 return;
             }
 
@@ -117,6 +120,11 @@ namespace GPTipsBot
             {
                 try
                 {
+                    if (serviceMessage != null)
+                    {
+                        await botClient.DeleteMessageAsync(chatId, serviceMessage.MessageId, cancellationToken: cancellationToken);
+                    }
+                    
                     await botClient.SendTextMessageAsync(chatId, gtpResponse.text, cancellationToken: cancellationToken);
 
                     return;

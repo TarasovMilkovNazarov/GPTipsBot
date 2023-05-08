@@ -15,7 +15,7 @@ namespace GPTipsBot.Services
         private readonly ChatGptService chatGptService;
         private long tokensCount;
 
-        public ContextWindow(ChatGptService chatGptService, int size = 5)
+        public ContextWindow(ChatGptService chatGptService, int size = 10)
         {
             messages = new LinkedList<string>();
             windowSize = size;

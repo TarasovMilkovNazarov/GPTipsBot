@@ -27,9 +27,9 @@ namespace GPTipsBot.Api
             this.messageService = messageService;
         }
 
-        public async Task<(bool isSuccessful, string? text)> SendMessage(CreateEditUser userDto)
+        public async Task<(bool isSuccessful, string? text)> SendMessage(TelegramGptMessage telegramGptMessage)
         {
-            var textWithContext = messageService.PrepareContext(userDto.ContextId);
+            var textWithContext = messageService.PrepareContext(telegramGptMessage.ContextId.Value);
             if (textWithContext.Length == 0)
             {
                 //todo reset context or suggest user to reset: send inline command with reset
