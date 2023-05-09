@@ -43,7 +43,8 @@ namespace GPTipsBot.Services
 
             foreach (var item in messages)
             {
-                contextWindow.AddMessage(item.Text, item.Role.ToString().ToLower());
+                var isMessageAddedToContext = contextWindow.TryToAddMessage(item.Text, item.Role.ToString().ToLower());
+                if (!isMessageAddedToContext) break;
             }
 
             return contextWindow.GetContext();

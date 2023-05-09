@@ -109,8 +109,20 @@ namespace GPTipsBot
             }
             catch (Exception ex)
             {
+                string? error = null;
+                if (ex is CustomException)
+                {
+                    error = ex.Message;
+                }
+
                 timer.Dispose();
-                await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                if (serviceMessage != null)
+                {
+                    await botClient.DeleteMessageAsync(chatId, serviceMessage.MessageId, cancellationToken: cancellationToken);
+                }
+
+                await botClient.SendTextMessageAsync(chatId, error ?? BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+
                 return;
             }
 

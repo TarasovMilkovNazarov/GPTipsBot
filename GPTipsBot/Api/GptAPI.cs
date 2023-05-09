@@ -33,7 +33,7 @@ namespace GPTipsBot.Api
             if (textWithContext.Length == 0)
             {
                 //todo reset context or suggest user to reset: send inline command with reset
-                throw new Exception(BotResponse.TokensLimitExceeded);
+                throw new CustomException(BotResponse.TokensLimitExceeded);
             }
 
             if (isFreeApi)
@@ -51,7 +51,7 @@ namespace GPTipsBot.Api
             request.AddHeader("Content-Type", "application/json");
             var gptDto = new
             {
-                model = "gpt-3.5-turbo",
+                model = GptModels.Models.ChatGpt3_5Turbo,
                 messages,
                 stream = false
             };

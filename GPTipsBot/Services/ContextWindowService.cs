@@ -23,7 +23,7 @@ namespace GPTipsBot.Services
             tokensCount = 0;
         }
 
-        public void AddMessage(string message, string role)
+        public bool TryToAddMessage(string message, string role)
         {
             if (messages.Count < WindowSize)
             {
@@ -32,9 +32,12 @@ namespace GPTipsBot.Services
                 {
                     tokensCount += messageTokensCount;
                     messages.AddFirst(new ChatMessage(role, message));
-                    return;
+
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public ChatMessage[] GetContext()
