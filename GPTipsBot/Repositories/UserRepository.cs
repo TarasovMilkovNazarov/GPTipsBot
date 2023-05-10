@@ -18,7 +18,7 @@ namespace GPTipsBot.Repositories
         private readonly MessageContextRepository messageRepository;
         private readonly string insertUserQuery = "INSERT INTO Users (id, firstname, lastname, createdat, isactive, source) " +
                 "VALUES (@TelegramId, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
-        private readonly string updateUserQuery = "Update Users SET isactive = 'true', messagescount = @messagesCount WHERE id = @telegramId;";
+        private readonly string updateUserQuery = "Update Users SET isactive = 'true', source = @Source WHERE id = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE id = @TelegramId;";
 
         private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE id = @telegramId;";
@@ -48,7 +48,6 @@ namespace GPTipsBot.Repositories
                 _connection.ExecuteScalar(updateUserQuery, new
                 {
                     telegramId = telegramGptMessage.TelegramId,
-                    messagesCount = ++dbUser.MessagesCount,
                     source = telegramGptMessage.Source
                 });
             }

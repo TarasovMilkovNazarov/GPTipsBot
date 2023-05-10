@@ -10,6 +10,7 @@ using GPTipsBot.Services;
 using GPTipsBot.Api;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Exceptions;
+using GPTipsBot.Models;
 
 namespace GPTipsBot
 {
@@ -22,7 +23,7 @@ namespace GPTipsBot
         private readonly TelegramBotAPI telegramBotApi;
         private bool onMaintenance = false;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, UserRepository userRepository, 
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, UserRepository userRepository,
             MessageContextRepository messageRepository, GptAPI gptAPI, TelegramBotAPI telegramBotApi)
         {
             _logger = logger;
@@ -47,22 +48,42 @@ namespace GPTipsBot
             if (message.Text is not { } messageText)
                 return;
 
+            var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && message.EntityValues.First().ToLower().Contains("gptip");
+            var isGroupOrChannel = message.Chat.Type == ChatType.Group || message.Chat.Type == ChatType.Channel;
+
+            if (!isBotMentioned && isGroupOrChannel)
+            {
+                return;
+            }
+            else if (isBotMentioned)
+            {
+                message.Text = messageText.Substring(message.EntityValues.First().Length).Trim();
+            }
+
             var chatId = message.Chat.Id;
             _logger.LogInformation($"Received a '{messageText}' message in chat {chatId}.");
 
             var telegramGptMessage = new TelegramGptMessage(message);
-            await ProccessCommand(botClient, telegramGptMessage, messageText, chatId, cancellationToken);
-            Message serviceMessage = null;
+            var isCommand = await ProccessCommand(botClient, telegramGptMessage, messageText, chatId, cancellationToken);
+
+            Telegram.Bot.Types.Message serviceMessage = null;
 
             try
             {
-                userRepository.CreateUpdateUser(telegramGptMessage);
                 messageRepository.AddUserMessage(telegramGptMessage);
-                serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken:cancellationToken);
+                if (isCommand) return;
+                if (onMaintenance)
+                {
+                    await botClient.SendTextMessageAsync(chatId, BotResponse.OnMaintenance, cancellationToken: cancellationToken);
+                    return;
+                }
+
+                serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
+                return;
             }
 
             var sendChatActionTasks = new List<Task>();
@@ -73,7 +94,7 @@ namespace GPTipsBot
                     botClient.SendChatActionAsync(chatId, ChatAction.Typing, cancellationToken);
                 }
                 catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
-                
+
             }, null, 0, 8 * 1000);
 
             if (!MessageService.UserToMessageCount.TryGetValue(message.From.Id, out var existingValue))
@@ -127,7 +148,7 @@ namespace GPTipsBot
             }
 
             timer.Dispose();
-            
+
             if (gtpResponse.isSuccessful)
             {
                 try
@@ -136,12 +157,13 @@ namespace GPTipsBot
                     {
                         await botClient.DeleteMessageAsync(chatId, serviceMessage.MessageId, cancellationToken: cancellationToken);
                     }
-                    
+
                     await botClient.SendTextMessageAsync(chatId, gtpResponse.text, cancellationToken: cancellationToken);
 
                     return;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     telegramBotApi.LogErrorMessageFromApiResponse(ex);
                 }
             }

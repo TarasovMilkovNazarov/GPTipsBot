@@ -14,32 +14,28 @@ namespace GPTipsBot
 {
     public partial class TelegramBotWorker
     {
-        public async Task ProccessCommand(ITelegramBotClient botClient, TelegramGptMessage telegramGptMessage, 
+        public async Task<bool> ProccessCommand(ITelegramBotClient botClient, TelegramGptMessage telegramGptMessage, 
             string? messageText, long chatId, CancellationToken cancellationToken)
         {
-            if (messageText == "maintenance" && chatId == AppConfig.AdminId)
-            {
-                onMaintenance = !onMaintenance;
-            }
-            if (onMaintenance)
-            {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.OnMaintenance, cancellationToken:cancellationToken);
-                return;
-            }
-
+            var isCommand = false;
+            
             if (messageText.StartsWith("/start"))
             {
                 telegramGptMessage.Source = TelegramService.GetSource(messageText);
                 userRepository.CreateUpdateUser(telegramGptMessage);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
-                return;
+                isCommand = true;
             }
             else if (messageText == "/help")
             {
                 var desc = telegramBotApi.GetMyDescription();
 
                 await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
-                return;
+                isCommand = true;
+            }
+            else if (messageText == "/fix" && chatId == AppConfig.AdminId)
+            {
+                onMaintenance = !onMaintenance;
             }
             //else if (messageText == "/resetContext")
             //{
@@ -48,6 +44,13 @@ namespace GPTipsBot
             //    await botClient.SendTextMessageAsync(chatId, BotResponse.ContextUpdated, cancellationToken:cancellationToken);
             //    return;
             //}
+
+            if (isCommand)
+            {
+                messageRepository.AddUserMessage(telegramGptMessage);
+            }
+
+            return isCommand;
         }
     }
 }
