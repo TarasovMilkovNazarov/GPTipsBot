@@ -1,18 +1,13 @@
-﻿using RestSharp;
-using GPTipsBot;
+﻿using GPTipsBot;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Npgsql;
-using Dapper;
 using GPTipsBot.Db;
 using Microsoft.Extensions.Configuration;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
-using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.Extensions;
 using GPTipsBot.Api;
-using GPTipsBot.Models;
 
 var builder = new ConfigurationBuilder()
                  .AddJsonFile($"appsettings.{AppConfig.Env}.json", true, true);

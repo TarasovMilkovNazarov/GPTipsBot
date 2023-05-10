@@ -48,7 +48,7 @@ namespace GPTipsBot.Repositories
                 _connection.ExecuteScalar(updateUserQuery, new
                 {
                     telegramId = telegramGptMessage.TelegramId,
-                    source = telegramGptMessage.Source
+                    source = string.IsNullOrEmpty(dbUser.Source) ? telegramGptMessage.Source : dbUser.Source
                 });
             }
 

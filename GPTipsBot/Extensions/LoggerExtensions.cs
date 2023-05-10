@@ -8,7 +8,7 @@ namespace GPTipsBot.Extensions
 
     public static class LoggerExtensions
     {
-        public static void LogWithStackTrace(this ILogger logger, LogLevel logLevel, string message, int methodCount = 5)
+        public static void LogWithStackTrace(this ILogger logger, LogLevel logLevel, string message, int methodCount = 20)
         {
             if (logger.IsEnabled(logLevel))
             {

@@ -88,12 +88,10 @@ namespace GPTipsBot.Api
 
             return ErrorMessage;
         }
-        public string? LogErrorMessageFromApiResponse(Exception ex)
+        public void LogErrorMessageFromApiResponse(Exception ex)
         {
-            var ErrorMessage = GetErrorMessageFromApiResponse(ex);
-            logger.LogWithStackTrace(LogLevel.Error, ErrorMessage);
-
-            return ErrorMessage;
+            var errorMessage = GetErrorMessageFromApiResponse(ex);
+            logger.LogWithStackTrace(LogLevel.Error, errorMessage);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace GPTipsBot.Api
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly IOpenAIService openAiService;
         private readonly MessageService messageService;
-        private readonly bool isFreeApi = true;
+        private readonly bool useFreeApi = true;
 
         public GptAPI(ILogger<TelegramBotWorker> logger, IOpenAIService openAiService, MessageService messageService)
         {
@@ -36,7 +36,7 @@ namespace GPTipsBot.Api
                 throw new CustomException(BotResponse.TokensLimitExceeded);
             }
 
-            if (isFreeApi)
+            if (useFreeApi)
             {
                 return SendViaFreeProxy(textWithContext);
             }
