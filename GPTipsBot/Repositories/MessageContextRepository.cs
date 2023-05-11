@@ -114,17 +114,6 @@ namespace GPTipsBot.Repositories
             return messages.ToList();
         }
 
-        public void ResetContext(TelegramGptMessage telegramGptMessage, long chatId)
-        {
-            telegramGptMessage.MessageId = _connection.QuerySingle<long>(insertMesWithSameContext, new { 
-                text = "/reset",
-                contextId = 0,
-                chatId,
-                telegramId = telegramGptMessage.TelegramId,
-                createdAt = DateTime.UtcNow
-            });
-        }
-
         public void Dispose()
         {
             _connection.Close(); // Close the connection when the service is disposed

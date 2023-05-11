@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /set_env.sh
 /env.list
+/utils.sql

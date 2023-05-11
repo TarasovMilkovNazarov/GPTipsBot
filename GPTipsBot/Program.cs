@@ -8,6 +8,8 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using OpenAI.GPT3.Extensions;
 using GPTipsBot.Api;
+using Telegram.Bot;
+using GPTipsBot.UpdateHandlers;
 
 var builder = new ConfigurationBuilder()
                  .AddJsonFile($"appsettings.{AppConfig.Env}.json", true, true);
@@ -23,12 +25,24 @@ var hostBuilder = new HostBuilder()
         .AddHostedService<TelegramBotWorker>()
         .AddSingleton<DapperContext>()
         .AddSingleton<IConfiguration>(config)
-        .AddTransient<MessageService>()
-        .AddTransient<GptAPI>()
-        .AddTransient<ChatGptService>()
-        .AddTransient(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
-        .AddTransient<MessageContextRepository>()
-        .AddTransient<UserRepository>();
+        .AddScoped<TypingStatus>()
+        .AddScoped<MessageHandlerFactory>()
+        .AddScoped<MainHandler>()
+        .AddScoped<DeleteUserHandler>()
+        .AddScoped<OnMaintenanceHandler>()
+        .AddScoped<RateLimitingHandler>()
+        .AddScoped<MessageTypeHandler>()
+        .AddScoped<CrudHandler>()
+        .AddScoped<CommandHandler>()
+        .AddScoped<GptToUserHandler>()
+        .AddScoped<UserToGptHandler>()
+        .AddScoped<MessageService>()
+        .AddScoped<GptAPI>()
+        .AddScoped<ChatGptService>()
+        .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
+        .AddScoped<MessageContextRepository>()
+        .AddScoped<UserRepository>()
+        .AddScoped<ITelegramBotClient, TelegramBotClient>(x => ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken));
 
         services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
     });
