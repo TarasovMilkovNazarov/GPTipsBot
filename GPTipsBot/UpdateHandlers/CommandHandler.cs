@@ -10,6 +10,7 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class CommandHandler : BaseMessageHandler
     {
+        private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly UserRepository userRepository;
         private readonly ITelegramBotClient botClient;
         private readonly TelegramBotAPI telegramBotAPI;
@@ -17,10 +18,13 @@ namespace GPTipsBot.UpdateHandlers
         public CommandHandler(MessageHandlerFactory messageHandlerFactory,UserRepository userRepository, ITelegramBotClient botClient, 
             TelegramBotAPI telegramBotAPI)
         {
+            this.messageHandlerFactory = messageHandlerFactory;
             this.userRepository = userRepository;
             this.botClient = botClient;
             this.telegramBotAPI = telegramBotAPI;
 
+            var crudHandler = messageHandlerFactory.Create<CrudHandler>();
+            crudHandler.SetNextHandler(null);
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
         }
 
@@ -28,6 +32,7 @@ namespace GPTipsBot.UpdateHandlers
         {
             var messageText = update.TelegramGptMessage.Message;
             var chatId = update.TelegramGptMessage.ChatId;
+            var isCommand = false;
             
             if (messageText.StartsWith("/start"))
             {
@@ -35,14 +40,24 @@ namespace GPTipsBot.UpdateHandlers
                 userRepository.CreateUpdateUser(update.TelegramGptMessage);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
 
-                return;
+                isCommand = true;
             }
             else if (messageText == "/help")
             {
                 var desc = telegramBotAPI.GetMyDescription();
                 await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
 
+                isCommand = true;
+            }
+
+            if (isCommand)
+            {
                 return;
+
+                var crudHandler = messageHandlerFactory.Create<CrudHandler>();
+                crudHandler.SetNextHandler(null);
+
+                SetNextHandler(crudHandler);
             }
 
             // Call next handler

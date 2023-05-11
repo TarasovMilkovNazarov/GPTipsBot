@@ -7,6 +7,7 @@ using GPTipsBot.Dtos;
 using GPTipsBot.Api;
 using System.Threading;
 using GPTipsBot.UpdateHandlers;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot
 {
@@ -19,7 +20,6 @@ namespace GPTipsBot
         private readonly TelegramBotAPI telegramBotApi;
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly TypingStatus typingStatus;
-        private bool onMaintenance = false;
 
         public TelegramBotWorker(ILogger<TelegramBotWorker> logger, 
             UserRepository userRepository, MessageContextRepository messageRepository, 
@@ -47,6 +47,11 @@ namespace GPTipsBot
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
+                if (ex is ApiRequestException apiEx && apiEx.ErrorCode == 403)
+                {
+                    return;
+                }
+
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
                 await typingStatus.Stop(cancellationToken);
             }

@@ -20,6 +20,7 @@ namespace GPTipsBot.Repositories
                 "VALUES (@TelegramId, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
         private readonly string updateUserQuery = "Update Users SET isactive = 'true', source = @Source WHERE id = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE id = @TelegramId;";
+        private readonly string isUserExists = $"SELECT Count(*) FROM Users WHERE id = @TelegramId;";
 
         private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE id = @telegramId;";
 
@@ -76,7 +77,7 @@ namespace GPTipsBot.Repositories
         {
             using (var connection = context.CreateConnection())
             {
-                int count = connection.ExecuteScalar<int>(selectUserByTelegramId, new { telegramId });
+                int count = connection.ExecuteScalar<int>(isUserExists, new { telegramId });
                 if (count == 0)
                 {
                     return -1;

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenAI.GPT3.Interfaces;
 using OpenAI.GPT3.ObjectModels.RequestModels;
+using OpenAI.GPT3.ObjectModels.ResponseModels;
 using RestSharp;
 using GptModels = OpenAI.GPT3.ObjectModels;
 
@@ -62,10 +63,9 @@ namespace GPTipsBot.Api
 
             try
             {
-                response = freeGptClient.Execute(request);
-                dynamic result = JsonConvert.DeserializeObject(response.Content);
-                string content = result.choices[0].message.content;
-                string finishReason = result.choices[0].finishReason;
+                response = freeGptClient.ExecuteWithRetry(request);
+                var completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(response.Content);
+                string? content = completionResult?.Choices?.FirstOrDefault()?.Message?.Content;
 
                 responseText = content;
             }

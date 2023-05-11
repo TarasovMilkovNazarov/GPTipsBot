@@ -10,7 +10,7 @@ namespace GPTipsBot.UpdateHandlers
         public MessageTypeHandler(MessageHandlerFactory messageHandlerFactory, ILogger<TelegramBotWorker> logger)
         {
             this.logger = logger;
-            SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
+            SetNextHandler(messageHandlerFactory.Create<GroupMessageHandler>());
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
