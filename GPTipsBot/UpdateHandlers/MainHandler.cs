@@ -21,12 +21,6 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
-            var message = update.Update.Message;
-            if (message == null)
-            {
-                return;
-            }
-
             // Call next handler
             await base.HandleAsync(update, cancellationToken);
         }

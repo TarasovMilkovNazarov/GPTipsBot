@@ -47,7 +47,7 @@ namespace GPTipsBot
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
-                if (ex is ApiRequestException apiEx && apiEx.ErrorCode == 403)
+                if (ex is ApiRequestException apiEx || update.Message == null)
                 {
                     return;
                 }

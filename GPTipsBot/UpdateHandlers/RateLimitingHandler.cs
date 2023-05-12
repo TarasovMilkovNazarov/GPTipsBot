@@ -24,24 +24,30 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
-            var telegramId = update.Update.Message.From.Id;
-            var chatId = update.Update.Message.Chat.Id;
-
-            if (!MessageService.UserToMessageCount.TryGetValue(telegramId, out var existingValue))
+            var telegramId = update.Update.Message?.From?.Id;
+            if (!telegramId.HasValue)
             {
-                MessageService.UserToMessageCount[telegramId] = (1, DateTime.UtcNow);
+                await base.HandleAsync(update, cancellationToken);
+                return;
+            }
+
+            var chatId = update.Update.Message?.Chat.Id;
+
+            if (!MessageService.UserToMessageCount.TryGetValue(telegramId.Value, out var existingValue))
+            {
+                MessageService.UserToMessageCount[telegramId.Value] = (1, DateTime.UtcNow);
             }
             else
             {
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     logger.LogError("Max messages limit reached");
-                    botClient.SendTextMessageAsync(chatId, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
 
                     return;
                 }
 
-                MessageService.UserToMessageCount[telegramId] = (existingValue.messageCount++, DateTime.UtcNow);
+                MessageService.UserToMessageCount[telegramId.Value] = (existingValue.messageCount++, DateTime.UtcNow);
             }
 
             // Call next handler
