@@ -14,6 +14,7 @@ namespace GPTipsBot.Extensions
         {
             int retryCount = 0;
             RestResponse response = null;
+            //request.Timeout = (int)TimeSpan.FromSeconds(120).TotalMilliseconds;
 
             while (retryCount < maxRetries)
             {
