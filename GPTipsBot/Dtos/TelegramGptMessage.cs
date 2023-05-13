@@ -28,6 +28,7 @@ namespace GPTipsBot.Dtos
         public string? Source { get; set; }
         public long? ContextId { get; internal set; }
         public DateTime CreatedAt { get; set; }
+        public int ServiceMessageId { get; set; }
     }
 
     internal interface IGptMessage

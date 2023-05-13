@@ -6,6 +6,8 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Dtos;
 using GPTipsBot.Api;
 using System.Threading;
+using GPTipsBot.UpdateHandlers;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot
 {
@@ -16,45 +18,42 @@ namespace GPTipsBot
         private readonly MessageContextRepository messageRepository;
         private readonly GptAPI gptAPI;
         private readonly TelegramBotAPI telegramBotApi;
-        private bool onMaintenance = false;
+        private readonly MessageHandlerFactory messageHandlerFactory;
+        private readonly TypingStatus typingStatus;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, UserRepository userRepository,
-            MessageContextRepository messageRepository, GptAPI gptAPI, TelegramBotAPI telegramBotApi)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, 
+            UserRepository userRepository, MessageContextRepository messageRepository, 
+            GptAPI gptAPI, TelegramBotAPI telegramBotApi, MessageHandlerFactory messageHandlerFactory,
+            TypingStatus typingStatus)
         {
             _logger = logger;
             this.userRepository = userRepository;
             this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
             this.telegramBotApi = telegramBotApi;
+            this.messageHandlerFactory = messageHandlerFactory;
+            this.typingStatus = typingStatus;
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            var chatId = update.Message.Chat.Id;
+            var mainHandler = messageHandlerFactory.Create<MainHandler>();
+            var extendedUpd = new UpdateWithCustomMessageDecorator(update, cancellationToken);
 
             try
             {
-                if (HandleRemove(update) == null || 
-                    HandleOnMaintenance(botClient, update.Message?.Text, chatId, cancellationToken) == null || 
-                    HandleRateLimiting(botClient, chatId, update.Message.From.Id, cancellationToken) == null ||
-                    FilterMessage(update) == null ||
-                    HandleGroupOrChannelMessage(update.Message) == null) return;
-
-                var telegramGptMessage = new TelegramGptMessage(update.Message);
-                messageRepository.AddUserMessage(telegramGptMessage);
-
-                var processCommand = await HandleCommand(botClient, telegramGptMessage, cancellationToken);
-                if (processCommand == null) return;
-
-                var typingInfo = await BroadcastTypingStatus(botClient, chatId, cancellationToken);
-                await AskChatGpt(botClient, telegramGptMessage, cancellationToken);
-                await StopStatusBroadcasting(botClient, typingInfo.serviceMessage.MessageId, chatId, typingInfo.statusTimer, cancellationToken);
-                await SendChatGptReplyToUser(botClient, telegramGptMessage, cancellationToken);
+                await mainHandler.HandleAsync(extendedUpd, cancellationToken);
             }
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                if (ex is ApiRequestException apiEx || update.Message == null)
+                {
+                    return;
+                }
+
+                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                await typingStatus.Stop(cancellationToken);
             }
         }
     }
