@@ -37,7 +37,7 @@ namespace GPTipsBot.UpdateHandlers
             if (messageText.StartsWith("/start"))
             {
                 update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
-                userRepository.CreateUpdateUser(update.TelegramGptMessage);
+                //userRepository.CreateUpdateUser(update.TelegramGptMessage);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
 
                 isCommand = true;

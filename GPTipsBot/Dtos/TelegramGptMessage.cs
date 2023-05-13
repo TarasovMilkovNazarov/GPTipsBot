@@ -11,7 +11,7 @@ namespace GPTipsBot.Dtos
             TelegramId = message.From.Id;
             FirstName = message.From.FirstName;
             LastName = message.From.LastName;
-            Message = message.Text;
+            Message = message.Text ?? "";
             ChatId= message.Chat.Id;
             CreatedAt = DateTime.UtcNow;
         }

@@ -21,6 +21,11 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
+            if (update.TelegramGptMessage != null)
+            {
+                userRepository.CreateUpdateUser(update.TelegramGptMessage);
+            }
+
             // Call next handler
             await base.HandleAsync(update, cancellationToken);
         }
