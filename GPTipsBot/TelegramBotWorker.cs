@@ -14,25 +14,21 @@ namespace GPTipsBot
     public partial class TelegramBotWorker : IHostedService, IDisposable
     {
         private readonly ILogger<TelegramBotWorker> _logger;
-        private readonly UserRepository userRepository;
-        private readonly MessageContextRepository messageRepository;
         private readonly GptAPI gptAPI;
         private readonly TelegramBotAPI telegramBotApi;
         private readonly MessageHandlerFactory messageHandlerFactory;
-        private readonly TypingStatus typingStatus;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, 
-            UserRepository userRepository, MessageContextRepository messageRepository, 
-            GptAPI gptAPI, TelegramBotAPI telegramBotApi, MessageHandlerFactory messageHandlerFactory,
-            TypingStatus typingStatus)
+        public static readonly Dictionary<long, Queue<Update>> userToUpdatesQueue = new Dictionary<long, Queue<Update>>();
+        public static DateTime Start { get; private set; }
+
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, GptAPI gptAPI, 
+            TelegramBotAPI telegramBotApi, MessageHandlerFactory messageHandlerFactory)
         {
             _logger = logger;
-            this.userRepository = userRepository;
-            this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
             this.telegramBotApi = telegramBotApi;
             this.messageHandlerFactory = messageHandlerFactory;
-            this.typingStatus = typingStatus;
+            Start = DateTime.UtcNow;
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -53,7 +49,6 @@ namespace GPTipsBot
                 }
 
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
-                await typingStatus.Stop(cancellationToken);
             }
         }
     }

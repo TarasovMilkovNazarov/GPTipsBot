@@ -16,7 +16,7 @@ namespace GPTipsBot.UpdateHandlers
         public DeleteUserHandler(MessageHandlerFactory messageHandlerFactory, UserRepository userRepository)
         {
             this.userRepository = userRepository;
-            SetNextHandler(messageHandlerFactory.Create<OnMaintenanceHandler>());
+            SetNextHandler(messageHandlerFactory.Create<RecoveryHandler>());
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)

@@ -23,10 +23,16 @@ namespace GPTipsBot.UpdateHandlers
             var message = update.TelegramGptMessage;
 
             await typingStatus.Start(update.Update.Message.Chat.Id, cancellationToken);
-            var gtpResponse = await gptAPI.SendMessage(message);
-            message.Reply = gtpResponse.text;
-            messageRepository.AddBotResponse(message);
-            await typingStatus.Stop(cancellationToken);
+            try
+            {
+                var gtpResponse = await gptAPI.SendMessage(message);
+                message.Reply = gtpResponse.text;
+                messageRepository.AddBotResponse(message);
+            }
+            finally
+            {
+                await typingStatus.Stop(cancellationToken);
+            }
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

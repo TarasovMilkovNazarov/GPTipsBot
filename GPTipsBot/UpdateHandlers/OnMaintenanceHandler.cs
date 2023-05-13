@@ -24,7 +24,7 @@ namespace GPTipsBot.UpdateHandlers
                 AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
                 if (!AppConfig.IsOnMaintenance)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.OnMaintenanceStop, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.Recovered, cancellationToken: cancellationToken);
                     return;
                 }
             }

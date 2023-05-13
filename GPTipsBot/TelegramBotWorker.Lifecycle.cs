@@ -11,7 +11,6 @@ namespace GPTipsBot
     {
         public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            await typingStatus.Stop(cancellationToken);
             telegramBotApi.LogErrorMessageFromApiResponse(exception);
             // Cooldown in case of network connection error
             if (exception is RequestException)
