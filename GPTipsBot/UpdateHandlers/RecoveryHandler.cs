@@ -30,7 +30,7 @@ namespace GPTipsBot.UpdateHandlers
 
             var telegramId = update.Update.Message.From.Id;
 
-            if (update.Update.Message?.Date <= TelegramBotWorker.Start)
+            if (TelegramBotWorker.Start - update.Update.Message?.Date >= TimeSpan.FromMinutes(2))
             {
                 messageRepository.AddUserMessage(update.TelegramGptMessage);
                 
