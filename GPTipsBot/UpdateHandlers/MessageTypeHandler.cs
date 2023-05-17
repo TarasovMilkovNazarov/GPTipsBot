@@ -40,7 +40,7 @@ namespace GPTipsBot.UpdateHandlers
             var message = update.Update.Message;
 
             // Only process text messages
-            if (message.Text is not { } messageText)
+            if (message?.Text is not { } messageText)
                 return;
 
             logger.LogInformation($"Received a '{messageText}' message in chat {message.Chat.Id}.");

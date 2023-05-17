@@ -20,9 +20,10 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.Update.Message;
-            var botMentionedEntity = message.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
+            var botMentionedEntity = message?.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
             var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
-            var isGroupOrChannel = message.Chat.Type == ChatType.Group || message.Chat.Type == ChatType.Channel;
+            var groupOrChannelTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
+            var isGroupOrChannel = groupOrChannelTypes.Contains(message.Chat.Type);
 
             if (!isBotMentioned && isGroupOrChannel)
             {
