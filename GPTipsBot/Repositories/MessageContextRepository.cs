@@ -31,19 +31,18 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
         }
         
-        public long AddUserMessage(TelegramGptMessage telegramGptMessage)
+        public long AddUserMessage(TelegramGptMessage telegramGptMessage, bool withNewContext = false)
         {
             return AddMessage(telegramGptMessage, GptRolesEnum.User);
         }
 
-        public long AddBotResponse(TelegramGptMessage telegramGptMessage)
+        public long AddBotResponse(TelegramGptMessage telegramGptMessage, bool withNewContext = false)
         {
-            return AddMessage(telegramGptMessage, GptRolesEnum.Assistant);
+            return AddMessage(telegramGptMessage, GptRolesEnum.Assistant, withNewContext);
         }
 
-        private long AddMessage(TelegramGptMessage telegramGptMessage, GptRolesEnum role)
+        private long AddMessage(TelegramGptMessage telegramGptMessage, GptRolesEnum role, bool withNewContext = false)
         {
-            long? contextId = GetLastContext(telegramGptMessage.TelegramId, telegramGptMessage.ChatId);
             string? text = null;
             long? replyToId = null;
 
@@ -60,7 +59,8 @@ namespace GPTipsBot.Repositories
                     break;
             }
 
-            var insertQuery = contextId.HasValue ? insertMesWithSameContext : insertWithNewContext;
+            var insertQuery = withNewContext ? insertWithNewContext : insertMesWithSameContext;
+            long? contextId = GetLastContext(telegramGptMessage.TelegramId, telegramGptMessage.ChatId);
 
             var inserted = _connection.QuerySingle<(long id, long contextId)>(insertQuery, new { 
                 text,

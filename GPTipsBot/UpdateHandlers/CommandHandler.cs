@@ -12,14 +12,17 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly UserRepository userRepository;
+        private readonly MessageContextRepository messageRepository;
         private readonly ITelegramBotClient botClient;
         private readonly TelegramBotAPI telegramBotAPI;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory,UserRepository userRepository, ITelegramBotClient botClient, 
+        public CommandHandler(MessageHandlerFactory messageHandlerFactory,UserRepository userRepository, 
+            MessageContextRepository messageRepository, ITelegramBotClient botClient, 
             TelegramBotAPI telegramBotAPI)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.userRepository = userRepository;
+            this.messageRepository = messageRepository;
             this.botClient = botClient;
             this.telegramBotAPI = telegramBotAPI;
 
@@ -46,6 +49,12 @@ namespace GPTipsBot.UpdateHandlers
             {
                 var desc = telegramBotAPI.GetMyDescription();
                 await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
+
+                isCommand = true;
+            }
+            else if (messageText == "/resetContext")
+            {
+                messageRepository.AddUserMessage(update.TelegramGptMessage, withNewContext: true);
 
                 isCommand = true;
             }
