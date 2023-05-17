@@ -19,7 +19,7 @@ namespace GPTipsBot.Api
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly IOpenAIService openAiService;
         private readonly MessageService messageService;
-        private readonly bool useFreeApi = true;
+        private readonly bool useFreeApi = false;
 
         public GptAPI(ILogger<TelegramBotWorker> logger, IOpenAIService openAiService, MessageService messageService)
         {
@@ -83,12 +83,12 @@ namespace GPTipsBot.Api
             {
                 Messages = messages,
                 Model = GptModels.Models.ChatGpt3_5Turbo,
-                MaxTokens = AppConfig.ChatGptTokensLimitPerMessage//optional
+                //MaxTokens = AppConfig.ChatGptTokensLimitPerMessage
             });
 
             var response = completionResult.Choices.First()?.Message?.Content;
 
-            return (completionResult.Successful, response);
+            return (completionResult?.Successful ?? false, response);
         }
     }
 }
