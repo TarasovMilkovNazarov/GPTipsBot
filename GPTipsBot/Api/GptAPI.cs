@@ -19,7 +19,7 @@ namespace GPTipsBot.Api
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly IOpenAIService openAiService;
         private readonly MessageService messageService;
-        private readonly bool useFreeApi = false;
+        private readonly bool useFreeApi = true;
 
         public GptAPI(ILogger<TelegramBotWorker> logger, IOpenAIService openAiService, MessageService messageService)
         {
