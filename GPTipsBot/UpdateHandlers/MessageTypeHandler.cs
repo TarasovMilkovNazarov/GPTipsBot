@@ -20,8 +20,13 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
+            var mediaMessageTypes = new Telegram.Bot.Types.Enums.MessageType?[]{
+                Telegram.Bot.Types.Enums.MessageType.Audio, 
+                Telegram.Bot.Types.Enums.MessageType.Video,
+                Telegram.Bot.Types.Enums.MessageType.Photo };
+
             // Only process Message updates: https://core.telegram.org/bots/api#message
-            if (update.Update.Message?.Type != Telegram.Bot.Types.Enums.MessageType.Text)
+            if (mediaMessageTypes.Contains(update.Update.Message?.Type))
             {
                 if (update.Update.Message?.Chat != null)
                 {
