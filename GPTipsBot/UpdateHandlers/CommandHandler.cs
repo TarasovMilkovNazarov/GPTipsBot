@@ -49,6 +49,12 @@ namespace GPTipsBot.UpdateHandlers
 
                 isCommand = true;
             }
+            else if (messageText == "/image")
+            {
+                //send image
+
+                isCommand = true;
+            }
 
             if (isCommand)
             {
