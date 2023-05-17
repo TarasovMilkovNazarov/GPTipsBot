@@ -20,7 +20,8 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.Update.Message;
-            var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && message.EntityValues.First().ToLower().Contains("gptip");
+            var botMentionedEntity = message.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
+            var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
             var isGroupOrChannel = message.Chat.Type == ChatType.Group || message.Chat.Type == ChatType.Channel;
 
             if (!isBotMentioned && isGroupOrChannel)
@@ -29,7 +30,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             if (isBotMentioned)
             {
-                message.Text = message.Text.Substring(message.EntityValues.First().Length).Trim();
+                message.Text = message.Text.Substring(botMentionedEntity.Length).Trim();
             }
 
             // Call next handler
