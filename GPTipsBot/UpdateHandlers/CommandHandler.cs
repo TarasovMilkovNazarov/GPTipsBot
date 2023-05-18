@@ -1,7 +1,9 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Dtos;
+using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
+using System.Collections.Concurrent;
 using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -23,8 +25,6 @@ namespace GPTipsBot.UpdateHandlers
             this.botClient = botClient;
             this.telegramBotAPI = telegramBotAPI;
 
-            var crudHandler = messageHandlerFactory.Create<CrudHandler>();
-            crudHandler.SetNextHandler(null);
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
         }
 
@@ -49,15 +49,16 @@ namespace GPTipsBot.UpdateHandlers
 
                 isCommand = true;
             }
+            else if (messageText == "/image")
+            {
+                await botClient.SendTextMessageAsync(chatId, BotResponse.InputImageDescriptionText, cancellationToken:cancellationToken);
+                MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.AwaitingImage;
+                isCommand = true;
+            }
 
             if (isCommand)
             {
                 return;
-
-                var crudHandler = messageHandlerFactory.Create<CrudHandler>();
-                crudHandler.SetNextHandler(null);
-
-                SetNextHandler(crudHandler);
             }
 
             // Call next handler

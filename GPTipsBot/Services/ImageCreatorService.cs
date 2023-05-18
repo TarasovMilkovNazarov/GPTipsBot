@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using GPTipsBot.Extensions;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +17,22 @@ namespace GPTipsBot.Services
         private string BING_URL = "https://www.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "ipv6=hit=1683984301209&t=4; MUID=1BFAF826D5F164F5079CEB29D4D965D5; USRLOC=HS=1; SRCHD=AF=SHORUN; SRCHUID=V=2&GUID=C044A514B78149B594D67939760B330A&dmnchg=1; MUIDB=1BFAF826D5F164F5079CEB29D4D965D5; _UR=QS=0&TQS=0; ipv6=hit=1683903202726&t=4; MMCASM=ID=0533AEDB1D8E450A9EFC8F2875A63D50; BCP=AD=1&AL=1&SM=1; dsc=order=ShopOrderNewsOverShop; _HPVN=CS=eyJQbiI6eyJDbiI6MSwiU3QiOjAsIlFzIjowLCJQcm9kIjoiUCJ9LCJTYyI6eyJDbiI6MSwiU3QiOjAsIlFzIjowLCJQcm9kIjoiSCJ9LCJReiI6eyJDbiI6MSwiU3QiOjAsIlFzIjowLCJQcm9kIjoiVCJ9LCJBcCI6dHJ1ZSwiTXV0ZSI6dHJ1ZSwiTGFkIjoiMjAyMy0wNS0xMlQwMDowMDowMFoiLCJJb3RkIjowLCJHd2IiOjAsIkRmdCI6bnVsbCwiTXZzIjowLCJGbHQiOjAsIkltcCI6NH0=; MicrosoftApplicationsTelemetryDeviceId=552d2863-bb45-4cf3-a1fc-2111e63dcf76; _EDGE_S=SID=2EE1676F8E65688020A474608F5669EA; ANON=A=DB36387B8CD91D409173AF8DFFFFFFFF&E=1c53&W=1; NAP=V=1.9&E=1bf9&C=2RVPCtWCi_qRO4A5LEiCRVgfPtpar5WAN3Kz0myldEsU7SXZdUT6SA&W=1; PPLState=1; WLID=q77FI4s+r9GeCp0LovNzuJx4KhOW4iVRPvbo+8ChBcnlwG3JoqrCKyaOnvGQSE9MOxAmfUqNocrk5YxZClg09KVhM9ucGiN5ChWfEBA/vUQ=; CSRFCookie=2e29563b-2628-45d9-93a5-d565d383eb35; SRCHUSR=DOB=20230512&T=1683899606000&POEX=W; WLS=C=2e52034796cc616c&N=%d0%90%d0%bb%d0%b5%d0%ba%d1%81%d0%b0%d0%bd%d0%b4%d1%80; KievRPSSecAuth=FACSBBRaTOJILtFsMkpLVWSG6AN6C/svRwNmAAAEgAAACNANfL+sJDw+UAS58RDHUPL7uJmNvzDwH68NxnCyNP+39K2bDZtCYtsDNJAxGNDxG2dC/Qq0M8CDbhuhZ6ISYTGlR76W2ay3juBzKuyti77oM/UjUJ1wwouaYUmIP2RwqmmZrzwu3kjdOUbTcMSwGXABj06QyxtnNLjjOWnskHbeq5+OYHv9BaiWHpPCRmSio2C+esRuTYEz16ZAInplodHiXJXlxmL9r27BUmUt8UZm8Om1OskQNa3oxCr70Y8QzBzTyakNkpU0aozA4MT/iTuLvV1QPuIW5BOhLPiKm+lAkKC60KhSsA4MwLA+9Toj2V59JL7uSImd+OoRHp2x8iStjKBJuc5A+GjixzBhX5eppZvHMn0HWfs+okYE8Ud1dfVcMNf90JlM/he4p4UP7dnN4i6eJLoWvILgodKlmEjZ3JTzST5ZRag8XYxlJZc3VldTHHlWgBQcJ4AlX2Cj280L2b/xyXC297yId76KS0GaYu9aGMd7/eW2NuDSJVUDmQPGnBNDax5T5jhnVO40WOeHQ4FbYKu3QyT2QGZkLPNfiaAjQD2NQR6E7aVE+P+7PR4XSB9Ng480M4WX4Dr8rkxCDPM/qg3SkgCmV8RthO0U67qboM432yrcrEzO06DPaj5EJ7ipHhDJerD+R/eX/wR7PCnTjBPeThpfGjywD9zjOC/6trB1xI5Dck7k+pvR5pagtNV7ozHw0NOn7ekcBy6yH9wNX9I4+FtDLzybCObko9PQR+VEwiFSO9HxXUDser1eJ2bsqpYj6+SE+Y6IHB26YjoG1i/FgkC4e4KfWSye1askg7yOUpYFFGM6hqHLg1oCnHFqMufuRCmEqYXPF6bRQfzxWCkePhilMnhk7LsyP7OvhLNrbDSfi4pOFafEWhwWfRwNSXv3XtIzhT/DVWrNvkIOPsOUzm+x53XY83z+yY8g32XtS9jqmQPgcyVcwWPyWPe+jwcz05QPIjoHaXL1hc5cJApAJNZlwRp4oVkopV0dm05ibaUPQfZXjetuxHU0+/gIVHdjnmOAYpRVP/uK+JYZvUstiE9KZTE4Xbxnt01DhWUFVaUM4pNXGFS8cUQkWxhbK4WTSU3VH0yHfRHnBRk2eQ42rimr4ACti5EnGasYcMH69fczOGHHMzPSh9gNGtzaEywLe6LFyH3mosFpJrYQaDIr6Jm+KmoqKXxbS8bsKeiwOUVib+Sp5yoTmA4SESPsdqTWbxhs4RncTZCOK7IphkamCDP4+F45Zmy+oKKTD8DYAxSpSahtQRFlRsP3aufbwaOd13SG4nsk1lRfYHb5QYVZKSj0ury5+PNYjHHYy4DOIVUnQLPrlJM98wG1lqJnnqv5iZOnng7ToHY1L/Dif+oAeYs4foEkakA36sUvT3vX4lJdLTH1E1+AHVgGkWRiOVcjrE4zYed4alxTf7TQkAG/bQO63de3NxX9YTh/hRdzF40FCKkbIszgHDbx9lA4FhVTfsUUAJ10jlchjUbe5JK0RrGsLeDwTAKw; _U=1k2N7azlv_lhDR8Qv01Op4YtxQf8LsxNRDrCVRJ7SvdPknimyCnyN0c3xmfrNgBZX6HfjXbrmxGw5IxgcnmEhM2GlMWTPT7PRHgS7KmOG3Wea96KkXu-7kY3Av3ltPfSAkEwffOJjSOUaOeBJQEo1xaBNrWfSDZ21JAg3WBymJK_KrV7BSDfeXA7uhqaihx3b6v26MGulYn9R2E8XkJEuk4SnBYdDFLeplPUFzU92_iyFZYiRgA4R_O1bXU6nHZfOmLmQvwmA9NqA8HDgEFEwaQ; BFB=AhCkK-pUiGTjyCQSVPmpUH9yZQ--T-qEOWcNkvgvyLXdxQ6loOlfsI5kjrg6V6j27F-4J6ePr3GyMXuZt_lmopyROPnNObkJtmJFRDWVk4TvCjsGwohBJLSKKj5WEL17lB-M4coUJv7AIrnqFBcb7qGeZ93cAqrpeczf63CFRNVll1UvQw03ttwR8ljISOOKHZM; _clck=16vrmwf|2|fbk|0|1227; SUID=A; SRCHHPGUSR=SRCHLANG=en&PV=10.0.0&BRW=XW&BRH=M&CW=1865&CH=969&SCW=1850&SCH=1819&DPR=1.0&UTC=300&DM=0&WTS=63819496398&HV=1683899944&EXLTT=2&PRVCW=1865&PRVCH=969; GI_FRE_COOKIE=gi_prompt=5&gi_fre=2&gi_sc=6; _clsk=bu4ptg|1683980710623|5|1|v.clarity.ms/collect; OID=AhCo4H5puhAzsEaMMP666M5hfiIFlQC25TSR68w4sAiHgcOaZEkul9xNOAsuLCxJsy2wI4uf9RW2mWKNgGunc9eq; _SS=SID=0B78011807C4699B092B121706F7688C&R=9&RB=9&GB=0&RG=0&RP=6; _RwBf=ilt=8&ihpd=2&ispd=3&rc=9&rb=9&gb=0&rg=0&pc=6&mtu=0&rbb=0&g=0&cid=&clo=0&v=4&l=2023-05-13T07:00:00.0000000Z&lft=0001-01-01T00:00:00.0000000&aof=0&o=0&p=BINGCOPILOTWAITLIST&c=MR000T&t=6366&s=2023-05-12T14:03:35.1755316+00:00&ts=2023-05-13T12:25:11.1517748+00:00&rwred=0&wls=2&lka=0&lkt=0&TH=&mta=0&e=q9x92paf1lZqUpNNub_dyynsL4cMMa4JTgDwyH9PS4kTu_WEZl5cxBdAo4EZzxPYyq_Kjr55Ad3I9whlqkf3Uw&A=DB36387B8CD91D409173AF8DFFFFFFFF";
-
+        private string authCookie = "_IDET=MIExp=0; ipv6=hit=1684394748326&t=4; MUID=33BB5168EEE6652F2F8B4278EFAE64E7; MUIDB=33BB5168EEE6652F2F8B4278EFAE64E7; _EDGE_V=1; USRLOC=HS=1; SRCHD=AF=GENCRE; SRCHUID=V=2&GUID=E28E258438E04985B47E0EF40BFF663B&dmnchg=1; ANON=A=DB36387B8CD91D409173AF8DFFFFFFFF&E=1c54&W=1; NAP=V=1.9&E=1bfa&C=FvqKC6YnFSrDXs4BX_0VCeT0js1KjkambMl3Fg-uB7KgsQUzQwtAjw&W=1; PPLState=1; KievRPSSecAuth=FACSBBRaTOJILtFsMkpLVWSG6AN6C/svRwNmAAAEgAAACBdFpXtd+7piUASjCcvKGVYdugjmkWvcgxM2sEc0d8t5iyW/ocQHeT8wglJpNQk9UGmgpw1+njvGY3NfS5JYvxsGsATfYB4gljZ9xj3C1PlKL1mkLKA/Dx+2vvI1WUpNE+XfLPEO/PpGtkmTE6yUYUNQm20q9TmhpfP2TrD63u2QwUmjqI5lxRyymGgQvbC1o+Edg0/xeJYWbQt67/6C960r7lUhoC3i8ft8x7ty/RmscxOtiVL5qQ6LbiwfCNapo/V0xJbc/XWH5EN7DaINIr5gd/4EllNy4GufwAm4zFvRKL9ucXDubE1gnYWbgHijuFhiJtvvzM8XKHl8JIyr0Wz6FGvoCu33sG6IuZqxq1g/N14Xe8Y9sV90JbmyaNX83DJ6ifzKUiitHSoASPqUYE+emQzq67ik4sBbcQQVriwa8IaKG45y/4hwfTuPCEaAmmXWUCsa2sXhFui+T4pT/XVKdH1rilN3vgOGbT9f9r22y5bc6mqcqt7231lStz128If2dTSoJYlMzG2opcaQEiEuEBC81NqJegTaxXg4ezkGhtZUO5EV22hrGiboC0PKkZjd/dMBow3DUgrOMQqyUhZeHlkfZadKBdOvrbb9NDeVi+0BbmWVMzBRr2MaApv3qXICBeK7s9XF/XxK8aRegRqKuXBoFnMM92JvewOWeqlp3bXkfCdfj+4zhNxa0Un6HTrLvJNIiMDqKirNkQ7uKC5W4l7agiuwA4jNmP/Xo+w4P0eCBvCwpJ14rQGuVU8SNXSdYHv5YOtCBlufrQ9efsDoJucZWhFy/ql6bxSiKOxEVxXXU51RPht6Gf2n2Bv2PFriQtP2simFfx0bKme/Fcy28L0dU6M/FGGXx/IFnq+qmNyhh+/Zx5bZPZPDHe6yVBcQ1MmauDrhD4ozz9Bw2OaAM62ob+nV+N+SZR7x1RjA7mpYAetGtAK1V9GOIIVTXa4/FQhMazm87w0SKX6/QZ71bnz6EZq3x382OQyvKcrChDHa7zUnK4sZz7FJIIDvpe8FFGGPihsRoYgAp7FtLMjbVXWCuUr0PbzenUENaBe0oLouNK6gARpFYXlAds9eyJFocQLcFNib5NaSAbUiDrXQi0G1Tr2YFplxTN/T7HHlCh0CLmwdTo83j/kfwIvz82OpBiJ8AfMbpL+39kTwygngIktORzJTep0R2CXJBPc5RxvF4zrZcW7jqxZXL05pB7zK6KLSfrV+eQRyPNb1KalOHCN6pp0uShJYPPtRPfTWexHGVum82v/nDZ4ksfbZQxjuNkKynoVAqP8lLkDl1bsW1oNULu0t6Zk5D6VrZnGFvEQthn5U4Vl+5LSPZ4Xj2vJvVjts7akl20gJ76P/7Xt0s1XUXiTmoT4tjBGf16ZagxiFTXKAmETvdP7dg9EK6ptFV4ycAU6n45OnOYyoJh5011q9s3EZZlICVJm7GxeSUErCz+R/TG2z2ZaOoTO87lzlzkj2HbuZNbYUAItMS05Rtw5BaG037SymFci3uNAt; _U=18oaPaE5T-OPHgCoPXQZsGDAhnzaYaB_tS51nayL0YL-zxvK16Bm_ysi6_hEVvaqp6NO6ut2V4rvKrK9UMYngxlgbMWu2mm98U3VkECNs-1tBRtvpjIIHzcoMQbepsavPEFDE-N7jIZ6_udD8SajkQbQKj851Um_LjYzcfXq-0Z4F8Y7Y9DntENIIP7IQZrp2kEW1g644uZWexbvQUWDlDaOii6hjhj5szE6mwb_rYVdiej-AxMgRzFF-9YQwjA7gjT_PqIg9gT7r0OWrdqwQSw; WLID=q77FI4s+r9GeCp0LovNzuJx4KhOW4iVRPvbo+8ChBcnlwG3JoqrCKyaOnvGQSE9MOxAmfUqNocrk5YxZClg09KVhM9ucGiN5ChWfEBA/vUQ=; SRCHUSR=DOB=20230513&POEX=W&T=1683981286000; BCP=AD=1&AL=1&SM=1; MMCASM=ID=50869B7CFF8948F59F577E4A18D20298; BFB=AhCwtYMCPbNGaTjCqiOVRZS4O_SO-3q7vb3l6YbeC8M4aE2nOb1jl2j_eEtoltb1Rdyw2zzOewsW536ztwYpdQf0YqMRY0J64EiI1V7I0g3HXDsn6I_G6hUHQFvXgW7folhEGBXQO3bHxUuiZCvikrg0gOBM4UAXB5IWXwa0GwXcHCqYdXYxtOIPWx32lqdRfII; SRCHHPGUSR=SRCHLANG=en&PV=10.0.0&BRW=NOTP&BRH=S&CW=551&CH=572&SCW=1164&SCH=3675&DPR=1.0&UTC=300&DM=0&HV=1683981378&PRVCW=1042&PRVCH=969; SUID=A; _EDGE_S=SID=39D0239A13706F3739E8308F12B76E2F; WLS=C=2e52034796cc616c&N=%d0%90%d0%bb%d0%b5%d0%ba%d1%81%d0%b0%d0%bd%d0%b4%d1%80; GI_FRE_COOKIE=gi_prompt=1; _clck=c050nq|2|fbp|0|1228; _clck=c050nq|2|fbp|0|1228; _RwBf=mta=0&rc=30&rb=30&gb=0&rg=0&pc=30&mtu=0&rbb=0&g=0&cid=&clo=0&v=1&l=2023-05-17T07:00:00.0000000Z&lft=0001-01-01T00:00:00.0000000&aof=0&o=0&p=BINGCOPILOTWAITLIST&c=MR000T&t=6366&s=2023-05-12T14:03:35.1755316+00:00&ts=2023-05-18T06:25:46.4271431+00:00&rwred=0&wls=2&lka=0&lkt=0&TH=&e=q9x92paf1lZqUpNNub_dyynsL4cMMa4JTgDwyH9PS4kTu_WEZl5cxBdAo4EZzxPYyq_Kjr55Ad3I9whlqkf3Uw&A=; _SS=SID=39D0239A13706F3739E8308F12B76E2F&R=30&RB=30&GB=0&RG=0&RP=30; _clsk=bwd6qo|1684391146586|1|0|s.clarity.ms/collect; OID=AhAc33avKT3qh_iOG1ERTGjze3a1s_lw2Fm8IpRxHFl1fcw-qM2xsaPwNKQG3Q1V14lIXSYOhly9KYZhAdGhQYEI";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
         }
-
+        
         public void CreateImageFromText(string prompt)
         {
             var imgSrcs = GetImageSources(prompt);
             SaveImages(imgSrcs);
+        }
+        public byte[] GetImageFromText(string prompt)
+        {
+            var imgSrcs = GetImageSources(prompt);
+
+            return GetImages(imgSrcs);
         }
 
         private RestClient CreateBingRestClient()
@@ -45,13 +51,13 @@ namespace GPTipsBot.Services
                 //CookieContainer = cookieContainer
             });
 
-            //client.AddDefaultHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-            //client.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
-            //client.AddDefaultHeader("cache-control", "max-age=0");
-            //client.AddDefaultHeader("content-type", "application/x-www-form-urlencoded");
-            //client.AddDefaultHeader("referrer", "https://www.bing.com/images/create/");
-            //client.AddDefaultHeader("origin", BING_URL);
-            //client.AddDefaultHeader("Cookie", authCookie);
+            client.AddDefaultHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+            client.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
+            client.AddDefaultHeader("cache-control", "max-age=0");
+            client.AddDefaultHeader("content-type", "application/x-www-form-urlencoded");
+            client.AddDefaultHeader("referrer", "https://www.bing.com/images/create/");
+            client.AddDefaultHeader("origin", BING_URL);
+            client.AddDefaultHeader("Cookie", authCookie);
 
             return client;
         }
@@ -63,14 +69,6 @@ namespace GPTipsBot.Services
             // https://www.bing.com/images/create?q=<PROMPT>&rt=4&FORM=GENCRE
             string url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
             var request = new RestRequest(url, Method.Post);
-
-            request.AddHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-            request.AddHeader("accept-language", "en-US,en;q=0.9");
-            request.AddHeader("cache-control", "max-age=0");
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.AddHeader("referrer", "https://www.bing.com/images/create/");
-            request.AddHeader("origin", BING_URL);
-            request.AddHeader("Cookie", authCookie);
 
             var response = client.Execute(request);
             if (response.StatusCode != HttpStatusCode.Found)
@@ -87,25 +85,7 @@ namespace GPTipsBot.Services
             // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
             string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
             // Poll for results
-            Console.WriteLine("Waiting for results...");
-            while (true)
-            {
-                Console.Write(".");
-                response = client.Execute(new RestRequest(pollingUrl, Method.Get));
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new Exception("Could not get results");
-                }
-                if (response.Content == "")
-                {
-                    Thread.Sleep(1000);
-                    continue;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            response = client.ExecuteWithPredicate(new RestRequest(pollingUrl, Method.Get), IsImageSrcGetRequestSuccessfull);
 
             // Use regex to search for src=""
             var imageLinks = new List<string>();
@@ -115,6 +95,32 @@ namespace GPTipsBot.Services
             }
             // Remove duplicates
             return new List<string>(new HashSet<string>(imageLinks));
+        }
+
+        private bool IsImageSrcGetRequestSuccessfull(RestResponse response, int currentAttempt)
+        {
+            if (currentAttempt == 0)
+            {
+                return false;
+            }
+
+            var maxRetries = 100;
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new Exception("Could not get results");
+            }
+            if (!string.IsNullOrEmpty(response.Content))
+            {
+                return true;
+            }
+
+            if (currentAttempt < maxRetries)
+            {
+                Thread.Sleep(1000);
+                return false;
+            }
+
+            return true;
         }
 
         private void SaveImages(List<string> links, string outputDir = "output")
@@ -146,6 +152,35 @@ namespace GPTipsBot.Services
                 }
                 imageNum++;
             }
+        }
+
+        private byte[] GetImages(List<string> links)
+        {
+            Console.WriteLine("Getting images...");
+            int imageNum = 0;
+            byte[] image = null;
+
+            var client = new RestClient();
+            foreach (string link in links)
+            {
+                try
+                {
+                    var request = new RestRequest(link);
+                    request.AddHeader("Accept", "image/jpeg");
+                    var response = client.DownloadData(request);
+                    if (response != null)
+                    {
+                        return response;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Error downloading file
+                }
+                imageNum++;
+            }
+
+            return image;
         }
     }
 }
