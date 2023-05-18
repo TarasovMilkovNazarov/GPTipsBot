@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using GPTipsBot.Extensions;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,25 +85,7 @@ namespace GPTipsBot.Services
             // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
             string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
             // Poll for results
-            Console.WriteLine("Waiting for results...");
-            while (true)
-            {
-                Console.Write(".");
-                response = client.Execute(new RestRequest(pollingUrl, Method.Get));
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new Exception("Could not get results");
-                }
-                if (response.Content == "")
-                {
-                    Thread.Sleep(1000);
-                    continue;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            response = client.ExecuteWithPredicate(new RestRequest(pollingUrl, Method.Get), IsImageSrcGetRequestSuccessfull);
 
             // Use regex to search for src=""
             var imageLinks = new List<string>();
@@ -112,6 +95,32 @@ namespace GPTipsBot.Services
             }
             // Remove duplicates
             return new List<string>(new HashSet<string>(imageLinks));
+        }
+
+        private bool IsImageSrcGetRequestSuccessfull(RestResponse response, int currentAttempt)
+        {
+            if (currentAttempt == 0)
+            {
+                return false;
+            }
+
+            var maxRetries = 100;
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new Exception("Could not get results");
+            }
+            if (!string.IsNullOrEmpty(response.Content))
+            {
+                return true;
+            }
+
+            if (currentAttempt < maxRetries)
+            {
+                Thread.Sleep(1000);
+                return false;
+            }
+
+            return true;
         }
 
         private void SaveImages(List<string> links, string outputDir = "output")
