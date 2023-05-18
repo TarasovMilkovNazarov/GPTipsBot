@@ -12,7 +12,8 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<ImageGeneratorToUserHandler> logger;
         private readonly ImageService imageService;
-        private readonly ActionStatus sendImagestatus;
+        private readonly ActionStatus sendImageStatus;
+        public const int basedOnExperienceInputLengthLimit = 150;
 
         public ImageGeneratorToUserHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorToUserHandler> logger,
             ImageService imageService, ActionStatus sendImagestatus)
@@ -20,7 +21,7 @@ namespace GPTipsBot.UpdateHandlers
             this.botClient = botClient;
             this.logger = logger;
             this.imageService = imageService;
-            this.sendImagestatus = sendImagestatus;
+            this.sendImageStatus = sendImagestatus;
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
@@ -28,7 +29,14 @@ namespace GPTipsBot.UpdateHandlers
             var message = update.TelegramGptMessage;
             var chatId = update.Update.Message.Chat.Id;
 
-            await sendImagestatus.Start(chatId, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
+            if (update.Update.Message.Text.Length > basedOnExperienceInputLengthLimit)
+            {
+                await botClient.SendTextMessageAsync(chatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken);
+                MainHandler.userState[update.TelegramGptMessage.TelegramId] = Enums.UserStateEnum.None;
+                return;
+            }
+
+            await sendImageStatus.Start(chatId, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
@@ -43,7 +51,7 @@ namespace GPTipsBot.UpdateHandlers
             finally
             {
                 MainHandler.userState[update.TelegramGptMessage.TelegramId] = Enums.UserStateEnum.None;
-                await sendImagestatus.Stop(cancellationToken);
+                await sendImageStatus.Stop(cancellationToken);
             }
             
 

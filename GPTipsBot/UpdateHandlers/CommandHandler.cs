@@ -3,6 +3,7 @@ using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Threading;
 using Telegram.Bot;
@@ -16,15 +17,16 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserRepository userRepository;
         private readonly ITelegramBotClient botClient;
         private readonly TelegramBotAPI telegramBotAPI;
+        private readonly ILogger<CommandHandler> logger;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory,UserRepository userRepository, ITelegramBotClient botClient, 
-            TelegramBotAPI telegramBotAPI)
+        public CommandHandler(MessageHandlerFactory messageHandlerFactory, UserRepository userRepository, ITelegramBotClient botClient,
+            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.userRepository = userRepository;
             this.botClient = botClient;
             this.telegramBotAPI = telegramBotAPI;
-
+            this.logger = logger;
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
         }
 
@@ -33,25 +35,26 @@ namespace GPTipsBot.UpdateHandlers
             var messageText = update.TelegramGptMessage.Message;
             var chatId = update.TelegramGptMessage.ChatId;
             var isCommand = false;
-            
+
             if (messageText.StartsWith("/start"))
             {
                 update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                 //userRepository.CreateUpdateUser(update.TelegramGptMessage);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken:cancellationToken);
+                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken: cancellationToken);
 
                 isCommand = true;
             }
             else if (messageText == "/help")
             {
                 var desc = telegramBotAPI.GetMyDescription();
-                await botClient.SendTextMessageAsync(chatId, desc, cancellationToken:cancellationToken);
+                await botClient.SendTextMessageAsync(chatId, desc, cancellationToken: cancellationToken);
 
                 isCommand = true;
             }
             else if (messageText == "/image")
             {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.InputImageDescriptionText, cancellationToken:cancellationToken);
+                logger.LogInformation($"User {0} typed /image command", update.TelegramGptMessage.TelegramId);
+                await botClient.SendTextMessageAsync(chatId, BotResponse.InputImageDescriptionText, cancellationToken: cancellationToken);
                 MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.AwaitingImage;
                 isCommand = true;
             }
