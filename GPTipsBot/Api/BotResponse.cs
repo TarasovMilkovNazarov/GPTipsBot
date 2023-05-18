@@ -24,6 +24,6 @@ namespace GPTipsBot.Api
         public static string OnlyMessagesAvailable = "Извините, но сейчас доступна обработка только текстовых сообщений. " +
             "В разработке находятся голосовые сообщения и генерация картинок текстом";
 
-        public static string InputImageDescriptionText => "Введите текстовое описани изображения, которое хотите получить";
+        public static string InputImageDescriptionText => "Введите текстовое описание изображения, которое хотите получить";
     }
 }

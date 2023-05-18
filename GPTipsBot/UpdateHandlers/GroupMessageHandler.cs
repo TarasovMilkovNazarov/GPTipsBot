@@ -14,13 +14,18 @@ namespace GPTipsBot.UpdateHandlers
     {
         public GroupMessageHandler(MessageHandlerFactory messageHandlerFactory)
         {
-            SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
+            SetNextHandler(messageHandlerFactory.Create<MessageTypeHandler>());
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.Update.Message;
-            var botMentionedEntity = message?.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
+            if (message == null)
+            {
+                await base.HandleAsync(update, cancellationToken);
+            }
+
+            var botMentionedEntity = message.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
             var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
             var groupOrChannelTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             var isGroupOrChannel = groupOrChannelTypes.Contains(message.Chat.Type);
