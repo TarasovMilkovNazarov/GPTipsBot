@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class TypingStatus
+    public class ActionStatus
     {
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<TelegramBotWorker> _logger;
@@ -13,24 +13,24 @@ namespace GPTipsBot.UpdateHandlers
         private int _serviceMessageId;
         private Timer _timer;
 
-        public TypingStatus(ITelegramBotClient botClient, ILogger<TelegramBotWorker> logger)
+        public ActionStatus(ITelegramBotClient botClient, ILogger<TelegramBotWorker> logger)
         {
             this.botClient = botClient;
             this._logger = logger;
         }
 
-        public async Task Start(long chatId, CancellationToken cancellationToken)
+        public async Task Start(long chatId, ChatAction chatAction, CancellationToken cancellationToken)
         {
             this._chatId = chatId;
 
-            var serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.Typing, cancellationToken: cancellationToken);
+            var serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.PleaseWaitMsg, cancellationToken: cancellationToken);
             _serviceMessageId = serviceMessage.MessageId;
 
             _timer = new((object o) =>
             {
                 try
                 {
-                    botClient.SendChatActionAsync(chatId, ChatAction.Typing, cancellationToken);
+                    botClient.SendChatActionAsync(chatId, chatAction, cancellationToken);
                 }
                 catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
 

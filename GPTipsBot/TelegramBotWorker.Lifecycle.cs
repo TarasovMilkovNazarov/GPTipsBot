@@ -36,6 +36,7 @@ namespace GPTipsBot
             await botClient.SetMyCommandsAsync(new List<BotCommand>() { 
                 new BotCommand { Command = "/start", Description = "Начать пользоваться ботом" },
                 new BotCommand { Command = "/help", Description = "Инструкция по применению" },
+                new BotCommand { Command = "/image", Description = "Создать изображение по текстовому описанию" },
             });
 
             var me = await botClient.GetMeAsync();

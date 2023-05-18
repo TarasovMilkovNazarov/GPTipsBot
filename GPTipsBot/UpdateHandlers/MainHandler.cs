@@ -1,7 +1,9 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Dtos;
+using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
+using System.Collections.Concurrent;
 using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -11,6 +13,7 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class MainHandler : BaseMessageHandler
     {
+        public static ConcurrentDictionary<long, UserStateEnum> userState = new ();
         private readonly UserRepository userRepository;
 
         public MainHandler(MessageHandlerFactory messageHandlerFactory, UserRepository userRepository)

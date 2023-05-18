@@ -6,51 +6,37 @@ using System.Threading.Tasks;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using Telegram.Bot;
-using static System.Net.Mime.MediaTypeNames;
-using SixLabors.ImageSharp.PixelFormats;
-using Image = SixLabors.ImageSharp.Image;
-using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO;
+using System.IO.Pipes;
 
 namespace GPTipsBot.Services
 {
     public class ImageService
     {
         private readonly ITelegramBotClient _botClient;
+        private readonly ImageCreatorService imageCreatorService;
 
-        public ImageService(ITelegramBotClient botClient)
+        public ImageService(ITelegramBotClient botClient, ImageCreatorService imageCreatorService)
         {
             _botClient = botClient;
+            this.imageCreatorService = imageCreatorService;
         }
 
-        public Image<Rgba32> GetImage(string pathToImage)
+        public async Task SendImage(long chatId, string fileName)
         {
-            using (var fileStream = new FileStream(pathToImage, FileMode.Open))
+            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
-                var image = Image.Load<Rgba32>(fileStream);
-                return image;
+                var fileToSend = new InputMedia(fileStream, fileName);
+                var message = await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, parseMode: ParseMode.Markdown);
             }
         }
 
-        public byte[] ConvertImageToByteArray(Image<Rgba32> image)
+        public async Task SendImageToTelegramUser(long chatId, string prompt)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                image.Save(memoryStream, new JpegEncoder()); // Можно использовать другой тип сохранения
-                return memoryStream.ToArray();
-            }
-        }
-
-        public async Task SendImage(string chatId, string pathToImage)
-        {
-            var image = GetImage(pathToImage);
-
-            using (var memoryStream = new MemoryStream())
-            {
-                image.Save(memoryStream, new JpegEncoder());
-                var fileToSend = new InputMedia(memoryStream, "image");
-                await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, parseMode: ParseMode.Markdown);
-            }
+            byte[] image = imageCreatorService.GetImageFromText(prompt);
+            MemoryStream stream = new MemoryStream(image);
+            var fileToSend = new InputMedia(stream, "newFile");
+            var message = await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, parseMode: ParseMode.Markdown);
         }
     }
 }

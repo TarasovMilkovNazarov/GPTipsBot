@@ -1,6 +1,8 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Telegram.Bot.Types;
 
@@ -10,11 +12,11 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly MessageContextRepository messageRepository;
         private readonly GptAPI gptAPI;
-        private readonly TypingStatus typingStatus;
+        private readonly ActionStatus typingStatus;
         private readonly ILogger<UserToGptHandler> logger;
 
         public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository, 
-            GptAPI gptAPI, TypingStatus typingStatus, ILogger<UserToGptHandler> logger)
+            GptAPI gptAPI, ActionStatus typingStatus, ILogger<UserToGptHandler> logger)
         {
             this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
@@ -27,13 +29,13 @@ namespace GPTipsBot.UpdateHandlers
         {
             var message = update.TelegramGptMessage;
 
-            await typingStatus.Start(update.Update.Message.Chat.Id, cancellationToken);
+            await typingStatus.Start(update.Update.Message.Chat.Id, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 var gtpResponse = await gptAPI.SendMessage(message);
                 sw.Stop();
-                logger.LogInformation($"Geetting response to message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
+                logger.LogInformation($"Get response to message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
                 message.Reply = gtpResponse.text;
                 messageRepository.AddBotResponse(message);
             }
