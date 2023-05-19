@@ -43,7 +43,8 @@ namespace GPTipsBot.UpdateHandlers
             if (message?.Text is not { } messageText)
                 return;
 
-            logger.LogInformation($"Received a '{messageText}' message in chat {message.Chat.Id}.");
+            var shortMessageText = messageText.Length > 100 ? messageText.Substring(0, 100) : messageText;
+            logger.LogInformation($"Received a '{shortMessageText}' message in chat {message.Chat.Id}.");
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

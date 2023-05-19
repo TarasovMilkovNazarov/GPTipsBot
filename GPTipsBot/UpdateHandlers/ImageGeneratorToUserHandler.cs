@@ -44,6 +44,10 @@ namespace GPTipsBot.UpdateHandlers
                 sw.Stop();
                 logger.LogInformation($"Successfull image generation for message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
             }
+            catch(CustomException ex)
+            {
+                await botClient.SendTextMessageAsync(chatId, ex.Message, cancellationToken: cancellationToken);
+            }
             catch(Exception ex)
             {
                 await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
@@ -53,7 +57,6 @@ namespace GPTipsBot.UpdateHandlers
                 MainHandler.userState[update.TelegramGptMessage.TelegramId] = Enums.UserStateEnum.None;
                 await sendImageStatus.Stop(cancellationToken);
             }
-            
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

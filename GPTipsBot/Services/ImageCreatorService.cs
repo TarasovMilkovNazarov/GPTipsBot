@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Extensions;
+﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,13 @@ namespace GPTipsBot.Services
         private string BING_URL = "https://www.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=19pYcXpVjNDL-xNgMtpQ81Td5QdEEf5jASLc-OjaFv-KEwuswa0R7-ZLuVd7Q_xt1VBHbK9IkgyPgbvaI4-8lRifA3tTvXo6TBDKVnQZErx-E9UDBrp-HeMtYrtV6BfXCBIe-BFkHKJ3v6-XSDXjuLa-0GpiAk95FOcNGU4w-FCzxblxIVJiP1BNhUltdSHrV5moIFdcM7hN0Ev9S5bBwfw;";
+        private string authCookie = "_U=1hPBTELyEnqk1ilPiqkWyJit0HD9GN2bHV6w7V9AVsfrphfucCn3wbLgypGavkQUsjBLdRV7KdzqzU01OllF33VXwZWZT_L7lpGT9Po00chkxS31d7W8-QNgKxQPk24oF-SkPYtWkbXEOydAKgzYuzyno7Vczi9QvDTVK9yV-o7BOskrzsY8ILJg_YdhKituMCgJx2buOp6SM70zmxXF4uynpa_VNxDv0fbr5HybFV6eT-Tvcw9rsHPCR16k1cYjanw7BuvJ8_OrRTmkYFJCz2Q";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
+
+            //uncomment for sniffing requests in fiddler
+            //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
         
         public void CreateImageFromText(string prompt)
@@ -45,11 +49,16 @@ namespace GPTipsBot.Services
             var cookieContainer = new CookieContainer() { MaxCookieSize = int.MaxValue };
             cookieContainer.Add(cookie);
 
-            var client = new RestClient(new RestClientOptions(BING_URL) { 
-                FollowRedirects = false, 
+            var client = new RestClient(new RestClientOptions(BING_URL) {
+                FollowRedirects = false,
                 UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
                 //CookieContainer = cookieContainer
             });
+
+            Random random = new Random();
+        
+            // Generate random IP between range 13.104.0.0/14
+            string FORWARDED_IP = $"13.{random.Next(104, 108)}.{random.Next(0, 256)}.{random.Next(0, 256)}";
 
             client.AddDefaultHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
             client.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
@@ -58,6 +67,7 @@ namespace GPTipsBot.Services
             client.AddDefaultHeader("referrer", "https://www.bing.com/images/create/");
             client.AddDefaultHeader("origin", BING_URL);
             client.AddDefaultHeader("Cookie", authCookie);
+            client.AddDefaultHeader("x-forwarded-for", FORWARDED_IP);
 
             return client;
         }
@@ -66,15 +76,42 @@ namespace GPTipsBot.Services
         {
             Console.WriteLine("Sending request...");
             string urlEncodedPrompt = Uri.EscapeDataString(prompt);
+            var payload = $"q={urlEncodedPrompt}&qs=ds";
+
             // https://www.bing.com/images/create?q=<PROMPT>&rt=4&FORM=GENCRE
             string url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
             var request = new RestRequest(url, Method.Post);
-
+            request.AddHeader("Accept-Encoding", "identity");
+            request.AddParameter($"q", urlEncodedPrompt);
+            request.AddParameter($"qs", "ds");
+            request.Timeout = 2000;
+             
             var response = client.Execute(request);
+
+            if (string.IsNullOrEmpty(response?.Content))
+            {
+                throw new CustomException(BotResponse.SomethingWentWrongWithImageService);
+            }
+
+            if (response.Content.ToLower().Contains("this prompt has been blocked"))
+            {
+                throw new CustomException(BingImageCreatorResponse.BlockedPromptError);
+            }
+            if (response.Content.ToLower().Contains("we're working hard to offer image creator in more languages"))
+            {
+                throw new CustomException(BingImageCreatorResponse.UnsupportedLangError);
+            }
+
             if (response.StatusCode != HttpStatusCode.Found)
             {
-                Console.WriteLine($"ERROR: {response.Content}");
-                throw new Exception("Redirect failed");
+                url = $"images/create?q={urlEncodedPrompt}&rt=3&FORM=GENCRE";
+                request = new RestRequest(url, Method.Post);
+
+                if (response.StatusCode != HttpStatusCode.Found)
+                {
+                    Console.WriteLine($"ERROR: {response.Content}");
+                    throw new Exception("Redirect failed");
+                }
             }
 
             // Get redirect URL

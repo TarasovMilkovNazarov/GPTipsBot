@@ -53,7 +53,6 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (messageText == "/image")
             {
-                logger.LogInformation($"User {0} typed /image command", update.TelegramGptMessage.TelegramId);
                 await botClient.SendTextMessageAsync(chatId, BotResponse.InputImageDescriptionText, cancellationToken: cancellationToken);
                 MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.AwaitingImage;
                 isCommand = true;
