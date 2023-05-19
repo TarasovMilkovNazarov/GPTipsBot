@@ -58,13 +58,13 @@ namespace GPTipsBot.Api
             };
 
             request.AddBody(gptDto);
-            RestResponse response = null;
+            RestResponse? response = null;
             var responseText = "";
 
             try
             {
-                response = freeGptClient.ExecuteWithRetry(request);
-                var completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(response.Content);
+                response = freeGptClient.ExecuteWithRetry(request, maxRetries: 10);
+                var completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(response?.Content);
                 string? content = completionResult?.Choices?.FirstOrDefault()?.Message?.Content;
 
                 responseText = content;

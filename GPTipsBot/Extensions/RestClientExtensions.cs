@@ -13,7 +13,7 @@ namespace GPTipsBot.Extensions
         public static RestResponse? ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3)
         {
             int retryCount = 0;
-            RestResponse response = null;
+            RestResponse? response = null;
             //request.Timeout = (int)TimeSpan.FromSeconds(120).TotalMilliseconds;
 
             while (retryCount < maxRetries)
@@ -25,11 +25,12 @@ namespace GPTipsBot.Extensions
                     {
                         return response;
                     }
-                    
-                    retryCount++;
                 }
                 catch (Exception e)
                 {
+
+                }
+                finally {
                     retryCount++;
                 }
 
