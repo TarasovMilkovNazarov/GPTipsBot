@@ -34,7 +34,7 @@ namespace GPTipsBot.Repositories
             this.messageRepository = messageRepository;
         }
 
-        public long CreateUpdateUser(TelegramGptMessage telegramGptMessage)
+        public long CreateUpdateUser(TelegramGptMessageUpdate telegramGptMessage)
         {
             logger.LogInformation("CreateUser");
 

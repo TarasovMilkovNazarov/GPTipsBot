@@ -12,12 +12,12 @@ namespace GPTipsBot.UpdateHandlers
             CancellationToken = cancellationToken;
             if (update.Message != null)
             {
-                TelegramGptMessage = new TelegramGptMessage(update.Message);
+                TelegramGptMessage = new TelegramGptMessageUpdate(update.Message);
             }
         }
 
         public Update Update { get; set; }
-        public TelegramGptMessage? TelegramGptMessage { get; set; }
+        public TelegramGptMessageUpdate? TelegramGptMessage { get; set; }
         public CancellationToken StatusTimerCancellationToken { get; set; }
         public CancellationToken CancellationToken { get; set; }
     }

@@ -37,7 +37,7 @@ namespace GPTipsBot.UpdateHandlers
             if (isBotMentioned)
             {
                 message.Text = message.Text.Substring(botMentionedEntity.Length).Trim();
-                update.TelegramGptMessage.Message = message.Text;
+                update.TelegramGptMessage.Text = message.Text;
             }
 
             // Call next handler

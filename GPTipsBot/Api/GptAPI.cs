@@ -28,7 +28,7 @@ namespace GPTipsBot.Api
             this.messageService = messageService;
         }
 
-        public async Task<(bool isSuccessful, string? text)> SendMessage(TelegramGptMessage telegramGptMessage)
+        public async Task<(bool isSuccessful, string? text)> SendMessage(TelegramGptMessageUpdate telegramGptMessage)
         {
             var textWithContext = messageService.PrepareContext(telegramGptMessage.ContextId.Value);
             if (textWithContext.Length == 0)

@@ -2,6 +2,7 @@
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
+using GPTipsBot.Mapper;
 using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -14,13 +15,10 @@ namespace GPTipsBot.Repositories
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
         
-        private readonly string insertMesWithSameContext = "INSERT INTO Messages (text, contextId, userId, chatId, replyToId, createdAt, role) " +
-                "VALUES (@Text, @ContextId, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role) RETURNING id, contextId;";
-        private readonly string insertWithNewContext = "INSERT INTO Messages (text, userId, chatId, replyToId, createdAt, role) " +
-                "VALUES (@Text, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role) RETURNING id, contextId;";
+        private readonly string insertMessage = "INSERT INTO Messages (text, contextId, userId, chatId, replyToId, createdAt, role) " +
+                "VALUES (@Text, @ContextId, @UserId, @ChatId, @ReplyToId, @CreatedAt, @Role) RETURNING id, contextId;";
         private readonly string recentContextMessagesQuery = $"SELECT * FROM Messages WHERE contextid = @ContextId Order By CreatedAt DESC Limit @Count;";
         private readonly string getLastMessage = $"SELECT * FROM Messages WHERE userid = @TelegramId AND chatid = @ChatId Order By CreatedAt DESC LIMIT 1;";
-        private readonly string getLastContextId = $"SELECT contextid FROM Messages Order By ContextId DESC LIMIT 1;";
         private readonly string selectAllUserMessagesQuery = $"SELECT * FROM Messages WHERE UserId = @TelegramId;";
 
         public MessageContextRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
@@ -31,49 +29,26 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
         }
         
-        public long AddUserMessage(TelegramGptMessage telegramGptMessage)
+        public long AddUserMessage(TelegramGptMessageUpdate telegramGptMessage)
         {
             return AddMessage(telegramGptMessage, GptRolesEnum.User);
         }
 
-        public long AddBotResponse(TelegramGptMessage telegramGptMessage)
+        public long AddBotResponse(TelegramGptMessageUpdate telegramGptMessage)
         {
             return AddMessage(telegramGptMessage, GptRolesEnum.Assistant);
         }
 
-        private long AddMessage(TelegramGptMessage telegramGptMessage, GptRolesEnum role)
+        private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, GptRolesEnum role)
         {
             long? contextId = GetLastContext(telegramGptMessage.TelegramId, telegramGptMessage.ChatId);
-            string? text = null;
-            long? replyToId = null;
+            telegramGptMessage.ContextId = contextId;
+            var messageModel = MessageMapper.MapToMessage(telegramGptMessage, role);
 
-            switch (role)
-            {
-                case GptRolesEnum.Assistant:
-                    text = telegramGptMessage.Reply;
-                    replyToId = telegramGptMessage.MessageId;
-                    break;
-                case GptRolesEnum.User:
-                    text = telegramGptMessage.Message;
-                    break;
-                default:
-                    break;
-            }
+            var inserted = _connection.QuerySingle<Message>(insertMessage, messageModel);
 
-            var insertQuery = contextId.HasValue ? insertMesWithSameContext : insertWithNewContext;
-
-            var inserted = _connection.QuerySingle<(long id, long contextId)>(insertQuery, new { 
-                text,
-                chatId = telegramGptMessage.ChatId,
-                contextId,
-                telegramId = telegramGptMessage.TelegramId,
-                replyToId,
-                createdAt = DateTime.UtcNow,
-                role
-            });
-
-            telegramGptMessage.MessageId = inserted.id;
-            telegramGptMessage.ContextId = inserted.contextId;
+            telegramGptMessage.MessageId = inserted.Id;
+            telegramGptMessage.ContextId = inserted.ContextId;
 
             return telegramGptMessage.MessageId;
         }

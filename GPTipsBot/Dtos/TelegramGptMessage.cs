@@ -3,15 +3,15 @@
 namespace GPTipsBot.Dtos
 {
 
-    public class TelegramGptMessage : ITelegramMessage, IGptMessage
+    public class TelegramGptMessageUpdate
     {
-        public TelegramGptMessage(Telegram.Bot.Types.Message message)
+        public TelegramGptMessageUpdate(Telegram.Bot.Types.Message message)
         {
             MessageId = message.MessageId;
             TelegramId = message.From.Id;
             FirstName = message.From.FirstName;
             LastName = message.From.LastName;
-            Message = message.Text ?? "";
+            Text = message.Text ?? "";
             ChatId= message.Chat.Id;
             CreatedAt = DateTime.UtcNow;
         }
@@ -20,30 +20,13 @@ namespace GPTipsBot.Dtos
         public string? LastName { get; set; }
         public long TelegramId { get; set; }
         public long ChatId { get; set; }
-        public string Message { get; set; }
+        public string Text { get; set; }
         public long MessageId { get; set; }
         public string? Reply { get; set; }
         public long? ReplyToId { get; set; }
-        public bool IsActive { get; set; } = true;
         public string? Source { get; set; }
         public long? ContextId { get; internal set; }
         public DateTime CreatedAt { get; set; }
         public int ServiceMessageId { get; set; }
-    }
-
-    internal interface IGptMessage
-    {
-        public long TelegramId { get; set; }
-        public long ChatId { get; set; }
-        public string? Reply { get; set; }
-        public long? ReplyToId { get; set; }
-    }
-
-    public interface ITelegramMessage
-    {
-        public long TelegramId { get; set; }
-        public long ChatId { get; set; }
-        public string Message { get; set; }
-        public long MessageId { get; set; }
     }
 }

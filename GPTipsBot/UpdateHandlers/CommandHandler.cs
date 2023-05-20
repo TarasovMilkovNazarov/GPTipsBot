@@ -32,7 +32,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
-            var messageText = update.TelegramGptMessage.Message;
+            var messageText = update.TelegramGptMessage.Text;
             var chatId = update.TelegramGptMessage.ChatId;
             var isCommand = false;
 
