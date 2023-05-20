@@ -30,7 +30,16 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            try
+            {
+                await base.HandleAsync(update, cancellationToken);
+            }
+            catch (Exception)
+            {
+
+                return;
+            }
+            
         }
     }
 }

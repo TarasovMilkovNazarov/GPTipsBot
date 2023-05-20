@@ -14,6 +14,7 @@ namespace GPTipsBot.Dtos
             Text = message.Text ?? "";
             ChatId= message.Chat.Id;
             CreatedAt = DateTime.UtcNow;
+            IsActive = true;
         }
 
         public string FirstName { get; set; }
@@ -28,5 +29,6 @@ namespace GPTipsBot.Dtos
         public long? ContextId { get; internal set; }
         public DateTime CreatedAt { get; set; }
         public int ServiceMessageId { get; set; }
+        public bool IsActive { get; set; }
     }
 }
