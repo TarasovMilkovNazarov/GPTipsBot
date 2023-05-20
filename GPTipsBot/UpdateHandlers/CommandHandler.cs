@@ -11,6 +11,8 @@ using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
+    using static TelegramBotUIService;
+
     public class CommandHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
@@ -40,7 +42,8 @@ namespace GPTipsBot.UpdateHandlers
             {
                 update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                 //userRepository.CreateUpdateUser(update.TelegramGptMessage);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, 
+                    cancellationToken: cancellationToken, replyMarkup: startKeyboard);
 
                 isCommand = true;
             }

@@ -4,7 +4,7 @@ namespace GPTipsBot.UpdateHandlers
 {
     public abstract class BaseMessageHandler : IMessageHandler
     {
-        private BaseMessageHandler nextHandler;
+        private BaseMessageHandler? nextHandler;
 
         public void SetNextHandler(BaseMessageHandler handler)
         {
