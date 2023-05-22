@@ -11,6 +11,8 @@ using GptModels = OpenAI.GPT3.ObjectModels;
 
 namespace GPTipsBot.Api
 {
+    using static AppConfig;
+
     public class GptAPI
     {
         private readonly string baseUrl1 = "https://chatgpt-api.shn.hk/v1";
@@ -19,7 +21,6 @@ namespace GPTipsBot.Api
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly IOpenAIService openAiService;
         private readonly MessageService messageService;
-        private readonly bool useFreeApi = false;
 
         public GptAPI(ILogger<TelegramBotWorker> logger, IOpenAIService openAiService, MessageService messageService)
         {
@@ -37,7 +38,7 @@ namespace GPTipsBot.Api
                 throw new CustomException(BotResponse.TokensLimitExceeded);
             }
 
-            if (useFreeApi)
+            if (UseFreeApi)
             {
                 return SendViaFreeProxy(textWithContext);
             }

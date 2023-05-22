@@ -8,6 +8,7 @@ namespace GPTipsBot
 {
     public static class AppConfig
     {
+        public static bool UseFreeApi = true;
         public static bool IsOnMaintenance = false;
         public static string Env { get; private set; }
         public static string TelegramToken { get; private set; }
