@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Models;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,17 @@ namespace GPTipsBot.Mapper
             Message message = new Message()
             {
                 ChatId = messageDto.ChatId,
-                ContextId = messageDto.ContextId ?? 0,
                 ReplyToId = messageDto.ReplyToId,
                 Text = messageDto.Text,
                 UserId = messageDto.TelegramId,
                 CreatedAt = DateTime.UtcNow,
                 Role = role
             };
+
+            if (messageDto.ContextId.HasValue)
+            {
+                message.ContextId = messageDto.ContextId;
+            }
 
             switch (role)
             {
