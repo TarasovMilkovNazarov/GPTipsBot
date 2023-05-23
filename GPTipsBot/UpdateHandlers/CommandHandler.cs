@@ -67,6 +67,16 @@ namespace GPTipsBot.UpdateHandlers
                     responseToUser = BotResponse.ContextUpdated;
                     keepContext = false;
                     break;
+                case CommandType.Feedback:
+                    responseToUser = BotResponse.SendFeedback;
+                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.SendingFeedback;
+                    replyMarkup = new ReplyKeyboardMarkup(cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
+                    break;
+                case CommandType.Cancel:
+                    responseToUser = BotResponse.Cancel;
+                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.None;
+                    replyMarkup = startKeyboard;
+                    break;
             }
 
             if (!string.IsNullOrEmpty(responseToUser))
@@ -99,6 +109,10 @@ namespace GPTipsBot.UpdateHandlers
             else if (message.Equals(Feedback.Command) || message.Equals(feedbackButton.Text.ToLower()))
             {
                 command = CommandType.Feedback;
+            }
+            else if (message.Equals("/cancel") || message.Equals("отмена"))
+            {
+                command = CommandType.Cancel;
             }
             else
             {

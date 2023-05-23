@@ -9,5 +9,6 @@ namespace GPTipsBot.Enums
         CreateImage,
         ResetContext,
         Feedback,
+        Cancel,
     }
 }

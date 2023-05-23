@@ -45,6 +45,7 @@ namespace GPTipsBot.Services
         public static KeyboardButton resetContextButton;
         public static KeyboardButton feedbackButton;
         public static KeyboardButton helpButton;
+        public static KeyboardButton cancelButton;
 
         public TelegramBotUIService(ITelegramBotClient botClient)
         {
@@ -57,6 +58,7 @@ namespace GPTipsBot.Services
             resetContextButton = new KeyboardButton("🗑 Сбросить контекст");
             helpButton = new KeyboardButton("❔ Help");
             feedbackButton = new KeyboardButton("Оставить отзыв");
+            cancelButton = new KeyboardButton("Отмена");
             startKeyboard = GetMenuKeyboardMarkup();
         }
 
