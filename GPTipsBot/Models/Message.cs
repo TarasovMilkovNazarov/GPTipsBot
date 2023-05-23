@@ -10,7 +10,7 @@ namespace GPTipsBot.Models
     {
         public long Id { get; set; }
         public long? TelegramMessageId { get; set; }
-        public long ContextId { get; set; }
+        public long? ContextId { get; set; }
         public long? ReplyToId { get; set; }
         public string Text { get; set; }
         public long UserId { get; set; }

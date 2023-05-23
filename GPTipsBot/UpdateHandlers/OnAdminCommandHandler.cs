@@ -5,11 +5,11 @@ using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class OnMaintenanceHandler : BaseMessageHandler
+    public class OnAdminCommandHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
 
-        public OnMaintenanceHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient)
+        public OnAdminCommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient)
         {
             this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<RateLimitingHandler>());
@@ -27,6 +27,12 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.Recovered, cancellationToken: cancellationToken);
                     return;
                 }
+            }
+            if (message?.Text == "/switchProxy" && message?.From?.Id == AppConfig.AdminId)
+            {
+                AppConfig.UseFreeApi = !AppConfig.UseFreeApi;
+                await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.SwitchProxy, cancellationToken: cancellationToken);
+                return;
             }
 
             if (AppConfig.IsOnMaintenance)
