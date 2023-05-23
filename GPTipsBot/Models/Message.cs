@@ -17,5 +17,6 @@ namespace GPTipsBot.Models
         public long ChatId { get; set; }
         public DateTime CreatedAt { get; set; }
         public GptRolesEnum Role { get; set; }
+        public bool ContextBound { get; set; }
     }
 }

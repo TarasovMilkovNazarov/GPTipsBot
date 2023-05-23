@@ -1,19 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.Services
 {
+    [JsonObject(MemberSerialization.OptIn, NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+    public static class BotMenu
+    {
+        public static BotCommand Start { get; set; }
+        public static BotCommand Image { get; set; }
+        public static BotCommand ResetContext { get; set; }
+        public static BotCommand Feedback { get; set; }
+        public static BotCommand Help { get; set; }
+
+        static BotMenu()
+        {
+            Start = new BotCommand { Command = "/start", Description = "Начать пользоваться ботом" };
+            Image = new BotCommand { Command = "/image", Description = "Создать изображение по текстовому описанию" };
+            ResetContext = new BotCommand { Command = "/reset_context", Description = "Сбросить контекст" };
+            Feedback = new BotCommand { Command = "/feedback", Description = "Оставить отзыв" };
+            Help = new BotCommand { Command = "/help", Description = "Инструкция по применению" };
+        }
+
+        public static BotCommand[] GetBotCommands()
+        {
+            return new BotCommand[]
+            {
+                Start,
+                Image,
+                ResetContext,
+                Feedback,
+                Help
+            };
+        }
+    }
+
     public class TelegramBotUIService
     {
         private readonly ITelegramBotClient botClient;
         public static ReplyKeyboardMarkup startKeyboard;
         public static KeyboardButton imageButton;
         public static KeyboardButton resetContextButton;
+        public static KeyboardButton feedbackButton;
         public static KeyboardButton helpButton;
 
         public TelegramBotUIService(ITelegramBotClient botClient)
@@ -23,10 +53,11 @@ namespace GPTipsBot.Services
 
         static TelegramBotUIService()
         {
-            startKeyboard = GetMenuKeyboardMarkup();
-            imageButton = new KeyboardButton("🖼 Создать изображение");
+            imageButton = new KeyboardButton("🖼 Создать изображение") { };
             resetContextButton = new KeyboardButton("🗑 Сбросить контекст");
             helpButton = new KeyboardButton("❔ Help");
+            feedbackButton = new KeyboardButton("Оставить отзыв");
+            startKeyboard = GetMenuKeyboardMarkup();
         }
 
         private static ReplyKeyboardMarkup GetMenuKeyboardMarkup()
@@ -40,7 +71,8 @@ namespace GPTipsBot.Services
                 },
                 new[]
                 {
-                    helpButton
+                    helpButton,
+                    feedbackButton
                 }
             });
 

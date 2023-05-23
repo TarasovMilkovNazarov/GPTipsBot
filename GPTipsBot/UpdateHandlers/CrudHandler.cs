@@ -18,12 +18,13 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
-            messageRepository.AddUserMessage(update.TelegramGptMessage);
             if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.TelegramId) && 
                 MainHandler.userState[update.TelegramGptMessage.TelegramId] == Enums.UserStateEnum.AwaitingImage)
             {
+                update.TelegramGptMessage.ContextBound = false;
                 SetNextHandler(messageHandlerFactory.Create<ImageGeneratorToUserHandler>());
             }
+            messageRepository.AddUserMessage(update.TelegramGptMessage);
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

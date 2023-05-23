@@ -16,10 +16,10 @@ namespace GPTipsBot.Repositories
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
         
-        private readonly string insertMesWithSameContext = "INSERT INTO Messages (text, contextId, userId, chatId, replyToId, createdAt, role) " +
-                "VALUES (@Text, @ContextId, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role) RETURNING id, contextId;";
-        private readonly string insertWithNewContext = "INSERT INTO Messages (text, userId, chatId, replyToId, createdAt, role) " +
-                "VALUES (@Text, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role) RETURNING id, contextId;";
+        private readonly string insertMesWithSameContext = "INSERT INTO Messages (text, contextId, userId, chatId, replyToId, createdAt, role, contextBound) " +
+                "VALUES (@Text, @ContextId, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role, @ContextBound) RETURNING id, contextId;";
+        private readonly string insertWithNewContext = "INSERT INTO Messages (text, userId, chatId, replyToId, createdAt, role, contextBound) " +
+                "VALUES (@Text, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role, @ContextBound) RETURNING id, contextId;";
 
         private readonly string recentContextMessagesQuery = $"SELECT * FROM Messages " +
             $"WHERE userId = @UserId AND chatId = @ChatId AND contextid = @ContextId Order By CreatedAt DESC Limit @Count;";
@@ -34,9 +34,9 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
         }
         
-        public long AddUserMessage(TelegramGptMessageUpdate telegramGptMessage)
+        public long AddUserMessage(TelegramGptMessageUpdate telegramGptMessage, bool keepContext = true)
         {
-            return AddMessage(telegramGptMessage, GptRolesEnum.User);
+            return AddMessage(telegramGptMessage, GptRolesEnum.User, keepContext);
         }
 
         public long AddBotResponse(TelegramGptMessageUpdate telegramGptMessage)
@@ -44,7 +44,7 @@ namespace GPTipsBot.Repositories
             return AddMessage(telegramGptMessage, GptRolesEnum.Assistant);
         }
 
-        private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, GptRolesEnum role)
+        private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, GptRolesEnum role, bool keepContext = true)
         {
             long? contextId = GetLastContext(telegramGptMessage.TelegramId, telegramGptMessage.ChatId);
             string? text = null;
@@ -63,7 +63,7 @@ namespace GPTipsBot.Repositories
                     break;
             }
 
-            var insertQuery = contextId.HasValue ? insertMesWithSameContext : insertWithNewContext;
+            var insertQuery = (keepContext && contextId.HasValue) ? insertMesWithSameContext : insertWithNewContext;
 
             var inserted = _connection.QuerySingle<(long id, long contextId)>(insertQuery, new { 
                 text,
@@ -72,7 +72,8 @@ namespace GPTipsBot.Repositories
                 telegramId = telegramGptMessage.TelegramId,
                 replyToId,
                 createdAt = DateTime.UtcNow,
-                role
+                role,
+                contextBound = telegramGptMessage.ContextBound
             });
 
             telegramGptMessage.MessageId = inserted.id;
@@ -116,7 +117,7 @@ namespace GPTipsBot.Repositories
                 count = ContextWindow.WindowSize
             });
 
-            return messages.ToList();
+            return messages.Where(m => m.ContextBound).ToList();
         }
 
         public void Dispose()

@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.Types;
-
-namespace GPTipsBot.UpdateHandlers
+﻿namespace GPTipsBot.UpdateHandlers
 {
     public abstract class BaseMessageHandler : IMessageHandler
     {
