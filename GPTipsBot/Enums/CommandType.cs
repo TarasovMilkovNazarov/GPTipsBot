@@ -10,5 +10,6 @@ namespace GPTipsBot.Enums
         ResetContext,
         Feedback,
         Cancel,
+        StopRequest,
     }
 }

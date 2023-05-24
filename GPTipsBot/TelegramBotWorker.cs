@@ -8,6 +8,7 @@ using GPTipsBot.Api;
 using System.Threading;
 using GPTipsBot.UpdateHandlers;
 using Telegram.Bot.Exceptions;
+using GPTipsBot.Extensions;
 
 namespace GPTipsBot
 {
@@ -48,7 +49,7 @@ namespace GPTipsBot
                     return;
                 }
 
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageWithMenuKeyboard(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
             }
         }
     }

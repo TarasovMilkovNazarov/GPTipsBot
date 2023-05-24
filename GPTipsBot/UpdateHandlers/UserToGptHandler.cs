@@ -28,10 +28,10 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.TelegramGptMessage;
-
-            await typingStatus.Start(update.Update.Message.Chat.Id, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
+            
             try
             {
+                await typingStatus.Start(message.UserKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
                 Stopwatch sw = Stopwatch.StartNew();
                 var gtpResponse = await gptAPI.SendMessage(message);
                 sw.Stop();
@@ -41,7 +41,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             finally
             {
-                await typingStatus.Stop(cancellationToken);
+                await typingStatus.Stop(message.UserKey, cancellationToken);
             }
 
             // Call next handler

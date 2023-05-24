@@ -31,7 +31,7 @@ namespace GPTipsBot.Api
 
         public async Task<(bool isSuccessful, string? text)> SendMessage(TelegramGptMessageUpdate telegramGptMessage)
         {
-            var textWithContext = messageService.PrepareContext(telegramGptMessage.TelegramId, telegramGptMessage.ChatId, telegramGptMessage.ContextId.Value);
+            var textWithContext = messageService.PrepareContext(telegramGptMessage.UserKey, telegramGptMessage.ContextId.Value);
             if (textWithContext.Length == 0)
             {
                 //todo reset context or suggest user to reset: send inline command with reset
@@ -80,6 +80,7 @@ namespace GPTipsBot.Api
 
         public async Task<(bool isSuccessful, string? response)> SendViaOpenAiApi(ChatMessage[] messages)
         {
+            await Task.Delay(30000);
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
             {
                 Messages = messages,

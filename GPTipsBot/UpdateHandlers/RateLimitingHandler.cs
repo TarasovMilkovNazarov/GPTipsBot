@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Dtos;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -42,7 +43,7 @@ namespace GPTipsBot.UpdateHandlers
                 if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     logger.LogError("Max messages limit reached");
-                    await botClient.SendTextMessageAsync(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageWithMenuKeyboard(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
 
                     return;
                 }

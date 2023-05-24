@@ -46,7 +46,7 @@ namespace GPTipsBot.Repositories
 
         private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, GptRolesEnum role, bool keepContext = true)
         {
-            long? contextId = GetLastContext(telegramGptMessage.TelegramId, telegramGptMessage.ChatId);
+            long? contextId = GetLastContext(telegramGptMessage.UserKey);
             string? text = null;
             long? replyToId = null;
 
@@ -67,9 +67,9 @@ namespace GPTipsBot.Repositories
 
             var inserted = _connection.QuerySingle<(long id, long contextId)>(insertQuery, new { 
                 text,
-                chatId = telegramGptMessage.ChatId,
+                chatId = telegramGptMessage.UserKey.ChatId,
                 contextId,
-                telegramId = telegramGptMessage.TelegramId,
+                telegramId = telegramGptMessage.UserKey.Id,
                 replyToId,
                 createdAt = DateTime.UtcNow,
                 role,
@@ -98,21 +98,21 @@ namespace GPTipsBot.Repositories
             return messages;
         }
         
-        public long? GetLastContext(long telegramId, long chatId)
+        public long? GetLastContext(UserKey userKey)
         {
             var lastMes = _connection.QueryFirstOrDefault<Message>(getLastMessage, new {
-                telegramId,
-                chatId
+                telegramId = userKey.Id,
+                chatId = userKey.ChatId
             });
 
             return lastMes?.ContextId;
         }
 
-        public List<Message> GetRecentContextMessages(long userId, long chatId, long contextId)
+        public List<Message> GetRecentContextMessages(UserKey userKey, long contextId)
         {
             var messages = _connection.Query<Message>(recentContextMessagesQuery, new {
-                userId,
-                chatId,
+                userId = userKey.Id,
+                chatId = userKey.ChatId,
                 contextId,
                 count = ContextWindow.WindowSize
             });

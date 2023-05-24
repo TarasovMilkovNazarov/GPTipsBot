@@ -15,7 +15,7 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class MainHandler : BaseMessageHandler
     {
-        public static ConcurrentDictionary<long, UserStateEnum> userState = new ();
+        public static ConcurrentDictionary<UserKey, UserStateDto> userState = new ();
         private readonly UserRepository userRepository;
         private readonly ILogger<MainHandler> logger;
 
@@ -28,6 +28,11 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
+            var userKey = update.TelegramGptMessage?.UserKey;
+            if (userKey != null && !userState.ContainsKey(userKey))
+            {
+                userState.TryAdd(userKey, new UserStateDto(userKey));
+            }
             if (update.TelegramGptMessage != null)
             {
                 userRepository.CreateUpdateUser(update.TelegramGptMessage);

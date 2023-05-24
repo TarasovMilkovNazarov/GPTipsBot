@@ -8,20 +8,18 @@ namespace GPTipsBot.Dtos
         public TelegramGptMessageUpdate(Telegram.Bot.Types.Message message)
         {
             MessageId = message.MessageId;
-            TelegramId = message.From.Id;
             FirstName = message.From.FirstName;
             LastName = message.From.LastName;
             Text = message.Text ?? "";
-            ChatId= message.Chat.Id;
             CreatedAt = DateTime.UtcNow;
             IsActive = true;
             ContextBound = true;
+            UserKey = new UserKey(message.From.Id, message.Chat.Id);
         }
 
         public string FirstName { get; set; }
         public string? LastName { get; set; }
-        public long TelegramId { get; set; }
-        public long ChatId { get; set; }
+        public UserKey UserKey { get; set; }
         public string Text { get; set; }
         public long MessageId { get; set; }
         public string? Reply { get; set; }

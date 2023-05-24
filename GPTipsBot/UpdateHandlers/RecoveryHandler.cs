@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Telegram.Bot;
@@ -43,7 +44,7 @@ namespace GPTipsBot.UpdateHandlers
                     q.Enqueue(update.Update);
                     userToUpdatesQueue.Add(telegramId, q);
                     
-                    await botClient.SendTextMessageAsync(update.Update.Message.Chat.Id, 
+                    await botClient.SendTextMessageWithMenuKeyboard(update.Update.Message.Chat.Id, 
                         BotResponse.Recovered, cancellationToken: update.CancellationToken);
                 };
 

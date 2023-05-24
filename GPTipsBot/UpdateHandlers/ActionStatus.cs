@@ -1,7 +1,9 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Dtos;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -9,7 +11,6 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<TelegramBotWorker> _logger;
-        private long? _chatId;
         private int _serviceMessageId;
         private Timer _timer;
 
@@ -19,18 +20,21 @@ namespace GPTipsBot.UpdateHandlers
             this._logger = logger;
         }
 
-        public async Task Start(long chatId, ChatAction chatAction, CancellationToken cancellationToken)
+        public async Task Start(UserKey userKey, ChatAction chatAction, CancellationToken cancellationToken)
         {
-            this._chatId = chatId;
-
-            var serviceMessage = await botClient.SendTextMessageAsync(chatId, BotResponse.PleaseWaitMsg, cancellationToken: cancellationToken);
+            var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("не отвечать", "/stopRequest"));
+            var serviceMessage = await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.PleaseWaitMsg, 
+                cancellationToken: cancellationToken, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
+
+            var tokenSource = new CancellationTokenSource();
+            MainHandler.userState[userKey].messageIdToCancellation.Add(_serviceMessageId, tokenSource);
 
             _timer = new((object o) =>
             {
                 try
                 {
-                    botClient.SendChatActionAsync(chatId, chatAction, cancellationToken);
+                    botClient.SendChatActionAsync(userKey.ChatId, chatAction, tokenSource.Token);
                 }
                 catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
 
@@ -38,14 +42,11 @@ namespace GPTipsBot.UpdateHandlers
         }
 
         
-        public async Task Stop(CancellationToken cancellationToken)
+        public async Task Stop(UserKey userKey,CancellationToken cancellationToken)
         {
-            if (!_chatId.HasValue)
-            {
-                return;
-            }
+            await botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId, cancellationToken: cancellationToken);
+            MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
 
-            await botClient.DeleteMessageAsync(_chatId, _serviceMessageId, cancellationToken: cancellationToken);
             _timer?.Dispose();
         }
     }

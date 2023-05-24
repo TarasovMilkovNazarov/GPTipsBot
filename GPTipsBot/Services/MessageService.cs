@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Repositories;
+﻿using GPTipsBot.Dtos;
+using GPTipsBot.Repositories;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 using System;
 using System.Collections.Generic;
@@ -36,9 +37,9 @@ namespace GPTipsBot.Services
             }
         }
 
-        public ChatMessage[] PrepareContext(long userId, long chatId, long contextId)
+        public ChatMessage[] PrepareContext(UserKey userKey, long contextId)
         {
-            var messages = messageContextRepository.GetRecentContextMessages(userId, chatId, contextId);
+            var messages = messageContextRepository.GetRecentContextMessages(userKey, contextId);
             var contextWindow = new ContextWindow(new ChatGptService());
 
             foreach (var item in messages)
