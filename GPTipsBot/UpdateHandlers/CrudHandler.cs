@@ -1,6 +1,10 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
+using GPTipsBot.Services;
+using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -8,22 +12,35 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageContextRepository messageRepository;
+        private readonly ITelegramBotClient botClient;
 
-        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository)
+        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository, ITelegramBotClient botClient)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
+            this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<UserToGptHandler>());
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
-            messageRepository.AddUserMessage(update.TelegramGptMessage);
             if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.TelegramId) && 
                 MainHandler.userState[update.TelegramGptMessage.TelegramId] == Enums.UserStateEnum.AwaitingImage)
             {
+                update.TelegramGptMessage.ContextBound = false;
                 SetNextHandler(messageHandlerFactory.Create<ImageGeneratorToUserHandler>());
             }
+            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.TelegramId) && 
+                MainHandler.userState[update.TelegramGptMessage.TelegramId] == Enums.UserStateEnum.SendingFeedback)
+            {
+                update.TelegramGptMessage.ContextBound = false;
+                MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.None;
+                update.TelegramGptMessage.Text = "Отзыв: " + update.TelegramGptMessage.Text;
+                await botClient.SendTextMessageAsync(update.TelegramGptMessage.ChatId, BotResponse.Thanks, replyMarkup: new ReplyKeyboardRemove());
+                SetNextHandler(null);
+            }
+
+            messageRepository.AddUserMessage(update.TelegramGptMessage);
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

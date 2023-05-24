@@ -1,28 +1,30 @@
 ﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
-using System.Threading;
 using Telegram.Bot;
-using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
+    using static TelegramBotUIService;
+    using static BotMenu;
+
     public class CommandHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
+        private readonly MessageContextRepository messageContextRepository;
         private readonly UserRepository userRepository;
         private readonly ITelegramBotClient botClient;
         private readonly TelegramBotAPI telegramBotAPI;
         private readonly ILogger<CommandHandler> logger;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory, UserRepository userRepository, ITelegramBotClient botClient,
-            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger)
+        public CommandHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageContextRepository,
+            UserRepository userRepository, ITelegramBotClient botClient, TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger)
         {
             this.messageHandlerFactory = messageHandlerFactory;
+            this.messageContextRepository = messageContextRepository;
             this.userRepository = userRepository;
             this.botClient = botClient;
             this.telegramBotAPI = telegramBotAPI;
@@ -34,37 +36,90 @@ namespace GPTipsBot.UpdateHandlers
         {
             var messageText = update.TelegramGptMessage.Text;
             var chatId = update.TelegramGptMessage.ChatId;
-            var isCommand = false;
 
-            if (messageText.StartsWith("/start"))
+            if (!TryGetCommand(messageText, out var command))
             {
-                update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
-                //userRepository.CreateUpdateUser(update.TelegramGptMessage);
-                await botClient.SendTextMessageAsync(chatId, BotResponse.Greeting, cancellationToken: cancellationToken);
-
-                isCommand = true;
-            }
-            else if (messageText == "/help")
-            {
-                var desc = telegramBotAPI.GetMyDescription();
-                await botClient.SendTextMessageAsync(chatId, desc, cancellationToken: cancellationToken);
-
-                isCommand = true;
-            }
-            else if (messageText == "/image")
-            {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.InputImageDescriptionText, cancellationToken: cancellationToken);
-                MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.AwaitingImage;
-                isCommand = true;
-            }
-
-            if (isCommand)
-            {
+                await base.HandleAsync(update, cancellationToken);
                 return;
             }
 
-            // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            string? responseToUser = null;
+            bool keepContext = true;
+            IReplyMarkup? replyMarkup = null;
+            update.TelegramGptMessage.ContextBound = false;
+
+            switch (command)
+            {
+                case CommandType.Start:
+                    update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
+                    userRepository.CreateUpdateUser(update.TelegramGptMessage);
+                    responseToUser = BotResponse.Greeting;
+                    replyMarkup = startKeyboard;
+                    break;
+                case CommandType.Help:
+                    responseToUser = telegramBotAPI.GetMyDescription();
+                    break;
+                case CommandType.CreateImage:
+                    responseToUser = BotResponse.InputImageDescriptionText;
+                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.AwaitingImage;
+                    break;
+                case CommandType.ResetContext:
+                    responseToUser = BotResponse.ContextUpdated;
+                    keepContext = false;
+                    break;
+                case CommandType.Feedback:
+                    responseToUser = BotResponse.SendFeedback;
+                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.SendingFeedback;
+                    replyMarkup = new ReplyKeyboardMarkup(cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
+                    break;
+                case CommandType.Cancel:
+                    responseToUser = BotResponse.Cancel;
+                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.None;
+                    replyMarkup = startKeyboard;
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(responseToUser))
+            {
+                messageContextRepository.AddUserMessage(update.TelegramGptMessage, keepContext);
+                await botClient.SendTextMessageAsync(chatId, responseToUser, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
+            }
+        }
+
+        private bool TryGetCommand(string message, out CommandType? command)
+        {
+            message = message.Trim().ToLower();
+
+            if (message.StartsWith(Start.Command))
+            {
+                command = CommandType.Start;
+            }
+            else if (message.Equals(Help.Command) || message.Equals(helpButton.Text.ToLower()))
+            {
+                command = CommandType.Help;
+            }
+            else if (message.Equals(Image.Command) || message.Equals(imageButton.Text.ToLower()))
+            {
+                command = CommandType.CreateImage;
+            }
+            else if (message.Equals(ResetContext.Command) || message.Equals(resetContextButton.Text.ToLower()))
+            {
+                command = CommandType.ResetContext;
+            }
+            else if (message.Equals(Feedback.Command) || message.Equals(feedbackButton.Text.ToLower()))
+            {
+                command = CommandType.Feedback;
+            }
+            else if (message.Equals("/cancel") || message.Equals("отмена"))
+            {
+                command = CommandType.Cancel;
+            }
+            else
+            {
+                command = null;
+            }
+
+            return command.HasValue;
         }
     }
 }

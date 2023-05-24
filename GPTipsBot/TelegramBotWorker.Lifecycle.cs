@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Services;
+using Microsoft.Extensions.Logging;
+using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types;
-using Telegram.Bot;
 
 namespace GPTipsBot
 {
@@ -33,11 +33,7 @@ namespace GPTipsBot
                 receiverOptions: receiverOptions
             );
 
-            await botClient.SetMyCommandsAsync(new List<BotCommand>() { 
-                new BotCommand { Command = "/start", Description = "Начать пользоваться ботом" },
-                new BotCommand { Command = "/help", Description = "Инструкция по применению" },
-                new BotCommand { Command = "/image", Description = "Создать изображение по текстовому описанию" },
-            });
+            await botClient.SetMyCommandsAsync(BotMenu.GetBotCommands());
 
             var me = await botClient.GetMeAsync();
             _logger.LogInformation($"Start listening for @{me.Username}");
