@@ -1,14 +1,11 @@
-﻿using Telegram.Bot.Types;
-using Telegram.Bot;
+﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using GPTipsBot.Repositories;
-using GPTipsBot.Dtos;
-using GPTipsBot.Api;
-using System.Threading;
-using GPTipsBot.UpdateHandlers;
+using Telegram.Bot;
 using Telegram.Bot.Exceptions;
-using GPTipsBot.Extensions;
+using Telegram.Bot.Types;
 
 namespace GPTipsBot
 {

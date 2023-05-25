@@ -10,7 +10,7 @@ namespace GPTipsBot.Extensions
 {
     internal static class RestClientExtensions
     {
-        public static RestResponse? ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3)
+        public static RestResponse? ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3, CancellationToken cancellationToken = default)
         {
             int retryCount = 0;
             RestResponse? response = null;
@@ -20,7 +20,7 @@ namespace GPTipsBot.Extensions
             {
                 try
                 {
-                    response = restClient.Execute(request);
+                    response = restClient.Execute(request, cancellationToken);
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         return response;

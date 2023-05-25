@@ -37,7 +37,7 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
+            message.ServiceMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();

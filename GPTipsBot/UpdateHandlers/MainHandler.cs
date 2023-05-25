@@ -33,7 +33,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 userState.TryAdd(userKey, new UserStateDto(userKey));
             }
-            if (update.TelegramGptMessage != null)
+            if (update.Update.CallbackQuery == null && update.TelegramGptMessage != null)
             {
                 userRepository.CreateUpdateUser(update.TelegramGptMessage);
             }

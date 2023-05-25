@@ -20,7 +20,7 @@ namespace GPTipsBot.UpdateHandlers
             this._logger = logger;
         }
 
-        public async Task Start(UserKey userKey, ChatAction chatAction, CancellationToken cancellationToken)
+        public async Task<long> Start(UserKey userKey, ChatAction chatAction, CancellationToken cancellationToken)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("не отвечать", "/stopRequest"));
             var serviceMessage = await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.PleaseWaitMsg, 
@@ -39,6 +39,8 @@ namespace GPTipsBot.UpdateHandlers
                 catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
 
             }, null, 0, 8 * 1000);
+
+            return serviceMessage.MessageId;
         }
 
         
@@ -50,4 +52,4 @@ namespace GPTipsBot.UpdateHandlers
             _timer?.Dispose();
         }
     }
-}
+} 

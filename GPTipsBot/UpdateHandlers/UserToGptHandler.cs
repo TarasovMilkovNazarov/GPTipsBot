@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
@@ -31,9 +32,10 @@ namespace GPTipsBot.UpdateHandlers
             
             try
             {
-                await typingStatus.Start(message.UserKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
+                message.ServiceMessageId = await typingStatus.Start(message.UserKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
                 Stopwatch sw = Stopwatch.StartNew();
-                var gtpResponse = await gptAPI.SendMessage(message);
+                var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
+                var gtpResponse = await gptAPI.SendMessage(message, token);
                 sw.Stop();
                 logger.LogInformation($"Get response to message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
                 message.Reply = gtpResponse.text;
