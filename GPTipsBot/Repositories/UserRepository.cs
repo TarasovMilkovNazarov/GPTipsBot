@@ -69,7 +69,7 @@ namespace GPTipsBot.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogWithStackTrace(LogLevel.Error, $"GetAll error {ex.Message}");
+                logger.LogError(ex, null);
             }
 
             return users;

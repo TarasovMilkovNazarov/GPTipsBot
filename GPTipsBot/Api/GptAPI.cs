@@ -72,7 +72,7 @@ namespace GPTipsBot.Api
             }
             catch (Exception ex)
             {
-                logger.LogWithStackTrace(LogLevel.Error, ex.Message);
+                logger.LogError(ex, "Error in request to proxy");
             }
 
             return (response?.IsSuccessful ?? false, responseText);
