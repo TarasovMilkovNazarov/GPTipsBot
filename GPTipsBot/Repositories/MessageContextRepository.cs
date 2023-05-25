@@ -92,7 +92,7 @@ namespace GPTipsBot.Repositories
             }
             catch (Exception ex)
             {
-                logger.LogWithStackTrace(LogLevel.Error, $"GetAllMessages for {telegramId}. Error {ex.Message}");
+                logger.LogError(ex, null);
             }
 
             return messages;

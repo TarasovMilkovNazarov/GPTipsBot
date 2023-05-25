@@ -92,8 +92,7 @@ namespace GPTipsBot.Api
         {
             var errorMessage = GetErrorMessageFromApiResponse(ex);
             errorMessage = errorMessage.Length > 100 ? errorMessage.Substring(0, 100) : errorMessage;
-
-            logger.LogWithStackTrace(LogLevel.Error, errorMessage);
+            logger.LogError(ex, errorMessage);
         }
     }
 }

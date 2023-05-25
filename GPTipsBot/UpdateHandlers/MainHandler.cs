@@ -40,7 +40,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (Exception ex)
             {
-                logger.LogWithStackTrace(LogLevel.Error, ex.Message);
+                logger.LogError(ex, null);
                 return;
             }
             
