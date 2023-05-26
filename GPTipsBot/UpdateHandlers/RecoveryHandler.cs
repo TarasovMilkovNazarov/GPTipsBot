@@ -44,7 +44,7 @@ namespace GPTipsBot.UpdateHandlers
                     q.Enqueue(update.Update);
                     userToUpdatesQueue.Add(telegramId, q);
                     
-                    await botClient.SendTextMessageWithMenuKeyboard(update.Update.Message.Chat.Id, 
+                    await botClient.SendTextMessageAsync(update.Update.Message.Chat.Id, 
                         BotResponse.Recovered, cancellationToken: update.CancellationToken);
                 };
 

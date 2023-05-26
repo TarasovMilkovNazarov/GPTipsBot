@@ -27,14 +27,14 @@ namespace GPTipsBot.Services
             //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
         
-        public void CreateImageFromText(string prompt)
+        public async Task CreateImageFromText(string prompt, CancellationToken token)
         {
-            var imgSrcs = GetImageSources(prompt);
+            var imgSrcs = await GetImageSources(prompt, token);
             SaveImages(imgSrcs);
         }
-        public byte[] GetImageFromText(string prompt)
+        public async Task<byte[]> GetImageFromText(string prompt, CancellationToken token)
         {
-            var imgSrcs = GetImageSources(prompt);
+            var imgSrcs = await GetImageSources(prompt, token);
 
             return GetImages(imgSrcs);
         }
@@ -72,7 +72,7 @@ namespace GPTipsBot.Services
             return client;
         }
 
-        private List<string> GetImageSources(string prompt)
+        private async Task<List<string>> GetImageSources(string prompt, CancellationToken token)
         {
             Console.WriteLine("Sending request...");
             string urlEncodedPrompt = Uri.EscapeDataString(prompt);
@@ -86,7 +86,7 @@ namespace GPTipsBot.Services
             request.AddParameter($"qs", "ds");
             request.Timeout = 2000;
              
-            var response = client.Execute(request);
+            var response = await client.ExecuteAsync(request, token);
 
             if (string.IsNullOrEmpty(response?.Content))
             {
@@ -102,27 +102,15 @@ namespace GPTipsBot.Services
                 throw new CustomException(BingImageCreatorResponse.UnsupportedLangError);
             }
 
-            if (response.StatusCode != HttpStatusCode.Found)
-            {
-                url = $"images/create?q={urlEncodedPrompt}&rt=3&FORM=GENCRE";
-                request = new RestRequest(url, Method.Post);
-
-                if (response.StatusCode != HttpStatusCode.Found)
-                {
-                    Console.WriteLine($"ERROR: {response.Content}");
-                    throw new Exception("Redirect failed");
-                }
-            }
-
             // Get redirect URL
             string redirectUrl = response.Headers.First(x => x.Name == "Location").Value.ToString();
             string requestId = redirectUrl.Split("id=")[^1];
-            client.Execute(new RestRequest(redirectUrl, Method.Get));
+            await client.ExecuteAsync(new RestRequest(redirectUrl, Method.Get), token);
 
             // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
             string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
             // Poll for results
-            response = client.ExecuteWithPredicate(new RestRequest(pollingUrl, Method.Get), IsImageSrcGetRequestSuccessfull);
+            response = await client.ExecuteWithPredicate(new RestRequest(pollingUrl, Method.Get), token, IsImageSrcGetRequestSuccessfull);
 
             // Use regex to search for src=""
             var imageLinks = new List<string>();

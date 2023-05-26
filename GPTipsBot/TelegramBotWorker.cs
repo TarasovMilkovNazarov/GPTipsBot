@@ -47,7 +47,7 @@ namespace GPTipsBot
                     return;
                 }
 
-                await botClient.SendTextMessageWithMenuKeyboard(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
             }
         }
 

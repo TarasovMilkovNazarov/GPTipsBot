@@ -20,12 +20,11 @@ namespace GPTipsBot.UpdateHandlers
 
             if (string.IsNullOrEmpty(update.TelegramGptMessage.Reply))
             {
-                //throw new CustomException(BotResponse.SomethingWentWrong);
-                await botClient.SendTextMessageWithMenuKeyboard(message.UserKey.ChatId, BotResponse.SomethingWentWrong, cancellationToken: update.CancellationToken);
+                await botClient.SendTextMessageAsync(message.UserKey.ChatId, BotResponse.SomethingWentWrong, cancellationToken: update.CancellationToken);
                 return;
             }
 
-            await botClient.SendTextMessageWithMenuKeyboard(message.UserKey.ChatId, message.Reply, cancellationToken: update.CancellationToken);
+            await botClient.SendTextMessageAsync(message.UserKey.ChatId, message.Reply, cancellationToken: update.CancellationToken);
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

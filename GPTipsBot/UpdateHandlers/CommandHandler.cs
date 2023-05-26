@@ -61,6 +61,7 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case CommandType.CreateImage:
                     responseToUser = BotResponse.InputImageDescriptionText;
+                    replyMarkup = new ReplyKeyboardMarkup(cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:

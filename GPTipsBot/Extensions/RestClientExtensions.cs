@@ -50,7 +50,7 @@ namespace GPTipsBot.Extensions
             return response;
         }
 
-        public static RestResponse? ExecuteWithPredicate(this RestClient restClient, RestRequest request, Func<RestResponse, int, bool> predicate)
+        public static async Task<RestResponse?> ExecuteWithPredicate(this RestClient restClient, RestRequest request, CancellationToken token, Func<RestResponse, int, bool> predicate)
         {
             int retryCount = 0;
             RestResponse response = null;
@@ -60,9 +60,14 @@ namespace GPTipsBot.Extensions
             {
                 try
                 {
-                    response = restClient.Execute(request);
+                    response = await restClient.ExecuteAsync(request, token);
                 }
-                catch (Exception e) {}
+                catch (OperationCanceledException e) {
+                    throw;
+                }
+                catch (Exception e) {
+
+                }
                 finally
                 {
                     retryCount++;

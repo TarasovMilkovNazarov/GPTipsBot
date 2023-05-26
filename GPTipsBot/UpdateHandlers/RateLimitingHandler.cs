@@ -43,7 +43,7 @@ namespace GPTipsBot.UpdateHandlers
                 if (mesCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     logger.LogError("Max messages limit reached");
-                    await botClient.SendTextMessageWithMenuKeyboard(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
 
                     return;
                 }

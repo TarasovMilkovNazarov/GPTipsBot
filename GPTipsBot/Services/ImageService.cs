@@ -8,6 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 using System.IO;
 using System.IO.Pipes;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.Services
 {
@@ -31,12 +32,14 @@ namespace GPTipsBot.Services
             }
         }
 
-        public async Task SendImageToTelegramUser(long chatId, string prompt)
+        public async Task SendImageToTelegramUser(long chatId, string prompt, CancellationToken token)
         {
-            byte[] image = imageCreatorService.GetImageFromText(prompt);
+            byte[] image = await imageCreatorService.GetImageFromText(prompt, token);
             MemoryStream stream = new MemoryStream(image);
             var fileToSend = new InputMedia(stream, "newFile");
-            var message = await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, parseMode: ParseMode.Markdown);
+            var replyMarkup = new ReplyKeyboardMarkup(TelegramBotUIService.cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
+            var message = await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, 
+                parseMode: ParseMode.Markdown, replyMarkup: replyMarkup, cancellationToken: token);
         }
     }
 }
