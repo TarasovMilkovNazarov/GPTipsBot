@@ -10,24 +10,28 @@ using OpenAI.GPT3.Extensions;
 using GPTipsBot.Api;
 using Telegram.Bot;
 using GPTipsBot.UpdateHandlers;
+using Telegram.Bot.Services;
+using Telegram.Bot.Polling;
 
-var builder = new ConfigurationBuilder()
-                 .AddJsonFile($"appsettings.{AppConfig.Env}.json", true, true);
-var config = builder.Build();
-
-var hostBuilder = new HostBuilder()
+var host = Host.CreateDefaultBuilder(args)
         // Add configuration, logging, ...
     .ConfigureServices((hostContext, services) =>
     {
+        services.AddHttpClient("telegram_bot_client")
+                .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
+                {
+                    TelegramBotClientOptions options = new(AppConfig.TelegramToken);
+                    return new TelegramBotClient(options);
+                });
+
+        services.AddScoped<TelegramBotWorker>();
+        services.AddScoped<ReceiverService>();
+        services.AddHostedService<PollingService>();
+
         // Add your services with depedency injection.
         services
-        //.AddHttpClient<UnreliableEndpointCallerService>()
-        //.AddTransientHttpErrorPolicy(
-        //    x => x.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(3, retryAttempt)))
         .AddLogging(configure => configure.AddConsole())
-        .AddHostedService<TelegramBotWorker>()
         .AddSingleton<DapperContext>()
-        .AddSingleton<IConfiguration>(config)
         .AddTransient<ImageCreatorService>()
         .AddTransient<ImageService>()
         .AddTransient<ActionStatus>()
@@ -53,6 +57,6 @@ var hostBuilder = new HostBuilder()
         .AddScoped<ITelegramBotClient, TelegramBotClient>(x => ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken));
 
         services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
-    });
+    }).Build();
 
-await hostBuilder.RunConsoleAsync();
+await host.RunAsync();

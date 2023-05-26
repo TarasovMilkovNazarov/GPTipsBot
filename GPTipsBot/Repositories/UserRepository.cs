@@ -2,6 +2,7 @@
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
+using GPTipsBot.Mapper;
 using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ namespace GPTipsBot.Repositories
         private readonly DapperContext context;
         private readonly MessageContextRepository messageRepository;
         private readonly string insertUserQuery = "INSERT INTO Users (id, firstname, lastname, createdat, isactive, source) " +
-                "VALUES (@TelegramId, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
+                "VALUES (@Id, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
         private readonly string updateUserQuery = "Update Users SET isactive = 'true', source = @Source WHERE id = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE id = @TelegramId;";
         private readonly string isUserExists = $"SELECT Count(*) FROM Users WHERE id = @TelegramId;";
@@ -38,22 +39,23 @@ namespace GPTipsBot.Repositories
         {
             logger.LogInformation("CreateUser");
 
-            User? dbUser;
-            dbUser = _connection.Query<User>(selectUserByTelegramId, telegramGptMessage).FirstOrDefault();
-            if (dbUser == null)
+            User? user;
+            user = _connection.Query<User>(selectUserByTelegramId, new { telegramId = telegramGptMessage.UserKey.Id }).FirstOrDefault();
+            if (user == null)
             {
-                _connection.QuerySingle<long>(insertUserQuery, telegramGptMessage);
+                user = UserMapper.MapToUser(telegramGptMessage);
+                _connection.QuerySingle<long>(insertUserQuery, user);
             }
             else
             {
                 _connection.ExecuteScalar(updateUserQuery, new
                 {
-                    telegramId = telegramGptMessage.TelegramId,
-                    source = string.IsNullOrEmpty(dbUser.Source) ? telegramGptMessage.Source : dbUser.Source
+                    telegramId = telegramGptMessage.UserKey.Id,
+                    source = string.IsNullOrEmpty(user.Source) ? telegramGptMessage.Source : user.Source
                 });
             }
 
-            return telegramGptMessage.TelegramId;
+            return telegramGptMessage.UserKey.Id;
         }
 
         public IEnumerable<User> GetAll()

@@ -40,7 +40,10 @@ namespace GPTipsBot.Services
     public class TelegramBotUIService
     {
         private readonly ITelegramBotClient botClient;
+
         public static ReplyKeyboardMarkup startKeyboard;
+        public static ReplyKeyboardMarkup cancelKeyboard;
+
         public static KeyboardButton imageButton;
         public static KeyboardButton resetContextButton;
         public static KeyboardButton feedbackButton;
@@ -60,6 +63,7 @@ namespace GPTipsBot.Services
             feedbackButton = new KeyboardButton("Оставить отзыв");
             cancelButton = new KeyboardButton("Отмена");
             startKeyboard = GetMenuKeyboardMarkup();
+            cancelKeyboard = GetCancelKeyboardMarkup();
         }
 
         private static ReplyKeyboardMarkup GetMenuKeyboardMarkup()
@@ -77,6 +81,16 @@ namespace GPTipsBot.Services
                     feedbackButton
                 }
             });
+
+            keyboardMarkup.ResizeKeyboard = true;
+            keyboardMarkup.OneTimeKeyboard = true;
+
+            return keyboardMarkup;
+        }
+
+        private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
+        {
+            var keyboardMarkup = new ReplyKeyboardMarkup(cancelButton);
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = true;

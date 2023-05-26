@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -27,35 +28,40 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.TelegramGptMessage;
-            var chatId = update.Update.Message.Chat.Id;
+            var userKey = update.TelegramGptMessage.UserKey;
 
             if (update.Update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken);
-                MainHandler.userState[update.TelegramGptMessage.TelegramId] = Enums.UserStateEnum.None;
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
+                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
 
-            await sendImageStatus.Start(chatId, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
+            message.ServiceMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                await imageService.SendImageToTelegramUser(message.ChatId, update.Update.Message.Text);
+                var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
+                await imageService.SendImageToTelegramUser(userKey.ChatId, update.Update.Message.Text, message.TelegramMessageId, token);
                 sw.Stop();
                 logger.LogInformation($"Successfull image generation for message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
             }
+            catch(OperationCanceledException ex)
+            {
+                logger.LogInformation("Image generation task was canceled");
+            }
             catch(CustomException ex)
             {
-                await botClient.SendTextMessageAsync(chatId, ex.Message, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(userKey.ChatId, ex.Message, cancellationToken: cancellationToken);
             }
             catch(Exception ex)
             {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
             }
             finally
             {
-                MainHandler.userState[update.TelegramGptMessage.TelegramId] = Enums.UserStateEnum.None;
-                await sendImageStatus.Stop(cancellationToken);
+                //MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
+                await sendImageStatus.Stop(userKey, cancellationToken);
             }
 
             // Call next handler

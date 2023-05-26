@@ -16,10 +16,10 @@ namespace GPTipsBot.Mapper
         {
             Message message = new Message()
             {
-                ChatId = messageDto.ChatId,
+                ChatId = messageDto.UserKey.ChatId,
                 ReplyToId = messageDto.ReplyToId,
                 Text = messageDto.Text,
-                UserId = messageDto.TelegramId,
+                UserId = messageDto.UserKey.Id,
                 CreatedAt = DateTime.UtcNow,
                 Role = role
             };

@@ -1,17 +1,16 @@
-﻿using Telegram.Bot.Types;
-using Telegram.Bot;
+﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using GPTipsBot.Repositories;
-using GPTipsBot.Dtos;
-using GPTipsBot.Api;
-using System.Threading;
-using GPTipsBot.UpdateHandlers;
+using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
 
 namespace GPTipsBot
 {
-    public partial class TelegramBotWorker : IHostedService, IDisposable
+    public partial class TelegramBotWorker : IUpdateHandler
     {
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly GptAPI gptAPI;
@@ -31,7 +30,7 @@ namespace GPTipsBot
             Start = DateTime.UtcNow;
         }
 
-        async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             var mainHandler = messageHandlerFactory.Create<MainHandler>();
             var extendedUpd = new UpdateWithCustomMessageDecorator(update, cancellationToken);
@@ -50,6 +49,14 @@ namespace GPTipsBot
 
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
             }
+        }
+
+        public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        {
+            telegramBotApi.LogErrorMessageFromApiResponse(exception);
+            // Cooldown in case of network connection error
+            if (exception is RequestException)
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
         }
     }
 }

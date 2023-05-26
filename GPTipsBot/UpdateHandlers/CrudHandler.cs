@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Enums;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Telegram.Bot;
@@ -24,19 +25,19 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
-            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.TelegramId) && 
-                MainHandler.userState[update.TelegramGptMessage.TelegramId] == Enums.UserStateEnum.AwaitingImage)
+            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
+                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.AwaitingImage)
             {
                 update.TelegramGptMessage.ContextBound = false;
                 SetNextHandler(messageHandlerFactory.Create<ImageGeneratorToUserHandler>());
             }
-            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.TelegramId) && 
-                MainHandler.userState[update.TelegramGptMessage.TelegramId] == Enums.UserStateEnum.SendingFeedback)
+            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
+                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.SendingFeedback)
             {
                 update.TelegramGptMessage.ContextBound = false;
-                MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.None;
+                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                 update.TelegramGptMessage.Text = "Отзыв: " + update.TelegramGptMessage.Text;
-                await botClient.SendTextMessageAsync(update.TelegramGptMessage.ChatId, BotResponse.Thanks, replyMarkup: new ReplyKeyboardRemove());
+                await botClient.SendTextMessageWithMenuKeyboard(update.TelegramGptMessage.UserKey.ChatId, BotResponse.Thanks, cancellationToken);
                 SetNextHandler(null);
             }
 

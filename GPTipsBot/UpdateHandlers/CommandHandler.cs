@@ -35,7 +35,7 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var messageText = update.TelegramGptMessage.Text;
-            var chatId = update.TelegramGptMessage.ChatId;
+            var chatId = update.TelegramGptMessage.UserKey.ChatId;
 
             if (!TryGetCommand(messageText, out var command))
             {
@@ -45,7 +45,7 @@ namespace GPTipsBot.UpdateHandlers
 
             string? responseToUser = null;
             bool keepContext = true;
-            IReplyMarkup? replyMarkup = null;
+            IReplyMarkup? replyMarkup = startKeyboard;
             update.TelegramGptMessage.ContextBound = false;
 
             switch (command)
@@ -54,14 +54,14 @@ namespace GPTipsBot.UpdateHandlers
                     update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                     userRepository.CreateUpdateUser(update.TelegramGptMessage);
                     responseToUser = BotResponse.Greeting;
-                    replyMarkup = startKeyboard;
                     break;
                 case CommandType.Help:
                     responseToUser = telegramBotAPI.GetMyDescription();
                     break;
                 case CommandType.CreateImage:
                     responseToUser = BotResponse.InputImageDescriptionText;
-                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.AwaitingImage;
+                    replyMarkup = cancelKeyboard;
+                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:
                     responseToUser = BotResponse.ContextUpdated;
@@ -69,13 +69,24 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case CommandType.Feedback:
                     responseToUser = BotResponse.SendFeedback;
-                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.SendingFeedback;
-                    replyMarkup = new ReplyKeyboardMarkup(cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
+                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.SendingFeedback;
+                    replyMarkup = cancelKeyboard;
                     break;
                 case CommandType.Cancel:
                     responseToUser = BotResponse.Cancel;
-                    MainHandler.userState[update.TelegramGptMessage.TelegramId] = UserStateEnum.None;
-                    replyMarkup = startKeyboard;
+                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
+                    break;
+                case CommandType.StopRequest:
+                    responseToUser = BotResponse.Cancel;
+                    try
+                    {
+                        MainHandler.userState[update.TelegramGptMessage.UserKey].messageIdToCancellation[update.Update.CallbackQuery.Message.MessageId].Cancel();
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
+                    
                     break;
             }
 
@@ -113,6 +124,10 @@ namespace GPTipsBot.UpdateHandlers
             else if (message.Equals("/cancel") || message.Equals("отмена"))
             {
                 command = CommandType.Cancel;
+            }
+            else if (message.Equals("/stoprequest"))
+            {
+                command = CommandType.StopRequest;
             }
             else
             {

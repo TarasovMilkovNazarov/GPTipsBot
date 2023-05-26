@@ -13,6 +13,7 @@ namespace GPTipsBot.Dtos
         public long ContextId { get; set; }
         public string Text { get; set; }
         public long TelegramId { get; set; }
+        public long? TelegramMessageId { get; set; }
         public long ChatId { get; set; }
         public DateTime CreatedAt { get; set; }
         public GptRolesEnum Role { get; set; }

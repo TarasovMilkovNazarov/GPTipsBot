@@ -8,23 +8,30 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot.Extensions
 {
-    internal static class RestClientExtensions
+    public static class RestClientExtensions
     {
-        public static RestResponse? ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3)
+        public static async Task<RestResponse?> ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3, CancellationToken cancellationToken = default)
         {
             int retryCount = 0;
             RestResponse? response = null;
-            //request.Timeout = (int)TimeSpan.FromSeconds(120).TotalMilliseconds;
 
             while (retryCount < maxRetries)
             {
                 try
                 {
-                    response = restClient.Execute(request);
+                    response = await restClient.ExecuteAsync(request, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException();
+                    }
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         return response;
                     }
+                }
+                catch (OperationCanceledException e)
+                {
+                    throw e;
                 }
                 catch (Exception e)
                 {
@@ -43,7 +50,7 @@ namespace GPTipsBot.Extensions
             return response;
         }
 
-        public static RestResponse? ExecuteWithPredicate(this RestClient restClient, RestRequest request, Func<RestResponse, int, bool> predicate)
+        public static async Task<RestResponse?> ExecuteWithPredicate(this RestClient restClient, RestRequest request, CancellationToken token, Func<RestResponse, int, bool> predicate)
         {
             int retryCount = 0;
             RestResponse response = null;
@@ -53,9 +60,18 @@ namespace GPTipsBot.Extensions
             {
                 try
                 {
-                    response = restClient.Execute(request);
+                    response = await restClient.ExecuteAsync(request, token);
+                    if (response?.ErrorException is OperationCanceledException)
+                    {
+                        throw response.ErrorException;
+                    }
                 }
-                catch (Exception e) {}
+                catch (OperationCanceledException e) {
+                    throw;
+                }
+                catch (Exception e) {
+
+                }
                 finally
                 {
                     retryCount++;

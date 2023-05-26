@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Dtos;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -33,13 +34,13 @@ namespace GPTipsBot.UpdateHandlers
 
             var chatId = update.Update.Message?.Chat.Id;
 
-            if (!MessageService.UserToMessageCount.TryGetValue(telegramId.Value, out var existingValue))
+            if (!MessageService.UserToMessageCount.TryGetValue(telegramId.Value, out var mesCount))
             {
-                MessageService.UserToMessageCount[telegramId.Value] = (1, DateTime.UtcNow);
+                MessageService.UserToMessageCount[telegramId.Value] = 1;
             }
             else
             {
-                if (existingValue.messageCount + 1 > MessageService.MaxMessagesCountPerMinute)
+                if (mesCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     logger.LogError("Max messages limit reached");
                     await botClient.SendTextMessageAsync(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
@@ -47,7 +48,7 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
-                MessageService.UserToMessageCount[telegramId.Value] = (existingValue.messageCount++, DateTime.UtcNow);
+                MessageService.UserToMessageCount[telegramId.Value] += 1;
             }
 
             // Call next handler

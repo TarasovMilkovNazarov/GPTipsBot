@@ -28,10 +28,11 @@ namespace GPTipsBot.UpdateHandlers
 
             var botMentionedEntity = message?.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
             var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
+            var isReplyToBotMessage = message.ReplyToMessage?.From?.IsBot ?? false;
             var groupOrChannelTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             var isGroupOrChannel = groupOrChannelTypes.Contains(message.Chat.Type);
 
-            if (!isBotMentioned && isGroupOrChannel)
+            if (!isBotMentioned && !isReplyToBotMessage && isGroupOrChannel)
             {
                 return;
             }

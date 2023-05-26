@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Telegram.Bot;
@@ -10,7 +11,7 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly ITelegramBotClient botClient;
         private readonly MessageContextRepository messageRepository;
-        private static readonly Dictionary<long, Queue<Update>> userToUpdatesQueue = new Dictionary<long, Queue<Update>>();
+        private static readonly Dictionary<long, Queue<Update>> chatToInformAboutRecovery = new Dictionary<long, Queue<Update>>();
 
         public RecoveryHandler(ITelegramBotClient botClient,
             MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository)
@@ -28,20 +29,20 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var telegramId = update.Update.Message.From.Id;
+            var chatId = update.Update.Message.Chat.Id;
 
             if (TelegramBotWorker.Start - update.Update.Message?.Date >= TimeSpan.FromMinutes(2))
             {
                 messageRepository.AddUserMessage(update.TelegramGptMessage);
                 
 
-                if (userToUpdatesQueue.ContainsKey(telegramId))
-                    userToUpdatesQueue[telegramId].Enqueue(update.Update);
+                if (chatToInformAboutRecovery.ContainsKey(chatId))
+                    chatToInformAboutRecovery[chatId].Enqueue(update.Update);
                 else
                 {
                     var q = new Queue<Update>();
                     q.Enqueue(update.Update);
-                    userToUpdatesQueue.Add(telegramId, q);
+                    chatToInformAboutRecovery.Add(chatId, q);
                     
                     await botClient.SendTextMessageAsync(update.Update.Message.Chat.Id, 
                         BotResponse.Recovered, cancellationToken: update.CancellationToken);
@@ -49,8 +50,8 @@ namespace GPTipsBot.UpdateHandlers
 
                 return;
             }
-            else if(userToUpdatesQueue.ContainsKey(telegramId))
-                userToUpdatesQueue.Remove(telegramId);
+            else if(chatToInformAboutRecovery.ContainsKey(chatId))
+                chatToInformAboutRecovery.Remove(chatId);
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Repositories;
+﻿using GPTipsBot.Dtos;
+using GPTipsBot.Repositories;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 using System;
 using System.Collections.Generic;
@@ -13,8 +14,10 @@ namespace GPTipsBot.Services
         private readonly MessageContextRepository messageContextRepository;
         private readonly ChatGptService chatGptService;
         public const int MaxMessagesCountPerMinute = 5;
+        public static Timer resetMessageCountsPerMinuteTimer;
+        public static TimeSpan ResettingInterval => TimeSpan.FromSeconds(60); 
 
-        public static Dictionary<long, (int messageCount, DateTime lastMessage)> UserToMessageCount { get; set; }
+        public static Dictionary<long, int> UserToMessageCount { get; set; }
 
         public MessageService(MessageContextRepository messageContextRepository, ChatGptService chatGptService)
         {
@@ -24,21 +27,21 @@ namespace GPTipsBot.Services
 
         static MessageService()
         {
-            UserToMessageCount = new Dictionary<long, (int messageCount, DateTime lastMessage)>();
-            Timer timer = new Timer(ResetMessageCountTime, null, 0, 60 * 1000 * 1);
+            UserToMessageCount = new Dictionary<long, int>();
+            resetMessageCountsPerMinuteTimer = new Timer(ResetMessageCountsPerMinute, null, 0, (int)ResettingInterval.TotalMilliseconds);
         }
 
-        public static void ResetMessageCountTime(Object o)
+        public static void ResetMessageCountsPerMinute(Object o)
         {
             foreach (var userId in UserToMessageCount.Keys.ToList())
             {
-                UserToMessageCount[userId] = (0, DateTime.MinValue);
+                UserToMessageCount[userId] = 0;
             }
         }
 
-        public ChatMessage[] PrepareContext(long userId, long chatId, long contextId)
+        public ChatMessage[] PrepareContext(UserKey userKey, long contextId)
         {
-            var messages = messageContextRepository.GetRecentContextMessages(userId, chatId, contextId);
+            var messages = messageContextRepository.GetRecentContextMessages(userKey, contextId);
             var contextWindow = new ContextWindow(new ChatGptService());
 
             foreach (var item in messages)

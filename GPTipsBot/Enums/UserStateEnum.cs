@@ -10,5 +10,6 @@ namespace GPTipsBot.Enums
         None,
         AwaitingImage,
         SendingFeedback,
+        AwaitingMessage
     }
 }
