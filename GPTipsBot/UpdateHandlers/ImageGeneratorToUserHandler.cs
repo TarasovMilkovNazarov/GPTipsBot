@@ -48,7 +48,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch(OperationCanceledException ex)
             {
-                return;
+                logger.LogInformation("Image generation task was canceled");
             }
             catch(CustomException ex)
             {

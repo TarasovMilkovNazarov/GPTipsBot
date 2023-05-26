@@ -61,6 +61,10 @@ namespace GPTipsBot.Extensions
                 try
                 {
                     response = await restClient.ExecuteAsync(request, token);
+                    if (response?.ErrorException is OperationCanceledException)
+                    {
+                        throw response.ErrorException;
+                    }
                 }
                 catch (OperationCanceledException e) {
                     throw;
