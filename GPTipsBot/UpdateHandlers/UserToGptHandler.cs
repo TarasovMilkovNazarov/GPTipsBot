@@ -17,7 +17,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ActionStatus typingStatus;
         private readonly ILogger<UserToGptHandler> logger;
 
-        public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository, 
+        public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository,
             GptAPI gptAPI, ActionStatus typingStatus, ILogger<UserToGptHandler> logger)
         {
             this.messageHandlerFactory = messageHandlerFactory;
@@ -31,19 +31,24 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.TelegramGptMessage;
-            
+
             try
             {
                 message.ServiceMessageId = await typingStatus.Start(message.UserKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
                 Stopwatch sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
                 var gtpResponse = await gptAPI.SendMessage(message, token);
+                if (gtpResponse?.Error != null)
+                {
+                    throw new Exception(gtpResponse.Error.Message);
+                }
+
                 sw.Stop();
                 logger.LogInformation($"Get response to message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
-                message.Reply = gtpResponse.text;
+                message.Reply = gtpResponse?.Choices?.FirstOrDefault()?.Message?.Content;
                 messageRepository.AddBotResponse(message);
             }
-            catch(OperationCanceledException ex)
+            catch (OperationCanceledException ex)
             {
                 logger.LogInformation("Request to openai service was canceled");
                 SetNextHandler(null);

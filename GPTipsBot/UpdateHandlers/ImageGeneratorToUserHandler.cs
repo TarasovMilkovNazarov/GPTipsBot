@@ -32,7 +32,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: new ReplyKeyboardMarkup(TelegramBotUIService.cancelButton));
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }

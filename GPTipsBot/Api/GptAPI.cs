@@ -29,7 +29,7 @@ namespace GPTipsBot.Api
             this.messageService = messageService;
         }
 
-        public async Task<(bool isSuccessful, string? text)> SendMessage(TelegramGptMessageUpdate telegramGptMessage, CancellationToken token)
+        public async Task<ChatCompletionCreateResponse> SendMessage(TelegramGptMessageUpdate telegramGptMessage, CancellationToken token)
         {
             var textWithContext = messageService.PrepareContext(telegramGptMessage.UserKey, telegramGptMessage.ContextId.Value);
             if (textWithContext.Length == 0)
@@ -46,7 +46,7 @@ namespace GPTipsBot.Api
             return await SendViaOpenAiApi(textWithContext, token);
         }
 
-        public async Task<(bool isSuccessful, string? response)> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
+        public async Task<ChatCompletionCreateResponse> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
         {
             var freeGptClient = new RestClient(baseUrl2);
             var request = new RestRequest("", Method.Post);
@@ -66,9 +66,8 @@ namespace GPTipsBot.Api
             {
                 response = await freeGptClient.ExecuteWithRetry(request, maxRetries: 10, cancellationToken: token);
                 var completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(response?.Content);
-                string? content = completionResult?.Choices?.FirstOrDefault()?.Message?.Content;
 
-                responseText = content;
+                return completionResult;
             }
             catch (OperationCanceledException ex)
             {
@@ -79,12 +78,11 @@ namespace GPTipsBot.Api
                 logger.LogError(ex, "Error in request to proxy");
             }
 
-            return (response?.IsSuccessful ?? false, responseText);
+            return null;
         }
 
-        public async Task<(bool isSuccessful, string? response)> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)
+        public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)
         {
-            await Task.Delay(30000);
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(
                 new ChatCompletionCreateRequest
                 {
@@ -93,9 +91,7 @@ namespace GPTipsBot.Api
                     //MaxTokens = AppConfig.ChatGptTokensLimitPerMessage
                 }, cancellationToken: token);
 
-            var response = completionResult.Choices.First()?.Message?.Content;
-
-            return (completionResult?.Successful ?? false, response);
+            return completionResult;
         }
     }
 }

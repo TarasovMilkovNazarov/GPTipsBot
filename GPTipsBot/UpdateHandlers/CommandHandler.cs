@@ -45,7 +45,7 @@ namespace GPTipsBot.UpdateHandlers
 
             string? responseToUser = null;
             bool keepContext = true;
-            IReplyMarkup? replyMarkup = null;
+            IReplyMarkup? replyMarkup = startKeyboard;
             update.TelegramGptMessage.ContextBound = false;
 
             switch (command)
@@ -54,14 +54,13 @@ namespace GPTipsBot.UpdateHandlers
                     update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                     userRepository.CreateUpdateUser(update.TelegramGptMessage);
                     responseToUser = BotResponse.Greeting;
-                    replyMarkup = startKeyboard;
                     break;
                 case CommandType.Help:
                     responseToUser = telegramBotAPI.GetMyDescription();
                     break;
                 case CommandType.CreateImage:
                     responseToUser = BotResponse.InputImageDescriptionText;
-                    replyMarkup = new ReplyKeyboardMarkup(cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
+                    replyMarkup = cancelKeyboard;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:
@@ -71,12 +70,11 @@ namespace GPTipsBot.UpdateHandlers
                 case CommandType.Feedback:
                     responseToUser = BotResponse.SendFeedback;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.SendingFeedback;
-                    replyMarkup = new ReplyKeyboardMarkup(cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
+                    replyMarkup = cancelKeyboard;
                     break;
                 case CommandType.Cancel:
                     responseToUser = BotResponse.Cancel;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
-                    replyMarkup = startKeyboard;
                     break;
                 case CommandType.StopRequest:
                     responseToUser = BotResponse.Cancel;
@@ -89,7 +87,6 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
                     
-                    replyMarkup = startKeyboard;
                     break;
             }
 

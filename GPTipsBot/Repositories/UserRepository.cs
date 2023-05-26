@@ -18,7 +18,7 @@ namespace GPTipsBot.Repositories
         private readonly DapperContext context;
         private readonly MessageContextRepository messageRepository;
         private readonly string insertUserQuery = "INSERT INTO Users (id, firstname, lastname, createdat, isactive, source) " +
-                "VALUES (@TelegramId, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
+                "VALUES (@Id, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
         private readonly string updateUserQuery = "Update Users SET isactive = 'true', source = @Source WHERE id = @telegramId;";
         private readonly string selectUserByTelegramId = $"SELECT * FROM Users WHERE id = @TelegramId;";
         private readonly string isUserExists = $"SELECT Count(*) FROM Users WHERE id = @TelegramId;";
