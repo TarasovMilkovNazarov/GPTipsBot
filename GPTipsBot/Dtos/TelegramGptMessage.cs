@@ -9,6 +9,7 @@ namespace GPTipsBot.Dtos
         public TelegramGptMessageUpdate(Telegram.Bot.Types.Message message)
         {
             MessageId = message.MessageId;
+            TelegramMessageId = message.MessageId;
             FirstName = message.From.FirstName;
             LastName = message.From.LastName;
             Text = message.Text ?? "";
@@ -31,6 +32,7 @@ namespace GPTipsBot.Dtos
         public UserKey UserKey { get; set; }
         public string Text { get; set; }
         public long MessageId { get; set; }
+        public long? TelegramMessageId { get; set; }
         public string? Reply { get; set; }
         public long? ReplyToId { get; set; }
         public string? Source { get; set; }

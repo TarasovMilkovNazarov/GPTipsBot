@@ -42,7 +42,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
-                await imageService.SendImageToTelegramUser(userKey.ChatId, update.Update.Message.Text, token);
+                await imageService.SendImageToTelegramUser(userKey.ChatId, update.Update.Message.Text, message.TelegramMessageId, token);
                 sw.Stop();
                 logger.LogInformation($"Successfull image generation for message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
             }

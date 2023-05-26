@@ -32,14 +32,14 @@ namespace GPTipsBot.Services
             }
         }
 
-        public async Task SendImageToTelegramUser(long chatId, string prompt, CancellationToken token)
+        public async Task SendImageToTelegramUser(long chatId, string prompt, long? telegramMessageId = null, CancellationToken token = default)
         {
             byte[] image = await imageCreatorService.GetImageFromText(prompt, token);
             MemoryStream stream = new MemoryStream(image);
             var fileToSend = new InputMedia(stream, "newFile");
             var replyMarkup = new ReplyKeyboardMarkup(TelegramBotUIService.cancelButton) { OneTimeKeyboard = false, ResizeKeyboard = true };
             var message = await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, 
-                parseMode: ParseMode.Markdown, replyMarkup: replyMarkup, cancellationToken: token);
+                parseMode: ParseMode.Markdown, replyToMessageId: (int)telegramMessageId, replyMarkup: replyMarkup, cancellationToken: token);
         }
     }
 }

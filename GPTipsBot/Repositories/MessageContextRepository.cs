@@ -16,10 +16,10 @@ namespace GPTipsBot.Repositories
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
         
-        private readonly string insertMesWithSameContext = "INSERT INTO Messages (text, contextId, userId, chatId, replyToId, createdAt, role, contextBound) " +
-                "VALUES (@Text, @ContextId, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role, @ContextBound) RETURNING id, contextId;";
-        private readonly string insertWithNewContext = "INSERT INTO Messages (text, userId, chatId, replyToId, createdAt, role, contextBound) " +
-                "VALUES (@Text, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role, @ContextBound) RETURNING id, contextId;";
+        private readonly string insertMesWithSameContext = "INSERT INTO Messages (text, contextId, userId, chatId, replyToId, createdAt, role, contextBound, telegramMessageId) " +
+                "VALUES (@Text, @ContextId, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role, @ContextBound, @TelegramMessageId) RETURNING id, contextId;";
+        private readonly string insertWithNewContext = "INSERT INTO Messages (text, userId, chatId, replyToId, createdAt, role, contextBound, telegramMessageId) " +
+                "VALUES (@Text, @TelegramId, @ChatId, @ReplyToId, @CreatedAt, @Role, @ContextBound, @TelegramMessageId) RETURNING id, contextId;";
 
         private readonly string recentContextMessagesQuery = $"SELECT * FROM Messages " +
             $"WHERE userId = @UserId AND chatId = @ChatId AND contextid = @ContextId Order By CreatedAt DESC Limit @Count;";
@@ -73,7 +73,8 @@ namespace GPTipsBot.Repositories
                 replyToId,
                 createdAt = DateTime.UtcNow,
                 role,
-                contextBound = telegramGptMessage.ContextBound
+                contextBound = telegramGptMessage.ContextBound,
+                telegramMessageId = telegramGptMessage.TelegramMessageId,
             });
 
             telegramGptMessage.MessageId = inserted.id;
