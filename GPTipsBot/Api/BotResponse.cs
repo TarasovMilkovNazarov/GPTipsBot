@@ -1,4 +1,5 @@
-﻿using GPTipsBot.UpdateHandlers;
+﻿using GPTipsBot.Services;
+using GPTipsBot.UpdateHandlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace GPTipsBot.Api
 {
     public static class BotResponse
     {
-        public static string TooManyRequests => "❗️❗️❗️ Слишком много запросов, попробуйте через 1 минуту";
+        public static string TooManyRequests => $"❗️Слишком много запросов, попробуйте через {MessageService.ResettingInterval.TotalSeconds} секунд";
         public static string TokensLimitExceeded => "Превышен лимит на количество символов. Попробуйте сократить ваш запрос";
         public static string ContextUpdated => "Контекст успешно сброшен. Начните новый диалог";
         public static string SendFeedback => "Введите сообщение ниже. Будем рад любой обратной связи.";

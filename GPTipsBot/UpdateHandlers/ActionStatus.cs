@@ -22,7 +22,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public async Task<long> Start(UserKey userKey, ChatAction chatAction, CancellationToken cancellationToken)
         {
-            var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("не отвечать", "/stopRequest"));
+            var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("отменить запрос", "/stopRequest"));
             var serviceMessage = await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.PleaseWaitMsg, 
                 cancellationToken: cancellationToken, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;

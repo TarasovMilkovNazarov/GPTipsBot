@@ -14,8 +14,10 @@ namespace GPTipsBot.Services
         private readonly MessageContextRepository messageContextRepository;
         private readonly ChatGptService chatGptService;
         public const int MaxMessagesCountPerMinute = 5;
+        public static Timer resetMessageCountsPerMinuteTimer;
+        public static TimeSpan ResettingInterval => TimeSpan.FromSeconds(60); 
 
-        public static Dictionary<long, (int messageCount, DateTime lastMessage)> UserToMessageCount { get; set; }
+        public static Dictionary<long, int> UserToMessageCount { get; set; }
 
         public MessageService(MessageContextRepository messageContextRepository, ChatGptService chatGptService)
         {
@@ -25,15 +27,15 @@ namespace GPTipsBot.Services
 
         static MessageService()
         {
-            UserToMessageCount = new Dictionary<long, (int messageCount, DateTime lastMessage)>();
-            Timer timer = new Timer(ResetMessageCountTime, null, 0, 60 * 1000 * 1);
+            UserToMessageCount = new Dictionary<long, int>();
+            resetMessageCountsPerMinuteTimer = new Timer(ResetMessageCountsPerMinute, null, 0, (int)ResettingInterval.TotalMilliseconds);
         }
 
-        public static void ResetMessageCountTime(Object o)
+        public static void ResetMessageCountsPerMinute(Object o)
         {
             foreach (var userId in UserToMessageCount.Keys.ToList())
             {
-                UserToMessageCount[userId] = (0, DateTime.MinValue);
+                UserToMessageCount[userId] = 0;
             }
         }
 

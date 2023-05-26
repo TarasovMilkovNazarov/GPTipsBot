@@ -8,23 +8,30 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot.Extensions
 {
-    internal static class RestClientExtensions
+    public static class RestClientExtensions
     {
-        public static RestResponse? ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3, CancellationToken cancellationToken = default)
+        public static async Task<RestResponse?> ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3, CancellationToken cancellationToken = default)
         {
             int retryCount = 0;
             RestResponse? response = null;
-            //request.Timeout = (int)TimeSpan.FromSeconds(120).TotalMilliseconds;
 
             while (retryCount < maxRetries)
             {
                 try
                 {
-                    response = restClient.Execute(request, cancellationToken);
+                    response = await restClient.ExecuteAsync(request, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException();
+                    }
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         return response;
                     }
+                }
+                catch (OperationCanceledException e)
+                {
+                    throw e;
                 }
                 catch (Exception e)
                 {

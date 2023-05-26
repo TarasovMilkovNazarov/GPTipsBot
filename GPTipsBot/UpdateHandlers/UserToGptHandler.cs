@@ -11,6 +11,7 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class UserToGptHandler : BaseMessageHandler
     {
+        private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageContextRepository messageRepository;
         private readonly GptAPI gptAPI;
         private readonly ActionStatus typingStatus;
@@ -19,6 +20,7 @@ namespace GPTipsBot.UpdateHandlers
         public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository, 
             GptAPI gptAPI, ActionStatus typingStatus, ILogger<UserToGptHandler> logger)
         {
+            this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
             this.typingStatus = typingStatus;
@@ -41,9 +43,10 @@ namespace GPTipsBot.UpdateHandlers
                 message.Reply = gtpResponse.text;
                 messageRepository.AddBotResponse(message);
             }
-            catch(Exception ex)
+            catch(OperationCanceledException ex)
             {
-
+                logger.LogInformation("Request to openai service was canceled");
+                SetNextHandler(null);
             }
             finally
             {

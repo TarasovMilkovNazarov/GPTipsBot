@@ -40,13 +40,13 @@ namespace GPTipsBot.Api
 
             if (UseFreeApi)
             {
-                return SendViaFreeProxy(textWithContext, token);
+                return await SendViaFreeProxy(textWithContext, token);
             }
 
             return await SendViaOpenAiApi(textWithContext, token);
         }
 
-        public (bool isSuccessful, string? response) SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
+        public async Task<(bool isSuccessful, string? response)> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
         {
             var freeGptClient = new RestClient(baseUrl2);
             var request = new RestRequest("", Method.Post);
@@ -64,11 +64,15 @@ namespace GPTipsBot.Api
 
             try
             {
-                response = freeGptClient.ExecuteWithRetry(request, maxRetries: 10, cancellationToken: token);
+                response = await freeGptClient.ExecuteWithRetry(request, maxRetries: 10, cancellationToken: token);
                 var completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(response?.Content);
                 string? content = completionResult?.Choices?.FirstOrDefault()?.Message?.Content;
 
                 responseText = content;
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {
