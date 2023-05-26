@@ -16,7 +16,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (update.CallbackQuery?.Message != null)
             {
-                TelegramGptMessage = new TelegramGptMessageUpdate(update.CallbackQuery.Message);
+                TelegramGptMessage = new TelegramGptMessageUpdate(update.CallbackQuery);
                 TelegramGptMessage.Text = update.CallbackQuery.Data;
             }
         }

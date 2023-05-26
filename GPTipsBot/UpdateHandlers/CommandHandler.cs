@@ -81,7 +81,7 @@ namespace GPTipsBot.UpdateHandlers
                     responseToUser = BotResponse.Cancel;
                     try
                     {
-                        MainHandler.userState[update.TelegramGptMessage.UserKey].messageIdToCancellation[update.Update.Message.MessageId].Cancel();
+                        MainHandler.userState[update.TelegramGptMessage.UserKey].messageIdToCancellation[update.Update.CallbackQuery.Message.MessageId].Cancel();
                     }
                     catch (Exception)
                     {
@@ -127,9 +127,9 @@ namespace GPTipsBot.UpdateHandlers
             {
                 command = CommandType.Cancel;
             }
-            else if (message.Equals("/stopRequest"))
+            else if (message.Equals("/stoprequest"))
             {
-                command = CommandType.Cancel;
+                command = CommandType.StopRequest;
             }
             else
             {

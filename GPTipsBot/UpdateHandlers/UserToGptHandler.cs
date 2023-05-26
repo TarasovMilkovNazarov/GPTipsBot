@@ -41,6 +41,10 @@ namespace GPTipsBot.UpdateHandlers
                 message.Reply = gtpResponse.text;
                 messageRepository.AddBotResponse(message);
             }
+            catch(Exception ex)
+            {
+
+            }
             finally
             {
                 await typingStatus.Stop(message.UserKey, cancellationToken);

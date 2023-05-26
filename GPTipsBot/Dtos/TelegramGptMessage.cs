@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Services;
+using Telegram.Bot.Types;
 
 namespace GPTipsBot.Dtos
 {
@@ -15,6 +16,14 @@ namespace GPTipsBot.Dtos
             IsActive = true;
             ContextBound = true;
             UserKey = new UserKey(message.From.Id, message.Chat.Id);
+        }
+
+        public TelegramGptMessageUpdate(CallbackQuery query) : this(query.Message)
+        {
+            CreatedAt = DateTime.UtcNow;
+            IsActive = true;
+            ContextBound = false;
+            UserKey = new UserKey(query.From.Id, query.Message.Chat.Id);
         }
 
         public string FirstName { get; set; }
