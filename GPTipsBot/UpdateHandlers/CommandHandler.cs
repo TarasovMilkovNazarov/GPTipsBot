@@ -51,11 +51,13 @@ namespace GPTipsBot.UpdateHandlers
             switch (command)
             {
                 case CommandType.Start:
+                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                     userRepository.CreateUpdateUser(update.TelegramGptMessage);
                     responseToUser = BotResponse.Greeting;
                     break;
                 case CommandType.Help:
+                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     responseToUser = telegramBotAPI.GetMyDescription();
                     break;
                 case CommandType.CreateImage:
@@ -64,6 +66,7 @@ namespace GPTipsBot.UpdateHandlers
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:
+                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     responseToUser = BotResponse.ContextUpdated;
                     keepContext = false;
                     break;

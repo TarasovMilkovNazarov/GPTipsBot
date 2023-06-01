@@ -27,7 +27,7 @@ namespace GPTipsBot.Services
             //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
         
-        public async Task CreateImageFromText(string prompt, CancellationToken token)
+        public async Task CreateImageFromText(string prompt, CancellationToken token = default)
         {
             var imgSrcs = await GetImageSources(prompt, token);
             SaveImages(imgSrcs);
