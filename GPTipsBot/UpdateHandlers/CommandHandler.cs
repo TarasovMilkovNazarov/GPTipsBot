@@ -83,6 +83,7 @@ namespace GPTipsBot.UpdateHandlers
                     responseToUser = BotResponse.Cancel;
                     try
                     {
+                        replyMarkup = cancelKeyboard;
                         MainHandler.userState[update.TelegramGptMessage.UserKey].messageIdToCancellation[update.Update.CallbackQuery.Message.MessageId].Cancel();
                     }
                     catch (Exception)

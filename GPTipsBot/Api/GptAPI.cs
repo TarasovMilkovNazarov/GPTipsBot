@@ -3,11 +3,11 @@ using GPTipsBot.Extensions;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using OpenAI.GPT3.Interfaces;
-using OpenAI.GPT3.ObjectModels.RequestModels;
-using OpenAI.GPT3.ObjectModels.ResponseModels;
+using OpenAI.Interfaces;
+using OpenAI.ObjectModels.RequestModels;
+using OpenAI.ObjectModels.ResponseModels;
 using RestSharp;
-using GptModels = OpenAI.GPT3.ObjectModels;
+using GptModels = OpenAI.ObjectModels;
 
 namespace GPTipsBot.Api
 {
@@ -46,7 +46,7 @@ namespace GPTipsBot.Api
             return await SendViaOpenAiApi(textWithContext, token);
         }
 
-        public async Task<ChatCompletionCreateResponse> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
+        public async Task<ChatCompletionCreateResponse?> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
         {
             var freeGptClient = new RestClient(baseUrl2);
             var request = new RestRequest("", Method.Post);
@@ -59,13 +59,12 @@ namespace GPTipsBot.Api
             };
 
             request.AddBody(gptDto);
-            RestResponse? response = null;
-            var responseText = "";
+            ChatCompletionCreateResponse? completionResult = null;
 
             try
             {
-                response = await freeGptClient.ExecuteWithRetry(request, maxRetries: 10, cancellationToken: token);
-                var completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(response?.Content);
+                var restResponse = await freeGptClient.ExecuteWithRetry(request, maxRetries: 10, cancellationToken: token);
+                completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(restResponse?.Content);
 
                 return completionResult;
             }
@@ -78,7 +77,7 @@ namespace GPTipsBot.Api
                 logger.LogError(ex, "Error in request to proxy");
             }
 
-            return null;
+            return completionResult;
         }
 
         public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)

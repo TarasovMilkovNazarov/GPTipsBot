@@ -6,7 +6,7 @@ using GPTipsBot.Db;
 using Microsoft.Extensions.Configuration;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
-using OpenAI.GPT3.Extensions;
+using OpenAI.Extensions;
 using GPTipsBot.Api;
 using Telegram.Bot;
 using GPTipsBot.UpdateHandlers;

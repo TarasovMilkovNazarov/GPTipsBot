@@ -1,6 +1,6 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Repositories;
-using OpenAI.GPT3.ObjectModels.RequestModels;
+using OpenAI.ObjectModels.RequestModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
