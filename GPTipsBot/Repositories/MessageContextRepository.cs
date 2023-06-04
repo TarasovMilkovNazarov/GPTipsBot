@@ -7,11 +7,10 @@ using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GPTipsBot.Repositories
 {
-    public class MessageContextRepository : IDisposable
+    public class MessageRepository : IDisposable
     {
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
@@ -26,7 +25,7 @@ namespace GPTipsBot.Repositories
         private readonly string getLastMessage = $"SELECT * FROM Messages WHERE userid = @TelegramId AND chatid = @ChatId Order By CreatedAt DESC LIMIT 1;";
         private readonly string selectAllUserMessagesQuery = $"SELECT * FROM Messages WHERE UserId = @TelegramId;";
 
-        public MessageContextRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
+        public MessageRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
         {
             _connection = context.CreateConnection();
             _connection.Open(); 
@@ -36,15 +35,20 @@ namespace GPTipsBot.Repositories
         
         public long AddUserMessage(TelegramGptMessageUpdate telegramGptMessage, bool keepContext = true)
         {
-            return AddMessage(telegramGptMessage, GptRolesEnum.User, keepContext);
+            return AddMessage(telegramGptMessage, MessageOwner.User, keepContext);
         }
-
+        
         public long AddBotResponse(TelegramGptMessageUpdate telegramGptMessage)
         {
-            return AddMessage(telegramGptMessage, GptRolesEnum.Assistant);
+            return AddMessage(telegramGptMessage, MessageOwner.Assistant);
         }
 
-        private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, GptRolesEnum role, bool keepContext = true)
+        public long AddBingImageCreatorResponse(TelegramGptMessageUpdate telegramGptMessage)
+        {
+            return AddMessage(telegramGptMessage, MessageOwner.BingAI);
+        }
+
+        private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, MessageOwner role, bool keepContext = true)
         {
             long? contextId = GetLastContext(telegramGptMessage.UserKey);
             string? text = null;
@@ -52,12 +56,16 @@ namespace GPTipsBot.Repositories
 
             switch (role)
             {
-                case GptRolesEnum.Assistant:
+                case MessageOwner.Assistant:
                     text = telegramGptMessage.Reply;
                     replyToId = telegramGptMessage.MessageId;
                     break;
-                case GptRolesEnum.User:
+                case MessageOwner.User:
                     text = telegramGptMessage.Text;
+                    break;
+                case MessageOwner.BingAI:
+                    text = telegramGptMessage.Reply;
+                    replyToId = telegramGptMessage.MessageId;
                     break;
                 default:
                     break;

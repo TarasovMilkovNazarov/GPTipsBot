@@ -1,10 +1,14 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -14,15 +18,19 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ILogger<ImageGeneratorToUserHandler> logger;
         private readonly ImageService imageService;
         private readonly ActionStatus sendImageStatus;
+        private readonly ImageCreatorService imageCreatorService;
+        private readonly MessageRepository messageRepository;
         public const int basedOnExperienceInputLengthLimit = 150;
 
         public ImageGeneratorToUserHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorToUserHandler> logger,
-            ImageService imageService, ActionStatus sendImagestatus)
+            ImageService imageService, ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
         {
             this.botClient = botClient;
             this.logger = logger;
             this.imageService = imageService;
             this.sendImageStatus = sendImagestatus;
+            this.imageCreatorService = imageCreatorService;
+            this.messageRepository = messageRepository;
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
@@ -42,7 +50,18 @@ namespace GPTipsBot.UpdateHandlers
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
-                await imageService.SendImageToTelegramUser(userKey.ChatId, update.Update.Message.Text, message.TelegramMessageId, token);
+
+                var imgSrcs = await imageCreatorService.GetImageSources(update.Update.Message.Text, token);
+                message.Reply = string.Join("\n",imgSrcs);
+                messageRepository.AddBingImageCreatorResponse(message);
+
+                var images = imageCreatorService.GetImages(imgSrcs);
+                var replyMarkup = TelegramBotUIService.cancelKeyboard;
+                var telegramMediaList = images.Select((img, i) => new InputMediaPhoto(new InputMedia(new MemoryStream(img),  $"newFile_{i}"))).ToList();
+
+                var photoMessage = await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true, 
+                    replyToMessageId: (int)message.TelegramMessageId, cancellationToken: token);
+
                 sw.Stop();
                 logger.LogInformation($"Successfull image generation for message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
             }

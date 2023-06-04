@@ -12,7 +12,7 @@ namespace GPTipsBot.Mapper
 {
     public static class MessageMapper
     {
-        public static Message MapToMessage(TelegramGptMessageUpdate messageDto, GptRolesEnum role)
+        public static Message MapToMessage(TelegramGptMessageUpdate messageDto, MessageOwner role)
         {
             Message message = new Message()
             {
@@ -31,7 +31,7 @@ namespace GPTipsBot.Mapper
 
             switch (role)
             {
-                case GptRolesEnum.Assistant:
+                case MessageOwner.Assistant:
                     message.Text = messageDto.Reply;
                     message.ReplyToId = messageDto.MessageId;
                     break;

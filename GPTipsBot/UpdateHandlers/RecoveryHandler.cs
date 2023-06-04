@@ -10,11 +10,11 @@ namespace GPTipsBot.UpdateHandlers
     public class RecoveryHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
-        private readonly MessageContextRepository messageRepository;
+        private readonly MessageRepository messageRepository;
         private static readonly Dictionary<long, Queue<Update>> chatToInformAboutRecovery = new Dictionary<long, Queue<Update>>();
 
         public RecoveryHandler(ITelegramBotClient botClient,
-            MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository)
+            MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository)
         {
             this.botClient = botClient;
             this.messageRepository = messageRepository;

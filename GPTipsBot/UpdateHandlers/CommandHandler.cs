@@ -14,13 +14,13 @@ namespace GPTipsBot.UpdateHandlers
     public class CommandHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
-        private readonly MessageContextRepository messageContextRepository;
+        private readonly MessageRepository messageContextRepository;
         private readonly UserRepository userRepository;
         private readonly ITelegramBotClient botClient;
         private readonly TelegramBotAPI telegramBotAPI;
         private readonly ILogger<CommandHandler> logger;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageContextRepository,
+        public CommandHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageContextRepository,
             UserRepository userRepository, ITelegramBotClient botClient, TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger)
         {
             this.messageHandlerFactory = messageHandlerFactory;

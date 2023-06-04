@@ -12,12 +12,12 @@ namespace GPTipsBot.UpdateHandlers
     public class UserToGptHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
-        private readonly MessageContextRepository messageRepository;
+        private readonly MessageRepository messageRepository;
         private readonly GptAPI gptAPI;
         private readonly ActionStatus typingStatus;
         private readonly ILogger<UserToGptHandler> logger;
 
-        public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository,
+        public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository,
             GptAPI gptAPI, ActionStatus typingStatus, ILogger<UserToGptHandler> logger)
         {
             this.messageHandlerFactory = messageHandlerFactory;

@@ -11,7 +11,7 @@ namespace GPTipsBot.Services
 {
     public class MessageService
     {
-        private readonly MessageContextRepository messageContextRepository;
+        private readonly MessageRepository messageContextRepository;
         private readonly ChatGptService chatGptService;
         public const int MaxMessagesCountPerMinute = 5;
         public static Timer resetMessageCountsPerMinuteTimer;
@@ -19,7 +19,7 @@ namespace GPTipsBot.Services
 
         public static Dictionary<long, int> UserToMessageCount { get; set; }
 
-        public MessageService(MessageContextRepository messageContextRepository, ChatGptService chatGptService)
+        public MessageService(MessageRepository messageContextRepository, ChatGptService chatGptService)
         {
             this.messageContextRepository = messageContextRepository;
             this.chatGptService = chatGptService;

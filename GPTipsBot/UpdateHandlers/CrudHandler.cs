@@ -12,10 +12,10 @@ namespace GPTipsBot.UpdateHandlers
     public class CrudHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
-        private readonly MessageContextRepository messageRepository;
+        private readonly MessageRepository messageRepository;
         private readonly ITelegramBotClient botClient;
 
-        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageContextRepository messageRepository, ITelegramBotClient botClient)
+        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository, ITelegramBotClient botClient)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;

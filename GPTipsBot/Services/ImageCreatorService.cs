@@ -18,7 +18,7 @@ namespace GPTipsBot.Services
         private string BING_URL = "https://www.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1hPBTELyEnqk1ilPiqkWyJit0HD9GN2bHV6w7V9AVsfrphfucCn3wbLgypGavkQUsjBLdRV7KdzqzU01OllF33VXwZWZT_L7lpGT9Po00chkxS31d7W8-QNgKxQPk24oF-SkPYtWkbXEOydAKgzYuzyno7Vczi9QvDTVK9yV-o7BOskrzsY8ILJg_YdhKituMCgJx2buOp6SM70zmxXF4uynpa_VNxDv0fbr5HybFV6eT-Tvcw9rsHPCR16k1cYjanw7BuvJ8_OrRTmkYFJCz2Q";
+        private string authCookie = "_U=1w4pYzmPHOt2iUw36dqGgIqoHTw9Gi13APgy9f0K5FnXL41xpEcj3BIa_SpOVOK_Vgyp9zqDVRPnalY75qdUu5S1L8lXw65Y6-UB0h9xl7nj5oeQcXbpV_ZQ1V7DKb_0oCWNUWxLZ9ckJDWqNioW_5E9C3pEARq-NxSTw250AIvL0EWn5FXFXGr1xtSLGIZ6ZaXNF8KvHppMyqbtlS2PXZQ";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
@@ -31,12 +31,6 @@ namespace GPTipsBot.Services
         {
             var imgSrcs = await GetImageSources(prompt, token);
             SaveImages(imgSrcs);
-        }
-        public async Task<byte[]> GetImageFromText(string prompt, CancellationToken token)
-        {
-            var imgSrcs = await GetImageSources(prompt, token);
-
-            return GetImages(imgSrcs);
         }
 
         private RestClient CreateBingRestClient()
@@ -72,7 +66,7 @@ namespace GPTipsBot.Services
             return client;
         }
 
-        private async Task<List<string>> GetImageSources(string prompt, CancellationToken token)
+        public async Task<List<string>> GetImageSources(string prompt, CancellationToken token)
         {
             Console.WriteLine("Sending request...");
             string urlEncodedPrompt = Uri.EscapeDataString(prompt);
@@ -179,11 +173,10 @@ namespace GPTipsBot.Services
             }
         }
 
-        private byte[] GetImages(List<string> links)
+        public List<byte[]> GetImages(List<string> links)
         {
+            var images = new List<byte[]>();
             Console.WriteLine("Getting images...");
-            int imageNum = 0;
-            byte[] image = null;
 
             var client = new RestClient();
             foreach (string link in links)
@@ -195,14 +188,36 @@ namespace GPTipsBot.Services
                     var response = client.DownloadData(request);
                     if (response != null)
                     {
-                        return response;
+                        images.Add(response);
                     }
                 }
                 catch (Exception)
                 {
                     // Error downloading file
                 }
-                imageNum++;
+            }
+
+            return images;
+        }
+
+        public byte[] GetImage(string link)
+        {
+            Console.WriteLine("Getting images...");
+            byte[]? image = null;
+
+            try
+            {
+                var request = new RestRequest(link);
+                request.AddHeader("Accept", "image/jpeg");
+                image = client.DownloadData(request);
+                if (image == null)
+                {
+                    throw new Exception($"Can't get image from source {link}");
+                }
+            }
+            catch (Exception)
+            {
+                // Error downloading file
             }
 
             return image;

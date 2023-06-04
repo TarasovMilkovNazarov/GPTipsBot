@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot.Models
 {
-    public enum GptRolesEnum
+    public enum MessageOwner
     {
         None = 0,
         System,
         Assistant,
         User,
+        BingAI
     }
 }

@@ -52,7 +52,7 @@ var host = Host.CreateDefaultBuilder(args)
         .AddScoped<GptAPI>()
         .AddScoped<ChatGptService>()
         .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
-        .AddScoped<MessageContextRepository>()
+        .AddScoped<MessageRepository>()
         .AddScoped<UserRepository>()
         .AddScoped<ITelegramBotClient, TelegramBotClient>(x => ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken));
 
