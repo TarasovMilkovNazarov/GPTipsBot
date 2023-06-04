@@ -54,10 +54,8 @@ namespace GPTipsBot.UpdateHandlers
                 var imgSrcs = await imageCreatorService.GetImageSources(update.Update.Message.Text, token);
                 message.Reply = string.Join("\n",imgSrcs);
                 messageRepository.AddBingImageCreatorResponse(message);
-
-                var images = imageCreatorService.GetImages(imgSrcs);
                 var replyMarkup = TelegramBotUIService.cancelKeyboard;
-                var telegramMediaList = images.Select((img, i) => new InputMediaPhoto(new InputMedia(new MemoryStream(img),  $"newFile_{i}"))).ToList();
+                var telegramMediaList = imgSrcs.Select((img, i) => new InputMediaPhoto(new InputMedia(img))).ToList();
 
                 var photoMessage = await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true, 
                     replyToMessageId: (int)message.TelegramMessageId, cancellationToken: token);

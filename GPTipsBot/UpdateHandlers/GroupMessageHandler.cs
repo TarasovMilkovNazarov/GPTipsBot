@@ -3,6 +3,8 @@ using GPTipsBot.Dtos;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
+using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -20,6 +22,31 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             var message = update.Update.Message;
+
+            // @GPTipBot /start any text
+            string pattern1 = @"(@GPTips?Bot)\s(\/.*?)\s?(.*)";
+            var match1 = Regex.Matches(message.Text, pattern1).FirstOrDefault();
+
+            if (match1 != null)
+            {
+                update.TelegramGptMessage.Text = message.Text.Remove(0,match1.Groups[0].Length);
+
+                await base.HandleAsync(update, cancellationToken);
+                return;
+            }
+
+            // image@GPTipBot text image description
+            string pattern2 = @"(\/.*?)(@GPTips?Bot)\s?(.*)";
+            var match2 = Regex.Matches(message.Text, pattern2).FirstOrDefault();
+
+            if (match2 != null)
+            {
+                update.TelegramGptMessage.Text = message.Text.Remove(match2.Groups[2].Index,match2.Groups[2].Length);
+
+                await base.HandleAsync(update, cancellationToken);
+                return;
+            }
+
             if (message == null)
             {
                 await base.HandleAsync(update, cancellationToken);
@@ -31,11 +58,13 @@ namespace GPTipsBot.UpdateHandlers
             var isReplyToBotMessage = message.ReplyToMessage?.From?.IsBot ?? false;
             var groupOrChannelTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             var isGroupOrChannel = groupOrChannelTypes.Contains(message.Chat.Type);
+            var isUserWaitingResponse = MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState != Enums.UserStateEnum.None;
 
-            if (!isBotMentioned && !isReplyToBotMessage && isGroupOrChannel)
+            if (!isBotMentioned && !isReplyToBotMessage && isGroupOrChannel && !isUserWaitingResponse)
             {
                 return;
             }
+
             if (isBotMentioned)
             {
                 message.Text = message.Text.Substring(botMentionedEntity.Length).Trim();
