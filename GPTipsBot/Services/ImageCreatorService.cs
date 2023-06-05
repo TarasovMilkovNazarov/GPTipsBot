@@ -110,7 +110,8 @@ namespace GPTipsBot.Services
             var imageLinks = new List<string>();
             foreach (Match match in regex.Matches(response.Content))
             {
-                imageLinks.Add(match.Groups[1].Value);
+                // split removes size limits
+                imageLinks.Add(match.Groups[1].Value.Split("?w=")[0]);
             }
             // Remove duplicates
             return new List<string>(new HashSet<string>(imageLinks));
