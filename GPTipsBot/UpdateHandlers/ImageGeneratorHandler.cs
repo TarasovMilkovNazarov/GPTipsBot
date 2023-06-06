@@ -12,17 +12,17 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class ImageGeneratorToUserHandler : BaseMessageHandler
+    public class ImageGeneratorHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
-        private readonly ILogger<ImageGeneratorToUserHandler> logger;
+        private readonly ILogger<ImageGeneratorHandler> logger;
         private readonly ImageService imageService;
         private readonly ActionStatus sendImageStatus;
         private readonly ImageCreatorService imageCreatorService;
         private readonly MessageRepository messageRepository;
         public const int basedOnExperienceInputLengthLimit = 150;
 
-        public ImageGeneratorToUserHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorToUserHandler> logger,
+        public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             ImageService imageService, ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
         {
             this.botClient = botClient;

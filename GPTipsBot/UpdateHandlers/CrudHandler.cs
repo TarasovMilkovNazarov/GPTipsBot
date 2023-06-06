@@ -20,7 +20,7 @@ namespace GPTipsBot.UpdateHandlers
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
             this.botClient = botClient;
-            SetNextHandler(messageHandlerFactory.Create<UserToGptHandler>());
+            SetNextHandler(messageHandlerFactory.Create<ChatGptHandler>());
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ namespace GPTipsBot.UpdateHandlers
                 MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.AwaitingImage)
             {
                 update.TelegramGptMessage.ContextBound = false;
-                SetNextHandler(messageHandlerFactory.Create<ImageGeneratorToUserHandler>());
+                SetNextHandler(messageHandlerFactory.Create<ImageGeneratorHandler>());
             }
             if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
                 MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.SendingFeedback)

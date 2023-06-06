@@ -24,7 +24,7 @@ namespace GPTipsBot.Api
             "Попробуйте заново, начиная с команды /image, либо дождитесь исправления ошибок. " +
             "Мы работаем над улучшением сервиса, благодарим за понимание 🙏";
         public static string ImageDescriptionLimitWarning = $"Текстовое описание изображения должно быть не более " +
-            $"{ImageGeneratorToUserHandler.basedOnExperienceInputLengthLimit} символов. " +
+            $"{ImageGeneratorHandler.basedOnExperienceInputLengthLimit} символов. " +
             "Сократите описание и начните заново с команды /image";
         public static string OnMaintenance = "⚙️ Ведутся технические работы. Благодарим за понимание.";
         public static string Recovered = "Простите, я отутствовал какое-то время, но сейчас снова в строю.";
@@ -34,6 +34,6 @@ namespace GPTipsBot.Api
             "В разработке находятся голосовые сообщения и генерация картинок текстом";
 
         public static string InputImageDescriptionText => $"Введите текстовое описание изображения длиной до " +
-            $"{ImageGeneratorToUserHandler.basedOnExperienceInputLengthLimit} символов";
+            $"{ImageGeneratorHandler.basedOnExperienceInputLengthLimit} символов";
     }
 }

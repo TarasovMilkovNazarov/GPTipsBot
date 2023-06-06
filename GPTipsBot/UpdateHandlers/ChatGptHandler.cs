@@ -5,27 +5,29 @@ using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class UserToGptHandler : BaseMessageHandler
+    public class ChatGptHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageRepository messageRepository;
         private readonly GptAPI gptAPI;
         private readonly ActionStatus typingStatus;
-        private readonly ILogger<UserToGptHandler> logger;
+        private readonly ILogger<ChatGptHandler> logger;
+        private readonly ITelegramBotClient botClient;
 
-        public UserToGptHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository,
-            GptAPI gptAPI, ActionStatus typingStatus, ILogger<UserToGptHandler> logger)
+        public ChatGptHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository,
+            GptAPI gptAPI, ActionStatus typingStatus, ILogger<ChatGptHandler> logger, ITelegramBotClient botClient)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
             this.typingStatus = typingStatus;
             this.logger = logger;
-            SetNextHandler(messageHandlerFactory.Create<GptToUserHandler>());
+            this.botClient = botClient;
         }
 
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
@@ -46,6 +48,7 @@ namespace GPTipsBot.UpdateHandlers
                 sw.Stop();
                 logger.LogInformation($"Get response to message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
                 message.Reply = gtpResponse?.Choices?.FirstOrDefault()?.Message?.Content;
+                await botClient.SendTextMessageAsync(message.UserKey.ChatId, message.Reply, replyToMessageId: (int)message.TelegramMessageId);
                 messageRepository.AddBotResponse(message);
             }
             catch (OperationCanceledException ex)
