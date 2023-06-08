@@ -25,20 +25,20 @@ namespace GPTipsBot.UpdateHandlers
                 AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
                 if (!AppConfig.IsOnMaintenance)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.Recovered, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.Recovered, cancellationToken: cancellationToken);
                     return;
                 }
             }
             if (message?.Text == "/switchProxy" && message?.From?.Id == AppConfig.AdminId)
             {
                 AppConfig.UseFreeApi = !AppConfig.UseFreeApi;
-                await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.SwitchProxy, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.SwitchProxy, cancellationToken: cancellationToken);
                 return;
             }
 
             if (AppConfig.IsOnMaintenance)
             {
-                await botClient.SendTextMessageAsync(message.Chat.Id, BotResponse.OnMaintenance, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.OnMaintenance, cancellationToken: cancellationToken);
                 return;
             }
 

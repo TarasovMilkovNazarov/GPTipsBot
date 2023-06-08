@@ -54,24 +54,24 @@ namespace GPTipsBot.UpdateHandlers
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                     userRepository.CreateUpdateUser(update.TelegramGptMessage);
-                    responseToUser = BotResponse.Greeting;
+                    responseToUser = Api.BotResponse.Greeting;
                     break;
                 case CommandType.Help:
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     responseToUser = telegramBotAPI.GetMyDescription();
                     break;
                 case CommandType.CreateImage:
-                    responseToUser = BotResponse.InputImageDescriptionText;
+                    responseToUser = Api.BotResponse.InputImageDescriptionText;
                     replyMarkup = cancelKeyboard;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
-                    responseToUser = BotResponse.ContextUpdated;
+                    responseToUser = Api.BotResponse.ContextUpdated;
                     keepContext = false;
                     break;
                 case CommandType.Feedback:
-                    responseToUser = BotResponse.SendFeedback;
+                    responseToUser = Api.BotResponse.SendFeedback;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.SendingFeedback;
                     replyMarkup = cancelKeyboard;
                     break;
@@ -83,8 +83,13 @@ namespace GPTipsBot.UpdateHandlers
                     responseToUser = BotResponse.Cancel;
                     try
                     {
-                        replyMarkup = cancelKeyboard;
-                        MainHandler.userState[update.TelegramGptMessage.UserKey].messageIdToCancellation[update.Update.CallbackQuery.Message.MessageId].Cancel();
+                        var state = MainHandler.userState[update.TelegramGptMessage.UserKey];
+                        if (state.CurrentState == UserStateEnum.None)
+                        {
+                            replyMarkup = new ReplyKeyboardRemove();
+                        }
+
+                        state.messageIdToCancellation[update.Update.CallbackQuery.Message.MessageId].Cancel();
                     }
                     catch (Exception ex) { return; }
                     

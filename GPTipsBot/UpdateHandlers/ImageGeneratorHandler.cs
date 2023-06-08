@@ -40,7 +40,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, Api.BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
@@ -73,7 +73,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch(Exception ex)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(userKey.ChatId, Api.BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
             }
             finally
             {

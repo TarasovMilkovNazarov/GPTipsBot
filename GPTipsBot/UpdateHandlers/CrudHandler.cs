@@ -37,7 +37,7 @@ namespace GPTipsBot.UpdateHandlers
                 update.TelegramGptMessage.ContextBound = false;
                 MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                 update.TelegramGptMessage.Text = "Отзыв: " + update.TelegramGptMessage.Text;
-                await botClient.SendTextMessageWithMenuKeyboard(update.TelegramGptMessage.UserKey.ChatId, BotResponse.Thanks, cancellationToken);
+                await botClient.SendTextMessageWithMenuKeyboard(update.TelegramGptMessage.UserKey.ChatId, Api.BotResponse.Thanks, cancellationToken);
                 SetNextHandler(null);
             }
 

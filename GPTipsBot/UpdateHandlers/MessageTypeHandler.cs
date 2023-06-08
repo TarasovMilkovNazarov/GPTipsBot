@@ -31,7 +31,7 @@ namespace GPTipsBot.UpdateHandlers
                 if (update.Update.Message?.Chat != null)
                 {
                     await botClient.SendTextMessageAsync(update.Update.Message.Chat.Id,
-                        BotResponse.OnlyMessagesAvailable, cancellationToken: update.CancellationToken);
+                        Api.BotResponse.OnlyMessagesAvailable, cancellationToken: update.CancellationToken);
                 }
                 
                 return;

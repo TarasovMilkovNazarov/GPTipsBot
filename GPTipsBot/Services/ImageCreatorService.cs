@@ -84,7 +84,7 @@ namespace GPTipsBot.Services
 
             if (string.IsNullOrEmpty(response?.Content))
             {
-                throw new CustomException(BotResponse.SomethingWentWrongWithImageService);
+                throw new CustomException(Api.BotResponse.SomethingWentWrongWithImageService);
             }
 
             if (response.Content.ToLower().Contains("this prompt has been blocked"))

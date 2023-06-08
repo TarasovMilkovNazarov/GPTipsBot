@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GPTipsBot.Models
+namespace GPTipsBot.Enums
 {
     public enum MessageOwner
     {
