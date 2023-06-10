@@ -20,23 +20,23 @@ namespace GPTipsBot.UpdateHandlers
         {
             var message = update.Update?.Message;
 
-            if (message?.Text == "/fix" && message?.From?.Id == AppConfig.AdminId)
+            if (message?.Text == "/fix" && message?.From?.Id == Config.AdminId)
             {
-                AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
-                if (!AppConfig.IsOnMaintenance)
+                Config.IsOnMaintenance = !Config.IsOnMaintenance;
+                if (!Config.IsOnMaintenance)
                 {
                     await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.Recovered, cancellationToken: cancellationToken);
                     return;
                 }
             }
-            if (message?.Text == "/switchProxy" && message?.From?.Id == AppConfig.AdminId)
+            if (message?.Text == "/switchProxy" && message?.From?.Id == Config.AdminId)
             {
-                AppConfig.UseFreeApi = !AppConfig.UseFreeApi;
+                Config.UseFreeApi = !Config.UseFreeApi;
                 await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.SwitchProxy, cancellationToken: cancellationToken);
                 return;
             }
 
-            if (AppConfig.IsOnMaintenance)
+            if (Config.IsOnMaintenance)
             {
                 await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.OnMaintenance, cancellationToken: cancellationToken);
                 return;

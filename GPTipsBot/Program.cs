@@ -23,7 +23,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddHttpClient("telegram_bot_client")
                 .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
                 {
-                    TelegramBotClientOptions options = new(AppConfig.TelegramToken);
+                    TelegramBotClientOptions options = new(Config.TelegramToken);
                     return new TelegramBotClient(options);
                 });
 
@@ -53,12 +53,12 @@ var host = Host.CreateDefaultBuilder(args)
         .AddScoped<MessageService>()
         .AddScoped<GptAPI>()
         .AddScoped<ChatGptService>()
-        .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
+        .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, Config.TelegramToken, Config.СhatId))
         .AddScoped<MessageRepository>()
         .AddScoped<UserRepository>()
-        .AddScoped<ITelegramBotClient, TelegramBotClient>(x => ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken));
+        .AddScoped<ITelegramBotClient, TelegramBotClient>(x => ActivatorUtilities.CreateInstance<TelegramBotClient>(x, Config.TelegramToken));
 
-        services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
+        services.AddOpenAIService(settings => { settings.ApiKey = Config.OpenAiToken; });
     }).Build();
 
 await host.RunAsync();

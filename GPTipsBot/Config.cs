@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot
 {
-    public static class AppConfig
+    public static class Config
     {
         public static bool UseFreeApi = true;
         public static bool IsOnMaintenance = false;

@@ -27,7 +27,7 @@ namespace GPTipsBot.Api
             $"{ImageGeneratorHandler.basedOnExperienceInputLengthLimit} символов. Сократите описание и начните заново с команды /image";
         public static string OnMaintenance = "⚙️ Ведутся технические работы. Благодарим за понимание.";
         public static string Recovered = "Простите, я отутствовал какое-то время, но сейчас снова в строю.";
-        public static string SwitchProxy => String.Format("Использовать бесплатное прокси: {0}", AppConfig.UseFreeApi);
+        public static string SwitchProxy => String.Format("Использовать бесплатное прокси: {0}", Config.UseFreeApi);
         public static string PleaseWaitMsg = "⌛️ Подождите, подготавливаю ответ...";
         public static string OnlyMessagesAvailable = "Извините, но сейчас доступна обработка только текстовых сообщений. " +
             "В разработке находятся голосовые сообщения и генерация картинок текстом";

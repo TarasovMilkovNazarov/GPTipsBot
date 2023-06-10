@@ -11,7 +11,7 @@ using GptModels = OpenAI.ObjectModels;
 
 namespace GPTipsBot.Api
 {
-    using static AppConfig;
+    using static Config;
 
     public class GptAPI
     {
