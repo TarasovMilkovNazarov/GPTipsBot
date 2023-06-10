@@ -23,25 +23,25 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<ChatGptHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
-                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.AwaitingImage)
+            if (MainHandler.userState.ContainsKey(update.UserChatKey) && 
+                MainHandler.userState[update.UserChatKey].CurrentState == Enums.UserStateEnum.AwaitingImage)
             {
-                update.TelegramGptMessage.ContextBound = false;
+                update.Message.ContextBound = false;
                 SetNextHandler(messageHandlerFactory.Create<ImageGeneratorHandler>());
             }
-            if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
-                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.SendingFeedback)
+            if (MainHandler.userState.ContainsKey(update.UserChatKey) && 
+                MainHandler.userState[update.UserChatKey].CurrentState == Enums.UserStateEnum.SendingFeedback)
             {
-                update.TelegramGptMessage.ContextBound = false;
-                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
-                update.TelegramGptMessage.Text = "Отзыв: " + update.TelegramGptMessage.Text;
-                await botClient.SendTextMessageWithMenuKeyboard(update.TelegramGptMessage.UserKey.ChatId, Api.BotResponse.Thanks, cancellationToken);
+                update.Message.ContextBound = false;
+                MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
+                update.Message.Text = "Отзыв: " + update.Message.Text;
+                await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, Api.BotResponse.Thanks, cancellationToken);
                 SetNextHandler(null);
             }
 
-            messageRepository.AddUserMessage(update.TelegramGptMessage);
+            messageRepository.AddMessage(update.Message);
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

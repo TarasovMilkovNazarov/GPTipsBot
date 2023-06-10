@@ -17,7 +17,7 @@ namespace GPTipsBot
         private readonly TelegramBotAPI telegramBotApi;
         private readonly MessageHandlerFactory messageHandlerFactory;
 
-        public static readonly Dictionary<long, Queue<Update>> userToUpdatesQueue = new Dictionary<long, Queue<Update>>();
+        public static readonly Dictionary<long, Queue<Telegram.Bot.Types.Update>> userToUpdatesQueue = new Dictionary<long, Queue<Telegram.Bot.Types.Update>>();
         public static DateTime Start { get; private set; }
 
         public TelegramBotWorker(ILogger<TelegramBotWorker> logger, GptAPI gptAPI, 
@@ -30,10 +30,10 @@ namespace GPTipsBot
             Start = DateTime.UtcNow;
         }
 
-        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
         {
             var mainHandler = messageHandlerFactory.Create<MainHandler>();
-            var extendedUpd = new UpdateWithCustomMessageDecorator(update, cancellationToken);
+            var extendedUpd = new UpdateDecorator(update, cancellationToken);
 
             try
             {

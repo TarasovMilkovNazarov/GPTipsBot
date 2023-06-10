@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Enums;
+using GPTipsBot.Mapper;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -32,10 +33,10 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            var messageText = update.TelegramGptMessage.Text;
-            var chatId = update.TelegramGptMessage.UserKey.ChatId;
+            var messageText = update.Message.Text;
+            var chatId = update.UserChatKey.ChatId;
 
             if (!TryGetCommand(messageText, out var command))
             {
@@ -46,50 +47,50 @@ namespace GPTipsBot.UpdateHandlers
             string? responseToUser = null;
             bool keepContext = true;
             IReplyMarkup? replyMarkup = startKeyboard;
-            update.TelegramGptMessage.ContextBound = false;
+            update.Message.ContextBound = false;
 
             switch (command)
             {
                 case CommandType.Start:
-                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
-                    update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
-                    userRepository.CreateUpdateUser(update.TelegramGptMessage);
-                    responseToUser = Api.BotResponse.Greeting;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
+                    update.User.Source = TelegramService.GetSource(messageText);
+                    userRepository.CreateUpdateUser(UserMapper.Map(update.User));
+                    responseToUser = BotResponse.Greeting;
                     break;
                 case CommandType.Help:
-                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     responseToUser = telegramBotAPI.GetMyDescription();
                     break;
                 case CommandType.CreateImage:
-                    responseToUser = Api.BotResponse.InputImageDescriptionText;
+                    responseToUser = BotResponse.InputImageDescriptionText;
                     replyMarkup = cancelKeyboard;
-                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:
-                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
-                    responseToUser = Api.BotResponse.ContextUpdated;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
+                    responseToUser = BotResponse.ContextUpdated;
                     keepContext = false;
                     break;
                 case CommandType.Feedback:
-                    responseToUser = Api.BotResponse.SendFeedback;
-                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.SendingFeedback;
+                    responseToUser = BotResponse.SendFeedback;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.SendingFeedback;
                     replyMarkup = cancelKeyboard;
                     break;
                 case CommandType.Cancel:
                     responseToUser = BotResponse.Cancel;
-                    MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     break;
                 case CommandType.StopRequest:
                     responseToUser = BotResponse.Cancel;
                     try
                     {
-                        var state = MainHandler.userState[update.TelegramGptMessage.UserKey];
+                        var state = MainHandler.userState[update.UserChatKey];
                         if (state.CurrentState == UserStateEnum.None)
-                        {
+                        { 
                             replyMarkup = new ReplyKeyboardRemove();
                         }
 
-                        state.messageIdToCancellation[update.Update.CallbackQuery.Message.MessageId].Cancel();
+                        state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
                     }
                     catch (Exception ex) { return; }
                     
@@ -98,7 +99,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (!string.IsNullOrEmpty(responseToUser))
             {
-                messageContextRepository.AddUserMessage(update.TelegramGptMessage, keepContext);
+                messageContextRepository.AddMessage(update.Message, keepContext: keepContext);
                 await botClient.SendTextMessageAsync(chatId, responseToUser, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
             }
         }

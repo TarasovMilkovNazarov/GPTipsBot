@@ -11,7 +11,7 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly ITelegramBotClient botClient;
         private readonly MessageRepository messageRepository;
-        private static readonly Dictionary<long, Queue<Update>> chatToInformAboutRecovery = new Dictionary<long, Queue<Update>>();
+        private static readonly Dictionary<long, Queue<UpdateDecorator>> chatToInformAboutRecovery = new Dictionary<long, Queue<UpdateDecorator>>();
 
         public RecoveryHandler(ITelegramBotClient botClient,
             MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository)
@@ -21,30 +21,30 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<OnAdminCommandHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            if (update.Update.Message?.From == null || update.TelegramGptMessage == null)
+            if (update.UserChatKey == null)
             {
                 await base.HandleAsync(update, cancellationToken);
                 return;
             }
 
-            var chatId = update.Update.Message.Chat.Id;
+            var chatId = update.UserChatKey.ChatId;
 
-            if (TelegramBotWorker.Start - update.Update.Message?.Date >= TimeSpan.FromMinutes(2))
+            if (TelegramBotWorker.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
             {
-                messageRepository.AddUserMessage(update.TelegramGptMessage);
+                messageRepository.AddMessage(update.Message);
                 
 
                 if (chatToInformAboutRecovery.ContainsKey(chatId))
-                    chatToInformAboutRecovery[chatId].Enqueue(update.Update);
+                    chatToInformAboutRecovery[chatId].Enqueue(update);
                 else
                 {
-                    var q = new Queue<Update>();
-                    q.Enqueue(update.Update);
+                    var q = new Queue<UpdateDecorator>();
+                    q.Enqueue(update);
                     chatToInformAboutRecovery.Add(chatId, q);
                     
-                    await botClient.SendTextMessageAsync(update.Update.Message.Chat.Id,
+                    await botClient.SendTextMessageAsync(chatId,
                         Api.BotResponse.Recovered, cancellationToken: update.CancellationToken);
                 };
 

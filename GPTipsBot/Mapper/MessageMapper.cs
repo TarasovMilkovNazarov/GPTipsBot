@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Models;
+using GPTipsBot.UpdateHandlers;
 using Polly;
 using System;
 using System.Collections.Generic;
@@ -8,35 +9,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
+using Tmessage = Telegram.Bot.Types.Message;
 
 namespace GPTipsBot.Mapper
 {
     public static class MessageMapper
     {
-        public static Message MapToMessage(TelegramGptMessageUpdate messageDto, MessageOwner role)
+        public static MessageDto Map(Tmessage tMessage, long chatId, MessageOwner role)
         {
-            Message message = new Message()
+            MessageDto message = new()
             {
-                ChatId = messageDto.UserKey.ChatId,
-                ReplyToId = messageDto.ReplyToId,
-                Text = messageDto.Text,
-                UserId = messageDto.UserKey.Id,
-                CreatedAt = DateTime.UtcNow,
-                Role = role
+                TelegramMessageId = tMessage.MessageId,
+                ChatId = chatId,
+                Text = tMessage.Text,
+                UserId = tMessage.From.Id,
+                CreatedAt = tMessage.Date,
+                Role = role,
+                EntityValues = tMessage.EntityValues,
+                Entities = tMessage.Entities,
+                ReplyToMessage = tMessage.ReplyToMessage,
+                ChatType = tMessage.Chat.Type,
+                ContextBound = true
             };
-
-            if (messageDto.ContextId.HasValue)
-            {
-                message.ContextId = messageDto.ContextId;
-            }
-
-            switch (role)
-            {
-                case MessageOwner.Assistant:
-                    message.Text = messageDto.Reply;
-                    message.ReplyToId = messageDto.MessageId;
-                    break;
-            }
 
             return message;
         }

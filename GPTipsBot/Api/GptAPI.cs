@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Services;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenAI.Interfaces;
@@ -29,9 +30,9 @@ namespace GPTipsBot.Api
             this.messageService = messageService;
         }
 
-        public async Task<ChatCompletionCreateResponse> SendMessage(TelegramGptMessageUpdate telegramGptMessage, CancellationToken token)
+        public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
         {
-            var textWithContext = messageService.PrepareContext(telegramGptMessage.UserKey, telegramGptMessage.ContextId.Value);
+            var textWithContext = messageService.PrepareContext(update.UserChatKey, update.Message.ContextId.Value);
             if (textWithContext.Length == 0)
             {
                 //todo reset context or suggest user to reset: send inline command with reset

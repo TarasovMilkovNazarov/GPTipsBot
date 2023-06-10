@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace GPTipsBot.Dtos
 {
-    public record UserKey(long Id, long ChatId);
+    public record UserChatKey(long Id, long ChatId);
 }

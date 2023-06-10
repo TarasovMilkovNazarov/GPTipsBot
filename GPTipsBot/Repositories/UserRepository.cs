@@ -5,6 +5,7 @@ using GPTipsBot.Extensions;
 using GPTipsBot.Mapper;
 using GPTipsBot.Models;
 using GPTipsBot.Services;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Data.Common;
@@ -35,27 +36,25 @@ namespace GPTipsBot.Repositories
             this.messageRepository = messageRepository;
         }
 
-        public long CreateUpdateUser(TelegramGptMessageUpdate telegramGptMessage)
+        public long CreateUpdateUser(User user)
         {
             logger.LogInformation("CreateUser");
 
-            User? user;
-            user = _connection.Query<User>(selectUserByTelegramId, new { telegramId = telegramGptMessage.UserKey.Id }).FirstOrDefault();
-            if (user == null)
+            var dbUser = _connection.Query<User>(selectUserByTelegramId, new { telegramId = user.Id }).FirstOrDefault();
+            if (dbUser == null)
             {
-                user = UserMapper.MapToUser(telegramGptMessage);
                 _connection.QuerySingle<long>(insertUserQuery, user);
             }
             else
             {
                 _connection.ExecuteScalar(updateUserQuery, new
                 {
-                    telegramId = telegramGptMessage.UserKey.Id,
-                    source = string.IsNullOrEmpty(user.Source) ? telegramGptMessage.Source : user.Source
+                    telegramId = user.Id,
+                    source = string.IsNullOrEmpty(dbUser.Source) ? user.Source : dbUser.Source
                 });
             }
 
-            return telegramGptMessage.UserKey.Id;
+            return user.Id;
         }
 
         public IEnumerable<User> GetAll()

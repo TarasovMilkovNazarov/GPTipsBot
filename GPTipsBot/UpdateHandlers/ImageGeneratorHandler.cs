@@ -33,35 +33,35 @@ namespace GPTipsBot.UpdateHandlers
             this.messageRepository = messageRepository;
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            var message = update.TelegramGptMessage;
-            var userKey = update.TelegramGptMessage.UserKey;
+            var userKey = update.UserChatKey;
 
-            if (update.Update.Message.Text.Length > basedOnExperienceInputLengthLimit)
+            if (update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
                 await botClient.SendTextMessageAsync(userKey.ChatId, Api.BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
 
-            message.ServiceMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
+            update.ServiceMessage.TelegramMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
+                var token = MainHandler.userState[update.UserChatKey]
+                    .messageIdToCancellation[update.ServiceMessage.TelegramMessageId ?? throw new InvalidOperationException()].Token;
 
-                var imgSrcs = await imageCreatorService.GetImageSources(update.Update.Message.Text, token);
-                message.Reply = string.Join("\n",imgSrcs);
-                messageRepository.AddBingImageCreatorResponse(message);
+                var imgSrcs = await imageCreatorService.GetImageSources(update.Message.Text, token);
+                update.Reply.Text = string.Join("\n",imgSrcs);
+                messageRepository.AddMessage(update.Reply);
                 var replyMarkup = TelegramBotUIService.cancelKeyboard;
                 var telegramMediaList = imgSrcs.Select((img, i) => new InputMediaPhoto(new InputMedia(img))).ToList();
 
                 var photoMessage = await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true, 
-                    replyToMessageId: (int)message.TelegramMessageId, cancellationToken: token);
+                    replyToMessageId: (int?)update.Message.TelegramMessageId, cancellationToken: token);
 
                 sw.Stop();
-                logger.LogInformation($"Successfull image generation for message {message.MessageId} takes {sw.Elapsed.TotalSeconds}s");
+                logger.LogInformation($"Successfull image generation for message {update.Message.Id} takes {sw.Elapsed.TotalSeconds}s");
             }
             catch(OperationCanceledException ex)
             {
