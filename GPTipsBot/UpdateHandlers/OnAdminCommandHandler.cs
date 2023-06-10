@@ -1,8 +1,5 @@
 ﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Extensions;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -16,29 +13,27 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<RateLimitingHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            var message = update.Update?.Message;
-
-            if (message?.Text == "/fix" && message?.From?.Id == AppConfig.AdminId)
+            if (update.Message.Text == "/fix" && update.UserChatKey.Id == AppConfig.AdminId)
             {
                 AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
                 if (!AppConfig.IsOnMaintenance)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.Recovered, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.Recovered, cancellationToken: cancellationToken);
                     return;
                 }
             }
-            if (message?.Text == "/switchProxy" && message?.From?.Id == AppConfig.AdminId)
+            if (update.Message.Text == "/switchProxy" && update.UserChatKey.Id == AppConfig.AdminId)
             {
                 AppConfig.UseFreeApi = !AppConfig.UseFreeApi;
-                await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.SwitchProxy, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.SwitchProxy, cancellationToken: cancellationToken);
                 return;
             }
 
             if (AppConfig.IsOnMaintenance)
             {
-                await botClient.SendTextMessageAsync(message.Chat.Id, Api.BotResponse.OnMaintenance, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.OnMaintenance, cancellationToken: cancellationToken);
                 return;
             }
 

@@ -1,6 +1,6 @@
 ﻿namespace GPTipsBot.UpdateHandlers
 {
-    public abstract class BaseMessageHandler : IMessageHandler
+    public abstract class BaseMessageHandler : IMessageHandler<UpdateDecorator>
     {
         private BaseMessageHandler? nextHandler;
 
@@ -9,7 +9,7 @@
             nextHandler = handler;
         }
 
-        public virtual async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public virtual async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
             if (nextHandler != null)
             {

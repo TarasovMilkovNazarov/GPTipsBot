@@ -1,21 +1,14 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Enums;
-using GPTipsBot.Extensions;
+﻿using GPTipsBot.Dtos;
+using GPTipsBot.Mapper;
 using GPTipsBot.Repositories;
-using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Threading;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
     public class MainHandler : BaseMessageHandler
     {
-        public static ConcurrentDictionary<UserKey, UserStateDto> userState = new ();
+        public static ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly UserRepository userRepository;
         private readonly ILogger<MainHandler> logger;
@@ -28,23 +21,23 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<DeleteUserHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            if (update.Update.CallbackQuery != null)
+            if (update.CallbackQuery != null)
             {
                 SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
                 await base.HandleAsync(update, cancellationToken);
                 return;
             }
 
-            var userKey = update.TelegramGptMessage?.UserKey;
+            var userKey = update.UserChatKey;
             if (userKey != null && !userState.ContainsKey(userKey))
             {
                 userState.TryAdd(userKey, new UserStateDto(userKey));
             }
-            if (update.Update.CallbackQuery == null && update.TelegramGptMessage != null)
+            if (update.CallbackQuery == null)
             {
-                userRepository.CreateUpdateUser(update.TelegramGptMessage);
+                userRepository.CreateUpdateUser(UserMapper.Map(update.User));
             }
 
             // Call next handler

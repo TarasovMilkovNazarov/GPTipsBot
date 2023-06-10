@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using GPTipsBot.Db;
-using Microsoft.Extensions.Configuration;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using OpenAI.Extensions;
@@ -11,7 +10,6 @@ using GPTipsBot.Api;
 using Telegram.Bot;
 using GPTipsBot.UpdateHandlers;
 using Telegram.Bot.Services;
-using Telegram.Bot.Polling;
 using dotenv.net;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();

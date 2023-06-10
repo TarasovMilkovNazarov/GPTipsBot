@@ -1,8 +1,6 @@
-﻿using GPTipsBot.Extensions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
-using System;
 using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.Api

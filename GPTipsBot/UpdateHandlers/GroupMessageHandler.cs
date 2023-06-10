@@ -1,13 +1,4 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Models;
-using GPTipsBot.Repositories;
-using GPTipsBot.Services;
-using Microsoft.Extensions.Options;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using System.Text.RegularExpressions;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
@@ -19,9 +10,9 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<MessageTypeHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            var message = update.Update.Message;
+            var message = update.Message;
 
             // @GPTipBot /start any text
             string pattern1 = @"(@GPTips?Bot)\s(\/.*?)\s?(.*)";
@@ -29,7 +20,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (match1 != null)
             {
-                update.TelegramGptMessage.Text = message.Text.Remove(0,match1.Groups[0].Length);
+                update.Message.Text = message.Text.Remove(0,match1.Groups[0].Length);
 
                 await base.HandleAsync(update, cancellationToken);
                 return;
@@ -41,7 +32,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (match2 != null)
             {
-                update.TelegramGptMessage.Text = message.Text.Remove(match2.Groups[2].Index,match2.Groups[2].Length);
+                update.Message.Text = message.Text.Remove(match2.Groups[2].Index,match2.Groups[2].Length);
 
                 await base.HandleAsync(update, cancellationToken);
                 return;
@@ -57,8 +48,8 @@ namespace GPTipsBot.UpdateHandlers
             var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
             var isReplyToBotMessage = message.ReplyToMessage?.From?.IsBot ?? false;
             var groupOrChannelTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
-            var isGroupOrChannel = groupOrChannelTypes.Contains(message.Chat.Type);
-            var isUserWaitingResponse = MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState != Enums.UserStateEnum.None;
+            var isGroupOrChannel = groupOrChannelTypes.Contains(message.ChatType);
+            var isUserWaitingResponse = MainHandler.userState[update.UserChatKey].CurrentState != Enums.UserStateEnum.None;
 
             if (!isBotMentioned && !isReplyToBotMessage && isGroupOrChannel && !isUserWaitingResponse)
             {
@@ -67,8 +58,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (isBotMentioned)
             {
-                message.Text = message.Text.Substring(botMentionedEntity.Length).Trim();
-                update.TelegramGptMessage.Text = message.Text;
+                update.Message.Text = update.Message.Text.Substring(botMentionedEntity.Length).Trim();
             }
 
             // Call next handler

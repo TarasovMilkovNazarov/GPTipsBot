@@ -1,13 +1,5 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Services;
-using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GPTipsBot.Services;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.Extensions
 {

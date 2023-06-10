@@ -1,11 +1,6 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Repositories;
 using OpenAI.ObjectModels.RequestModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GPTipsBot.Services
 {
@@ -39,7 +34,7 @@ namespace GPTipsBot.Services
             }
         }
 
-        public ChatMessage[] PrepareContext(UserKey userKey, long contextId)
+        public ChatMessage[] PrepareContext(UserChatKey userKey, long contextId)
         {
             var messages = messageContextRepository.GetRecentContextMessages(userKey, contextId);
             var contextWindow = new ContextWindow(new ChatGptService());

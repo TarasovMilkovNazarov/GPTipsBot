@@ -1,7 +1,5 @@
-﻿using GPTipsBot.Api;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -18,7 +16,7 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
             var mediaMessageTypes = new Telegram.Bot.Types.Enums.MessageType?[]{
                 Telegram.Bot.Types.Enums.MessageType.Audio, 
@@ -26,25 +24,22 @@ namespace GPTipsBot.UpdateHandlers
                 Telegram.Bot.Types.Enums.MessageType.Photo };
 
             // Only process Message updates: https://core.telegram.org/bots/api#message
-            if (mediaMessageTypes.Contains(update.Update.Message?.Type))
+            if (mediaMessageTypes.Contains(update.Message?.Type))
             {
-                if (update.Update.Message?.Chat != null)
-                {
-                    await botClient.SendTextMessageAsync(update.Update.Message.Chat.Id,
+                await botClient.SendTextMessageAsync(update.ChatId,
                         Api.BotResponse.OnlyMessagesAvailable, cancellationToken: update.CancellationToken);
-                }
                 
                 return;
             }
 
-            var message = update.Update.Message;
+            var message = update.Message;
 
             // Only process text messages
             if (message?.Text is not { } messageText)
                 return;
 
             var shortMessageText = messageText.Length > 100 ? messageText.Substring(0, 100) : messageText;
-            logger.LogInformation($"Received a '{shortMessageText}' message in chat {message.Chat.Id}.");
+            logger.LogInformation($"Received a '{shortMessageText}' message in chat {message.ChatId}.");
 
             // Call next handler
             await base.HandleAsync(update, cancellationToken);

@@ -1,12 +1,7 @@
 ﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Extensions;
-using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
-using System.Threading;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -23,32 +18,32 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<GroupMessageHandler>());
         }
 
-        public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
-            var telegramId = update.Update.Message?.From?.Id;
-            if (!telegramId.HasValue)
+            var telegramId = update.UserChatKey.Id;
+            if (update.UserChatKey != null)
             {
                 await base.HandleAsync(update, cancellationToken);
                 return;
             }
 
-            var chatId = update.Update.Message?.Chat.Id;
+            var chatId = update.UserChatKey?.ChatId;
 
-            if (!MessageService.UserToMessageCount.TryGetValue(telegramId.Value, out var mesCount))
+            if (!MessageService.UserToMessageCount.TryGetValue(telegramId, out var mesCount))
             {
-                MessageService.UserToMessageCount[telegramId.Value] = 1;
+                MessageService.UserToMessageCount[telegramId] = 1;
             }
             else
             {
                 if (mesCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     logger.LogError("Max messages limit reached");
-                    await botClient.SendTextMessageAsync(chatId ?? telegramId.Value, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId ?? telegramId, BotResponse.TooManyRequests, cancellationToken: cancellationToken);
 
                     return;
                 }
 
-                MessageService.UserToMessageCount[telegramId.Value] += 1;
+                MessageService.UserToMessageCount[telegramId] += 1;
             }
 
             // Call next handler

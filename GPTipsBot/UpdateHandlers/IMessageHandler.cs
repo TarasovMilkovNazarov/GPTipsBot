@@ -1,9 +1,7 @@
-﻿using Telegram.Bot.Types;
-
-namespace GPTipsBot.UpdateHandlers
+﻿namespace GPTipsBot.UpdateHandlers
 {
-    public interface IMessageHandler
+    public interface IMessageHandler<T>
     {
-        Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken);
+        Task HandleAsync(T update, CancellationToken cancellationToken);
     }
 }
