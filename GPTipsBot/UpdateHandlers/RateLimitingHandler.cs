@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;

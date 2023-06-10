@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Enums;
 using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
@@ -33,7 +34,7 @@ namespace GPTipsBot.UpdateHandlers
                 update.Message.ContextBound = false;
                 MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                 update.Message.Text = "Отзыв: " + update.Message.Text;
-                await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, Api.BotResponse.Thanks, cancellationToken);
+                await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, BotResponse.Thanks, cancellationToken);
                 SetNextHandler(null);
             }
 

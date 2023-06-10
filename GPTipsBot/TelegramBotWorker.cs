@@ -1,6 +1,9 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Localization;
+using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -29,6 +32,9 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
         {
+            var userCulture = update.Message?.From?.LanguageCode;
+            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userCulture);
+
             var mainHandler = messageHandlerFactory.Create<MainHandler>();
             var extendedUpd = new UpdateDecorator(update, cancellationToken);
 
@@ -44,7 +50,7 @@ namespace GPTipsBot
                     return;
                 }
 
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, Api.BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
             }
         }
 

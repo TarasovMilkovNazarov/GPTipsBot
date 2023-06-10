@@ -2,6 +2,8 @@
 {
     public class BotSettings
     {
-        public bool IsOnMaintenance { get; set; }
+        public int Id { get; set; }
+        public string Culture { get; set; }
+        public long UserId { get; set; }
     }
 }

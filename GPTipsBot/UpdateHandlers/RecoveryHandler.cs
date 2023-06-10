@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
@@ -41,7 +42,7 @@ namespace GPTipsBot.UpdateHandlers
                     chatToInformAboutRecovery.Add(chatId, q);
                     
                     await botClient.SendTextMessageAsync(chatId,
-                        Api.BotResponse.Recovered, cancellationToken: update.CancellationToken);
+                        BotResponse.Recovered, cancellationToken: update.CancellationToken);
                 };
 
                 return;

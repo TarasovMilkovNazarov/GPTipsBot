@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Resources;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
@@ -27,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
             if (mediaMessageTypes.Contains(update.Message?.Type))
             {
                 await botClient.SendTextMessageAsync(update.ChatId,
-                        Api.BotResponse.OnlyMessagesAvailable, cancellationToken: update.CancellationToken);
+                        BotResponse.OnlyMessagesAvailable, cancellationToken: update.CancellationToken);
                 
                 return;
             }

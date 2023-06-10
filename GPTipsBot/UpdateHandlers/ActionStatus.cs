@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Dtos;
+using GPTipsBot.Resources;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
@@ -21,8 +22,8 @@ namespace GPTipsBot.UpdateHandlers
 
         public async Task<long> Start(UserChatKey userKey, ChatAction chatAction, CancellationToken cancellationToken)
         {
-            var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("отменить запрос", "/stopRequest"));
-            var serviceMessage = await botClient.SendTextMessageAsync(userKey.ChatId, Api.BotResponse.PleaseWaitMsg, 
+            var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
+            var serviceMessage = await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.PleaseWaitMsg, 
                 cancellationToken: cancellationToken, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
 
@@ -33,7 +34,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 try
                 {
-                    botClient.SendChatActionAsync(userKey.ChatId, chatAction, tokenSource.Token);
+                    botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
                 catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
 

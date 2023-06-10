@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Extensions;
+using GPTipsBot.Resources;
 using RestSharp;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -78,16 +79,16 @@ namespace GPTipsBot.Services
 
             if (string.IsNullOrEmpty(response?.Content))
             {
-                throw new CustomException(Api.BotResponse.SomethingWentWrongWithImageService);
+                throw new CustomException(BotResponse.SomethingWentWrongWithImageService);
             }
 
             if (response.Content.ToLower().Contains("this prompt has been blocked"))
             {
-                throw new CustomException(BingImageCreatorResponse.BlockedPromptError);
+                throw new CustomException(BingResponse.BlockedPromptError);
             }
             if (response.Content.ToLower().Contains("we're working hard to offer image creator in more languages"))
             {
-                throw new CustomException(BingImageCreatorResponse.UnsupportedLangError);
+                throw new CustomException(BingResponse.UnsupportedLangError);
             }
 
             // Get redirect URL

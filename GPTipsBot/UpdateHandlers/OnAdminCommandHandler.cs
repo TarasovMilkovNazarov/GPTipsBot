@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Resources;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers

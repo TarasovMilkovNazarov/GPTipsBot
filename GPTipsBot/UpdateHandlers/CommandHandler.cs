@@ -2,6 +2,7 @@
 using GPTipsBot.Enums;
 using GPTipsBot.Mapper;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -59,10 +60,10 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case CommandType.Help:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    responseToUser = telegramBotAPI.GetMyDescription();
+                    responseToUser = BotResponse.BotDescription;
                     break;
                 case CommandType.CreateImage:
-                    responseToUser = BotResponse.InputImageDescriptionText;
+                    responseToUser = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.basedOnExperienceInputLengthLimit);
                     replyMarkup = cancelKeyboard;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
@@ -112,23 +113,23 @@ namespace GPTipsBot.UpdateHandlers
             {
                 command = CommandType.Start;
             }
-            else if (message.Equals(Help.Command) || message.Equals(helpButton.Text.ToLower()))
+            else if (message.Equals(Help.Command) || ButtonToLocalizations[helpButton].Any(b => b.ToLower() == message))
             {
                 command = CommandType.Help;
             }
-            else if (message.Equals(Image.Command) || message.Equals(imageButton.Text.ToLower()))
+            else if (message.Equals(Image.Command) || ButtonToLocalizations[imageButton].Any(b => b.ToLower() == message))
             {
                 command = CommandType.CreateImage;
             }
-            else if (message.Equals(ResetContext.Command) || message.Equals(resetContextButton.Text.ToLower()))
+            else if (message.Equals(ResetContext.Command) || ButtonToLocalizations[resetContextButton].Any(b => b.ToLower() == message))
             {
                 command = CommandType.ResetContext;
             }
-            else if (message.Equals(Feedback.Command) || message.Equals(feedbackButton.Text.ToLower()))
+            else if (message.Equals(Feedback.Command) || ButtonToLocalizations[feedbackButton].Any(b => b.ToLower() == message))
             {
                 command = CommandType.Feedback;
             }
-            else if (message.Equals("/cancel") || message.Equals("отмена"))
+            else if (message.Equals("/cancel") || ButtonToLocalizations[cancelButton].Any(b => b.ToLower() == message))
             {
                 command = CommandType.Cancel;
             }

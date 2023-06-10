@@ -13,12 +13,44 @@
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.2" />
     <PackageReference Include="Npgsql" Version="7.0.2" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
-    <PackageReference Include="Telegram.Bot" Version="18.0.0" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
     <PackageReference Include="TiktokenSharp" Version="1.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources\BingResponse.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BingResponse.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\BotResponse.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BotResponse.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\BotUI.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BotUI.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\BingResponse.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BingResponse.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\BotResponse.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BotResponse.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\BotUI.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BotUI.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.dev.json">

@@ -11,6 +11,9 @@ using Telegram.Bot;
 using GPTipsBot.UpdateHandlers;
 using Telegram.Bot.Services;
 using dotenv.net;
+using System.Globalization;
+using System.Net;
+using GPTipsBot.Resources;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
@@ -18,6 +21,11 @@ var host = Host.CreateDefaultBuilder(args)
         // Add configuration, logging, ...
     .ConfigureServices((hostContext, services) =>
     {
+        services.AddLocalization(options =>
+        {
+            options.ResourcesPath = "Resources";
+        });
+
         services.AddHttpClient("telegram_bot_client")
                 .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
                 {
@@ -34,7 +42,6 @@ var host = Host.CreateDefaultBuilder(args)
         .AddLogging(configure => configure.AddConsole())
         .AddSingleton<DapperContext>()
         .AddTransient<ImageCreatorService>()
-        .AddTransient<ImageService>()
         .AddTransient<ActionStatus>()
         .AddTransient<MessageHandlerFactory>()
         .AddTransient<MainHandler>()
@@ -51,12 +58,31 @@ var host = Host.CreateDefaultBuilder(args)
         .AddScoped<MessageService>()
         .AddScoped<GptAPI>()
         .AddScoped<ChatGptService>()
-        .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken, AppConfig.СhatId))
+        .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken))
         .AddScoped<MessageRepository>()
         .AddScoped<UserRepository>()
-        .AddScoped<ITelegramBotClient, TelegramBotClient>(x => ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken));
+        .AddScoped<BotSettingsRepository>()
+        .AddScoped<ITelegramBotClient, TelegramBotClient>(x => {
+            var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
+
+            CultureInfo.CurrentUICulture = new CultureInfo("en");
+            InitializeBot(botClient);
+
+            CultureInfo.CurrentUICulture = new CultureInfo("ru");
+            InitializeBot(botClient, "ru");
+
+            return botClient;
+         });
 
         services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
     }).Build();
+
+void InitializeBot(ITelegramBotClient botClient, string? langCode = null) {
+    var botMenu = new BotMenu();
+    botClient.SetMyCommandsAsync(botMenu.GetBotCommands(), languageCode: langCode);
+    botClient.SetMyNameAsync(AppConfig.Env == "Production" ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
+    botClient.SetMyDescriptionAsync(BotResponse.BotDescription, languageCode: langCode);
+    botClient.SetMyShortDescriptionAsync(AppConfig.Env == "Production" ? BotResponse.ShortDescription : BotResponse.ShortDevDescription, languageCode: langCode);
+}
 
 await host.RunAsync();
