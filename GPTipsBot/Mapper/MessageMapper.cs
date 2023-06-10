@@ -1,13 +1,6 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Models;
-using Polly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GPTipsBot.Mapper
 {

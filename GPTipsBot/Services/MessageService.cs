@@ -1,11 +1,6 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Repositories;
 using OpenAI.ObjectModels.RequestModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GPTipsBot.Services
 {

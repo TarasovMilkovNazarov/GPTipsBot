@@ -1,8 +1,4 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Extensions;
-using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
 {

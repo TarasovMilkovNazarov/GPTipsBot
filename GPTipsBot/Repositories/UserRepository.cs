@@ -1,13 +1,10 @@
 ﻿using Dapper;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
-using GPTipsBot.Extensions;
 using GPTipsBot.Mapper;
 using GPTipsBot.Models;
-using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using System.Data.Common;
 
 namespace GPTipsBot.Repositories
 {

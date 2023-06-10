@@ -1,13 +1,4 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Models;
-using GPTipsBot.Repositories;
-using GPTipsBot.Services;
-using Microsoft.Extensions.Options;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using System.Text.RegularExpressions;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
