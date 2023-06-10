@@ -12,6 +12,9 @@ using Telegram.Bot;
 using GPTipsBot.UpdateHandlers;
 using Telegram.Bot.Services;
 using Telegram.Bot.Polling;
+using dotenv.net;
+
+DotEnv.Fluent().WithProbeForEnv(10).Load();
 
 var host = Host.CreateDefaultBuilder(args)
         // Add configuration, logging, ...
