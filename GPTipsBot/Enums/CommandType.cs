@@ -1,6 +1,4 @@
-﻿using GPTipsBot.Services;
-
-namespace GPTipsBot.Enums
+﻿namespace GPTipsBot.Enums
 {
     public enum CommandType
     {

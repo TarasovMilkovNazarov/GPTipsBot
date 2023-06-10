@@ -1,11 +1,7 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Enums;
+﻿using GPTipsBot.Enums;
 using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
-using GPTipsBot.Services;
 using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {

@@ -1,12 +1,8 @@
 ﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {

@@ -1,7 +1,5 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
-using GPTipsBot.Models;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 

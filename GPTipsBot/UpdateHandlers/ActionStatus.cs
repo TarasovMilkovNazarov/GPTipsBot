@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
+﻿using GPTipsBot.Dtos;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;

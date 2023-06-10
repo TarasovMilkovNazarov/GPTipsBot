@@ -1,12 +1,9 @@
 ﻿using GPTipsBot.Api;
-using GPTipsBot.Extensions;
 using GPTipsBot.UpdateHandlers;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot
 {

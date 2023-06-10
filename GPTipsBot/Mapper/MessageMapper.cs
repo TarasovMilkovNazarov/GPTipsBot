@@ -1,14 +1,5 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
-using GPTipsBot.Models;
-using GPTipsBot.UpdateHandlers;
-using Polly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 using Tmessage = Telegram.Bot.Types.Message;
 
 namespace GPTipsBot.Mapper

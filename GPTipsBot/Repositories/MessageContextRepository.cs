@@ -1,15 +1,10 @@
 ﻿using Dapper;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
-using GPTipsBot.Enums;
-using GPTipsBot.Extensions;
-using GPTipsBot.Mapper;
 using GPTipsBot.Models;
 using GPTipsBot.Services;
-using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GPTipsBot.Repositories
 {
