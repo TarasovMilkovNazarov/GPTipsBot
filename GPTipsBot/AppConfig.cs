@@ -10,30 +10,22 @@ namespace GPTipsBot
     {
         public static bool UseFreeApi = true;
         public static bool IsOnMaintenance = false;
-        public static string Env { get; private set; }
-        public static string TelegramToken { get; private set; }
-        public static string OpenAiToken { get; private set; }
+        public static string Env => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        public static string TelegramToken => GetEnvStrict("TELEGRAM_TOKEN");
+        public static string OpenAiToken => GetEnvStrict("OPENAI_TOKEN");
+        public static string ConnectionString => GetEnvStrict("PG_CONNECTION_STRING");
 
         public const long СhatId = 486363646;
         public const long AdminId = 486363646;
         public const int ChatGptTokensLimitPerMessage = 100;
 
-        static AppConfig()
+        private static string GetEnvStrict(string name)
         {
-            Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-            TelegramToken = Environment.GetEnvironmentVariable("TELEGRAM_TOKEN") ?? "";
-            OpenAiToken = Environment.GetEnvironmentVariable("OPENAI_TOKEN") ?? "";
-            //Console.WriteLine($"TELEGRAM_TOKEN {TelegramToken}");
-            //Console.WriteLine($"OPENAI_TOKEN {OpenAiToken}");
+            var env = Environment.GetEnvironmentVariable(name);
+            if (env is null or "")
+                throw new ArgumentNullException(name);
 
-            if (TelegramToken == "")
-            {
-                throw new ArgumentNullException("Telegram is not configured");
-            }
-            if (OpenAiToken == "")
-            {
-                throw new ArgumentNullException("Chat GPT is not configured");
-            }
+            return env;
         }
     }
 }
