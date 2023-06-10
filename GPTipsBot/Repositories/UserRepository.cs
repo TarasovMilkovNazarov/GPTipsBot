@@ -76,7 +76,7 @@ namespace GPTipsBot.Repositories
         {
             using (var connection = context.CreateConnection())
             {
-                int count = connection.ExecuteScalar<int>(isUserExists, new { telegramId });
+                var count = connection.ExecuteScalar<int>(isUserExists, new { telegramId });
                 if (count == 0)
                 {
                     return -1;

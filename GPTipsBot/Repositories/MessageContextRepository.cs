@@ -49,7 +49,7 @@ namespace GPTipsBot.Repositories
 
         private long AddMessage(TelegramGptMessageUpdate telegramGptMessage, MessageOwner role, bool keepContext = true)
         {
-            long? contextId = GetLastContext(telegramGptMessage.UserKey);
+            var contextId = GetLastContext(telegramGptMessage.UserKey);
             string? text = null;
             long? replyToId = null;
 

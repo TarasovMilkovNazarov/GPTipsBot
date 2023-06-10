@@ -44,7 +44,7 @@ namespace GPTipsBot.UpdateHandlers
             message.ServiceMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
             try
             {
-                Stopwatch sw = Stopwatch.StartNew();
+                var sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
 
                 var imgSrcs = await imageCreatorService.GetImageSources(update.Update.Message.Text, token);

@@ -49,7 +49,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         var updateReceiver = new QueuedUpdateReceiver(_botClient, receiverOptions);
         try
         {
-            await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+            await foreach (var update in updateReceiver.WithCancellation(cts.Token))
             {
                 _updateHandler.HandleUpdateAsync(_botClient, update, cts.Token);
             }

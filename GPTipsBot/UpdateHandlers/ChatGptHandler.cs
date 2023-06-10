@@ -33,7 +33,7 @@ namespace GPTipsBot.UpdateHandlers
             try
             {
                 message.ServiceMessageId = await typingStatus.Start(message.UserKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
-                Stopwatch sw = Stopwatch.StartNew();
+                var sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[message.UserKey].messageIdToCancellation[message.ServiceMessageId].Token;
                 var gtpResponse = await gptAPI.SendMessage(message, token);
                 if (gtpResponse?.Error != null)

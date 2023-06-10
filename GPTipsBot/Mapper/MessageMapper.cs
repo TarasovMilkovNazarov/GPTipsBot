@@ -8,7 +8,7 @@ namespace GPTipsBot.Mapper
     {
         public static Message MapToMessage(TelegramGptMessageUpdate messageDto, MessageOwner role)
         {
-            Message message = new Message()
+            var message = new Message()
             {
                 ChatId = messageDto.UserKey.ChatId,
                 ReplyToId = messageDto.ReplyToId,

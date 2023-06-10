@@ -44,7 +44,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             string? responseToUser = null;
-            bool keepContext = true;
+            var keepContext = true;
             IReplyMarkup? replyMarkup = startKeyboard;
             update.TelegramGptMessage.ContextBound = false;
 

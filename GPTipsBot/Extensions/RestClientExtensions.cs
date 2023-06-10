@@ -7,7 +7,7 @@ namespace GPTipsBot.Extensions
     {
         public static async Task<RestResponse?> ExecuteWithRetry(this RestClient restClient, RestRequest request, int maxRetries = 3, CancellationToken cancellationToken = default)
         {
-            int retryCount = 0;
+            var retryCount = 0;
             RestResponse? response = null;
 
             while (retryCount < maxRetries)
@@ -47,7 +47,7 @@ namespace GPTipsBot.Extensions
 
         public static async Task<RestResponse?> ExecuteWithPredicate(this RestClient restClient, RestRequest request, CancellationToken token, Func<RestResponse, int, bool> predicate)
         {
-            int retryCount = 0;
+            var retryCount = 0;
             RestResponse response = null;
             //request.Timeout = (int)TimeSpan.FromSeconds(120).TotalMilliseconds;
 

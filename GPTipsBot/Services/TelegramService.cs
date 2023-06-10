@@ -6,10 +6,10 @@ namespace GPTipsBot.Services
     public static class TelegramService
     {
         public static NameValueCollection ParseDeeplink(string deepLink){
-            Uri uri = new Uri(deepLink);
-            string query = uri.Query;
+            var uri = new Uri(deepLink);
+            var query = uri.Query;
 
-            NameValueCollection queryParams = HttpUtility.ParseQueryString(query);
+            var queryParams = HttpUtility.ParseQueryString(query);
 
             return queryParams;
         }

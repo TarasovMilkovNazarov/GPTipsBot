@@ -15,7 +15,7 @@ namespace GPTipsBot.UpdateHandlers
             var message = update.Update.Message;
 
             // @GPTipBot /start any text
-            string pattern1 = @"(@GPTips?Bot)\s(\/.*?)\s?(.*)";
+            var pattern1 = @"(@GPTips?Bot)\s(\/.*?)\s?(.*)";
             var match1 = Regex.Matches(message.Text, pattern1).FirstOrDefault();
 
             if (match1 != null)
@@ -27,7 +27,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             // image@GPTipBot text image description
-            string pattern2 = @"(\/.*?)(@GPTips?Bot)\s?(.*)";
+            var pattern2 = @"(\/.*?)(@GPTips?Bot)\s?(.*)";
             var match2 = Regex.Matches(message.Text, pattern2).FirstOrDefault();
 
             if (match2 != null)

@@ -7,7 +7,7 @@ namespace GPTipsBot.Mapper
     {
         public static User MapToUser(TelegramGptMessageUpdate messageDto)
         {
-            User user = new User()
+            var user = new User()
             {
                 Id = messageDto.UserKey.Id,
                 FirstName = messageDto.FirstName,

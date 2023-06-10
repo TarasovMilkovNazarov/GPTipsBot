@@ -43,10 +43,10 @@ namespace GPTipsBot.Services
                 //CookieContainer = cookieContainer
             });
 
-            Random random = new Random();
+            var random = new Random();
         
             // Generate random IP between range 13.104.0.0/14
-            string FORWARDED_IP = $"13.{random.Next(104, 108)}.{random.Next(0, 256)}.{random.Next(0, 256)}";
+            var FORWARDED_IP = $"13.{random.Next(104, 108)}.{random.Next(0, 256)}.{random.Next(0, 256)}";
 
             client.AddDefaultHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
             client.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
@@ -63,11 +63,11 @@ namespace GPTipsBot.Services
         public async Task<List<string>> GetImageSources(string prompt, CancellationToken token)
         {
             Console.WriteLine("Sending request...");
-            string urlEncodedPrompt = Uri.EscapeDataString(prompt);
+            var urlEncodedPrompt = Uri.EscapeDataString(prompt);
             var payload = $"q={urlEncodedPrompt}&qs=ds";
 
             // https://www.bing.com/images/create?q=<PROMPT>&rt=4&FORM=GENCRE
-            string url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
+            var url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
             var request = new RestRequest(url, Method.Post);
             request.AddHeader("Accept-Encoding", "identity");
             request.AddParameter($"q", urlEncodedPrompt);
@@ -91,12 +91,12 @@ namespace GPTipsBot.Services
             }
 
             // Get redirect URL
-            string redirectUrl = response.Headers.First(x => x.Name == "Location").Value.ToString();
-            string requestId = redirectUrl.Split("id=")[^1];
+            var redirectUrl = response.Headers.First(x => x.Name == "Location").Value.ToString();
+            var requestId = redirectUrl.Split("id=")[^1];
             await client.ExecuteAsync(new RestRequest(redirectUrl, Method.Get), token);
 
             // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
-            string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
+            var pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
             // Poll for results
             response = await client.ExecuteWithPredicate(new RestRequest(pollingUrl, Method.Get), token, IsImageSrcGetRequestSuccessfull);
 
@@ -148,10 +148,10 @@ namespace GPTipsBot.Services
             {
                 // Directory already exists
             }
-            int imageNum = 0;
+            var imageNum = 0;
 
             var client = new RestClient();
-            foreach (string link in links)
+            foreach (var link in links)
             {
                 try
                 {
@@ -174,7 +174,7 @@ namespace GPTipsBot.Services
             Console.WriteLine("Getting images...");
 
             var client = new RestClient();
-            foreach (string link in links)
+            foreach (var link in links)
             {
                 try
                 {

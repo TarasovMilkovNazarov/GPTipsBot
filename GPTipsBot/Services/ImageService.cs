@@ -17,7 +17,7 @@ namespace GPTipsBot.Services
 
         public async Task SendImage(long chatId, string fileName)
         {
-            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
                 var fileToSend = new InputMedia(fileStream, fileName);
                 var message = await _botClient.SendPhotoAsync(chatId, fileToSend, disableNotification: true, parseMode: ParseMode.Markdown);
