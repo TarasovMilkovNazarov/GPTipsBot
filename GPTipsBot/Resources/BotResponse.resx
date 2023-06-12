@@ -131,6 +131,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>Операция отменена</value>
   </data>
+  <data name="ChooseLanguagePlease" xml:space="preserve">
+    <value>Пожалуйста выберите язык интерфейса</value>
+  </data>
   <data name="ContextUpdated" xml:space="preserve">
     <value>Контекст успешно сброшен. Начните новый диалог</value>
   </data>
@@ -145,6 +148,9 @@
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>Введите текстовое описание изображения длиной до {0} символов</value>
+  </data>
+  <data name="LanguageWasSetSuccessfully" xml:space="preserve">
+    <value>Руссий язык используется для интерфейса</value>
   </data>
   <data name="OnlyMessagesAvailable" xml:space="preserve">
     <value>Извините, но сейчас доступна обработка только текстовых сообщений. В разработке находятся голосовые сообщения и генерация картинок текстом</value>

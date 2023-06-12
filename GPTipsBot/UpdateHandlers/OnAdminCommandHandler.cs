@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Resources;
+﻿using GPTipsBot.Resources;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
@@ -28,7 +27,7 @@ namespace GPTipsBot.UpdateHandlers
             if (update.Message.Text == "/switchProxy" && update.UserChatKey.Id == AppConfig.AdminId)
             {
                 AppConfig.UseFreeApi = !AppConfig.UseFreeApi;
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.SwitchProxy, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, string.Format(BotResponse.SwitchProxy, AppConfig.UseFreeApi), cancellationToken: cancellationToken);
                 return;
             }
 

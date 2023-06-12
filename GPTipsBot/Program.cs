@@ -12,7 +12,6 @@ using GPTipsBot.UpdateHandlers;
 using Telegram.Bot.Services;
 using dotenv.net;
 using System.Globalization;
-using System.Net;
 using GPTipsBot.Resources;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();

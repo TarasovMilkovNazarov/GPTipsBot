@@ -11,6 +11,7 @@ namespace GPTipsBot.Dtos
         }
 
         public UserChatKey UserKey { get; }
+        public string LanguageCode { get; set; }
         public UserStateEnum CurrentState { get; set; }
         public Dictionary<long, CancellationTokenSource> messageIdToCancellation = new ();
     }

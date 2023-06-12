@@ -10,11 +10,10 @@ namespace GPTipsBot.Repositories
     {
         private readonly IDbConnection _connection;
         private readonly ILogger<BotSettingsRepository> logger;
-        private readonly DapperContext context;
         private readonly string getSettings = $"SELECT * FROM BotSettings WHERE id = @UserId;";
-        private readonly string insertSetting = "INSERT INTO BotSettings (id, culture) " +
-                "VALUES (@Id, @Culture) RETURNING id";
-        private readonly string updateSettingsQuery = "Update BotSettings SET culture = @Culture WHERE userId = @UserId;";
+        private readonly string insertSetting = "INSERT INTO BotSettings (id, language) " +
+                "VALUES (@UserId, @language) RETURNING id";
+        private readonly string updateSettingsQuery = "Update BotSettings SET language = @language WHERE id = @UserId;";
 
         public BotSettingsRepository(ILogger<BotSettingsRepository> logger, DapperContext context)
         {
@@ -22,12 +21,11 @@ namespace GPTipsBot.Repositories
             _connection.Open();
 
             this.logger = logger;
-            this.context = context;
         }
-
-        public BotSettings CreateUpdate(long userId, string culture)
+        
+        public BotSettings Create(long userId, string languageCode)
         {
-            logger.LogInformation("CreateUser");
+            logger.LogInformation($"Create settings userId={userId} with culture={languageCode}");
 
             BotSettings? settings = _connection.Query<BotSettings>(getSettings, new { userId }).FirstOrDefault();
 
@@ -36,16 +34,23 @@ namespace GPTipsBot.Repositories
                 settings = _connection.QuerySingle<BotSettings>(insertSetting, new
                 {
                     userId,
-                    culture
+                    language = languageCode
                 });
 
                 return settings;
             }
 
-            _connection.ExecuteScalar(updateSettingsQuery, new
+            return settings;
+        }
+
+        public BotSettings Update(long userId, string languageCode)
+        {
+            logger.LogInformation($"Update settings userId={userId} with culture={languageCode}");
+
+            var settings = _connection.ExecuteScalar<BotSettings>(updateSettingsQuery, new
             {
                 userId,
-                culture
+                language = languageCode
             });
 
             return settings;

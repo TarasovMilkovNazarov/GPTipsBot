@@ -146,11 +146,17 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>Please enter a text description of the image up to {0} characters in length.</value>
   </data>
+  <data name="LanguageWasSetSuccessfully" xml:space="preserve">
+    <value>English was set as interface language</value>
+  </data>
   <data name="OnlyMessagesAvailable" xml:space="preserve">
     <value>I'm sorry, but currently only processing of text messages is available. Voice messages and image generation from text are under development.</value>
   </data>
   <data name="OnMaintenance" xml:space="preserve">
     <value>⚙️ Technical maintenance is in progress. Thank you for your understanding.</value>
+  </data>
+  <data name="PleaseSetLanguage" xml:space="preserve">
+    <value>Please choose language for interface</value>
   </data>
   <data name="PleaseWaitMsg" xml:space="preserve">
     <value>⌛️ Please wait, preparing the response...</value>

@@ -169,11 +169,29 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Английский.
+        /// </summary>
+        internal static string SetEngLang {
+            get {
+                return ResourceManager.GetString("SetEngLang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Установить язык интерфейса бота.
         /// </summary>
         internal static string SetLang {
             get {
                 return ResourceManager.GetString("SetLang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Русский.
+        /// </summary>
+        internal static string SetRuLang {
+            get {
+                return ResourceManager.GetString("SetRuLang", resourceCulture);
             }
         }
         

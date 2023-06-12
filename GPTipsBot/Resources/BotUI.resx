@@ -153,8 +153,14 @@
   <data name="RussianButton" xml:space="preserve">
     <value>Русский</value>
   </data>
+  <data name="SetEngLang" xml:space="preserve">
+    <value>Английский</value>
+  </data>
   <data name="SetLang" xml:space="preserve">
     <value>Установить язык интерфейса бота</value>
+  </data>
+  <data name="SetRuLang" xml:space="preserve">
+    <value>Русский</value>
   </data>
   <data name="Start" xml:space="preserve">
     <value>Начать пользоваться ботом</value>

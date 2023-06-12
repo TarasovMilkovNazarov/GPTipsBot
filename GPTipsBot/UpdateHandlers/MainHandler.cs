@@ -1,11 +1,9 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
-using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
-using System.Linq;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
@@ -43,11 +41,14 @@ namespace GPTipsBot.UpdateHandlers
             if (userKey != null && !userState.ContainsKey(userKey))
             {
                 userState.TryAdd(userKey, new UserStateDto(userKey));
+                userState[userKey].LanguageCode = update.Message.LanguageCode;
             }
+
             if (update.CallbackQuery == null)
             {
-                userRepository.CreateUpdateUser(UserMapper.Map(update.User));
-                //var settings = botSettingsRepository.CreateUpdate(userKey.Id, update.Update.Message.From.LanguageCode);
+                userRepository.CreateUpdate(UserMapper.Map(update.User));
+                var settings = botSettingsRepository.Create(userKey.Id, update.Message.LanguageCode);
+                CultureInfo.CurrentUICulture = new CultureInfo(settings.Language);
             }
 
             // Call next handler

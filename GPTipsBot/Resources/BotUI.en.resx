@@ -153,8 +153,14 @@
   <data name="RussianButton" xml:space="preserve">
     <value>Russian</value>
   </data>
+  <data name="SetEngLang" xml:space="preserve">
+    <value>English</value>
+  </data>
   <data name="SetLang" xml:space="preserve">
     <value>Set bot interface language</value>
+  </data>
+  <data name="SetRuLang" xml:space="preserve">
+    <value>Russian</value>
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>

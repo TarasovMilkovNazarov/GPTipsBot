@@ -93,6 +93,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Пожалуйста выберите язык интерфейса.
+        /// </summary>
+        internal static string ChooseLanguagePlease {
+            get {
+                return ResourceManager.GetString("ChooseLanguagePlease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Контекст успешно сброшен. Начните новый диалог.
         /// </summary>
         internal static string ContextUpdated {
@@ -134,6 +143,15 @@ namespace GPTipsBot.Resources {
         internal static string InputImageDescriptionText {
             get {
                 return ResourceManager.GetString("InputImageDescriptionText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Руссий язык используется для интерфейса.
+        /// </summary>
+        internal static string LanguageWasSetSuccessfully {
+            get {
+                return ResourceManager.GetString("LanguageWasSetSuccessfully", resourceCulture);
             }
         }
         
