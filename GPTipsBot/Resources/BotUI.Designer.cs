@@ -70,7 +70,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Английский.
+        ///   Looks up a localized string similar to English.
         /// </summary>
         internal static string EnglishButton {
             get {
@@ -169,7 +169,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Английский.
+        ///   Looks up a localized string similar to English.
         /// </summary>
         internal static string SetEngLang {
             get {

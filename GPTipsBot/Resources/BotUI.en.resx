@@ -151,7 +151,7 @@
     <value>🗑 Reset context</value>
   </data>
   <data name="RussianButton" xml:space="preserve">
-    <value>Russian</value>
+    <value>Русский</value>
   </data>
   <data name="SetEngLang" xml:space="preserve">
     <value>English</value>
@@ -160,7 +160,7 @@
     <value>Set bot interface language</value>
   </data>
   <data name="SetRuLang" xml:space="preserve">
-    <value>Russian</value>
+    <value>Русский</value>
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>

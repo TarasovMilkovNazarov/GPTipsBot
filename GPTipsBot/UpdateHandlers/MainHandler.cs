@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Dtos;
+using GPTipsBot.Localization;
 using GPTipsBot.Mapper;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
@@ -38,17 +39,14 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var userKey = update.UserChatKey;
-            if (userKey != null && !userState.ContainsKey(userKey))
+
+            if (!userState.ContainsKey(userKey))
             {
                 userState.TryAdd(userKey, new UserStateDto(userKey));
-                userState[userKey].LanguageCode = update.Message.LanguageCode;
-            }
-
-            if (update.CallbackQuery == null)
-            {
                 userRepository.CreateUpdate(UserMapper.Map(update.User));
-                var settings = botSettingsRepository.Create(userKey.Id, update.Message.LanguageCode);
+                var settings = botSettingsRepository.Get(userKey.Id) ?? botSettingsRepository.Create(userKey.Id, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
                 CultureInfo.CurrentUICulture = new CultureInfo(settings.Language);
+                userState[userKey].LanguageCode = settings.Language;
             }
 
             // Call next handler

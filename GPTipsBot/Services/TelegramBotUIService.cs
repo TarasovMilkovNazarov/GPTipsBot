@@ -92,6 +92,8 @@ namespace GPTipsBot.Services
                 { BotMenu.SetEngLangStr, new() },
             };
 
+            var savedCulture = CultureInfo.CurrentUICulture;
+
             foreach (var culture in LocalizationManager.SupportedCultures)
             {
                 CultureInfo.CurrentUICulture = culture;
@@ -105,6 +107,8 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.SetRuLangStr].Add(BotUI.RussianButton);
                 ButtonToLocalizations[BotMenu.SetEngLangStr].Add(BotUI.EnglishButton);
             }
+
+            CultureInfo.CurrentUICulture = savedCulture;
         }
 
         private static ReplyKeyboardMarkup GetMenuKeyboardMarkup()

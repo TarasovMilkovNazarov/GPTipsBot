@@ -121,7 +121,7 @@
     <value>Отмена</value>
   </data>
   <data name="EnglishButton" xml:space="preserve">
-    <value>Английский</value>
+    <value>English</value>
   </data>
   <data name="Feedback" xml:space="preserve">
     <value>Оставить отзыв</value>
@@ -154,7 +154,7 @@
     <value>Русский</value>
   </data>
   <data name="SetEngLang" xml:space="preserve">
-    <value>Английский</value>
+    <value>English</value>
   </data>
   <data name="SetLang" xml:space="preserve">
     <value>Установить язык интерфейса бота</value>

@@ -13,6 +13,7 @@ using Telegram.Bot.Services;
 using dotenv.net;
 using System.Globalization;
 using GPTipsBot.Resources;
+using GPTipsBot.Localization;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
@@ -64,11 +65,11 @@ var host = Host.CreateDefaultBuilder(args)
         .AddScoped<ITelegramBotClient, TelegramBotClient>(x => {
             var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
 
-            CultureInfo.CurrentUICulture = new CultureInfo("en");
-            InitializeBot(botClient);
-
-            CultureInfo.CurrentUICulture = new CultureInfo("ru");
+            CultureInfo.CurrentUICulture = LocalizationManager.Ru;
             InitializeBot(botClient, "ru");
+
+            CultureInfo.CurrentUICulture = LocalizationManager.En;
+            InitializeBot(botClient);
 
             return botClient;
          });

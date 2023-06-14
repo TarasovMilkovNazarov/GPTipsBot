@@ -32,11 +32,11 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
         {
-            var userCulture = update.Message?.From?.LanguageCode;
-            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userCulture);
-
             var mainHandler = messageHandlerFactory.Create<MainHandler>();
             var extendedUpd = new UpdateDecorator(update, cancellationToken);
+
+            var userCulture = update.Message?.From?.LanguageCode ?? MainHandler.userState[extendedUpd.UserChatKey]?.LanguageCode;
+            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userCulture);
 
             try
             {
