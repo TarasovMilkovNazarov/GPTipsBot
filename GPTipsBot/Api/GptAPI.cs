@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Extensions;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;

@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Extensions;
+using GPTipsBot.Resources;
 using RestSharp;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -12,7 +13,7 @@ namespace GPTipsBot.Services
         private string BING_URL = "https://www.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1w4pYzmPHOt2iUw36dqGgIqoHTw9Gi13APgy9f0K5FnXL41xpEcj3BIa_SpOVOK_Vgyp9zqDVRPnalY75qdUu5S1L8lXw65Y6-UB0h9xl7nj5oeQcXbpV_ZQ1V7DKb_0oCWNUWxLZ9ckJDWqNioW_5E9C3pEARq-NxSTw250AIvL0EWn5FXFXGr1xtSLGIZ6ZaXNF8KvHppMyqbtlS2PXZQ";
+        private string authCookie = "_U=1PR8yXIol38TdR2N3YLisWmhmHz2dD0xnfJU7Eqd2hYyG6SqmVFUNAkZ3V5N-0AdREGKvdP--ERjHn5YlJ313uzIAr4HJQMxQeeeDouycUPhKqzl3ffygHziNsK_LN_V1TWrd4TpCWd0-r0HukhMUpnZIbkighZZQwcEVkTxCFDIETu5VQNCfcdd70AGR2w3BexLdrrJ3AqcihHjk6cBwzQ";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
@@ -78,16 +79,16 @@ namespace GPTipsBot.Services
 
             if (string.IsNullOrEmpty(response?.Content))
             {
-                throw new CustomException(Api.BotResponse.SomethingWentWrongWithImageService);
+                throw new CustomException(BotResponse.SomethingWentWrongWithImageService);
             }
 
             if (response.Content.ToLower().Contains("this prompt has been blocked"))
             {
-                throw new CustomException(BingImageCreatorResponse.BlockedPromptError);
+                throw new CustomException(BingResponse.BlockedPromptError);
             }
             if (response.Content.ToLower().Contains("we're working hard to offer image creator in more languages"))
             {
-                throw new CustomException(BingImageCreatorResponse.UnsupportedLangError);
+                throw new CustomException(BingResponse.UnsupportedLangError);
             }
 
             // Get redirect URL

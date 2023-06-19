@@ -4,6 +4,7 @@
         None,
         AwaitingImage,
         SendingFeedback,
-        AwaitingMessage
+        AwaitingMessage,
+        AwaitingLanguage,
     }
 }

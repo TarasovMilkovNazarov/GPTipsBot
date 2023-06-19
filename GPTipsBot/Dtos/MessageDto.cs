@@ -22,5 +22,6 @@ namespace GPTipsBot.Dtos
         public MessageType Type { get; internal set; }
         public bool ContextBound { get; internal set; }
         public long ReplyToId { get; internal set; }
+        public string? LanguageCode { get; internal set; }
     }
 }

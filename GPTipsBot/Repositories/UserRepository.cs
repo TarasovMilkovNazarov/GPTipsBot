@@ -30,7 +30,7 @@ namespace GPTipsBot.Repositories
             this.messageRepository = messageRepository;
         }
 
-        public long CreateUpdateUser(User user)
+        public long CreateUpdate(User user)
         {
             logger.LogInformation("CreateUser");
 

@@ -9,5 +9,8 @@
         Feedback,
         Cancel,
         StopRequest,
+        ChooseLang,
+        SetRuLang,
+        SetEngLang,
     }
 }

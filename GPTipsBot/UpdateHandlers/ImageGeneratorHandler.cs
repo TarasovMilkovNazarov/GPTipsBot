@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Api;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
@@ -12,18 +13,16 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<ImageGeneratorHandler> logger;
-        private readonly ImageService imageService;
         private readonly ActionStatus sendImageStatus;
         private readonly ImageCreatorService imageCreatorService;
         private readonly MessageRepository messageRepository;
         public const int basedOnExperienceInputLengthLimit = 150;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
-            ImageService imageService, ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
+            ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
         {
             this.botClient = botClient;
             this.logger = logger;
-            this.imageService = imageService;
             this.sendImageStatus = sendImagestatus;
             this.imageCreatorService = imageCreatorService;
             this.messageRepository = messageRepository;
@@ -35,7 +34,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, Api.BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
@@ -51,7 +50,7 @@ namespace GPTipsBot.UpdateHandlers
                 update.Reply.Text = string.Join("\n",imgSrcs);
                 messageRepository.AddMessage(update.Reply);
                 var replyMarkup = TelegramBotUIService.cancelKeyboard;
-                var telegramMediaList = imgSrcs.Select((img, i) => new InputMediaPhoto(new InputMedia(img))).ToList();
+                var telegramMediaList = imgSrcs.Select((src, i) => new InputMediaPhoto(InputFile.FromString(src))).ToList();
 
                 var photoMessage = await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true, 
                     replyToMessageId: (int?)update.Message.TelegramMessageId, cancellationToken: token);
@@ -69,7 +68,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch(Exception ex)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, Api.BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
             }
             finally
             {

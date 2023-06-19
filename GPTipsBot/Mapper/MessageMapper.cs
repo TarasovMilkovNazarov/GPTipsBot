@@ -20,7 +20,8 @@ namespace GPTipsBot.Mapper
                 Entities = tMessage.Entities,
                 ReplyToMessage = tMessage.ReplyToMessage,
                 ChatType = tMessage.Chat.Type,
-                ContextBound = true
+                ContextBound = true,
+                LanguageCode = tMessage.From.LanguageCode
             };
 
             return message;
