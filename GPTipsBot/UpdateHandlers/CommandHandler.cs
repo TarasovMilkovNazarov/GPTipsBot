@@ -101,17 +101,24 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case CommandType.StopRequest:
                     responseToUser = BotResponse.Cancel;
-                    try
+                    if (MainHandler.userState.ContainsKey(update.UserChatKey))
                     {
                         var state = MainHandler.userState[update.UserChatKey];
+                        
                         if (state.CurrentState == UserStateEnum.None)
                         { 
                             replyMarkup = new ReplyKeyboardRemove();
                         }
+                        else
+                        {
+                            replyMarkup = cancelKeyboard;
+                        }
 
-                        state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
+                        if (update.Message.TelegramMessageId.HasValue && state.messageIdToCancellation.ContainsKey(update.Message.TelegramMessageId.Value))
+                        {
+                            state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
+                        }
                     }
-                    catch (Exception ex) { return; }
                     
                     break;
             }
