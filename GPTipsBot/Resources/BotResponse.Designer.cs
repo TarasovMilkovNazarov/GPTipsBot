@@ -75,7 +75,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;ChatGPT + DALL-E | Бесплатный&quot;.
+        ///   Looks up a localized string similar to ChatGPT + DALL-E | Бесплатный.
         /// </summary>
         internal static string BotName {
             get {

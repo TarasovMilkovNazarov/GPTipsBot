@@ -40,7 +40,7 @@ namespace GPTipsBot.Repositories
         {
             logger.LogInformation($"Update settings userId={userId} with culture={languageCode}");
 
-            var settings = _connection.ExecuteScalar<BotSettings>(updateSettingsQuery, new
+            var settings = _connection.QuerySingle<BotSettings>(updateSettingsQuery, new
             {
                 userId,
                 language = languageCode
