@@ -48,3 +48,8 @@ UPDATE users AS u
 SET id = t.telegramid
 FROM users AS t
 WHERE u.id = t.id;
+
+CREATE TABLE botsettings (
+  id bigint REFERENCES users(id),
+  language VARCHAR(255)
+);

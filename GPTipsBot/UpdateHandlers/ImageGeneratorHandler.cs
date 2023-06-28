@@ -68,6 +68,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch(Exception ex)
             {
+                logger.LogError(ex.Message);
                 await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
             }
             finally

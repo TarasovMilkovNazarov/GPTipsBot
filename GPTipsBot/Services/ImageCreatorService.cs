@@ -92,7 +92,7 @@ namespace GPTipsBot.Services
             }
 
             // Get redirect URL
-            string redirectUrl = response.Headers.First(x => x.Name == "Location").Value.ToString();
+            string? redirectUrl = response.Headers?.First(x => x.Name == "Location").Value?.ToString().Replace("&nfy=1", "");
             string requestId = redirectUrl.Split("id=")[^1];
             await client.ExecuteAsync(new RestRequest(redirectUrl, Method.Get), token);
 
