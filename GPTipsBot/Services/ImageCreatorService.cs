@@ -10,7 +10,7 @@ namespace GPTipsBot.Services
 {
     public class ImageCreatorService
     {
-        private string BING_URL = "https://www.bing.com";
+        private string BING_URL = "https://cn.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
         private string authCookie = "_U=1PR8yXIol38TdR2N3YLisWmhmHz2dD0xnfJU7Eqd2hYyG6SqmVFUNAkZ3V5N-0AdREGKvdP--ERjHn5YlJ313uzIAr4HJQMxQeeeDouycUPhKqzl3ffygHziNsK_LN_V1TWrd4TpCWd0-r0HukhMUpnZIbkighZZQwcEVkTxCFDIETu5VQNCfcdd70AGR2w3BexLdrrJ3AqcihHjk6cBwzQ";
@@ -92,7 +92,7 @@ namespace GPTipsBot.Services
             }
 
             // Get redirect URL
-            string? redirectUrl = response.Headers?.First(x => x.Name == "Location").Value?.ToString().Replace("&nfy=1", "");
+            string? redirectUrl = response.Headers?.First(x => x.Name == "Location").Value?.ToString()?.Replace("&nfy=1", "");
             string requestId = redirectUrl.Split("id=")[^1];
             await client.ExecuteAsync(new RestRequest(redirectUrl, Method.Get), token);
 
@@ -109,7 +109,7 @@ namespace GPTipsBot.Services
                 imageLinks.Add(match.Groups[1].Value.Split("?w=")[0]);
             }
             // Remove duplicates
-            return new List<string>(new HashSet<string>(imageLinks));
+            return new HashSet<string>(imageLinks).ToList();
         }
 
         private bool IsImageSrcGetRequestSuccessfull(RestResponse response, int currentAttempt)
