@@ -13,7 +13,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public BaseMessageHandler Create<T>() where T : BaseMessageHandler
         {
-            return _serviceProvider.GetRequiredService(typeof(T)) as T;
+            return _serviceProvider.GetRequiredService(typeof(T)) as T ?? throw new InvalidOperationException();
         }
     }
 }

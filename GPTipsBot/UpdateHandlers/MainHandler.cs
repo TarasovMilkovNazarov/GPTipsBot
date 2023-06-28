@@ -1,5 +1,4 @@
 ﻿using GPTipsBot.Dtos;
-using GPTipsBot.Localization;
 using GPTipsBot.Mapper;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
