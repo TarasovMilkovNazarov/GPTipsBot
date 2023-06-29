@@ -5,9 +5,12 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class GroupMessageHandler : BaseMessageHandler
     {
+        private static readonly ChatType?[] groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
+        public static ChatType?[] GroupChatTypes => groupChatTypes;
+
         public GroupMessageHandler(MessageHandlerFactory messageHandlerFactory)
         {
-            SetNextHandler(messageHandlerFactory.Create<MessageTypeHandler>());
+            SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
         }
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
@@ -47,8 +50,7 @@ namespace GPTipsBot.UpdateHandlers
             var botMentionedEntity = message?.EntityValues?.FirstOrDefault(ev => ev.ToLower().Contains("gptip"));
             var isBotMentioned = message.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
             var isReplyToBotMessage = message.ReplyToMessage?.From?.IsBot ?? false;
-            var groupOrChannelTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
-            var isGroupOrChannel = groupOrChannelTypes.Contains(message.ChatType);
+            var isGroupOrChannel = GroupChatTypes.Contains(message.ChatType);
             var isUserWaitingResponse = MainHandler.userState[update.UserChatKey].CurrentState != Enums.UserStateEnum.None;
 
             if (!isBotMentioned && !isReplyToBotMessage && isGroupOrChannel && !isUserWaitingResponse)

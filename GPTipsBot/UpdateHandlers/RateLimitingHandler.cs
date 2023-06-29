@@ -15,7 +15,7 @@ namespace GPTipsBot.UpdateHandlers
             this.botClient = botClient;
             this.logger = logger;
 
-            SetNextHandler(messageHandlerFactory.Create<GroupMessageHandler>());
+            SetNextHandler(messageHandlerFactory.Create<MessageTypeHandler>());
         }
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)

@@ -13,7 +13,10 @@ namespace GPTipsBot.UpdateHandlers
         public UpdateDecorator(Update update, CancellationToken cancellationToken)
         {
             _update = update;
-            ChatId = _update.Message?.Chat.Id ?? _update.CallbackQuery?.Message?.Chat.Id ?? throw new ArgumentNullException();
+            ChatId = _update.Message?.Chat.Id ?? 
+                _update.CallbackQuery?.Message?.Chat.Id ?? 
+                _update.MyChatMember?.Chat.Id ?? 
+                throw new ArgumentNullException();
 
             CancellationToken = cancellationToken;
 
@@ -41,7 +44,10 @@ namespace GPTipsBot.UpdateHandlers
                 Message = MessageMapper.Map(_update.CallbackQuery?.Message, ChatId, Enums.MessageOwner.User);
                 Message.UserId = _update.CallbackQuery.Message.Chat.Id;
                 Message.Text = _update.CallbackQuery.Data;
+            }
 
+            if (UserChatKey == null)
+            {
                 UserChatKey = new(ChatId, ChatId);
             }
         }
@@ -62,5 +68,15 @@ namespace GPTipsBot.UpdateHandlers
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
 
+
+        public string GetUserLanguage()
+        {
+            if (MainHandler.userState.ContainsKey(UserChatKey))
+            {
+                return MainHandler.userState[UserChatKey].LanguageCode;
+            }
+
+            return Message?.LanguageCode ?? "ru";
+        }
     }
 }

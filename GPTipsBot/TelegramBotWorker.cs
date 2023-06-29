@@ -35,8 +35,8 @@ namespace GPTipsBot
             var mainHandler = messageHandlerFactory.Create<MainHandler>();
             var extendedUpd = new UpdateDecorator(update, cancellationToken);
 
-            var userCulture = update.Message?.From?.LanguageCode ?? MainHandler.userState[extendedUpd.UserChatKey]?.LanguageCode;
-            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userCulture);
+            var userLang = extendedUpd.GetUserLanguage();
+            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userLang);
 
             try
             {

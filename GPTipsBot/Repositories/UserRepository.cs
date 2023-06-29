@@ -10,8 +10,6 @@ namespace GPTipsBot.Repositories
     {
         private readonly IDbConnection _connection;
         private readonly ILogger<TelegramBotWorker> logger;
-        private readonly DapperContext context;
-        private readonly MessageRepository messageRepository;
         private readonly string insertUserQuery = "INSERT INTO Users (id, firstname, lastname, createdat, isactive, source) " +
                 "VALUES (@Id, @FirstName, @LastName, @CreatedAt, @IsActive, @Source) RETURNING id";
         private readonly string updateUserQuery = "Update Users SET isactive = 'true', source = @Source WHERE id = @telegramId;";
@@ -20,14 +18,12 @@ namespace GPTipsBot.Repositories
 
         private readonly string removeUserQuery = "UPDATE users SET isactive = 'false' WHERE id = @telegramId;";
 
-        public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context, MessageRepository messageRepository)
+        public UserRepository(ILogger<TelegramBotWorker> logger, DapperContext context)
         {
             _connection = context.CreateConnection();
             _connection.Open();
 
             this.logger = logger;
-            this.context = context;
-            this.messageRepository = messageRepository;
         }
 
         public long CreateUpdate(User user)
@@ -70,18 +66,15 @@ namespace GPTipsBot.Repositories
 
         public long SoftlyRemoveUser(long telegramId)
         {
-            using (var connection = context.CreateConnection())
+            int count = _connection.ExecuteScalar<int>(isUserExists, new { telegramId });
+            if (count == 0)
             {
-                int count = connection.ExecuteScalar<int>(isUserExists, new { telegramId });
-                if (count == 0)
-                {
-                    return -1;
-                }
-
-                connection.Execute(removeUserQuery, new { telegramId });
-
-                return telegramId;
+                return -1;
             }
+
+            _connection.Execute(removeUserQuery, new { telegramId });
+
+            return telegramId;
         }
 
         public void Dispose()
