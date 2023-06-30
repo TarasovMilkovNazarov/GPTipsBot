@@ -26,7 +26,6 @@ namespace GPTipsBot.Repositories
         public BotSettings Create(long userId, string languageCode)
         {
             logger.LogInformation($"Create settings userId={userId} with language={languageCode}");
-
             var settings = _connection.QuerySingle<BotSettings>(insertSetting, new
             {
                 userId,

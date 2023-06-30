@@ -42,9 +42,9 @@ namespace GPTipsBot.UpdateHandlers
             if (!userState.ContainsKey(userKey))
             {
                 userState.TryAdd(userKey, new UserStateDto(userKey));
-                userRepository.CreateUpdate(UserMapper.Map(update.User));
             }
 
+            userRepository.CreateUpdate(UserMapper.Map(update.User));
             var settings = botSettingsRepository.Get(userKey.Id) ?? botSettingsRepository.Create(userKey.Id, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
             CultureInfo.CurrentUICulture = new CultureInfo(settings.Language);
             userState[userKey].LanguageCode = settings.Language;

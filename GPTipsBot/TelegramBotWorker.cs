@@ -3,6 +3,7 @@ using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -13,7 +14,6 @@ namespace GPTipsBot
     public partial class TelegramBotWorker : IUpdateHandler
     {
         private readonly ILogger<TelegramBotWorker> _logger;
-        private readonly GptAPI gptAPI;
         private readonly TelegramBotAPI telegramBotApi;
         private readonly MessageHandlerFactory messageHandlerFactory;
 
@@ -24,7 +24,6 @@ namespace GPTipsBot
             TelegramBotAPI telegramBotApi, MessageHandlerFactory messageHandlerFactory)
         {
             _logger = logger;
-            this.gptAPI = gptAPI;
             this.telegramBotApi = telegramBotApi;
             this.messageHandlerFactory = messageHandlerFactory;
             Start = DateTime.UtcNow;
