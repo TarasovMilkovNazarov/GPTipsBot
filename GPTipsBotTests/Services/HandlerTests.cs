@@ -1,4 +1,5 @@
-﻿using GPTipsBot;
+﻿using dotenv.net;
+using GPTipsBot;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,15 +16,13 @@ namespace GPTipsBotTests.Services
         Update telegramUpdate;
         TelegramBotClient telegramBotClient;
         TelegramBotWorker telegramBotWorker;
-        ServiceProvider serviceProvider;
+        readonly IServiceProvider _services = HostBuilder.CreateHostBuilder(new string[] { }).Build().Services;
 
         public HandlerTests()
         {
-            var services = new ServiceCollection();
-            services.AddTransient<TelegramBotWorker>();
-
-            serviceProvider = services.BuildServiceProvider();
-            telegramBotWorker = serviceProvider.GetService<TelegramBotWorker>() ?? throw new ArgumentNullException();
+            DotEnv.Fluent().WithProbeForEnv(10).Load();
+            var host = HostBuilder.CreateHostBuilder(Array.Empty<string>()).Build();
+            telegramBotWorker = _services.GetService<TelegramBotWorker>() ?? throw new ArgumentNullException();
 
             var updStr = "{\"update_id\":878620224,\"message\":" +
                 "{\"message_id\":3923,\"from\":{\"id\":486363646,\"is_bot\":false,\"first_name\":\"Aleksandr\"," +
@@ -36,21 +35,16 @@ namespace GPTipsBotTests.Services
         }
 
         [Test]
-        public async Task HandlersBaseOrderTest()
+        public async Task SendTextMessage()
         {
-            var mainHandler = serviceProvider.GetRequiredService<MainHandler>();
+            var mainHandler = _services.GetRequiredService<MainHandler>();
             var cts = new CancellationTokenSource();
             var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
 
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
 
             Assert.IsNotEmpty(updateDecorator.Message.Text);
-        }
-
-        [Test]
-        public void SendTextMessage()
-        {
-            throw new NotImplementedException(); 
+            Assert.IsNotEmpty(updateDecorator.Reply.Text);
         }
         
         [Test]
