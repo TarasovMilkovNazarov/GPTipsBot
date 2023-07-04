@@ -137,6 +137,9 @@
   <data name="ContextUpdated" xml:space="preserve">
     <value>Контекст успешно сброшен. Начните новый диалог</value>
   </data>
+  <data name="CookiesUpdated" xml:space="preserve">
+    <value>Куки для Bing image обновлены</value>
+  </data>
   <data name="DevBotName" xml:space="preserve">
     <value>GPTipDev</value>
   </data>

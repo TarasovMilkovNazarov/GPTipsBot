@@ -22,6 +22,7 @@ namespace GPTipsBot.Services
         public const string SetEngLangStr = "/setEngLang";
         public const string CancelStr = "/cancel";
         public const string StopRequestStr = "/stopRequest";
+        public const string UpdateBingCookieStr = "/updateBingCookie";
 
         public static BotCommand Start => new BotCommand { Command = StartStr, Description = BotUI.Start };
         public static BotCommand Image => new BotCommand { Command = ImageStr, Description = BotUI.Image };

@@ -2,7 +2,7 @@
 {
     public static class AppConfig
     {
-        public static bool UseFreeApi = false;
+        public static bool UseFreeApi { get; set; } = Env != "Production";
         public static bool IsOnMaintenance = false;
         public static string Env => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         public static string TelegramToken => GetEnvStrict("TELEGRAM_TOKEN");

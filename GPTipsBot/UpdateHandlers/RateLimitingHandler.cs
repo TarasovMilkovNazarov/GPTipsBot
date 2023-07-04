@@ -21,13 +21,7 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
             var telegramId = update.UserChatKey.Id;
-            if (update.UserChatKey != null)
-            {
-                await base.HandleAsync(update, cancellationToken);
-                return;
-            }
-
-            var chatId = update.UserChatKey?.ChatId;
+            var chatId = update.UserChatKey.ChatId;
 
             if (!MessageService.UserToMessageCount.TryGetValue(telegramId, out var mesCount))
             {
@@ -38,8 +32,9 @@ namespace GPTipsBot.UpdateHandlers
                 if (mesCount + 1 > MessageService.MaxMessagesCountPerMinute)
                 {
                     logger.LogError("Max messages limit reached");
-                    await botClient.SendTextMessageAsync(chatId ?? telegramId, 
-                        string.Format(BotResponse.TooManyRequests, MessageService.ResettingInterval), cancellationToken: cancellationToken);
+                    update.Reply.Text = string.Format(BotResponse.TooManyRequests, MessageService.ResettingInterval);
+
+                    await botClient.SendTextMessageAsync(chatId, update.Reply.Text, cancellationToken: cancellationToken);
 
                     return;
                 }

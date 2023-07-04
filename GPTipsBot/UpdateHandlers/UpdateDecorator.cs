@@ -30,11 +30,6 @@ namespace GPTipsBot.UpdateHandlers
                     UserId = User.Id,
                     ChatId = ChatId,
                 };
-                Reply = new MessageDto()
-                {
-                    UserId = User.Id,
-                    ChatId = ChatId,
-                };
 
                 UserChatKey = new(User.Id, ChatId);
             }
@@ -50,6 +45,12 @@ namespace GPTipsBot.UpdateHandlers
             {
                 UserChatKey = new(ChatId, ChatId);
             }
+
+            Reply = new MessageDto()
+            {
+                UserId = User.Id,
+                ChatId = ChatId,
+            };
         }
 
         public CancellationToken StatusTimerCancellationToken { get; set; }

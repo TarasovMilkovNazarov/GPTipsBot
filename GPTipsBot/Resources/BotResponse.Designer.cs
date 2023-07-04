@@ -22,7 +22,7 @@ namespace GPTipsBot.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class BotResponse {
+    public class BotResponse {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace GPTipsBot.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GPTipsBot.Resources.BotResponse", typeof(BotResponse).Assembly);
@@ -51,7 +51,7 @@ namespace GPTipsBot.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -68,7 +68,7 @@ namespace GPTipsBot.Resources {
         ///- чтобы задать вопрос боту, просто отправьте текст
         ///- для генерации изображения введите команду /image, либо воспользуйтесь кнопкой меню.
         /// </summary>
-        internal static string BotDescription {
+        public static string BotDescription {
             get {
                 return ResourceManager.GetString("BotDescription", resourceCulture);
             }
@@ -77,7 +77,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to ChatGPT + DALL-E | Бесплатный.
         /// </summary>
-        internal static string BotName {
+        public static string BotName {
             get {
                 return ResourceManager.GetString("BotName", resourceCulture);
             }
@@ -86,7 +86,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Операция отменена.
         /// </summary>
-        internal static string Cancel {
+        public static string Cancel {
             get {
                 return ResourceManager.GetString("Cancel", resourceCulture);
             }
@@ -95,7 +95,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Пожалуйста выберите язык интерфейса.
         /// </summary>
-        internal static string ChooseLanguagePlease {
+        public static string ChooseLanguagePlease {
             get {
                 return ResourceManager.GetString("ChooseLanguagePlease", resourceCulture);
             }
@@ -104,16 +104,25 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Контекст успешно сброшен. Начните новый диалог.
         /// </summary>
-        internal static string ContextUpdated {
+        public static string ContextUpdated {
             get {
                 return ResourceManager.GetString("ContextUpdated", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Куки для Bing image обновлены.
+        /// </summary>
+        public static string CookiesUpdated {
+            get {
+                return ResourceManager.GetString("CookiesUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GPTipDev.
         /// </summary>
-        internal static string DevBotName {
+        public static string DevBotName {
             get {
                 return ResourceManager.GetString("DevBotName", resourceCulture);
             }
@@ -122,7 +131,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Привет! Чем могу помочь?.
         /// </summary>
-        internal static string Greeting {
+        public static string Greeting {
             get {
                 return ResourceManager.GetString("Greeting", resourceCulture);
             }
@@ -131,7 +140,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image.
         /// </summary>
-        internal static string ImageDescriptionLimitWarning {
+        public static string ImageDescriptionLimitWarning {
             get {
                 return ResourceManager.GetString("ImageDescriptionLimitWarning", resourceCulture);
             }
@@ -140,7 +149,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Введите текстовое описание изображения длиной до {0} символов.
         /// </summary>
-        internal static string InputImageDescriptionText {
+        public static string InputImageDescriptionText {
             get {
                 return ResourceManager.GetString("InputImageDescriptionText", resourceCulture);
             }
@@ -149,7 +158,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Руссий язык используется для интерфейса.
         /// </summary>
-        internal static string LanguageWasSetSuccessfully {
+        public static string LanguageWasSetSuccessfully {
             get {
                 return ResourceManager.GetString("LanguageWasSetSuccessfully", resourceCulture);
             }
@@ -158,7 +167,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Извините, но сейчас доступна обработка только текстовых сообщений. В разработке находятся голосовые сообщения и генерация картинок текстом.
         /// </summary>
-        internal static string OnlyMessagesAvailable {
+        public static string OnlyMessagesAvailable {
             get {
                 return ResourceManager.GetString("OnlyMessagesAvailable", resourceCulture);
             }
@@ -167,7 +176,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to ⚙️ Ведутся технические работы. Благодарим за понимание..
         /// </summary>
-        internal static string OnMaintenance {
+        public static string OnMaintenance {
             get {
                 return ResourceManager.GetString("OnMaintenance", resourceCulture);
             }
@@ -176,7 +185,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to ⌛️ Подождите, подготавливаю ответ....
         /// </summary>
-        internal static string PleaseWaitMsg {
+        public static string PleaseWaitMsg {
             get {
                 return ResourceManager.GetString("PleaseWaitMsg", resourceCulture);
             }
@@ -185,7 +194,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Простите, я отутствовал какое-то время, но сейчас снова в строю..
         /// </summary>
-        internal static string Recovered {
+        public static string Recovered {
             get {
                 return ResourceManager.GetString("Recovered", resourceCulture);
             }
@@ -194,7 +203,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Введите сообщение ниже. Будем рад любой обратной связи..
         /// </summary>
-        internal static string SendFeedback {
+        public static string SendFeedback {
             get {
                 return ResourceManager.GetString("SendFeedback", resourceCulture);
             }
@@ -203,7 +212,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Бот с интеграцией GPT-3.5 + DALL-E. Поможет ответить на вопросы и создать изображение по тексту 🤖👋 (Автор @alanextar).
         /// </summary>
-        internal static string ShortDescription {
+        public static string ShortDescription {
             get {
                 return ResourceManager.GetString("ShortDescription", resourceCulture);
             }
@@ -212,7 +221,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Служебный бот для разработки, добавляйте @GPTipsBot.
         /// </summary>
-        internal static string ShortDevDescription {
+        public static string ShortDevDescription {
             get {
                 return ResourceManager.GetString("ShortDevDescription", resourceCulture);
             }
@@ -221,7 +230,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Что-то пошло не так, попробуйте ещё раз.
         /// </summary>
-        internal static string SomethingWentWrong {
+        public static string SomethingWentWrong {
             get {
                 return ResourceManager.GetString("SomethingWentWrong", resourceCulture);
             }
@@ -230,7 +239,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Сервис генерации изображений находится в тестовом режиме. Попробуйте заново, начиная с команды /image, либо дождитесь исправления ошибок. Мы работаем над улучшением сервиса, благодарим за понимание 🙏.
         /// </summary>
-        internal static string SomethingWentWrongWithImageService {
+        public static string SomethingWentWrongWithImageService {
             get {
                 return ResourceManager.GetString("SomethingWentWrongWithImageService", resourceCulture);
             }
@@ -239,7 +248,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Использовать бесплатное прокси: {0}.
         /// </summary>
-        internal static string SwitchProxy {
+        public static string SwitchProxy {
             get {
                 return ResourceManager.GetString("SwitchProxy", resourceCulture);
             }
@@ -248,7 +257,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Test.
         /// </summary>
-        internal static string Test {
+        public static string Test {
             get {
                 return ResourceManager.GetString("Test", resourceCulture);
             }
@@ -257,7 +266,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Ваш отзыв отправлен автору. Спасибо, что делаете бота лучше!.
         /// </summary>
-        internal static string Thanks {
+        public static string Thanks {
             get {
                 return ResourceManager.GetString("Thanks", resourceCulture);
             }
@@ -266,7 +275,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Превышен лимит на количество символов. Попробуйте сократить ваш запрос.
         /// </summary>
-        internal static string TokensLimitExceeded {
+        public static string TokensLimitExceeded {
             get {
                 return ResourceManager.GetString("TokensLimitExceeded", resourceCulture);
             }
@@ -275,7 +284,7 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to ❗️Слишком много запросов, попробуйте через {0} секунд.
         /// </summary>
-        internal static string TooManyRequests {
+        public static string TooManyRequests {
             get {
                 return ResourceManager.GetString("TooManyRequests", resourceCulture);
             }

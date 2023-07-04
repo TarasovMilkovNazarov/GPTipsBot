@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using GPTipsBot.Db;
-using GPTipsBot.Models;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using User = GPTipsBot.Models.User;
 
 namespace GPTipsBot.Repositories
 {
@@ -26,27 +26,34 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
         }
 
-        public long CreateUpdate(User user)
+        public User? Get(long id)
+        {
+            return _connection.Query<User>(selectUserByTelegramId, new { telegramId = id }).FirstOrDefault();
+        }
+
+        public long Create(User user)
         {
             logger.LogInformation("CreateUser");
-
-            var dbUser = _connection.Query<User>(selectUserByTelegramId, new { telegramId = user.Id }).FirstOrDefault();
-            if (dbUser == null)
-            {
-                _connection.QuerySingle<long>(insertUserQuery, user);
-            }
-            else
-            {
-                _connection.ExecuteScalar(updateUserQuery, new
-                {
-                    telegramId = user.Id,
-                    source = string.IsNullOrEmpty(dbUser.Source) ? user.Source : dbUser.Source
-                });
-            }
+            _connection.QuerySingle<long>(insertUserQuery, user);
 
             return user.Id;
         }
 
+        public void Update(User user)
+        {
+            var dbUser = Get(user.Id);
+            if (dbUser == null)
+            {
+                throw new InvalidOperationException($"Can't find user with id {user.Id}");
+            }
+
+            _connection.ExecuteScalar(updateUserQuery, new
+            {
+                telegramId = user.Id,
+                source = string.IsNullOrEmpty(dbUser.Source) ? user.Source : dbUser.Source
+            });
+        }
+        
         public IEnumerable<User> GetAll()
         {
             const string sql = @"SELECT * FROM Users";
@@ -62,6 +69,13 @@ namespace GPTipsBot.Repositories
             }
 
             return users;
+        }
+
+        public long GetActiveUsersCount()
+        {
+            const string sql = @"SELECT Count(*) FROM Users WHERE isactive=true;";
+
+            return _connection.QuerySingle<long>(sql);
         }
 
         public long SoftlyRemoveUser(long telegramId)

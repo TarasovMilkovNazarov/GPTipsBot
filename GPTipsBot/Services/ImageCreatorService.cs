@@ -218,5 +218,10 @@ namespace GPTipsBot.Services
 
             return image;
         }
+
+        public void UpdateBingCookies(string messageText)
+        {
+            authCookie = "_U=" + messageText;
+        }
     }
 }

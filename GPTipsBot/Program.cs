@@ -49,6 +49,7 @@ public class HostBuilder
             services
             .AddLogging(configure => configure.AddConsole())
             .AddSingleton<DapperContext>()
+            .AddTransient<UserService>()
             .AddTransient<ImageCreatorService>()
             .AddTransient<ActionStatus>()
             .AddTransient<MessageHandlerFactory>()

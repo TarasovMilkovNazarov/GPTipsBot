@@ -137,6 +137,9 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="ContextUpdated" xml:space="preserve">
     <value>Context reset successfully. Start a new dialogue.</value>
   </data>
+  <data name="CookiesUpdated" xml:space="preserve">
+    <value>Bing image cookies were updated</value>
+  </data>
   <data name="DevBotName" xml:space="preserve">
     <value>GPTipDev</value>
   </data>

@@ -12,5 +12,6 @@
         ChooseLang,
         SetRuLang,
         SetEngLang,
+        UpdateBingCookie,
     }
 }

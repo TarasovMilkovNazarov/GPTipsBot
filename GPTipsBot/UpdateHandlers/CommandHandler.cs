@@ -21,6 +21,8 @@ namespace GPTipsBot.UpdateHandlers
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageRepository messageContextRepository;
         private readonly UserRepository userRepository;
+        private readonly UserService userService;
+        private readonly ImageCreatorService imageCreatorService;
         private readonly ITelegramBotClient botClient;
         private readonly BotSettingsRepository botSettingsRepository;
         private readonly TelegramBotAPI telegramBotAPI;
@@ -28,7 +30,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public CommandHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageContextRepository,
             UserRepository userRepository, ITelegramBotClient botClient, BotSettingsRepository botSettingsRepository,
-            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger)
+            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger, UserService userService, ImageCreatorService imageCreatorService)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageContextRepository = messageContextRepository;
@@ -38,6 +40,8 @@ namespace GPTipsBot.UpdateHandlers
             this.telegramBotAPI = telegramBotAPI;
             this.logger = logger;
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+            this.userService = userService;
+            this.imageCreatorService = imageCreatorService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
@@ -51,7 +55,6 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            string? responseToUser = null;
             bool keepContext = true;
             IReplyMarkup? replyMarkup = startKeyboard;
             update.Message.ContextBound = false;
@@ -62,30 +65,37 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.User.Source = TelegramService.GetSource(messageText);
-                    userRepository.CreateUpdate(UserMapper.Map(update.User));
-                    responseToUser = BotResponse.Greeting;
+                    userService.CreateUpdateUser(UserMapper.Map(update.User));
+                    update.Reply.Text = BotResponse.Greeting;
                     break;
                 case CommandType.Help:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    responseToUser = BotResponse.BotDescription;
+                    update.Reply.Text = BotResponse.BotDescription;
                     break;
                 case CommandType.CreateImage:
-                    responseToUser = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.basedOnExperienceInputLengthLimit);
-                    replyMarkup = cancelKeyboard;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingImage;
+                    if (messageText.StartsWith("/image "))
+                    {
+                        update.Message.Text = messageText.Substring("/image ".Length);
+                        SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+                        await base.HandleAsync(update, cancellationToken);
+                        return;
+                    }
+                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.basedOnExperienceInputLengthLimit);
+                    replyMarkup = cancelKeyboard;
                     break;
                 case CommandType.ResetContext:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    responseToUser = BotResponse.ContextUpdated;
+                    update.Reply.Text = BotResponse.ContextUpdated;
                     keepContext = false;
                     break;
                 case CommandType.Feedback:
-                    responseToUser = BotResponse.SendFeedback;
+                    update.Reply.Text = BotResponse.SendFeedback;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.SendingFeedback;
                     replyMarkup = cancelKeyboard;
                     break;
                 case CommandType.ChooseLang:
-                    responseToUser = BotResponse.ChooseLanguagePlease;
+                    update.Reply.Text = BotResponse.ChooseLanguagePlease;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingLanguage;
                     replyMarkup = chooseLangKeyboard;
                     break;
@@ -96,11 +106,11 @@ namespace GPTipsBot.UpdateHandlers
                     await UpdateLanguage(update.UserChatKey, "ru");
                     break;
                 case CommandType.Cancel:
-                    responseToUser = BotResponse.Cancel;
+                    update.Reply.Text = BotResponse.Cancel;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     break;
                 case CommandType.StopRequest:
-                    responseToUser = BotResponse.Cancel;
+                    update.Reply.Text = BotResponse.Cancel;
                     if (MainHandler.userState.ContainsKey(update.UserChatKey))
                     {
                         var state = MainHandler.userState[update.UserChatKey];
@@ -123,10 +133,10 @@ namespace GPTipsBot.UpdateHandlers
                     break;
             }
 
-            if (!string.IsNullOrEmpty(responseToUser))
+            if (!string.IsNullOrEmpty(update.Reply.Text))
             {
                 messageContextRepository.AddMessage(update.Message, keepContext: keepContext);
-                await botClient.SendTextMessageAsync(chatId, responseToUser, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
+                await botClient.SendTextMessageAsync(chatId, update.Reply.Text, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
             }
 
             async Task UpdateLanguage(UserChatKey userKey, string langCode)
@@ -134,7 +144,7 @@ namespace GPTipsBot.UpdateHandlers
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
                 MainHandler.userState[userKey].LanguageCode = langCode;
                 botSettingsRepository.Update(userKey.Id, langCode);
-                responseToUser = BotResponse.LanguageWasSetSuccessfully;
+                update.Reply.Text = BotResponse.LanguageWasSetSuccessfully;
                 await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();
                 MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
@@ -145,43 +155,47 @@ namespace GPTipsBot.UpdateHandlers
         {
             message = message.Trim().ToLower();
 
-            if (message.StartsWith(Start.Command))
+            if (message.StartsWith(Start.Command.ToLower()))
             {
                 command = CommandType.Start;
             }
-            else if (message.Equals(Help.Command) || ButtonToLocalizations[HelpStr].Any(b => b.ToLower() == message))
+            else if (message.Equals(Help.Command.ToLower()) || ButtonToLocalizations[HelpStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.Help;
             }
-            else if (message.Equals(Image.Command) || ButtonToLocalizations[ImageStr].Any(b => b.ToLower() == message))
+            else if (message.StartsWith(Image.Command.ToLower()) || ButtonToLocalizations[ImageStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.CreateImage;
             }
-            else if (message.Equals(ResetContext.Command) || ButtonToLocalizations[ResetContextStr].Any(b => b.ToLower() == message))
+            else if (message.StartsWith(UpdateBingCookieStr.ToLower()))
+            {
+                command = CommandType.UpdateBingCookie;
+            }
+            else if (message.Equals(ResetContext.Command.ToLower()) || ButtonToLocalizations[ResetContextStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.ResetContext;
             }
-            else if (message.Equals(Feedback.Command) || ButtonToLocalizations[FeedbackStr].Any(b => b.ToLower() == message))
+            else if (message.Equals(Feedback.Command.ToLower()) || ButtonToLocalizations[FeedbackStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.Feedback;
             }
-            else if (message.Equals(ChooseLang.Command) || ButtonToLocalizations[ChooseLangStr].Any(b => b.ToLower() == message))
+            else if (message.Equals(ChooseLang.Command.ToLower()) || ButtonToLocalizations[ChooseLangStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.ChooseLang;
             }
-            else if (message.Equals(SetRuLang.Command) || ButtonToLocalizations[SetRuLangStr].Any(b => b.ToLower() == message))
+            else if (message.Equals(SetRuLang.Command.ToLower()) || ButtonToLocalizations[SetRuLangStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.SetRuLang;
             }
-            else if (message.Equals(SetEngLang.Command) || ButtonToLocalizations[SetEngLangStr].Any(b => b.ToLower() == message))
+            else if (message.Equals(SetEngLang.Command.ToLower()) || ButtonToLocalizations[SetEngLangStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.SetEngLang;
             }
-            else if (message.Equals(CancelStr) || ButtonToLocalizations[CancelStr].Any(b => b.ToLower() == message))
+            else if (message.Equals(CancelStr.ToLower()) || ButtonToLocalizations[CancelStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.Cancel;
             }
-            else if (message.Equals("/stoprequest"))
+            else if (message.Equals(StopRequestStr.ToLower()))
             {
                 command = CommandType.StopRequest;
             }

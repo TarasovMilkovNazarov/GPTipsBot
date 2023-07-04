@@ -3,7 +3,6 @@ using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
