@@ -42,6 +42,7 @@ namespace GPTipsBot.UpdateHandlers
                 sw.Stop();
                 logger.LogInformation($"Get response to message {update.Message.Id} takes {sw.Elapsed.TotalSeconds}s");
                 update.Reply.Text = gtpResponse?.Choices?.FirstOrDefault()?.Message?.Content;
+                update.Reply.Role = Enums.MessageOwner.Assistant;
                 update.Reply.ContextBound = true;
                 messageRepository.AddMessage(update.Reply, update.Message.Id);
                 await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, replyToMessageId: (int)update.Message.TelegramMessageId);

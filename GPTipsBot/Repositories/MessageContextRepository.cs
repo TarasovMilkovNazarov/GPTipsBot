@@ -75,7 +75,7 @@ namespace GPTipsBot.Repositories
         {
             var lastMes = _connection.QueryFirstOrDefault<Message>(getLastMessage, new {
                 telegramId = userId,
-                chatId = chatId
+                chatId
             });
 
             return lastMes?.ContextId;

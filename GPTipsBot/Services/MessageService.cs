@@ -37,7 +37,7 @@ namespace GPTipsBot.Services
         public ChatMessage[] PrepareContext(UserChatKey userKey, long contextId)
         {
             var messages = messageContextRepository.GetRecentContextMessages(userKey, contextId);
-            var contextWindow = new ContextWindow(new ChatGptService());
+            var contextWindow = new ContextWindow(chatGptService);
 
             foreach (var item in messages)
             {
