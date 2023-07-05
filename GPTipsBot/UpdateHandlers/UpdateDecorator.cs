@@ -48,8 +48,8 @@ namespace GPTipsBot.UpdateHandlers
 
             Reply = new MessageDto()
             {
-                UserId = User.Id,
-                ChatId = ChatId,
+                UserId = UserChatKey.Id,
+                ChatId = UserChatKey.ChatId,
             };
         }
 
