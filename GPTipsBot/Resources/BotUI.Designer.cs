@@ -142,7 +142,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сбросить контекст.
+        ///   Looks up a localized string similar to Начать новый диалог с ChatGPT (сбросить контекст).
         /// </summary>
         internal static string ResetContext {
             get {
@@ -151,7 +151,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 🗑 Сбросить контекст.
+        ///   Looks up a localized string similar to 💬 Новый диалог с ChatGPT (сбросить контекст).
         /// </summary>
         internal static string ResetContextButton {
             get {

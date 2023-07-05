@@ -118,8 +118,8 @@ namespace GPTipsBot.Services
             {
                 new[]
                 {
-                    imageButton,
-                    resetContextButton
+                    resetContextButton,
+                    imageButton
                 },
                 new[]
                 {

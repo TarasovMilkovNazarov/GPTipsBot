@@ -145,10 +145,10 @@
     <value>Language</value>
   </data>
   <data name="ResetContext" xml:space="preserve">
-    <value>Reset context</value>
+    <value>Start new dialog with ChatGPT (reset context)</value>
   </data>
   <data name="ResetContextButton" xml:space="preserve">
-    <value>🗑 Reset context</value>
+    <value>💬 New dialog with ChatGPT (reset context)</value>
   </data>
   <data name="RussianButton" xml:space="preserve">
     <value>Русский</value>
