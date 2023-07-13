@@ -117,8 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BookDivinationButton" xml:space="preserve">
+    <value>Book Divination</value>
+  </data>
   <data name="CancelButton" xml:space="preserve">
     <value>Cancel</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="EmojiTranslationButton" xml:space="preserve">
+    <value>Emoji Translation</value>
   </data>
   <data name="EnglishButton" xml:space="preserve">
     <value>English</value>
@@ -128,6 +137,12 @@
   </data>
   <data name="FeedbackButton" xml:space="preserve">
     <value>Send feedback</value>
+  </data>
+  <data name="GamesButton" xml:space="preserve">
+    <value>Games</value>
+  </data>
+  <data name="GuessWhoButton" xml:space="preserve">
+    <value>Guess Who</value>
   </data>
   <data name="Help" xml:space="preserve">
     <value>How to use bot</value>
@@ -167,5 +182,8 @@
   </data>
   <data name="StopRequestButton" xml:space="preserve">
     <value>cancel request</value>
+  </data>
+  <data name="TickTackToeButton" xml:space="preserve">
+    <value>Tick tack toe</value>
   </data>
 </root>

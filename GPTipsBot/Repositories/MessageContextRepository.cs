@@ -31,11 +31,11 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
         }
 
-        public long AddMessage(MessageDto messageDto, long? replyToId = null, bool keepContext = true)
+        public long AddMessage(MessageDto messageDto, long? replyToId = null)
         {
             long? contextId = GetLastContext(messageDto.UserId, messageDto.ChatId);
 
-            var insertQuery = (keepContext && contextId.HasValue) ? insertMesWithSameContext : insertWithNewContext;
+            var insertQuery = messageDto.NewContext || contextId == null ? insertWithNewContext : insertMesWithSameContext;
 
             var inserted = _connection.QuerySingle<(long id, long contextId)>(insertQuery, new { 
                 messageDto.Text,

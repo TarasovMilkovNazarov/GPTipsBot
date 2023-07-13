@@ -8,7 +8,7 @@ namespace GPTipsBot.Services
     {
         private readonly MessageRepository messageContextRepository;
         private readonly ChatGptService chatGptService;
-        public const int MaxMessagesCountPerMinute = 5;
+        public const int MaxMessagesCountPerMinute = 10;
         public static Timer resetMessageCountsPerMinuteTimer;
         public static TimeSpan ResettingInterval => TimeSpan.FromSeconds(60); 
 

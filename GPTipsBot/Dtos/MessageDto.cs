@@ -21,6 +21,7 @@ namespace GPTipsBot.Dtos
         public ChatType ChatType { get; internal set; }
         public MessageType Type { get; internal set; }
         public bool ContextBound { get; internal set; }
+        public bool NewContext { get; internal set; }
         public long ReplyToId { get; internal set; }
         public string? LanguageCode { get; internal set; }
     }

@@ -20,9 +20,14 @@ namespace GPTipsBot.Services
         public const string ChooseLangStr = "/setLang";
         public const string SetRuLangStr = "/setRuLang";
         public const string SetEngLangStr = "/setEngLang";
+        public const string GamesStr = "/games";
         public const string CancelStr = "/cancel";
         public const string StopRequestStr = "/stopRequest";
         public const string UpdateBingCookieStr = "/updateBingCookie";
+        public const string TickTackToeStr = "/tickTackToe";
+        public const string EmojiTranslationStr = "/emojiTranslation";
+        public const string BookDivinationStr = "/bookDivination";
+        public const string GuessWhoStr = "/guessWho";
 
         public static BotCommand Start => new BotCommand { Command = StartStr, Description = BotUI.Start };
         public static BotCommand Image => new BotCommand { Command = ImageStr, Description = BotUI.Image };
@@ -32,6 +37,11 @@ namespace GPTipsBot.Services
         public static BotCommand ChooseLang => new BotCommand { Command = ChooseLangStr, Description = BotUI.SetLang };
         public static BotCommand SetRuLang => new BotCommand { Command = SetRuLangStr, Description = BotUI.SetRuLang };
         public static BotCommand SetEngLang => new BotCommand { Command = SetEngLangStr, Description = BotUI.SetEngLang };
+        public static BotCommand Games => new BotCommand { Command = GamesStr, Description = BotUI.GamesButton };
+        public static BotCommand TickTackToe => new BotCommand { Command = TickTackToeStr, Description = BotUI.TickTackToeButton };
+        public static BotCommand EmojiTranslation => new BotCommand { Command = EmojiTranslationStr, Description = BotUI.EmojiTranslationButton };
+        public static BotCommand BookDivination => new BotCommand { Command = BookDivinationStr, Description = BotUI.BookDivinationButton };
+        public static BotCommand GuessWho => new BotCommand { Command = GuessWhoStr, Description = BotUI.GuessWhoButton };
 
         public BotMenu()
         {
@@ -44,6 +54,7 @@ namespace GPTipsBot.Services
                 Start,
                 Image,
                 ResetContext,
+                Games,
                 Feedback,
                 Help
             };
@@ -57,6 +68,7 @@ namespace GPTipsBot.Services
         public static ReplyKeyboardMarkup startKeyboard => GetMenuKeyboardMarkup();
         public static ReplyKeyboardMarkup cancelKeyboard => GetCancelKeyboardMarkup();
         public static ReplyKeyboardMarkup chooseLangKeyboard => GetLanguageKeyboardMarkup();
+        public static ReplyKeyboardMarkup gamesKeyboard => GetGamesKeyboardMarkup();
 
         public static KeyboardButton imageButton => new KeyboardButton(BotUI.ImageButton);
         public static KeyboardButton resetContextButton => new KeyboardButton(BotUI.ResetContextButton);
@@ -66,6 +78,12 @@ namespace GPTipsBot.Services
         public static KeyboardButton langButton => new KeyboardButton(BotUI.LangButton);
         public static KeyboardButton ruLangButton => new KeyboardButton(BotUI.RussianButton);
         public static KeyboardButton engLangButton => new KeyboardButton(BotUI.EnglishButton);
+
+        public static KeyboardButton gamesButton => new KeyboardButton(BotUI.GamesButton);
+        public static KeyboardButton tickTackToeButton => new KeyboardButton(BotUI.TickTackToeButton);
+        public static KeyboardButton emojiTranslationButton => new KeyboardButton(BotUI.EmojiTranslationButton);
+        public static KeyboardButton guessWhoButton => new KeyboardButton(BotUI.GuessWhoButton);
+        public static KeyboardButton bookDivinationButton => new KeyboardButton(BotUI.BookDivinationButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -91,6 +109,11 @@ namespace GPTipsBot.Services
                 { BotMenu.ChooseLangStr, new() },
                 { BotMenu.SetRuLangStr, new() },
                 { BotMenu.SetEngLangStr, new() },
+                { BotMenu.GamesStr, new() },
+                { BotMenu.TickTackToeStr, new() },
+                { BotMenu.BookDivinationStr, new() },
+                { BotMenu.EmojiTranslationStr, new() },
+                { BotMenu.GuessWhoStr, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -107,6 +130,11 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ChooseLangStr].Add(BotUI.LangButton);
                 ButtonToLocalizations[BotMenu.SetRuLangStr].Add(BotUI.RussianButton);
                 ButtonToLocalizations[BotMenu.SetEngLangStr].Add(BotUI.EnglishButton);
+                ButtonToLocalizations[BotMenu.GamesStr].Add(BotUI.GamesButton);
+                ButtonToLocalizations[BotMenu.TickTackToeStr].Add(BotUI.TickTackToeButton);
+                ButtonToLocalizations[BotMenu.BookDivinationStr].Add(BotUI.BookDivinationButton);
+                ButtonToLocalizations[BotMenu.EmojiTranslationStr].Add(BotUI.EmojiTranslationButton);
+                ButtonToLocalizations[BotMenu.GuessWhoStr].Add(BotUI.GuessWhoButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -120,6 +148,10 @@ namespace GPTipsBot.Services
                 {
                     resetContextButton,
                     imageButton
+                },
+                new[]
+                {
+                    gamesButton
                 },
                 new[]
                 {
@@ -137,10 +169,31 @@ namespace GPTipsBot.Services
 
             return keyboardMarkup;
         }
-
+        
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
         {
             var keyboardMarkup = new ReplyKeyboardMarkup(cancelButton);
+
+            keyboardMarkup.ResizeKeyboard = true;
+            keyboardMarkup.OneTimeKeyboard = true;
+
+            return keyboardMarkup;
+        }
+        private static ReplyKeyboardMarkup GetGamesKeyboardMarkup()
+        {
+            var keyboardMarkup = new ReplyKeyboardMarkup(new[]
+            {
+                new[]
+                {
+                    tickTackToeButton,
+                    emojiTranslationButton
+                },
+                new[]
+                {
+                    guessWhoButton,
+                    bookDivinationButton
+                }
+            });
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = true;

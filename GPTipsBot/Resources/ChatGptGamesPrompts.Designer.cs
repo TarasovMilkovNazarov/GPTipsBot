@@ -22,14 +22,14 @@ namespace GPTipsBot.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class BingResponse {
+    internal class ChatGptGamesPrompts {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal BingResponse() {
+        internal ChatGptGamesPrompts() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace GPTipsBot.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GPTipsBot.Resources.BingResponse", typeof(BingResponse).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GPTipsBot.Resources.ChatGptGamesPrompts", typeof(ChatGptGamesPrompts).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,74 +61,38 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Не удалось сгенерировать изображение. Попробуйте изменить запрос..
+        ///   Looks up a localized string similar to Давай сыграем в игру &quot;Book divination&quot; - гадание по книге. 1. Предложи пользователю для гадания популярные книги 2. Пользователь должен написать на что он гадает. Какой вопрос его беспокоит 3. Случайным образом выбери строчку или абзац из книги и интерпретируй её для пользователя. Перед началом игры расскажи правила..
         /// </summary>
-        internal static string BadImagesError {
+        internal static string BookDivination {
             get {
-                return ResourceManager.GetString("BadImagesError", resourceCulture);
+                return ResourceManager.GetString("BookDivination", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ⚠️Ваш запрос был заблокирован. Попробуйте изменить некорректные слова и повторите попытку..
+        ///   Looks up a localized string similar to Давай сыграем в Emoji Translation. 1. Отправь пользователю название известного фильма, мультфильма или книги в виде последовательности эмодзи. 2. Пользователь должен угадать название. Перед началом игры расскажи правила..
         /// </summary>
-        internal static string BlockedPromptError {
+        internal static string EmojiTranslation {
             get {
-                return ResourceManager.GetString("BlockedPromptError", resourceCulture);
+                return ResourceManager.GetString("EmojiTranslation", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Выберите игру.
+        ///   Looks up a localized string similar to Я загадываю известного персонажа. Задавай мне вопросы, предполагающие ответы да или нет. На основании моих ответов, ты должен угадать, какого персонажа я загадал(а). Начни задавать вопросы. Перед началом расскажи правила..
         /// </summary>
-        internal static string ChooseGame {
+        internal static string GuessWho {
             get {
-                return ResourceManager.GetString("ChooseGame", resourceCulture);
+                return ResourceManager.GetString("GuessWho", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Изображения не найдены..
+        ///   Looks up a localized string similar to Давай сыграем в в крестики нолики. Предложи мне выбрать за какой символ я буду играть, за крестик или нолик. Отслеживай мои ходы и обновляй поле, каждый раз. Когда будешь обновлять поле каждый раз проверяй результат, если есть победитель или ничья напиши &quot;Кабалунгма&quot;.
         /// </summary>
-        internal static string NoImagesError {
+        internal static string TickTacToe {
             get {
-                return ResourceManager.GetString("NoImagesError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Не удалось получить результаты..
-        /// </summary>
-        internal static string NoResultsError {
-            get {
-                return ResourceManager.GetString("NoResultsError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ⚠️Не удалось выполнить перенаправление..
-        /// </summary>
-        internal static string RedirectError {
-            get {
-                return ResourceManager.GetString("RedirectError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ⚠️Ваш запрос превысил время ожидания..
-        /// </summary>
-        internal static string TimeoutError {
-            get {
-                return ResourceManager.GetString("TimeoutError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Данный язык в настоящее время не поддерживается..
-        /// </summary>
-        internal static string UnsupportedLangError {
-            get {
-                return ResourceManager.GetString("UnsupportedLangError", resourceCulture);
+                return ResourceManager.GetString("TickTacToe", resourceCulture);
             }
         }
     }

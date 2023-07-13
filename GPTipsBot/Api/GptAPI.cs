@@ -32,7 +32,17 @@ namespace GPTipsBot.Api
 
         public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
         {
-            var textWithContext = messageService.PrepareContext(update.UserChatKey, update.Message.ContextId.Value);
+            ChatMessage[] textWithContext = Array.Empty<ChatMessage>();
+
+            if (update.Message.NewContext)
+            {
+                textWithContext = new ChatMessage[] { new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text) };
+            }
+            else
+            {
+                textWithContext = messageService.PrepareContext(update.UserChatKey, update.Message.ContextId.Value);
+            }
+
             if (textWithContext.Length == 0)
             {
                 //todo reset context or suggest user to reset: send inline command with reset

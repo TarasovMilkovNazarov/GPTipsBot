@@ -1,8 +1,12 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
+using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Telegram.Bot;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -28,6 +32,17 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
+            IReplyMarkup replyMarkup = null;
+
+            //if (MainHandler.userState[update.UserChatKey].CurrentState == UserStateEnum.PlayingEmojiTranslations && update.Message.Text != ChatGptGamesPrompts.EmojiTranslation)
+            //{
+            //    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.ContinueButton, BotMenu.EmojiTranslationStr));
+            //}
+            //else if (MainHandler.userState[update.UserChatKey].CurrentState == UserStateEnum.PlayingTickTacToe && update.Message.Text.Contains("Кабалунгма"))
+            //{
+            //    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.ContinueButton, BotMenu.TickTackToeStr));
+            //}
+
             try
             {
                 update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
@@ -45,7 +60,8 @@ namespace GPTipsBot.UpdateHandlers
                 update.Reply.Role = Enums.MessageOwner.Assistant;
                 update.Reply.ContextBound = true;
                 messageRepository.AddMessage(update.Reply, update.Message.Id);
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, replyToMessageId: (int)update.Message.TelegramMessageId);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text,
+                    replyToMessageId: (int)update.Message.TelegramMessageId);
             }
             catch (OperationCanceledException ex)
             {

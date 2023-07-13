@@ -25,18 +25,12 @@ namespace GPTipsBot.UpdateHandlers
                 User = UserMapper.Map(update.Message.From);
                 Message = MessageMapper.Map(update.Message, ChatId, Enums.MessageOwner.User);
 
-                ServiceMessage = new MessageDto()
-                {
-                    UserId = User.Id,
-                    ChatId = ChatId,
-                };
-
                 UserChatKey = new(User.Id, ChatId);
             }
             else if (_update.CallbackQuery?.Message != null)
             {
                 //User = UserMapper.Map(_update.CallbackQuery?.Message.From);
-                Message = MessageMapper.Map(_update.CallbackQuery?.Message, ChatId, Enums.MessageOwner.User);
+                Message = MessageMapper.Map(_update.CallbackQuery.Message, ChatId, Enums.MessageOwner.User);
                 Message.UserId = _update.CallbackQuery.Message.Chat.Id;
                 Message.Text = _update.CallbackQuery.Data;
             }
@@ -45,6 +39,12 @@ namespace GPTipsBot.UpdateHandlers
             {
                 UserChatKey = new(ChatId, ChatId);
             }
+
+            ServiceMessage = new MessageDto()
+            {
+                UserId = UserChatKey.Id,
+                ChatId = UserChatKey.ChatId,
+            };
 
             Reply = new MessageDto()
             {

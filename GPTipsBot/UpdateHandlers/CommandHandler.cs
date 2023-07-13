@@ -55,7 +55,6 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            bool keepContext = true;
             IReplyMarkup? replyMarkup = startKeyboard;
             update.Message.ContextBound = false;
 
@@ -87,7 +86,7 @@ namespace GPTipsBot.UpdateHandlers
                 case CommandType.ResetContext:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.ContextUpdated;
-                    keepContext = false;
+                    update.Message.NewContext = true;
                     break;
                 case CommandType.Feedback:
                     update.Reply.Text = BotResponse.SendFeedback;
@@ -129,14 +128,41 @@ namespace GPTipsBot.UpdateHandlers
                             state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
                         }
                     }
-                    
                     break;
+                case CommandType.Games:
+                    update.Reply.Text = BotResponse.ChooseGame;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingGames;
+                    replyMarkup = gamesKeyboard;
+                    break;
+                case CommandType.TickTackToe:
+                    await SetGameInstructions(ChatGptGamesPrompts.TickTacToe, UserStateEnum.PlayingTickTacToe);
+                    return;
+                case CommandType.EmojiTranslation:
+                    await SetGameInstructions(ChatGptGamesPrompts.EmojiTranslation, UserStateEnum.PlayingEmojiTranslations);
+                    return;
+                case CommandType.BookDivination:
+                    await SetGameInstructions(ChatGptGamesPrompts.BookDivination, UserStateEnum.PlayingBookDivination);
+                    return;
+                case CommandType.GuessWho:
+                    await SetGameInstructions(ChatGptGamesPrompts.GuessWho, UserStateEnum.PlayingGuessWho);
+                    return;
             }
 
             if (!string.IsNullOrEmpty(update.Reply.Text))
             {
-                messageContextRepository.AddMessage(update.Message, keepContext: keepContext);
+                messageContextRepository.AddMessage(update.Message);
                 await botClient.SendTextMessageAsync(chatId, update.Reply.Text, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
+            }
+
+            Task SetGameInstructions(string prompt, UserStateEnum userState)
+            {
+                update.Message.Text = prompt;
+                update.Message.NewContext = true;
+                update.Message.ContextBound = true;
+                update.Message.Role = MessageOwner.System;
+                MainHandler.userState[update.UserChatKey].CurrentState = userState;
+                SetNextHandler(messageHandlerFactory.Create<MainHandler>());
+                return base.HandleAsync(update, cancellationToken);
             }
 
             async Task UpdateLanguage(UserChatKey userKey, string langCode)
@@ -198,6 +224,26 @@ namespace GPTipsBot.UpdateHandlers
             else if (message.Equals(StopRequestStr.ToLower()))
             {
                 command = CommandType.StopRequest;
+            }
+            else if (message.Equals(GamesStr.ToLower()) || ButtonToLocalizations[GamesStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.Games;
+            }
+            else if (message.Equals(TickTackToeStr.ToLower()) || ButtonToLocalizations[TickTackToeStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.TickTackToe;
+            }
+            else if (message.Equals(BookDivinationStr.ToLower()) || ButtonToLocalizations[BookDivinationStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.BookDivination;
+            }
+            else if (message.Equals(GuessWhoStr.ToLower()) || ButtonToLocalizations[GuessWhoStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.GuessWho;
+            }
+            else if (message.Equals(EmojiTranslationStr.ToLower()) || ButtonToLocalizations[EmojiTranslationStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.EmojiTranslation;
             }
             else
             {

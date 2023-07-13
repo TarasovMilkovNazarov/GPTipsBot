@@ -6,5 +6,10 @@
         SendingFeedback,
         AwaitingMessage,
         AwaitingLanguage,
+        AwaitingGames,
+        PlayingGuessWho,
+        PlayingTickTacToe,
+        PlayingBookDivination,
+        PlayingEmojiTranslations,
     }
 }

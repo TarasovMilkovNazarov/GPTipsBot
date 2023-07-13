@@ -117,8 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BookDivinationButton" xml:space="preserve">
+    <value>Гадание по книгам</value>
+  </data>
   <data name="CancelButton" xml:space="preserve">
     <value>Отмена</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Продолжить</value>
+  </data>
+  <data name="EmojiTranslationButton" xml:space="preserve">
+    <value>Эмодзи ребус</value>
   </data>
   <data name="EnglishButton" xml:space="preserve">
     <value>English</value>
@@ -128,6 +137,12 @@
   </data>
   <data name="FeedbackButton" xml:space="preserve">
     <value>Оставить отзыв</value>
+  </data>
+  <data name="GamesButton" xml:space="preserve">
+    <value>Игры</value>
+  </data>
+  <data name="GuessWhoButton" xml:space="preserve">
+    <value>Отгадай кто</value>
   </data>
   <data name="Help" xml:space="preserve">
     <value>Инструкция по применению</value>
@@ -167,5 +182,8 @@
   </data>
   <data name="StopRequestButton" xml:space="preserve">
     <value>отменить запрос</value>
+  </data>
+  <data name="TickTackToeButton" xml:space="preserve">
+    <value>Крестики нолики</value>
   </data>
 </root>

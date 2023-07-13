@@ -131,6 +131,9 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="Cancel" xml:space="preserve">
     <value>Operation canceled</value>
   </data>
+  <data name="ChooseGame" xml:space="preserve">
+    <value>Выберите игру</value>
+  </data>
   <data name="ChooseLanguagePlease" xml:space="preserve">
     <value>Choose user interface language please</value>
   </data>

@@ -123,6 +123,9 @@
   <data name="BlockedPromptError" xml:space="preserve">
     <value>⚠️Ваш запрос был заблокирован. Попробуйте изменить некорректные слова и повторите попытку.</value>
   </data>
+  <data name="ChooseGame" xml:space="preserve">
+    <value>Выберите игру</value>
+  </data>
   <data name="NoImagesError" xml:space="preserve">
     <value>Изображения не найдены.</value>
   </data>

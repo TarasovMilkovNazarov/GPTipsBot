@@ -13,5 +13,10 @@
         SetRuLang,
         SetEngLang,
         UpdateBingCookie,
+        Games,
+        TickTackToe,
+        BookDivination,
+        GuessWho,
+        EmojiTranslation
     }
 }

@@ -93,6 +93,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Пожалуйста выберите игру.
+        /// </summary>
+        public static string ChooseGame {
+            get {
+                return ResourceManager.GetString("ChooseGame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Пожалуйста выберите язык интерфейса.
         /// </summary>
         public static string ChooseLanguagePlease {

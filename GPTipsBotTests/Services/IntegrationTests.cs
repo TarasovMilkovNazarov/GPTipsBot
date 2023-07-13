@@ -62,10 +62,11 @@ namespace GPTipsBotTests.Services
             var cts = new CancellationTokenSource();
             var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
-            updateDecorator.Message.Text = "test";
+            updateDecorator.Message.Text = "What is the capital city of France?";
+            await mainHandler.HandleAsync(updateDecorator, cts.Token);
 
             Assert.IsNotEmpty(updateDecorator.Message.Text);
-            Assert.IsNotEmpty(updateDecorator.Reply.Text);
+            Assert.True(updateDecorator.Reply.Text.Contains("Paris"));
         }
 
         [Test]
@@ -89,13 +90,13 @@ namespace GPTipsBotTests.Services
         public async Task SendGenerateImageRequest()
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
-            telegramUpdate.Message.Text = "/image гора";
             var cts = new CancellationTokenSource();
             var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            updateDecorator.Message.Text = "/image гора";
 
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
 
-            Assert.That(updateDecorator.Reply.Text, Does.Contain("https"));
+            Assert.True(updateDecorator.Reply.Text.Contains("http"));
         }
 
         [Test, Order(999)]

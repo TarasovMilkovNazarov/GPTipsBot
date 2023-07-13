@@ -37,6 +37,16 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BotUI.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\ChatGptGamesPrompts.en.Designer.cs">
+      <DependentUpon>ChatGptGamesPrompts.en.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\ChatGptGamesPrompts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ChatGptGamesPrompts.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\BingResponse.resx">
@@ -51,6 +61,14 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>BotUI.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\ChatGptGamesPrompts.en.resx">
+      <LastGenOutput>ChatGptGamesPrompts.en.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\ChatGptGamesPrompts.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ChatGptGamesPrompts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.dev.json">
@@ -59,5 +77,8 @@
     <None Update="appsettings.Production.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\Games\" />
   </ItemGroup>
 </Project>
