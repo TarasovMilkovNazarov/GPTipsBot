@@ -146,6 +146,9 @@ namespace GPTipsBot.UpdateHandlers
                 case CommandType.GuessWho:
                     await SetGameInstructions(ChatGptGamesPrompts.GuessWho, UserStateEnum.PlayingGuessWho);
                     return;
+                case CommandType.AdventureGame:
+                    await SetGameInstructions(ChatGptGamesPrompts.Adventure, UserStateEnum.PlayingAdventureGame);
+                    return;
             }
 
             if (!string.IsNullOrEmpty(update.Reply.Text))
@@ -244,6 +247,10 @@ namespace GPTipsBot.UpdateHandlers
             else if (message.Equals(EmojiTranslationStr.ToLower()) || ButtonToLocalizations[EmojiTranslationStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.EmojiTranslation;
+            }
+            else if (message.Equals(AdventureStr.ToLower()) || ButtonToLocalizations[AdventureStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.AdventureGame;
             }
             else
             {

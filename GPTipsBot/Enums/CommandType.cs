@@ -17,6 +17,7 @@
         TickTackToe,
         BookDivination,
         GuessWho,
-        EmojiTranslation
+        EmojiTranslation,
+        AdventureGame
     }
 }

@@ -61,6 +61,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Действуй как текстовая приключенческая игра.
+        /// </summary>
+        internal static string Adventure {
+            get {
+                return ResourceManager.GetString("Adventure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Давай сыграем в игру &quot;Book divination&quot; - гадание по книге. 1. Предложи пользователю для гадания популярные книги 2. Пользователь должен написать на что он гадает. Какой вопрос его беспокоит 3. Случайным образом выбери строчку или абзац из книги и интерпретируй её для пользователя. Перед началом игры расскажи правила..
         /// </summary>
         internal static string BookDivination {

@@ -28,6 +28,7 @@ namespace GPTipsBot.Services
         public const string EmojiTranslationStr = "/emojiTranslation";
         public const string BookDivinationStr = "/bookDivination";
         public const string GuessWhoStr = "/guessWho";
+        public const string AdventureStr = "/adventureGame";
 
         public static BotCommand Start => new BotCommand { Command = StartStr, Description = BotUI.Start };
         public static BotCommand Image => new BotCommand { Command = ImageStr, Description = BotUI.Image };
@@ -42,6 +43,7 @@ namespace GPTipsBot.Services
         public static BotCommand EmojiTranslation => new BotCommand { Command = EmojiTranslationStr, Description = BotUI.EmojiTranslationButton };
         public static BotCommand BookDivination => new BotCommand { Command = BookDivinationStr, Description = BotUI.BookDivinationButton };
         public static BotCommand GuessWho => new BotCommand { Command = GuessWhoStr, Description = BotUI.GuessWhoButton };
+        public static BotCommand Adventure => new BotCommand { Command = AdventureStr, Description = BotUI.AdventureButton };
 
         public BotMenu()
         {
@@ -84,6 +86,7 @@ namespace GPTipsBot.Services
         public static KeyboardButton emojiTranslationButton => new KeyboardButton(BotUI.EmojiTranslationButton);
         public static KeyboardButton guessWhoButton => new KeyboardButton(BotUI.GuessWhoButton);
         public static KeyboardButton bookDivinationButton => new KeyboardButton(BotUI.BookDivinationButton);
+        public static KeyboardButton adventureGameButton => new KeyboardButton(BotUI.AdventureButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -114,6 +117,7 @@ namespace GPTipsBot.Services
                 { BotMenu.BookDivinationStr, new() },
                 { BotMenu.EmojiTranslationStr, new() },
                 { BotMenu.GuessWhoStr, new() },
+                { BotMenu.AdventureStr, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -135,6 +139,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.BookDivinationStr].Add(BotUI.BookDivinationButton);
                 ButtonToLocalizations[BotMenu.EmojiTranslationStr].Add(BotUI.EmojiTranslationButton);
                 ButtonToLocalizations[BotMenu.GuessWhoStr].Add(BotUI.GuessWhoButton);
+                ButtonToLocalizations[BotMenu.AdventureStr].Add(BotUI.AdventureButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -192,6 +197,10 @@ namespace GPTipsBot.Services
                 {
                     guessWhoButton,
                     bookDivinationButton
+                },
+                new[]
+                {
+                    adventureGameButton
                 }
             });
 

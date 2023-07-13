@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Adventure" xml:space="preserve">
+    <value>Действуй как текстовая приключенческая игра</value>
+  </data>
   <data name="BookDivination" xml:space="preserve">
     <value>Давай сыграем в игру "Book divination" - гадание по книге. 1. Предложи пользователю для гадания популярные книги 2. Пользователь должен написать на что он гадает. Какой вопрос его беспокоит 3. Случайным образом выбери строчку или абзац из книги и интерпретируй её для пользователя. Перед началом игры расскажи правила.</value>
   </data>

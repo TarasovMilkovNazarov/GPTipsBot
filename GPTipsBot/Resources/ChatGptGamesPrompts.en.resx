@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Adventure" xml:space="preserve">
+    <value>Imitate a command prompt text based adventure</value>
+  </data>
   <data name="BookDivination" xml:space="preserve">
     <value>Let's play "Book Divination" - a game of fortune-telling using a book. 1. Offer the user popular books to choose from for divination. 2. The user should write about what they want to inquire. What question is bothering them. 3. Randomly select a sentence or paragraph from the book and interpret it for the user. Before we start the game, let me explain the rules.</value>
   </data>

@@ -11,5 +11,6 @@
         PlayingTickTacToe,
         PlayingBookDivination,
         PlayingEmojiTranslations,
+        PlayingAdventureGame,
     }
 }
