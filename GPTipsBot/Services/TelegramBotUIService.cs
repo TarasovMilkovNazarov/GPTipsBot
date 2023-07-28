@@ -29,6 +29,7 @@ namespace GPTipsBot.Services
         public const string BookDivinationStr = "/bookDivination";
         public const string GuessWhoStr = "/guessWho";
         public const string AdventureStr = "/adventureGame";
+        public const string FaceSwapStr = "/faceSwap";
 
         public static BotCommand Start => new BotCommand { Command = StartStr, Description = BotUI.Start };
         public static BotCommand Image => new BotCommand { Command = ImageStr, Description = BotUI.Image };
@@ -87,6 +88,7 @@ namespace GPTipsBot.Services
         public static KeyboardButton guessWhoButton => new KeyboardButton(BotUI.GuessWhoButton);
         public static KeyboardButton bookDivinationButton => new KeyboardButton(BotUI.BookDivinationButton);
         public static KeyboardButton adventureGameButton => new KeyboardButton(BotUI.AdventureButton);
+        public static KeyboardButton faceSwapButton => new KeyboardButton(BotUI.FaceSwapButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -118,6 +120,7 @@ namespace GPTipsBot.Services
                 { BotMenu.EmojiTranslationStr, new() },
                 { BotMenu.GuessWhoStr, new() },
                 { BotMenu.AdventureStr, new() },
+                { BotMenu.FaceSwapStr, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -140,6 +143,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.EmojiTranslationStr].Add(BotUI.EmojiTranslationButton);
                 ButtonToLocalizations[BotMenu.GuessWhoStr].Add(BotUI.GuessWhoButton);
                 ButtonToLocalizations[BotMenu.AdventureStr].Add(BotUI.AdventureButton);
+                ButtonToLocalizations[BotMenu.FaceSwapStr].Add(BotUI.FaceSwapButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -156,6 +160,7 @@ namespace GPTipsBot.Services
                 },
                 new[]
                 {
+                    faceSwapButton,
                     gamesButton
                 },
                 new[]

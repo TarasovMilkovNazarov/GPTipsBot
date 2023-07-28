@@ -6,13 +6,13 @@ using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class CrudHandler : BaseMessageHandler
+    public class UserStateHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageRepository messageRepository;
         private readonly ITelegramBotClient botClient;
 
-        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository, ITelegramBotClient botClient)
+        public UserStateHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository, ITelegramBotClient botClient)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
@@ -36,6 +36,12 @@ namespace GPTipsBot.UpdateHandlers
                 update.Message.Text = "Отзыв: " + update.Message.Text;
                 await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, BotResponse.Thanks, cancellationToken);
                 SetNextHandler(null);
+            }
+            if (MainHandler.userState.ContainsKey(update.UserChatKey) && 
+                MainHandler.userState[update.UserChatKey].CurrentState == Enums.UserStateEnum.AwaitingFaceSwapImages)
+            {
+                update.Message.ContextBound = false;
+                SetNextHandler(messageHandlerFactory.Create<FaceSwapHandler>());
             }
 
             messageRepository.AddMessage(update.Message);

@@ -18,6 +18,7 @@
         BookDivination,
         GuessWho,
         EmojiTranslation,
-        AdventureGame
+        AdventureGame,
+        FaceSwap,
     }
 }

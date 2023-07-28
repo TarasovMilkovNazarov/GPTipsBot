@@ -21,7 +21,8 @@ namespace GPTipsBot.Mapper
                 ReplyToMessage = tMessage.ReplyToMessage,
                 ChatType = tMessage.Chat.Type,
                 ContextBound = true,
-                LanguageCode = tMessage.From.LanguageCode
+                LanguageCode = tMessage.From.LanguageCode,
+                Document = tMessage.Document
             };
 
             return message;

@@ -135,6 +135,9 @@
   <data name="EnglishButton" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="FaceSwapButton" xml:space="preserve">
+    <value>Face swap</value>
+  </data>
   <data name="Feedback" xml:space="preserve">
     <value>Send feedback to author</value>
   </data>

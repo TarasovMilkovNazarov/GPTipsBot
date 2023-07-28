@@ -12,5 +12,6 @@
         PlayingBookDivination,
         PlayingEmojiTranslations,
         PlayingAdventureGame,
+        AwaitingFaceSwapImages,
     }
 }

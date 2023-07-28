@@ -23,6 +23,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserRepository userRepository;
         private readonly UserService userService;
         private readonly ImageCreatorService imageCreatorService;
+        private readonly InsightFaceSwapper faceSwapper;
         private readonly ITelegramBotClient botClient;
         private readonly BotSettingsRepository botSettingsRepository;
         private readonly TelegramBotAPI telegramBotAPI;
@@ -30,7 +31,8 @@ namespace GPTipsBot.UpdateHandlers
 
         public CommandHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageContextRepository,
             UserRepository userRepository, ITelegramBotClient botClient, BotSettingsRepository botSettingsRepository,
-            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger, UserService userService, ImageCreatorService imageCreatorService)
+            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger, UserService userService, ImageCreatorService imageCreatorService,
+            InsightFaceSwapper faceSwapper)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageContextRepository = messageContextRepository;
@@ -39,9 +41,10 @@ namespace GPTipsBot.UpdateHandlers
             this.botSettingsRepository = botSettingsRepository;
             this.telegramBotAPI = telegramBotAPI;
             this.logger = logger;
-            SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+            SetNextHandler(messageHandlerFactory.Create<UserStateHandler>());
             this.userService = userService;
             this.imageCreatorService = imageCreatorService;
+            this.faceSwapper = faceSwapper;
         }
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
@@ -76,7 +79,7 @@ namespace GPTipsBot.UpdateHandlers
                     if (messageText.StartsWith("/image "))
                     {
                         update.Message.Text = messageText.Substring("/image ".Length);
-                        SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+                        SetNextHandler(messageHandlerFactory.Create<UserStateHandler>());
                         await base.HandleAsync(update, cancellationToken);
                         return;
                     }
@@ -148,6 +151,10 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 case CommandType.AdventureGame:
                     await SetGameInstructions(ChatGptGamesPrompts.Adventure, UserStateEnum.PlayingAdventureGame);
+                    return;
+                case CommandType.FaceSwap:
+                    update.Reply.Text = BotResponse.FaceSwapInstruction;
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingFaceSwapImages;
                     return;
             }
 
@@ -249,6 +256,10 @@ namespace GPTipsBot.UpdateHandlers
                 command = CommandType.EmojiTranslation;
             }
             else if (message.Equals(AdventureStr.ToLower()) || ButtonToLocalizations[AdventureStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.AdventureGame;
+            }
+            else if (message.Equals(FaceSwapStr.ToLower()) || ButtonToLocalizations[FaceSwapStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.AdventureGame;
             }

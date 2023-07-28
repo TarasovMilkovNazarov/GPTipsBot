@@ -115,6 +115,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Face swap.
+        /// </summary>
+        internal static string FaceSwapButton {
+            get {
+                return ResourceManager.GetString("FaceSwapButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Оставить отзыв.
         /// </summary>
         internal static string Feedback {

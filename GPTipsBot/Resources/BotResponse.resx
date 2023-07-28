@@ -146,6 +146,9 @@
   <data name="DevBotName" xml:space="preserve">
     <value>GPTipDev</value>
   </data>
+  <data name="FaceSwapInstruction" xml:space="preserve">
+    <value>Отправьте два изображения с лицами в следующем сообщении</value>
+  </data>
   <data name="Greeting" xml:space="preserve">
     <value>Привет! Чем могу помочь?</value>
   </data>

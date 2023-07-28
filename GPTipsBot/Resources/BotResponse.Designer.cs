@@ -138,6 +138,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Отправьте два изображения с лицами в следующем сообщении.
+        /// </summary>
+        public static string FaceSwapInstruction {
+            get {
+                return ResourceManager.GetString("FaceSwapInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Привет! Чем могу помочь?.
         /// </summary>
         public static string Greeting {

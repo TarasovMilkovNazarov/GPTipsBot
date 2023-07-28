@@ -146,6 +146,9 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="DevBotName" xml:space="preserve">
     <value>GPTipDev</value>
   </data>
+  <data name="FaceSwapInstruction" xml:space="preserve">
+    <value>Send two images with faces in next message</value>
+  </data>
   <data name="Greeting" xml:space="preserve">
     <value>Hello! How can I help you?</value>
   </data>

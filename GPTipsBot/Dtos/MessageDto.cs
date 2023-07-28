@@ -24,5 +24,6 @@ namespace GPTipsBot.Dtos
         public bool NewContext { get; internal set; }
         public long ReplyToId { get; internal set; }
         public string? LanguageCode { get; internal set; }
+        public Document? Document { get; internal set; }
     }
 }
