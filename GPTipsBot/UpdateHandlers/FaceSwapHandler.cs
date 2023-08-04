@@ -1,6 +1,6 @@
 ﻿using GPTipsBot.Dtos;
-using GPTipsBot.Dtos.FaceSwap;
 using GPTipsBot.Enums;
+using GPTipsBot.InsightFaceSwap.FaceSwap;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;

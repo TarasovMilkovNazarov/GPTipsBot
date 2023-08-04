@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GPTipsBot.Dtos.FaceSwap
+namespace GPTipsBot.InsightFaceSwap.FaceSwap
 {
     public class Attachment
     {

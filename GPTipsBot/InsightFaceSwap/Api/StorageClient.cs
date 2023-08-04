@@ -1,4 +1,4 @@
-﻿using GPTipsBot.Dtos.FaceSwap;
+﻿using GPTipsBot.InsightFaceSwap.FaceSwap;
 using RestSharp;
 
 namespace GPTipsBot.InsightFaceSwap.Api

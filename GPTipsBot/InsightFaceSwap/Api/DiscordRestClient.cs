@@ -1,4 +1,4 @@
-﻿using GPTipsBot.Dtos.FaceSwap;
+﻿using GPTipsBot.InsightFaceSwap.FaceSwap;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -44,7 +44,7 @@ namespace GPTipsBot.InsightFaceSwap.Api
             request.AddHeader("Sec-Fetch-Dest", "empty");
             request.AddHeader("Sec-Fetch-Mode", "cors");
             request.AddHeader("Sec-Fetch-Site", "same-origin");
-            request.AddHeader("Referrer", $"https://discord.com/channels/{DiscordSettings.ServerId}/{DiscordSettings.ChannelId}");
+            request.AddHeader("Referrer", $"https://discord.com/channels/{DiscordSettings.Guild}/{DiscordSettings.ChannelId}");
             request.AddBody(payload, ContentType.Json);
             var response = this.Execute(request);
 

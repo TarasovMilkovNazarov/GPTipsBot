@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Dtos.FaceSwap;
 using GPTipsBot.InsightFaceSwap.Api;
+using GPTipsBot.InsightFaceSwap.FaceSwap;
 using System.Text;
 
 namespace GPTipsBot.Services
@@ -38,7 +39,7 @@ namespace GPTipsBot.Services
             {
                 application_id = DiscordSettings.InsightSwapFaceApplicationId,
                 type = (int)Discord.InteractionType.ApplicationCommand,
-                guild_id = DiscordSettings.ServerId,
+                guild_id = DiscordSettings.Guild,
                 channel_id = DiscordSettings.ChannelId,
                 session_id = sessionId,
                 data = new Data()
@@ -69,7 +70,7 @@ namespace GPTipsBot.Services
             {
                 application_id = DiscordSettings.InsightSwapFaceApplicationId,
                 type = (int)Discord.InteractionType.ApplicationCommand,
-                guild_id = DiscordSettings.ServerId,
+                guild_id = DiscordSettings.Guild,
                 channel_id = DiscordSettings.ChannelId,
                 session_id = sessionId,
                 data = new Data()
