@@ -31,6 +31,11 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
+            if (update.IsRecovered)
+            {
+                return;
+            }
+
             if (update.ChatMemeberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked)
             {
                 await base.HandleAsync(update, cancellationToken);

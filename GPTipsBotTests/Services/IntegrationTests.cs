@@ -62,6 +62,7 @@ namespace GPTipsBotTests.Services
             var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
             updateDecorator.Message.Text = "What is the capital city of France?";
+            updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
 
             Assert.IsNotEmpty(updateDecorator.Message.Text);

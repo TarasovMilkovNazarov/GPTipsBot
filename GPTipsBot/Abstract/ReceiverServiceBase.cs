@@ -36,6 +36,11 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         // ToDo: we can inject ReceiverOptions through IOptions container
         var receiverOptions = new ReceiverOptions()
         {
+            //AllowedUpdates = new UpdateType[] { 
+            //    UpdateType.Message, 
+            //    UpdateType.InlineQuery, 
+            //    UpdateType.CallbackQuery, 
+            //    UpdateType.ChatMember },
             AllowedUpdates = Array.Empty<UpdateType>(),
         };
 

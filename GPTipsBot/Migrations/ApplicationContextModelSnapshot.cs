@@ -77,6 +77,8 @@ namespace GPTipsBot.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ReplyToId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Messages");
@@ -90,25 +92,22 @@ namespace GPTipsBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<double>("Balance")
+                    b.Property<double?>("Balance")
                         .HasColumnType("double precision");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsFreezed")
-                        .HasColumnType("boolean");
+                    b.Property<DateTime?>("FreezedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OrganizationId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Token")
@@ -151,11 +150,17 @@ namespace GPTipsBot.Migrations
 
             modelBuilder.Entity("GPTipsBot.Models.Message", b =>
                 {
+                    b.HasOne("GPTipsBot.Models.Message", "ReplyTo")
+                        .WithMany()
+                        .HasForeignKey("ReplyToId");
+
                     b.HasOne("GPTipsBot.Models.User", null)
                         .WithMany("Messages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ReplyTo");
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.User", b =>

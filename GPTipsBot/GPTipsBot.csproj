@@ -89,6 +89,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="Services\Games\" />
   </ItemGroup>
 </Project>

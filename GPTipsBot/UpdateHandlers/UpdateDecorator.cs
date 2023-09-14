@@ -1,5 +1,9 @@
 ﻿using GPTipsBot.Dtos;
+using GPTipsBot.Enums;
 using GPTipsBot.Mapper;
+using GPTipsBot.Models;
+using GPTipsBot.Services;
+using System.Data;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -30,6 +34,7 @@ namespace GPTipsBot.UpdateHandlers
                     FirstName = chat.FirstName,
                     LastName = chat.LastName,
                 };
+                IsRecovered = true;
             }
 
             if (update.Message != null)
@@ -78,6 +83,7 @@ namespace GPTipsBot.UpdateHandlers
         public MessageDto ServiceMessage { get; set; }
 
         public ChatMemberStatus? ChatMemeberStatus => _update.MyChatMember?.NewChatMember.Status;
+        public bool IsRecovered { get; }
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
 

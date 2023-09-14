@@ -13,7 +13,9 @@ namespace GPTipsBot.Models
         public long? ReplyToId { get; set; }
         public Message ReplyTo { get; set; }
         public string Text { get; set; }
+        [ForeignKey("User")]
         public long UserId { get; set; }
+        public User User { get; set; }
         public long ChatId { get; set; }
         public DateTime CreatedAt { get; set; }
         public MessageOwner Role { get; set; }

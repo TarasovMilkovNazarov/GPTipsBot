@@ -7,6 +7,7 @@ using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
+using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
 {
@@ -30,6 +31,11 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
         {
+            if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Left && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
+            {
+                return;
+            }
+
             var mainHandler = messageHandlerFactory.Create<MainHandler>();
             var extendedUpd = new UpdateDecorator(update, cancellationToken);
 
