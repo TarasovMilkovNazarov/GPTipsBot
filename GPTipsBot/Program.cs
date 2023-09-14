@@ -70,6 +70,7 @@ public class HostBuilder
             .AddTransient<MessageRepository>()
             .AddTransient<UserRepository>()
             .AddTransient<BotSettingsRepository>()
+            .AddTransient<OpenaiAccountsRepository>()
             .AddTransient<UnitOfWork>()
             .AddScoped<ITelegramBotClient, TelegramBotClient>(x =>
             {

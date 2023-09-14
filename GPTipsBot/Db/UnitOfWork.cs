@@ -7,16 +7,19 @@ namespace GPTipsBot.Db
         private readonly ApplicationContext context;
         private readonly BotSettingsRepository botSettingsRepository;
         private readonly MessageRepository messageRepository;
+        private readonly OpenaiAccountsRepository openaiAccountsRepository;
 
-        public UnitOfWork(ApplicationContext context, BotSettingsRepository botSettingsRepository, MessageRepository messageRepository)
+        public UnitOfWork(ApplicationContext context, BotSettingsRepository botSettingsRepository, MessageRepository messageRepository, OpenaiAccountsRepository openaiAccountsRepository)
         {
             this.context = context;
             this.botSettingsRepository = botSettingsRepository;
             this.messageRepository = messageRepository;
+            this.openaiAccountsRepository = openaiAccountsRepository;
         }
 
         public BotSettingsRepository BotSettings => botSettingsRepository;
         public MessageRepository Messages => messageRepository;
+        public OpenaiAccountsRepository OpenaiAccounts => openaiAccountsRepository;
  
         public void Save()
         {

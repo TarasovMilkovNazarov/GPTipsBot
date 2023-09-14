@@ -19,7 +19,7 @@ namespace GPTipsBot.Repositories
 
         public User? Get(long id)
         {
-            return context.Users.AsNoTracking().FirstOrDefault(x => x.Id == id);
+            return context.Users.FirstOrDefault(x => x.Id == id);
         }
 
         public long Create(User user)

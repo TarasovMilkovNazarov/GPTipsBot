@@ -6,7 +6,6 @@
         public static bool IsOnMaintenance = false;
         public static string Env => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         public static string TelegramToken => GetEnvStrict("TELEGRAM_TOKEN");
-        public static Queue<string> OpenAiTokens { get; } = new Queue<string>(GetEnvStrict("OPENAI_TOKEN").Split(' '));
         public static string ConnectionString => GetEnvStrict("PG_CONNECTION_STRING");
         public const long AdminId = 486363646;
 
