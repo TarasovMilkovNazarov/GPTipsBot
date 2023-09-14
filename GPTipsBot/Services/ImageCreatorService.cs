@@ -10,10 +10,10 @@ namespace GPTipsBot.Services
 {
     public class ImageCreatorService
     {
-        private string BING_URL = "https://www.bing.com";
+        private string BING_URL = "https://cn.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1v_jjeb1hjJhZH0dScsY6XBPI7WoMi0yVpPJJWS8kP4oeAN7lNABC2UuttROvV6JAeQe7ppnzZ75AU8d6pGSHohA5CQcs8in3FrfG3ocGhiaionUdFiv-DSHX68w0qfYyVPDrPe23Ogk_8TFFJ4NnSfCUP6-NyFM50XGBuihMM4gGA8bAk8aXa6dv54tJVrlwoU3TcPw73TMJSbhs_7wiRQ;SRCHHPGUSR=SRCHLANG=en&PV=10.0.0&BRW=XW&BRH=M&CW=1865&CH=969&SCW=1850&SCH=1953&DPR=1.0&UTC=300&DM=0&IG=6C33E34BAA494AAEBE67824AE68021FA&PRVCW=1865&PRVCH=969&HV=1692014886";
+        private string authCookie = "_U=13t5bJPebEVU93wafBuXRO-2RhvCRxO9ct8xV3E1cngme74zORAlL1o4eEslBHDFIlYnvfbUMOHVpJjwuj5j_IlUSE0JkOQ7dNTXi06X0RkoHl80qwo0liGVU4BErBSnUIGlasxwHbNQ7CspUXeoCCrqnqvx9DpYOlw1tjlchvgIuwpRqwzwXYTLr_H1zWpdSB3goRuQXflrb6vbCY7QONg;SRCHHPGUSR=SRCHLANG=en&PV=10.0.0&BRW=XW&BRH=M&CW=1865&CH=969&SCW=1850&SCH=1953&DPR=1.0&UTC=300&DM=0&IG=7E9FCEABDE7F4BB7ACADB02071E6A794&PRVCW=1865&PRVCH=969&HV=1692014886";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");

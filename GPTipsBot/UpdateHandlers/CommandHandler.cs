@@ -1,8 +1,8 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Mapper;
-using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -19,24 +19,19 @@ namespace GPTipsBot.UpdateHandlers
     public class CommandHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
-        private readonly MessageRepository messageContextRepository;
-        private readonly UserRepository userRepository;
         private readonly UserService userService;
         private readonly ImageCreatorService imageCreatorService;
         private readonly ITelegramBotClient botClient;
-        private readonly BotSettingsRepository botSettingsRepository;
+        private readonly UnitOfWork unitOfWork;
         private readonly TelegramBotAPI telegramBotAPI;
         private readonly ILogger<CommandHandler> logger;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageContextRepository,
-            UserRepository userRepository, ITelegramBotClient botClient, BotSettingsRepository botSettingsRepository,
+        public CommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, UnitOfWork unitOfWork,
             TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger, UserService userService, ImageCreatorService imageCreatorService)
         {
             this.messageHandlerFactory = messageHandlerFactory;
-            this.messageContextRepository = messageContextRepository;
-            this.userRepository = userRepository;
             this.botClient = botClient;
-            this.botSettingsRepository = botSettingsRepository;
+            this.unitOfWork = unitOfWork;
             this.telegramBotAPI = telegramBotAPI;
             this.logger = logger;
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
@@ -113,9 +108,9 @@ namespace GPTipsBot.UpdateHandlers
                     if (MainHandler.userState.ContainsKey(update.UserChatKey))
                     {
                         var state = MainHandler.userState[update.UserChatKey];
-                        
+
                         if (state.CurrentState == UserStateEnum.None)
-                        { 
+                        {
                             replyMarkup = new ReplyKeyboardRemove();
                         }
                         else
@@ -153,7 +148,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (!string.IsNullOrEmpty(update.Reply.Text))
             {
-                messageContextRepository.AddMessage(update.Message);
+                unitOfWork.Messages.AddMessage(update.Message);
                 await botClient.SendTextMessageAsync(chatId, update.Reply.Text, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
             }
 
@@ -172,7 +167,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
                 MainHandler.userState[userKey].LanguageCode = langCode;
-                botSettingsRepository.Update(userKey.Id, langCode);
+                unitOfWork.BotSettings.Update(userKey.Id, langCode);
                 update.Reply.Text = BotResponse.LanguageWasSetSuccessfully;
                 await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();

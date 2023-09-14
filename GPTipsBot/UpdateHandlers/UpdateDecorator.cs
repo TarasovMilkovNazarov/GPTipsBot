@@ -13,12 +13,24 @@ namespace GPTipsBot.UpdateHandlers
         public UpdateDecorator(Update update, CancellationToken cancellationToken)
         {
             _update = update;
-            ChatId = _update.Message?.Chat.Id ?? 
-                _update.CallbackQuery?.Message?.Chat.Id ?? 
-                _update.MyChatMember?.Chat.Id ?? 
+            ChatId = _update.Message?.Chat.Id ??
+                _update.CallbackQuery?.Message?.Chat.Id ??
+                _update.MyChatMember?.Chat.Id ??
                 throw new ArgumentNullException();
 
             CancellationToken = cancellationToken;
+
+            if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Kicked && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
+            {
+                var chat = update.MyChatMember.Chat;
+
+                User = new UserDto()
+                {
+                    Id = chat.Id,
+                    FirstName = chat.FirstName,
+                    LastName = chat.LastName,
+                };
+            }
 
             if (update.Message != null)
             {

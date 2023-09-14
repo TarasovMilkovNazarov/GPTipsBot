@@ -4,11 +4,15 @@ using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using OpenAI;
 using OpenAI.Interfaces;
+using OpenAI.Managers;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
 using RestSharp;
+using Timer = System.Timers.Timer;
 using GptModels = OpenAI.ObjectModels;
+using System.Timers;
 
 namespace GPTipsBot.Api
 {
@@ -18,22 +22,29 @@ namespace GPTipsBot.Api
     {
         private readonly string baseUrl1 = "https://chatgpt-api.shn.hk/v1";
         private readonly string baseUrl2 = "https://free.churchless.tech/v1/chat/completions";
-        private readonly string baseUrl3 = "https://api.jeeves.ai/generate/v3/chat";
-        private readonly string baseUrl4 = "https://api.aiguoguo199.com/v1/chat/completions";
         private readonly ILogger<TelegramBotWorker> logger;
-        private readonly IOpenAIService openAiService;
+        private IOpenAIService openAiService;
         private readonly MessageService messageService;
+        private string currentToken;
+        private static Timer timer;
+        private static List<string> dayLimitedTokens { get; } = new List<string>();
 
-        public GptAPI(ILogger<TelegramBotWorker> logger, IOpenAIService openAiService, MessageService messageService)
+        public GptAPI(ILogger<TelegramBotWorker> logger, MessageService messageService)
         {
             this.logger = logger;
-            this.openAiService = openAiService;
+            currentToken = OpenAiTokens.Dequeue();
+
             this.messageService = messageService;
+        }
+
+        static GptAPI()
+        {
+            setup_Timer();
         }
 
         public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
         {
-            ChatMessage[] textWithContext = Array.Empty<ChatMessage>();
+            ChatMessage[] textWithContext;
 
             if (update.Message.NewContext)
             {
@@ -60,10 +71,9 @@ namespace GPTipsBot.Api
 
         public async Task<ChatCompletionCreateResponse?> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
         {
-            var freeGptClient = new RestClient(baseUrl4);
+            var freeGptClient = new RestClient(baseUrl2);
             var request = new RestRequest("", Method.Post);
             request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Authorization", "Bearer sk-XGNemRUzPF7FlcFR54938d41026b4d84BcA6A2845995Fd51");
             var gptDto = new
             {
                 model = GptModels.Models.ChatGpt3_5Turbo,
@@ -95,6 +105,11 @@ namespace GPTipsBot.Api
 
         public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)
         {
+            this.openAiService = new OpenAIService(new OpenAiOptions()
+            {
+                ApiKey =  currentToken
+            });
+
             var completionResult = await openAiService.ChatCompletion.CreateCompletion(
                 new ChatCompletionCreateRequest
                 {
@@ -103,7 +118,52 @@ namespace GPTipsBot.Api
                     //MaxTokens = AppConfig.ChatGptTokensLimitPerMessage
                 }, cancellationToken: token);
 
+            if (completionResult.Successful)
+            {
+                OpenAiTokens.Enqueue(currentToken);
+            }
+            else if(completionResult.Error?.Code == "insufficient_quota")
+            {
+                await SendViaOpenAiApi(messages, token);
+            }
+            else if(completionResult.Error?.Code == "rate_limit_exceeded" && completionResult.Error.Message != null) {
+                if (completionResult.Error.Message.Contains("on requests per day"))
+                {
+                    dayLimitedTokens.Add(currentToken);
+                }
+                else if (completionResult.Error.Message.Contains("on requests per min"))
+                {
+                    OpenAiTokens.Enqueue(currentToken);
+                }
+            }
+
             return completionResult;
+        }
+
+        private static void setup_Timer()
+        {
+            var delay = TimeSpan.FromMinutes(1).TotalMinutes;
+
+            DateTime nowTime = DateTime.Now;
+            DateTime specificTime = nowTime.Date.AddDays(1).AddMinutes(delay);
+            if (nowTime > specificTime)
+                specificTime= specificTime.AddDays(1);
+
+            double tickTime = (specificTime- nowTime).TotalMilliseconds;
+            timer = new Timer(tickTime);
+            timer.Elapsed += UnfreezeDayLimitedTokens;
+            timer.Start();
+        }
+
+        private static void UnfreezeDayLimitedTokens(object sender, ElapsedEventArgs e)
+        {
+            timer.Stop();
+            foreach (var item in dayLimitedTokens)
+            {
+                OpenAiTokens.Enqueue(item);
+            }
+
+            setup_Timer();
         }
     }
 }

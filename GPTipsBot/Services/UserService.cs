@@ -29,7 +29,7 @@ namespace GPTipsBot.Services
                 return;
             }
 
-            userRepository.Update(user);
+            userRepository.Update(dbUser);
         }
 
         public void UserCreatedEventHandler(object sender, User user)

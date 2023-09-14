@@ -1,6 +1,6 @@
-﻿using GPTipsBot.Dtos;
+﻿using GPTipsBot.Db;
+using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
-using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
@@ -13,18 +13,16 @@ namespace GPTipsBot.UpdateHandlers
     {
         public static ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
         private readonly MessageHandlerFactory messageHandlerFactory;
-        private readonly UserRepository userRepository;
         private readonly UserService userService;
-        private readonly BotSettingsRepository botSettingsRepository;
+        private readonly UnitOfWork unitOfWork;
         private readonly ILogger<MainHandler> logger;
         private readonly ITelegramBotClient botClient;
 
-        public MainHandler(MessageHandlerFactory messageHandlerFactory, UserRepository userRepository, 
-            BotSettingsRepository botSettingsRepository, ILogger<MainHandler> logger, ITelegramBotClient botClient, UserService userService)
+        public MainHandler(MessageHandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
+            ILogger<MainHandler> logger, ITelegramBotClient botClient, UserService userService)
         {
             this.messageHandlerFactory = messageHandlerFactory;
-            this.userRepository = userRepository;
-            this.botSettingsRepository = botSettingsRepository;
+            this.unitOfWork = unitOfWork;
             this.logger = logger;
             this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<DeleteUserHandler>());
@@ -33,6 +31,12 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
+            if (update.ChatMemeberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked)
+            {
+                await base.HandleAsync(update, cancellationToken);
+                return;
+            }
+
             if (update.CallbackQuery != null)
             {
                 SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
@@ -48,7 +52,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             userService.CreateUpdateUser(UserMapper.Map(update.User));
-            var settings = botSettingsRepository.Get(userKey.Id) ?? botSettingsRepository.Create(userKey.Id, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+            var settings = unitOfWork.BotSettings.Get(userKey.Id) ?? unitOfWork.BotSettings.Create(userKey.Id, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
             CultureInfo.CurrentUICulture = new CultureInfo(settings.Language);
             userState[userKey].LanguageCode = settings.Language;
 
@@ -62,7 +66,10 @@ namespace GPTipsBot.UpdateHandlers
                 logger.LogError(ex, null);
                 return;
             }
-            
+            finally
+            {
+                unitOfWork.Save();
+            }
         }
     }
 }

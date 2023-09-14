@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using GPTipsBot.Db;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
-using OpenAI.Extensions;
 using GPTipsBot.Api;
 using Telegram.Bot;
 using GPTipsBot.UpdateHandlers;
@@ -14,6 +13,7 @@ using dotenv.net;
 using System.Globalization;
 using GPTipsBot.Resources;
 using GPTipsBot.Localization;
+using Microsoft.EntityFrameworkCore;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
@@ -48,7 +48,6 @@ public class HostBuilder
             // Add your services with depedency injection.
             services
             .AddLogging(configure => configure.AddConsole())
-            .AddSingleton<DapperContext>()
             .AddTransient<UserService>()
             .AddTransient<ImageCreatorService>()
             .AddTransient<ActionStatus>()
@@ -65,12 +64,13 @@ public class HostBuilder
             .AddTransient<ImageGeneratorHandler>()
             .AddTransient<ChatGptHandler>()
             .AddScoped<MessageService>()
-            .AddScoped<GptAPI>()
+            .AddTransient<GptAPI>()
             .AddScoped<ChatGptService>()
             .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken))
-            .AddScoped<MessageRepository>()
-            .AddScoped<UserRepository>()
-            .AddScoped<BotSettingsRepository>()
+            .AddTransient<MessageRepository>()
+            .AddTransient<UserRepository>()
+            .AddTransient<BotSettingsRepository>()
+            .AddTransient<UnitOfWork>()
             .AddScoped<ITelegramBotClient, TelegramBotClient>(x =>
             {
                 var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
@@ -84,7 +84,7 @@ public class HostBuilder
                 return botClient;
             });
 
-            services.AddOpenAIService(settings => { settings.ApiKey = AppConfig.OpenAiToken; });
+            services.AddDbContext<ApplicationContext>();
         });
     }
 

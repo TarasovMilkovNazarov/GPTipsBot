@@ -3,7 +3,6 @@ using GPTipsBot;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Globalization;
 using Telegram.Bot;

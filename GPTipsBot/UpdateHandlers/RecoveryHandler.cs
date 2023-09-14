@@ -43,7 +43,7 @@ namespace GPTipsBot.UpdateHandlers
                     
                     await botClient.SendTextMessageAsync(chatId,
                         BotResponse.Recovered, cancellationToken: update.CancellationToken);
-                };
+                }
 
                 return;
             }
