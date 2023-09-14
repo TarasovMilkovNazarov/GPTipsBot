@@ -21,7 +21,7 @@ namespace GPTipsBot.Repositories
 
         public long AddMessage(MessageDto messageDto, long? replyToId = null)
         {
-            long? contextId = GetLastContext(messageDto.UserId, messageDto.ChatId);
+            long? contextId = messageDto.NewContext ? null : GetLastContext(messageDto.UserId, messageDto.ChatId);
 
             var newMessage = new Message()
             {

@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Db;
 using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
@@ -14,16 +15,18 @@ namespace GPTipsBot
     public partial class TelegramBotWorker : IUpdateHandler
     {
         private readonly ILogger<TelegramBotWorker> _logger;
+        private readonly UnitOfWork unitOfWork;
         private readonly TelegramBotAPI telegramBotApi;
         private readonly MessageHandlerFactory messageHandlerFactory;
 
         public static readonly Dictionary<long, Queue<Telegram.Bot.Types.Update>> userToUpdatesQueue = new Dictionary<long, Queue<Telegram.Bot.Types.Update>>();
         public static DateTime Start { get; private set; }
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, GptAPI gptAPI, 
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, UnitOfWork unitOfWork,
             TelegramBotAPI telegramBotApi, MessageHandlerFactory messageHandlerFactory)
         {
             _logger = logger;
+            this.unitOfWork = unitOfWork;
             this.telegramBotApi = telegramBotApi;
             this.messageHandlerFactory = messageHandlerFactory;
             Start = DateTime.UtcNow;
@@ -55,6 +58,10 @@ namespace GPTipsBot
                 }
 
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+            }
+            finally
+            {
+                unitOfWork.Save();
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using dotenv.net;
 using GPTipsBot;
 using GPTipsBot.Resources;
+using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -108,7 +109,7 @@ namespace GPTipsBotTests.Services
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
             updateDecorator.Message.Text = "test";
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < MessageService.MaxMessagesCountPerMinute; i++)
             {
                 mainHandler.HandleAsync(updateDecorator, cts.Token);
             }
