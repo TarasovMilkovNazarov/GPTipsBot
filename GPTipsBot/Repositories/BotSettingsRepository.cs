@@ -36,9 +36,9 @@ namespace GPTipsBot.Repositories
             return settings;
         }
 
-        public BotSettings Get(long userId)
+        public BotSettings? Get(long userId)
         {
-            return context.BotSettings.AsNoTracking().First(x => x.Id == userId);
+            return context.BotSettings.AsNoTracking().FirstOrDefault(x => x.Id == userId);
         }
     }
 }

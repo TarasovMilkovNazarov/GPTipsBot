@@ -16,16 +16,25 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
             this.context = context;
         }
-
+        
         public void FreezeToken(string token)
         {
             context.OpenaiAccounts.Where(x => x.Token == token)
                 .ExecuteUpdate(x => x.SetProperty(y => y.FreezedAt, DateTime.UtcNow));
         }
 
+        public void Remove(string token, DeletionReason reason)
+        {
+            context.OpenaiAccounts.Where(x => x.Token == token)
+                .ExecuteUpdate(x => x.SetProperty(y => y.IsDeleted, true));
+
+            context.OpenaiAccounts.Where(x => x.Token == token)
+                .ExecuteUpdate(x => x.SetProperty(y => y.DeletionReason, reason));
+        }
+
         public List<string> UnfreezeTokens()
         {
-            var freezedTokens = context.OpenaiAccounts.Where(x => x.FreezedAt != null);
+            var freezedTokens = context.OpenaiAccounts.Where(x => !x.IsDeleted && x.FreezedAt != null);
             freezedTokens.ExecuteUpdate(x => x.SetProperty(y => y.FreezedAt, default(DateTime?)));
 
             context.SaveChanges();
@@ -40,7 +49,7 @@ namespace GPTipsBot.Repositories
 
         public IEnumerable<OpenaiAccount> GetAllAvailable()
         {
-            return context.OpenaiAccounts.AsNoTracking().Where(x => x.FreezedAt == null).ToList();
+            return context.OpenaiAccounts.AsNoTracking().Where(x => !x.IsDeleted && x.FreezedAt == null).ToList();
         }
     }
 }

@@ -8,7 +8,6 @@ WORKDIR /src
 COPY ["GPTipsBot/GPTipsBot.csproj", "GPTipsBot/"]
 RUN dotnet restore "GPTipsBot/GPTipsBot.csproj"
 COPY . .
-COPY ./init.sql /docker-entrypoint-initdb.d/
 WORKDIR "/src/GPTipsBot"
 RUN dotnet build "GPTipsBot.csproj" -c Release -o /app/build
 

@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /utils.sql
 .env
 .idea/
+/*.tar

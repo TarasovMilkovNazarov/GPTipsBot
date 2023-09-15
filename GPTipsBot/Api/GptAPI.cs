@@ -14,6 +14,7 @@ using Timer = System.Timers.Timer;
 using GptModels = OpenAI.ObjectModels;
 using System.Timers;
 using GPTipsBot.Repositories;
+using GPTipsBot.Models;
 
 namespace GPTipsBot.Api
 {
@@ -33,6 +34,7 @@ namespace GPTipsBot.Api
             OpenaiAccountsRepository openaiAccountsRepository, MessageService messageService)
         {
             this.logger = logger;
+            this.openaiAccountsRepository = openaiAccountsRepository;
             this.messageService = messageService;
         }
 
@@ -125,8 +127,14 @@ namespace GPTipsBot.Api
             {
                 OpenAiTokens.Enqueue(currentToken);
             }
+            else if(completionResult.Error?.Message != null && completionResult.Error.Message.Contains("deactivated"))
+            {
+                openaiAccountsRepository.Remove(currentToken, DeletionReason.Deactivated);
+                await SendViaOpenAiApi(messages, token);
+            }
             else if(completionResult.Error?.Code == "insufficient_quota")
             {
+                openaiAccountsRepository.Remove(currentToken, DeletionReason.InsufficientQuota);
                 await SendViaOpenAiApi(messages, token);
             }
             else if(completionResult.Error?.Code == "rate_limit_exceeded" && completionResult.Error.Message != null) {
@@ -138,6 +146,7 @@ namespace GPTipsBot.Api
                 {
                     OpenAiTokens.Enqueue(currentToken);
                 }
+                await SendViaOpenAiApi(messages, token);
             }
 
             return completionResult;
