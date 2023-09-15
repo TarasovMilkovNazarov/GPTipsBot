@@ -19,7 +19,7 @@ namespace GPTipsBot.Repositories
             this.context = context;
         }
 
-        public long AddMessage(MessageDto messageDto, long? replyToId = null)
+        public long? AddMessage(MessageDto messageDto, long? replyToId = null)
         {
             long? contextId = messageDto.NewContext ? null : GetLastContext(messageDto.UserId, messageDto.ChatId);
 
@@ -29,10 +29,10 @@ namespace GPTipsBot.Repositories
                 ChatId = messageDto.ChatId,
                 UserId = messageDto.UserId,
                 Role = messageDto.Role,
+                ContextId = contextId,
                 ContextBound = messageDto.ContextBound,
                 TelegramMessageId = messageDto.TelegramMessageId,
                 ReplyToId = replyToId,
-                ContextId = contextId,
                 CreatedAt = DateTime.UtcNow,
             };
 
@@ -42,7 +42,7 @@ namespace GPTipsBot.Repositories
             messageDto.Id = added.Entity.Id;
             messageDto.ContextId = added.Entity.ContextId;
 
-            return messageDto.ContextId.Value;
+            return messageDto.ContextId;
         }
 
         public IEnumerable<Message> GetAllUserMessages(long telegramId)
@@ -53,7 +53,7 @@ namespace GPTipsBot.Repositories
         public long? GetLastContext(long userId, long chatId)
         {
             var lastMes = context.Messages.AsNoTracking().OrderByDescending(x => x.CreatedAt)
-                .FirstOrDefault(x => x.UserId == userId && x.ChatId == chatId);
+                .FirstOrDefault(x => x.UserId == userId && x.ChatId == chatId && x.ContextId != null);
 
             return lastMes?.ContextId;
         }

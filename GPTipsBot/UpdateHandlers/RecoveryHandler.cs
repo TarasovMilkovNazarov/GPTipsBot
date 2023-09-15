@@ -31,7 +31,6 @@ namespace GPTipsBot.UpdateHandlers
             if (TelegramBotWorker.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
             {
                 messageRepository.AddMessage(update.Message);
-                
 
                 if (chatToInformAboutRecovery.ContainsKey(chatId))
                     chatToInformAboutRecovery[chatId].Enqueue(update);

@@ -7,6 +7,8 @@ namespace GPTipsBot.Models
     {
         public long Id { get; set; }
         public long? TelegramMessageId { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long? ContextId { get; set; }
 
         [ForeignKey("ReplyTo")]

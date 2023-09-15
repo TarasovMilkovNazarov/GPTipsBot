@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GPTipsBot.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20230914150032_Initial")]
+    [Migration("20230915080813_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -57,7 +57,10 @@ namespace GPTipsBot.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<long?>("ContextId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long?>("ContextId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -157,13 +160,15 @@ namespace GPTipsBot.Migrations
                         .WithMany()
                         .HasForeignKey("ReplyToId");
 
-                    b.HasOne("GPTipsBot.Models.User", null)
+                    b.HasOne("GPTipsBot.Models.User", "User")
                         .WithMany("Messages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ReplyTo");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.User", b =>

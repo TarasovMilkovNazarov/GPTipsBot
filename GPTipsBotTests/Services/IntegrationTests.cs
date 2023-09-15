@@ -13,9 +13,9 @@ namespace GPTipsBotTests.Services
 {
     public class IntegrationTests
     {
-        Update telegramUpdate;
-        TelegramBotClient telegramBotClient;
-        TelegramBotWorker telegramBotWorker;
+        private readonly Update telegramUpdate;
+        private readonly TelegramBotClient telegramBotClient;
+        private readonly TelegramBotWorker telegramBotWorker;
         readonly IServiceProvider _services = HostBuilder.CreateHostBuilder(new string[] { }).Build().Services;
 
         public IntegrationTests()
@@ -137,6 +137,30 @@ namespace GPTipsBotTests.Services
             var newContextId = updateDecorator.Message.ContextId;
 
             Assert.False(initialContextId == newContextId);
+        }
+
+        [Test]
+        public async Task TestContext()
+        {
+            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var cts = new CancellationTokenSource();
+            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            updateDecorator.Message.ContextBound = true;
+            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            var initialContextId = updateDecorator.Message.ContextId;
+            
+            updateDecorator.Message.Text = "2+2=?";
+            updateDecorator.Message.ContextBound = true;
+            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+
+            updateDecorator.Message.Text = "add 2 to result";
+            updateDecorator.Message.ContextBound = true;
+            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+
+            var newContextId = updateDecorator.Message.ContextId;
+
+            Assert.True(initialContextId == newContextId);
+            Assert.True(updateDecorator.Reply.Text.Contains("6"));
         }
     }
 }

@@ -145,8 +145,10 @@ namespace GPTipsBot.Api
 
         private static void setup_Timer(OpenaiAccountsRepository openaiAccountsRepository)
         {
+            var delay = TimeSpan.FromMinutes(1).TotalMinutes;
+
             DateTime nowTime = DateTime.Now;
-            DateTime specificTime = nowTime.AddMinutes(2);
+            DateTime specificTime = nowTime.Date.AddDays(1).AddMinutes(delay);
             if (nowTime > specificTime)
                 specificTime= specificTime.AddDays(1);
 

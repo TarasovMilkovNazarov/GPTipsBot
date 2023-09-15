@@ -18,8 +18,6 @@ namespace GPTipsBot
         private readonly UnitOfWork unitOfWork;
         private readonly TelegramBotAPI telegramBotApi;
         private readonly MessageHandlerFactory messageHandlerFactory;
-
-        public static readonly Dictionary<long, Queue<Telegram.Bot.Types.Update>> userToUpdatesQueue = new Dictionary<long, Queue<Telegram.Bot.Types.Update>>();
         public static DateTime Start { get; private set; }
 
         public TelegramBotWorker(ILogger<TelegramBotWorker> logger, UnitOfWork unitOfWork,
