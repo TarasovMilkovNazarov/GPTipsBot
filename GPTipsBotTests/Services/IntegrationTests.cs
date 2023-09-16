@@ -1,5 +1,6 @@
 ﻿using dotenv.net;
 using GPTipsBot;
+using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
@@ -138,7 +139,7 @@ namespace GPTipsBotTests.Services
 
             Assert.False(initialContextId == newContextId);
         }
-
+        
         [Test]
         public async Task TestContext()
         {
@@ -161,6 +162,24 @@ namespace GPTipsBotTests.Services
 
             Assert.True(initialContextId == newContextId);
             Assert.True(updateDecorator.Reply.Text.Contains("6"));
+        }
+
+        [Test]
+        public async Task AddNewUser()
+        {
+            var userRepository = _services.GetRequiredService<UserRepository>();
+            userRepository.Delete(AppConfig.AdminId);
+
+            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var cts = new CancellationTokenSource();
+            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            updateDecorator.Message.ContextBound = true;
+            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            
+
+            var newUser = userRepository.Get(AppConfig.AdminId);
+
+            Assert.True(newUser != null);
         }
     }
 }

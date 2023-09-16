@@ -16,10 +16,22 @@ namespace GPTipsBot.Repositories
             this.logger = logger;
             this.context = context;
         }
-
+        
         public User? Get(long id)
         {
             return context.Users.FirstOrDefault(x => x.Id == id);
+        }
+
+        public void Delete(long id)
+        {
+            var user = context.Users.FirstOrDefault(x => x.Id == id);
+
+            if (user == null)
+            {
+                throw new Exception($"User id={id} not found");
+            }
+
+            context.Users.Remove(user);
         }
 
         public long Create(User user)

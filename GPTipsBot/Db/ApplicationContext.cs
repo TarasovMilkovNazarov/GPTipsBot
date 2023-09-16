@@ -19,5 +19,13 @@ namespace GPTipsBot.Db
 
             optionsBuilder.UseNpgsql(connectionString);
         }
+
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<User>()
+        //        .HasOne(m => m.BotSettings)
+        //        .WithOne("BotSettingsId")
+        //        .OnDelete(DeleteBehavior.Cascade);
+        //}
     }
 }

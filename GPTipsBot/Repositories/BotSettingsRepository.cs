@@ -36,6 +36,18 @@ namespace GPTipsBot.Repositories
             return settings;
         }
 
+        public void Delete(long id)
+        {
+            var settings = context.BotSettings.FirstOrDefault(x => x.Id == id);
+
+            if (settings == null)
+            {
+                throw new Exception($"Settings id={id} not found");
+            }
+
+            context.BotSettings.Remove(settings);
+        }
+
         public BotSettings? Get(long userId)
         {
             return context.BotSettings.AsNoTracking().FirstOrDefault(x => x.Id == userId);
