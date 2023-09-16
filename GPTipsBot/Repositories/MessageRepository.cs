@@ -39,8 +39,8 @@ namespace GPTipsBot.Repositories
             var added = context.Messages.Add(newMessage);
             context.SaveChanges();
 
-            messageDto.Id = added.Entity.Id;
-            messageDto.ContextId = added.Entity.ContextId;
+            messageDto.Id = newMessage.Id;
+            messageDto.ContextId = newMessage.ContextId;
 
             return messageDto.ContextId;
         }

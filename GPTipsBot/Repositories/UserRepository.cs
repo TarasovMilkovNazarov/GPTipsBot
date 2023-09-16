@@ -19,7 +19,7 @@ namespace GPTipsBot.Repositories
         
         public User? Get(long id)
         {
-            return context.Users.FirstOrDefault(x => x.Id == id);
+            return context.Users.AsNoTracking().FirstOrDefault(x => x.Id == id);
         }
 
         public void Delete(long id)
@@ -49,7 +49,7 @@ namespace GPTipsBot.Repositories
                 throw new InvalidOperationException($"Can't find user with id {user.Id}");
             }
 
-            context.Users.Update(user);
+            //context.Users.Update(user);
         }
         
         public IEnumerable<User> GetAll()

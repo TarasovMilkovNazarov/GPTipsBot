@@ -23,6 +23,7 @@ namespace GPTipsBot.Services
             var dbUser = userRepository.Get(user.Id);
             if (dbUser == null)
             {
+                user.BotSettingsId = user.Id;
                 userRepository.Create(user);
                 UserCreated?.Invoke(this, user);
 

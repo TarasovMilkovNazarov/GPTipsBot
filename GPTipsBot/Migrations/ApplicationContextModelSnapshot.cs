@@ -36,7 +36,7 @@ namespace GPTipsBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BotSettings");
+                    b.ToTable("BotSettings", (string)null);
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.Message", b =>
@@ -84,7 +84,7 @@ namespace GPTipsBot.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.OpenaiAccount", b =>
@@ -125,7 +125,7 @@ namespace GPTipsBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OpenaiAccounts");
+                    b.ToTable("OpenaiAccounts", (string)null);
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.User", b =>
@@ -135,9 +135,6 @@ namespace GPTipsBot.Migrations
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("BotSettingsId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -157,9 +154,7 @@ namespace GPTipsBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BotSettingsId");
-
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.Message", b =>
@@ -177,17 +172,6 @@ namespace GPTipsBot.Migrations
                     b.Navigation("ReplyTo");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("GPTipsBot.Models.User", b =>
-                {
-                    b.HasOne("GPTipsBot.Models.BotSettings", "BotSettings")
-                        .WithMany()
-                        .HasForeignKey("BotSettingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BotSettings");
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.User", b =>
