@@ -49,7 +49,8 @@ namespace GPTipsBot.Repositories
                 throw new InvalidOperationException($"Can't find user with id {user.Id}");
             }
 
-            //context.Users.Update(user);
+            context.ChangeTracker.Clear();
+            context.Users.Update(user);
         }
         
         public IEnumerable<User> GetAll()
