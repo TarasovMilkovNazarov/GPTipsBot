@@ -5,6 +5,7 @@ namespace GPTipsBot.Db
 {
     public class ApplicationContext : DbContext
     {
+        public Guid Guid { get; } = Guid.NewGuid();
         public DbSet<User> Users { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<BotSettings> BotSettings { get; set; }

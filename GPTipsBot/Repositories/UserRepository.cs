@@ -10,6 +10,7 @@ namespace GPTipsBot.Repositories
     {
         private readonly ILogger<TelegramBotWorker> logger;
         private readonly ApplicationContext context;
+        public Guid Guid { get; } = Guid.NewGuid();
 
         public UserRepository(ILogger<TelegramBotWorker> logger, ApplicationContext context)
         {
@@ -49,7 +50,7 @@ namespace GPTipsBot.Repositories
                 throw new InvalidOperationException($"Can't find user with id {user.Id}");
             }
 
-            context.ChangeTracker.Clear();
+            //context.ChangeTracker.Clear();
             context.Users.Update(user);
         }
         

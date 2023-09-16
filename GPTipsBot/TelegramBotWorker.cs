@@ -4,6 +4,7 @@ using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -14,6 +15,7 @@ namespace GPTipsBot
 {
     public partial class TelegramBotWorker : IUpdateHandler
     {
+        public Guid Guid { get; } = Guid.NewGuid();
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly UnitOfWork unitOfWork;
         private readonly TelegramBotAPI telegramBotApi;

@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Polling;
+using Telegram.Bot.Services;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -13,16 +16,16 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
     where TUpdateHandler : IUpdateHandler
 {
     private readonly ITelegramBotClient _botClient;
-    private readonly IUpdateHandler _updateHandler;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ReceiverServiceBase<TUpdateHandler>> _logger;
 
     internal ReceiverServiceBase(
         ITelegramBotClient botClient,
-        TUpdateHandler updateHandler,
+        IServiceProvider serviceProvider,
         ILogger<ReceiverServiceBase<TUpdateHandler>> logger)
     {
         _botClient = botClient;
-        _updateHandler = updateHandler;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -49,6 +52,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
         // to cancel
         var cts = new CancellationTokenSource();
+        var runningTasks = new List<Task>();
 
         // Start receiving updates
         var updateReceiver = new QueuedUpdateReceiver(_botClient, receiverOptions);
@@ -56,7 +60,11 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         {
             await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
             {
-                _updateHandler.HandleUpdateAsync(_botClient, update, cts.Token);
+                using var scope = _serviceProvider.CreateScope();
+                var worker = scope.ServiceProvider.GetRequiredService<TelegramBotWorker>();
+                var t = worker.HandleUpdateAsync(_botClient, update, cts.Token);
+                //await t;
+                runningTasks.Add(t);
             }
         }
         catch (OperationCanceledException exception)

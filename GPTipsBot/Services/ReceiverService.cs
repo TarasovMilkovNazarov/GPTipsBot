@@ -9,9 +9,9 @@ namespace Telegram.Bot.Services
     {
         public ReceiverService(
             ITelegramBotClient botClient,
-            TelegramBotWorker updateHandler,
+            IServiceProvider serviceProvider,
             ILogger<ReceiverServiceBase<TelegramBotWorker>> logger)
-            : base(botClient, updateHandler, logger)
+            : base(botClient, serviceProvider, logger)
         {
         }
     }
