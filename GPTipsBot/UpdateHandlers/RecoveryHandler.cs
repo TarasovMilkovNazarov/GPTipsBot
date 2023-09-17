@@ -28,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
 
             var chatId = update.UserChatKey.ChatId;
 
-            if (TelegramBotWorker.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
+            if (UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
             {
                 messageRepository.AddMessage(update.Message);
 

@@ -8,11 +8,11 @@ namespace GPTipsBot.Repositories
 {
     public class UserRepository
     {
-        private readonly ILogger<TelegramBotWorker> logger;
+        private readonly ILogger<UpdateHandlerEntryPoint> logger;
         private readonly ApplicationContext context;
         public Guid Guid { get; } = Guid.NewGuid();
 
-        public UserRepository(ILogger<TelegramBotWorker> logger, ApplicationContext context)
+        public UserRepository(ILogger<UpdateHandlerEntryPoint> logger, ApplicationContext context)
         {
             this.logger = logger;
             this.context = context;

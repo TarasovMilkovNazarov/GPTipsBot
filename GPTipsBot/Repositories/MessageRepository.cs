@@ -10,10 +10,10 @@ namespace GPTipsBot.Repositories
 {
     public class MessageRepository
     {
-        private readonly ILogger<TelegramBotWorker> logger;
+        private readonly ILogger<UpdateHandlerEntryPoint> logger;
         private readonly ApplicationContext context;
 
-        public MessageRepository(ILogger<TelegramBotWorker> logger, ApplicationContext context)
+        public MessageRepository(ILogger<UpdateHandlerEntryPoint> logger, ApplicationContext context)
         {
             this.logger = logger;
             this.context = context;

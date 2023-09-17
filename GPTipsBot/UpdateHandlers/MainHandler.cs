@@ -71,6 +71,10 @@ namespace GPTipsBot.UpdateHandlers
                 logger.LogError(ex, null);
                 return;
             }
+            finally
+            {
+                unitOfWork.Save();
+            }
         }
     }
 }

@@ -41,7 +41,7 @@ public class HostBuilder
                         return new TelegramBotClient(options);
                     });
 
-            services.AddScoped<TelegramBotWorker>();
+            services.AddScoped<UpdateHandlerEntryPoint>();
             services.AddScoped<ReceiverService>();
             services.AddHostedService<PollingService>();
 

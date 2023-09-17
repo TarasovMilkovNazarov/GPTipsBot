@@ -16,14 +16,14 @@ namespace GPTipsBotTests.Services
     {
         private readonly Update telegramUpdate;
         private readonly TelegramBotClient telegramBotClient;
-        private readonly TelegramBotWorker telegramBotWorker;
+        private readonly UpdateHandlerEntryPoint telegramBotWorker;
         readonly IServiceProvider _services = HostBuilder.CreateHostBuilder(new string[] { }).Build().Services;
 
         public IntegrationTests()
         {
             DotEnv.Fluent().WithProbeForEnv(10).Load();
             var host = HostBuilder.CreateHostBuilder(Array.Empty<string>()).Build();
-            telegramBotWorker = _services.GetService<TelegramBotWorker>() ?? throw new ArgumentNullException();
+            telegramBotWorker = _services.GetService<UpdateHandlerEntryPoint>() ?? throw new ArgumentNullException();
 
             telegramUpdate = new Update
             {

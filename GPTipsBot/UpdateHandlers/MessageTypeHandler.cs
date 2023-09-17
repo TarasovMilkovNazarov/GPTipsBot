@@ -7,10 +7,10 @@ namespace GPTipsBot.UpdateHandlers
     public class MessageTypeHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
-        private readonly ILogger<TelegramBotWorker> logger;
+        private readonly ILogger<UpdateHandlerEntryPoint> logger;
 
         public MessageTypeHandler(ITelegramBotClient botClient,
-            MessageHandlerFactory messageHandlerFactory, ILogger<TelegramBotWorker> logger)
+            MessageHandlerFactory messageHandlerFactory, ILogger<UpdateHandlerEntryPoint> logger)
         {
             this.botClient = botClient;
             this.logger = logger;

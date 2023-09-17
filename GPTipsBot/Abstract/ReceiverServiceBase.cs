@@ -59,9 +59,8 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         {
             await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
             {
-                using var scope = _serviceProvider.CreateScope();
-                var worker = scope.ServiceProvider.GetRequiredService<TelegramBotWorker>();
-                await worker.HandleUpdateAsync(_botClient, update, cts.Token);
+                var worker = _serviceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
+                worker.HandleUpdateAsync(_botClient, update, cts.Token);
             }
         }
         catch (OperationCanceledException exception)

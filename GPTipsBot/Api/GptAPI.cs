@@ -23,14 +23,14 @@ namespace GPTipsBot.Api
     public class GptAPI
     {
         private readonly string betterChatGptBaseUrl = "https://free.churchless.tech/v1/chat/completions";
-        private readonly ILogger<TelegramBotWorker> logger;
+        private readonly ILogger<UpdateHandlerEntryPoint> logger;
         private readonly OpenaiAccountsRepository openaiAccountsRepository;
         private IOpenAIService openAiService;
         private readonly MessageService messageService;
         private static Timer timer;
         private static Queue<string> OpenAiTokens;
 
-        public GptAPI(ILogger<TelegramBotWorker> logger, 
+        public GptAPI(ILogger<UpdateHandlerEntryPoint> logger, 
             OpenaiAccountsRepository openaiAccountsRepository, MessageService messageService)
         {
             this.logger = logger;
