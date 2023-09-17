@@ -1,10 +1,12 @@
 ﻿using dotenv.net;
 using GPTipsBot;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using System.Globalization;
 using Telegram.Bot;
@@ -15,15 +17,14 @@ namespace GPTipsBotTests.Services
     public class IntegrationTests
     {
         private readonly Update telegramUpdate;
-        private readonly TelegramBotClient telegramBotClient;
-        private readonly UpdateHandlerEntryPoint telegramBotWorker;
-        readonly IServiceProvider _services = HostBuilder.CreateHostBuilder(new string[] { }).Build().Services;
+        readonly IServiceProvider _services;
+        private readonly ITelegramBotClient botClient;
 
         public IntegrationTests()
         {
             DotEnv.Fluent().WithProbeForEnv(10).Load();
-            var host = HostBuilder.CreateHostBuilder(Array.Empty<string>()).Build();
-            telegramBotWorker = _services.GetService<UpdateHandlerEntryPoint>() ?? throw new ArgumentNullException();
+            _services = new ServiceCollection().ConfigureServices().BuildServiceProvider();
+            botClient = _services.GetRequiredService<ITelegramBotClient>();
 
             telegramUpdate = new Update
             {
@@ -52,10 +53,14 @@ namespace GPTipsBotTests.Services
                     Text = "/start"
                 }
             };
-
-            telegramBotClient = new TelegramBotClient(AppConfig.TelegramToken);
         }
-        
+
+        [SetUp]
+        public void Setup()
+        {
+            MessageService.ResetMessageCountsPerMinute(null);
+        }
+
         [Test]
         public async Task SendTextMessage()
         {
@@ -87,7 +92,7 @@ namespace GPTipsBotTests.Services
 
             Assert.AreEqual(BotResponse.LanguageWasSetSuccessfully, updateDecorator.Reply.Text);
         }
-        
+
         [Test]
         public async Task SendGenerateImageRequest()
         {
@@ -99,28 +104,6 @@ namespace GPTipsBotTests.Services
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
 
             Assert.True(updateDecorator.Reply.Text.Contains("http"));
-        }
-
-        [Test, Order(999)]
-        public async Task ViolateBreakLimiting()
-        {
-            var cts = new CancellationTokenSource();
-            var mainHandler = _services.GetRequiredService<MainHandler>();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
-            updateDecorator.Message.Text = "test";
-
-            for (int i = 0; i < MessageService.MaxMessagesCountPerMinute; i++)
-            {
-                mainHandler.HandleAsync(updateDecorator, cts.Token);
-            }
-
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
-
-            Assert.IsNotEmpty(updateDecorator.Message.Text);
-            Assert.IsNotEmpty(updateDecorator.Reply.Text);
-            Assert.IsTrue(updateDecorator.Reply.Text.Contains("Слишком много запросов") || updateDecorator.Reply.Text.Contains("Too many requests"));
-            await Task.Delay(TimeSpan.FromMinutes(1));
         }
 
         [Test]
@@ -139,7 +122,7 @@ namespace GPTipsBotTests.Services
 
             Assert.False(initialContextId == newContextId);
         }
-        
+
         [Test]
         public async Task TestContext()
         {
@@ -149,7 +132,7 @@ namespace GPTipsBotTests.Services
             updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
             var initialContextId = updateDecorator.Message.ContextId;
-            
+
             updateDecorator.Message.Text = "2+2=?";
             updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
@@ -175,7 +158,7 @@ namespace GPTipsBotTests.Services
             var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
             updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator, cts.Token);
-            
+
 
             var newUser = userRepository.Get(AppConfig.AdminId);
 

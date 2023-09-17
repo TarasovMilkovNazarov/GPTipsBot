@@ -20,7 +20,7 @@ namespace GPTipsBot.Api
 {
     using static AppConfig;
 
-    public class GptAPI
+    public class GptAPI : IGpt
     {
         private readonly string betterChatGptBaseUrl = "https://free.churchless.tech/v1/chat/completions";
         private readonly ILogger<UpdateHandlerEntryPoint> logger;
@@ -179,5 +179,10 @@ namespace GPTipsBot.Api
 
             setup_Timer(openaiAccountsRepository);
         }
+    }
+
+    public interface IGpt
+    {
+        Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
     }
 }

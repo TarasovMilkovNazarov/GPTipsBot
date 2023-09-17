@@ -10,7 +10,7 @@ namespace GPTipsBot.Services.Tests
             var deviation = 0.20d;
             var chatGptService = new ChatGptService();
 
-            (string text, int count) ethalonTextToTokensCount = ("This is a sample text with exactly fifty tokens for GPT-3.5-turbo model.", 16);
+            (string text, int count) ethalonTextToTokensCount = ("Today, I went for a walk in the park and enjoyed the beautiful weather. The sun was shining, birds were chirping, and flowers were blooming. It was a perfect day to be outdoors and appreciate nature's wonders.", 50);
 
             Assert.LessOrEqual(Math.Abs(ethalonTextToTokensCount.count - chatGptService.CountTokens(ethalonTextToTokensCount.text)), ethalonTextToTokensCount.count*deviation);
         }

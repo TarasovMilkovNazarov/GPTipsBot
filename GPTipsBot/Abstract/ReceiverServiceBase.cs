@@ -13,7 +13,6 @@ namespace Telegram.Bot.Abstract;
 /// </summary>
 /// <typeparam name="TUpdateHandler">Update Handler to use in Update Receiver</typeparam>
 public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
-    where TUpdateHandler : IUpdateHandler
 {
     private readonly ITelegramBotClient _botClient;
     private readonly IServiceProvider _serviceProvider;

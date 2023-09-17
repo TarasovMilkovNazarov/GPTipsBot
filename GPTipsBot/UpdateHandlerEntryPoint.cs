@@ -12,7 +12,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
 {
-    public partial class UpdateHandlerEntryPoint : IUpdateHandler
+    public partial class UpdateHandlerEntryPoint
     {
         public Guid Guid { get; } = Guid.NewGuid();
         private readonly ILogger<UpdateHandlerEntryPoint> _logger;
@@ -30,14 +30,14 @@ namespace GPTipsBot
             Start = DateTime.UtcNow;
         }
 
-        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
+        public async Task<UpdateDecorator?> HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
         {
             using var scope = serviceProvider.CreateScope();
             var mainHandler = scope.ServiceProvider.GetRequiredService<MainHandler>();
 
             if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Left && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
             {
-                return;
+                return null;
             }
 
             try
@@ -46,18 +46,20 @@ namespace GPTipsBot
 
                 var userLang = extendedUpd.GetUserLanguage();
                 CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userLang);
+                await mainHandler.HandleAsync(extendedUpd,cancellationToken);
 
-                await mainHandler.HandleAsync(extendedUpd, cancellationToken);
+                return extendedUpd;
             }
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
                 if (ex is ApiRequestException apiEx || update.Message == null)
                 {
-                    return;
+                    return null;
                 }
 
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                return null;
             }
         }
 

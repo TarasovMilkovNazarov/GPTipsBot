@@ -4,7 +4,6 @@ namespace GPTipsBot.Services
 {
     public class ChatGptService
     {
-        private readonly string openaiBaseUrl = "https://api.openai.com/v1/engines/davinci-codex";
         public const int MaxTokensLimit = 1000;
 
         public ChatGptService() { }

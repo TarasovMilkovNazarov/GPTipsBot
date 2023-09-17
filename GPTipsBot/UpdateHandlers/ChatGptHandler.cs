@@ -10,13 +10,13 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageRepository messageRepository;
-        private readonly GptAPI gptAPI;
+        private readonly IGpt gptAPI;
         private readonly ActionStatus typingStatus;
         private readonly ILogger<ChatGptHandler> logger;
         private readonly ITelegramBotClient botClient;
 
         public ChatGptHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository,
-            GptAPI gptAPI, ActionStatus typingStatus, ILogger<ChatGptHandler> logger, ITelegramBotClient botClient)
+            IGpt gptAPI, ActionStatus typingStatus, ILogger<ChatGptHandler> logger, ITelegramBotClient botClient)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
