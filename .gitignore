@@ -367,3 +367,4 @@ FodyWeavers.xsd
 .env
 .idea/
 /*.tar
+/deploy.ps1

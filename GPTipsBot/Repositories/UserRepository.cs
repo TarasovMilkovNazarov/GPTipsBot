@@ -50,7 +50,7 @@ namespace GPTipsBot.Repositories
                 throw new InvalidOperationException($"Can't find user with id {user.Id}");
             }
 
-            //context.ChangeTracker.Clear();
+            context.ChangeTracker.Clear();
             context.Users.Update(user);
         }
         
