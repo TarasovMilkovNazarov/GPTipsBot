@@ -72,7 +72,7 @@ public class HostBuilder
             .AddTransient<BotSettingsRepository>()
             .AddTransient<OpenaiAccountsRepository>()
             .AddTransient<UnitOfWork>()
-            .AddScoped<ITelegramBotClient, TelegramBotClient>(x =>
+            .AddSingleton<ITelegramBotClient, TelegramBotClient>(x =>
             {
                 var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
 

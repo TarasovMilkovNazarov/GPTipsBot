@@ -52,7 +52,6 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
         // to cancel
         var cts = new CancellationTokenSource();
-        var runningTasks = new List<Task>();
 
         // Start receiving updates
         var updateReceiver = new QueuedUpdateReceiver(_botClient, receiverOptions);
@@ -62,9 +61,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
             {
                 using var scope = _serviceProvider.CreateScope();
                 var worker = scope.ServiceProvider.GetRequiredService<TelegramBotWorker>();
-                var t = worker.HandleUpdateAsync(_botClient, update, cts.Token);
-                //await t;
-                runningTasks.Add(t);
+                await worker.HandleUpdateAsync(_botClient, update, cts.Token);
             }
         }
         catch (OperationCanceledException exception)
