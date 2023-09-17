@@ -30,6 +30,7 @@ namespace GPTipsBot.Services
                 return;
             }
 
+            dbUser.Source = user.Source ?? dbUser.Source;
             userRepository.Update(dbUser);
         }
 
@@ -47,7 +48,7 @@ namespace GPTipsBot.Services
                 activeUserCount++;
             }
 
-            var message = "#newUser" + Environment.NewLine + $"new user {fullName} with telegramId={user.Id} created";
+            var message = "#newUser" + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
             message += Environment.NewLine + $"Total count: {activeUserCount}";
 
             botClient.SendTextMessageAsync(AppConfig.AdminId, message);

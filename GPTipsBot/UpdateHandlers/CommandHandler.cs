@@ -58,8 +58,6 @@ namespace GPTipsBot.UpdateHandlers
                 case CommandType.Start:
                     await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    update.User.Source = TelegramService.GetSource(messageText);
-                    userService.CreateUpdateUser(UserMapper.Map(update.User));
                     update.Reply.Text = BotResponse.Greeting;
                     break;
                 case CommandType.Help:

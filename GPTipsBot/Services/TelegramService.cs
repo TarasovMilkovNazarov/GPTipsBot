@@ -20,7 +20,7 @@ namespace GPTipsBot.Services
                 return null;
             }
 
-            return text.Substring("/start".Length).Trim();
+            return text.StartsWith("/start") ? text.Substring("/start".Length).Trim() : null;
         }
     }
 }

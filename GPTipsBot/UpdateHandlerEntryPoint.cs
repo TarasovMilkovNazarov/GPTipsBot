@@ -40,13 +40,13 @@ namespace GPTipsBot
                 return;
             }
 
-            var extendedUpd = new UpdateDecorator(update, cancellationToken);
-
-            var userLang = extendedUpd.GetUserLanguage();
-            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userLang);
-
             try
             {
+                var extendedUpd = new UpdateDecorator(update, cancellationToken);
+
+                var userLang = extendedUpd.GetUserLanguage();
+                CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userLang);
+
                 await mainHandler.HandleAsync(extendedUpd, cancellationToken);
             }
             catch (Exception ex)
