@@ -20,7 +20,7 @@ namespace GPTipsBot.UpdateHandlers
             ChatId = _update.Message?.Chat.Id ??
                 _update.CallbackQuery?.Message?.Chat.Id ??
                 _update.MyChatMember?.Chat.Id ??
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(update), "Can't get ChatId");
 
             CancellationToken = cancellationToken;
 
