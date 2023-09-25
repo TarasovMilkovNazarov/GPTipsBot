@@ -8,9 +8,9 @@ namespace GPTipsBot.UpdateHandlers
     public class RateLimitingHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
-        private readonly ILogger<UpdateHandlerEntryPoint> logger;
+        private readonly ILogger<RateLimitingHandler> logger;
 
-        public RateLimitingHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, ILogger<UpdateHandlerEntryPoint> logger)
+        public RateLimitingHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, ILogger<RateLimitingHandler> logger)
         {
             this.botClient = botClient;
             this.logger = logger;

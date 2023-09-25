@@ -13,7 +13,7 @@ namespace GPTipsBot.Services
         private string BING_URL = "https://cn.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1JpLTYyPwlLU0P4dZVLZoslGtY_0hEWfj9t_84gR4S8YcsAhUQvzFxl6m8D0qYRB6z_d5sejbjWyQCgJUYERCDH-vExn3KaFUtjqBI9jLFcf5nMo4CNNzAo2UG6MS4n_QiaO0y4pPY9822CYrE967hP3ujhUU8CF7PUrTIOFkG0h70cpKIBTyJq6EMOPPnMjjdDUoXfiYWO5tZPmkBHu0ew";
+        private string authCookie = "_U=1gcRxDxURcnYo2aEpDNy63CzYqleD94-iDDg-g-_E-z9Rv1dMBe91Fn-hME6M5itgiBUbMTNg6Dl53MQ9pQ9p-9QfzVUaqC16H2vUhJsMR7XLTHtdYkFMBhYALq0OnkKSQQDaMPilhm9S-QcLPTcflMWTLHOphUSnNSC1xx__M2KspTc_JxNfmduC1M152emEBT7dltIsBJjeiPyvv4rrRg";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");

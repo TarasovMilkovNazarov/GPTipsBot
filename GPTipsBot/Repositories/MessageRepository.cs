@@ -10,10 +10,10 @@ namespace GPTipsBot.Repositories
 {
     public class MessageRepository
     {
-        private readonly ILogger<UpdateHandlerEntryPoint> logger;
+        private readonly ILogger<MessageRepository> logger;
         private readonly ApplicationContext context;
 
-        public MessageRepository(ILogger<UpdateHandlerEntryPoint> logger, ApplicationContext context)
+        public MessageRepository(ILogger<MessageRepository> logger, ApplicationContext context)
         {
             this.logger = logger;
             this.context = context;
@@ -36,7 +36,7 @@ namespace GPTipsBot.Repositories
                 CreatedAt = DateTime.UtcNow,
             };
 
-            var added = context.Messages.Add(newMessage);
+            context.Messages.Add(newMessage);
             context.SaveChanges();
 
             messageDto.Id = newMessage.Id;

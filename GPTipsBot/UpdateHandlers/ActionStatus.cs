@@ -10,11 +10,11 @@ namespace GPTipsBot.UpdateHandlers
     public class ActionStatus
     {
         private readonly ITelegramBotClient botClient;
-        private readonly ILogger<UpdateHandlerEntryPoint> _logger;
+        private readonly ILogger<ActionStatus> _logger;
         private int _serviceMessageId;
         private Timer _timer;
 
-        public ActionStatus(ITelegramBotClient botClient, ILogger<UpdateHandlerEntryPoint> logger)
+        public ActionStatus(ITelegramBotClient botClient, ILogger<ActionStatus> logger)
         {
             this.botClient = botClient;
             this._logger = logger;

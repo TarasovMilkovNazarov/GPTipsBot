@@ -165,11 +165,21 @@ namespace GPTipsBot.UpdateHandlers
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
                 MainHandler.userState[userKey].LanguageCode = langCode;
-                unitOfWork.BotSettings.Update(userKey.Id, langCode);
+
                 update.Reply.Text = BotResponse.LanguageWasSetSuccessfully;
                 await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();
                 MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
+
+                var settings = unitOfWork.BotSettings.Get(userKey.Id);
+                if (settings == null)
+                {
+                    unitOfWork.BotSettings.Create(userKey.Id, langCode);
+                }
+                else
+                {
+                    unitOfWork.BotSettings.Update(userKey.Id, langCode);
+                }
             }
         }
 

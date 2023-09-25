@@ -43,7 +43,7 @@ namespace GPTipsBot.Extensions
             services
             .AddLogging(configure => configure.AddConsole())
             .AddTransient<UserService>()
-            .AddTransient<ImageCreatorService>()
+            .AddSingleton<ImageCreatorService>()
             .AddTransient<ActionStatus>()
             .AddTransient<MessageHandlerFactory>()
             .AddTransient<MainHandler>()

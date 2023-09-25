@@ -19,6 +19,11 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
         {
+            if (update.Message?.Text == null) {
+                await base.HandleAsync(update, cancellationToken);
+                return;
+            }
+
             if (update.Message.Text == "/fix" && update.UserChatKey.Id == AppConfig.AdminId)
             {
                 AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;

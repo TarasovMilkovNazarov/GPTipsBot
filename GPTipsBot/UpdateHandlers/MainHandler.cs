@@ -2,6 +2,7 @@
 using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
 using GPTipsBot.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -11,12 +12,11 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class MainHandler : BaseMessageHandler
     {
-        public static ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
+        public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly UserService userService;
         private readonly UnitOfWork unitOfWork;
         private readonly ILogger<MainHandler> logger;
-        private readonly ITelegramBotClient botClient;
 
         public MainHandler(MessageHandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
             ILogger<MainHandler> logger, ITelegramBotClient botClient, UserService userService)
@@ -24,7 +24,6 @@ namespace GPTipsBot.UpdateHandlers
             this.messageHandlerFactory = messageHandlerFactory;
             this.unitOfWork = unitOfWork;
             this.logger = logger;
-            this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<DeleteUserHandler>());
             this.userService = userService;
         }
@@ -56,10 +55,21 @@ namespace GPTipsBot.UpdateHandlers
                 userState.TryAdd(userKey, new UserStateDto(userKey));
             }
 
-            userService.CreateUpdateUser(UserMapper.Map(update.User));
-            var settings = unitOfWork.BotSettings.Get(userKey.Id) ?? unitOfWork.BotSettings.Create(userKey.Id, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
-            CultureInfo.CurrentUICulture = new CultureInfo(settings.Language);
-            userState[userKey].LanguageCode = settings.Language;
+            logger.LogInformation($"MainHandler execution {userKey.Id} with message {update.Message?.Text}");
+
+            var newUser = UserMapper.Map(update.User);
+            try
+            {
+                userService.CreateUpdateUser(newUser);
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex.Message);
+            }
+
+            var language = unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
+            CultureInfo.CurrentUICulture = new CultureInfo(language);
+            userState[userKey].LanguageCode = language;
 
             // Call next handler
             try
@@ -69,7 +79,6 @@ namespace GPTipsBot.UpdateHandlers
             catch (Exception ex)
             {
                 logger.LogError(ex, null);
-                return;
             }
             finally
             {

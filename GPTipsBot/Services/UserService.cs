@@ -20,18 +20,15 @@ namespace GPTipsBot.Services
 
         public void CreateUpdateUser(User user)
         {
-            var dbUser = userRepository.Get(user.Id);
-            if (dbUser == null)
+            var isExists = userRepository.Any(user.Id);
+            if (isExists)
             {
-                user.BotSettingsId = user.Id;
-                userRepository.Create(user);
-                UserCreated?.Invoke(this, user);
-
+                userRepository.Update(user);
                 return;
             }
 
-            dbUser.Source = user.Source ?? dbUser.Source;
-            userRepository.Update(dbUser);
+            userRepository.Create(user);
+            UserCreated?.Invoke(this, user);
         }
 
         public void UserCreatedEventHandler(object sender, User user)

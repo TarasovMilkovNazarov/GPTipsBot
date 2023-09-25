@@ -14,7 +14,7 @@ namespace GPTipsBot.Services
             return queryParams;
         }
 
-        public static string? GetSource(string text){
+        public static string? GetSource(string? text){
             if (string.IsNullOrEmpty(text))
             {
                 return null;

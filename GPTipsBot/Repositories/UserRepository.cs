@@ -8,19 +8,24 @@ namespace GPTipsBot.Repositories
 {
     public class UserRepository
     {
-        private readonly ILogger<UpdateHandlerEntryPoint> logger;
+        private readonly ILogger<UserRepository> logger;
         private readonly ApplicationContext context;
         public Guid Guid { get; } = Guid.NewGuid();
 
-        public UserRepository(ILogger<UpdateHandlerEntryPoint> logger, ApplicationContext context)
+        public UserRepository(ILogger<UserRepository> logger, ApplicationContext context)
         {
             this.logger = logger;
             this.context = context;
         }
         
+        public bool Any(long id)
+        {
+            return context.Users.Any(x => x.Id == id);
+        }
+
         public User? Get(long id)
         {
-            return context.Users.AsNoTracking().FirstOrDefault(x => x.Id == id);
+            return context.Users.FirstOrDefault(x => x.Id == id);
         }
 
         public void Delete(long id)
@@ -38,20 +43,23 @@ namespace GPTipsBot.Repositories
         public long Create(User user)
         {
             logger.LogInformation("CreateUser");
+            var entity = context.Users.Add(user).Entity;
 
-            return context.Users.Add(user).Entity.Id;
+            context.SaveChanges();
+
+            return user.Id;
         }
 
-        public void Update(User user)
+        public void Update(User newUser)
         {
-            var dbUser = Get(user.Id);
-            if (dbUser == null)
-            {
-                throw new InvalidOperationException($"Can't find user with id {user.Id}");
-            }
+            var dbUser = Get(newUser.Id);
 
-            context.ChangeTracker.Clear();
-            context.Users.Update(user);
+            if (dbUser == null) { throw new ArgumentNullException($"Can't find user with Id {newUser.Id}"); }
+
+            dbUser.FirstName = newUser.FirstName; 
+            dbUser.LastName = newUser.LastName;
+            dbUser.IsActive = newUser.IsActive;
+            dbUser.Source = newUser.Source ?? dbUser.Source;
         }
         
         public IEnumerable<User> GetAll()

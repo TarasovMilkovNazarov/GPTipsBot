@@ -10,14 +10,16 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageRepository messageRepository;
+        private readonly UserRepository userRepository;
         private readonly ITelegramBotClient botClient;
 
-        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository, ITelegramBotClient botClient)
+        public CrudHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository, ITelegramBotClient botClient, UserRepository userRepository)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
             this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<ChatGptHandler>());
+            this.userRepository = userRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)

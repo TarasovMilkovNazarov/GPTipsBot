@@ -88,10 +88,12 @@ namespace GPTipsBot.UpdateHandlers
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
 
+        public string Language => GetUserLanguage();
 
-        public string GetUserLanguage()
+
+        string GetUserLanguage()
         {
-            if (MainHandler.userState.ContainsKey(UserChatKey))
+            if (MainHandler.userState.ContainsKey(UserChatKey) && MainHandler.userState[UserChatKey].LanguageCode != null)
             {
                 return MainHandler.userState[UserChatKey].LanguageCode;
             }

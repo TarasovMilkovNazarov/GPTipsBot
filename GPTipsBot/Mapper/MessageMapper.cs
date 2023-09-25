@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
+using GPTipsBot.Localization;
 using Tmessage = Telegram.Bot.Types.Message;
 
 namespace GPTipsBot.Mapper
@@ -21,7 +22,7 @@ namespace GPTipsBot.Mapper
                 ReplyToMessage = tMessage.ReplyToMessage,
                 ChatType = tMessage.Chat.Type,
                 ContextBound = true,
-                LanguageCode = tMessage.From.LanguageCode
+                LanguageCode = LocalizationManager.GetCulture(tMessage.From?.LanguageCode).TwoLetterISOLanguageName
             };
 
             return message;

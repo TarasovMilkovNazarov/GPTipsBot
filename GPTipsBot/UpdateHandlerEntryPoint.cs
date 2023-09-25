@@ -12,7 +12,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
 {
-    public partial class UpdateHandlerEntryPoint
+    public class UpdateHandlerEntryPoint
     {
         public Guid Guid { get; } = Guid.NewGuid();
         private readonly ILogger<UpdateHandlerEntryPoint> _logger;
@@ -27,6 +27,10 @@ namespace GPTipsBot
             _logger = logger;
             this.telegramBotApi = telegramBotApi;
             this.serviceProvider = serviceProvider;
+        }
+
+        static UpdateHandlerEntryPoint()
+        {
             Start = DateTime.UtcNow;
         }
 
@@ -44,8 +48,7 @@ namespace GPTipsBot
             {
                 var extendedUpd = new UpdateDecorator(update, cancellationToken);
 
-                var userLang = extendedUpd.GetUserLanguage();
-                CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(userLang);
+                CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
                 await mainHandler.HandleAsync(extendedUpd,cancellationToken);
 
                 return extendedUpd;

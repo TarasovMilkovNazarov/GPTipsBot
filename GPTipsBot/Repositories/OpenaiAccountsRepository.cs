@@ -8,10 +8,10 @@ namespace GPTipsBot.Repositories
 {
     public class OpenaiAccountsRepository
     {
-        private readonly ILogger<UpdateHandlerEntryPoint> logger;
+        private readonly ILogger<OpenaiAccountsRepository> logger;
         private readonly ApplicationContext context;
 
-        public OpenaiAccountsRepository(ILogger<UpdateHandlerEntryPoint> logger, ApplicationContext context)
+        public OpenaiAccountsRepository(ILogger<OpenaiAccountsRepository> logger, ApplicationContext context)
         {
             this.logger = logger;
             this.context = context;

@@ -10,7 +10,6 @@ namespace GPTipsBot.Models
         public string? Source { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool IsActive { get; set; } = true;
-        public List<Message> Messages { get; set; }
         public BotSettings? BotSettings { get; set; }
 
         [ForeignKey("BotSettings")]
