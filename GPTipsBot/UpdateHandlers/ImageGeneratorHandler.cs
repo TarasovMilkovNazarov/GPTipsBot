@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
@@ -56,7 +57,7 @@ namespace GPTipsBot.UpdateHandlers
                     replyToMessageId: (int?)update.Message.TelegramMessageId, cancellationToken: token);
 
                 sw.Stop();
-                logger.LogInformation($"Successfull image generation for message {update.Message.Id} takes {sw.Elapsed.TotalSeconds}s");
+                logger.LogInformation($"Successfull image generation for request {StringExtensions.Truncate(update.Message.Text, 30)} takes {sw.Elapsed.TotalSeconds}s");
             }
             catch(OperationCanceledException ex)
             {

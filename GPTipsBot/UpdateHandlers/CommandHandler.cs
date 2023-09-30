@@ -2,7 +2,6 @@
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
-using GPTipsBot.Mapper;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;

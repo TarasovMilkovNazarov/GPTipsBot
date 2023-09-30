@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Services;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 

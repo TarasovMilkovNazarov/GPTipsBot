@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
@@ -38,15 +38,29 @@ namespace GPTipsBot
         {
             using var scope = serviceProvider.CreateScope();
             var mainHandler = scope.ServiceProvider.GetRequiredService<MainHandler>();
+            
+            if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Administrator)
+            {
+                return null;
+            }
+            if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Administrator)
+            {
+                return null;
+            }
+            if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Left)
+            {
+                return null;
+            }
 
             if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Left && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
             {
                 return null;
             }
 
+            UpdateDecorator extendedUpd = null;
             try
             {
-                var extendedUpd = new UpdateDecorator(update, cancellationToken);
+                extendedUpd = new UpdateDecorator(update, cancellationToken);
 
                 CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
                 await mainHandler.HandleAsync(extendedUpd,cancellationToken);
@@ -55,6 +69,7 @@ namespace GPTipsBot
             }
             catch (Exception ex)
             {
+                _logger.LogError(update.Serialize());
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
                 if (ex is ApiRequestException apiEx || update.Message == null)
                 {

@@ -1,9 +1,7 @@
 ﻿using GPTipsBot.Dtos;
-using GPTipsBot.Enums;
 using GPTipsBot.Mapper;
-using GPTipsBot.Models;
 using GPTipsBot.Services;
-using System.Data;
+using Newtonsoft.Json;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -12,7 +10,6 @@ namespace GPTipsBot.UpdateHandlers
     public class UpdateDecorator
     {
         private Update _update;
-
 
         public UpdateDecorator(Update update, CancellationToken cancellationToken)
         {
@@ -99,6 +96,13 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             return Message?.LanguageCode ?? "ru";
+        }
+
+        public override string ToString()
+        {
+            string serialized = JsonConvert.SerializeObject(_update, Formatting.Indented);
+
+            return serialized;
         }
     }
 }

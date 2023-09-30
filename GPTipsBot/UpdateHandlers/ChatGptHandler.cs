@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
@@ -8,17 +9,14 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class ChatGptHandler : BaseMessageHandler
     {
-        private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly MessageRepository messageRepository;
         private readonly IGpt gptAPI;
         private readonly ActionStatus typingStatus;
         private readonly ILogger<ChatGptHandler> logger;
         private readonly ITelegramBotClient botClient;
 
-        public ChatGptHandler(MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository,
-            IGpt gptAPI, ActionStatus typingStatus, ILogger<ChatGptHandler> logger, ITelegramBotClient botClient)
+        public ChatGptHandler(MessageRepository messageRepository, IGpt gptAPI, ActionStatus typingStatus, ILogger<ChatGptHandler> logger, ITelegramBotClient botClient)
         {
-            this.messageHandlerFactory = messageHandlerFactory;
             this.messageRepository = messageRepository;
             this.gptAPI = gptAPI;
             this.typingStatus = typingStatus;
@@ -40,7 +38,9 @@ namespace GPTipsBot.UpdateHandlers
                 }
 
                 sw.Stop();
-                logger.LogInformation($"Get response to message {update.Message.Id} takes {sw.Elapsed.TotalSeconds}s");
+                logger.LogInformation($"Get response to message " +
+                    $"'{StringExtensions.Truncate(update.Message.Text, 30)}' " +
+                    $"takes {sw.Elapsed.TotalSeconds}s");
                 update.Reply.Text = gtpResponse?.Choices?.FirstOrDefault()?.Message?.Content ?? "";
                 update.Reply.Role = Enums.MessageOwner.Assistant;
                 update.Reply.ContextBound = true;

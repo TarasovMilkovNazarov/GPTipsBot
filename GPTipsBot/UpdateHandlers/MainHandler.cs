@@ -55,8 +55,6 @@ namespace GPTipsBot.UpdateHandlers
                 userState.TryAdd(userKey, new UserStateDto(userKey));
             }
 
-            logger.LogInformation($"MainHandler execution {userKey.Id} with message {update.Message?.Text}");
-
             var newUser = UserMapper.Map(update.User);
             try
             {
