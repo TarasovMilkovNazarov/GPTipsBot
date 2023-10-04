@@ -36,26 +36,13 @@ namespace GPTipsBot
 
         public async Task<UpdateDecorator?> HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
         {
-            using var scope = serviceProvider.CreateScope();
-            var mainHandler = scope.ServiceProvider.GetRequiredService<MainHandler>();
-            
-            if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Administrator)
-            {
-                return null;
-            }
-            if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Administrator)
-            {
-                return null;
-            }
-            if (update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Left)
+            if (update.Ignore())
             {
                 return null;
             }
 
-            if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Left && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
-            {
-                return null;
-            }
+            using var scope = serviceProvider.CreateScope();
+            var mainHandler = scope.ServiceProvider.GetRequiredService<MainHandler>();
 
             UpdateDecorator extendedUpd = null;
             try

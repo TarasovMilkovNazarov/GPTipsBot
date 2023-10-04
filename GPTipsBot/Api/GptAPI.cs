@@ -161,13 +161,14 @@ namespace GPTipsBot.Api
             if (nowTime > specificTime)
                 specificTime= specificTime.AddDays(1);
 
-            double tickTime = (specificTime- nowTime).TotalMilliseconds;
+            double tickTime = (specificTime - nowTime).TotalMilliseconds;
             timer = new Timer(tickTime);
             timer.Elapsed += (s, e) => UnfreezeDayLimitedTokens(s,e,openaiAccountsRepository);
             timer.Start();
         }
 
-        private static void UnfreezeDayLimitedTokens(object sender, ElapsedEventArgs e, OpenaiAccountsRepository openaiAccountsRepository)
+        private static void UnfreezeDayLimitedTokens(object sender, ElapsedEventArgs e,
+            OpenaiAccountsRepository openaiAccountsRepository)
         {
             timer.Stop();
 

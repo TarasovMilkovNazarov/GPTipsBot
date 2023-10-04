@@ -36,8 +36,6 @@ namespace GPTipsBot.Repositories
             var freezedTokens = context.OpenaiAccounts.Where(x => !x.IsDeleted && x.FreezedAt != null);
             freezedTokens.ExecuteUpdate(x => x.SetProperty(y => y.FreezedAt, default(DateTime?)));
 
-            context.SaveChanges();
-
             return freezedTokens.Select(x => x.Token).ToList();
         }
         
