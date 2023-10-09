@@ -76,7 +76,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, null);
+                logger.LogError(ex.Message);
             }
             finally
             {

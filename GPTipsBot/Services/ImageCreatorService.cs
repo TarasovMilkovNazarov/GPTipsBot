@@ -10,10 +10,10 @@ namespace GPTipsBot.Services
 {
     public class ImageCreatorService
     {
-        private string BING_URL = "https://cn.bing.com";
+        private readonly string BING_URL = "https://cn.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1gcRxDxURcnYo2aEpDNy63CzYqleD94-iDDg-g-_E-z9Rv1dMBe91Fn-hME6M5itgiBUbMTNg6Dl53MQ9pQ9p-9QfzVUaqC16H2vUhJsMR7XLTHtdYkFMBhYALq0OnkKSQQDaMPilhm9S-QcLPTcflMWTLHOphUSnNSC1xx__M2KspTc_JxNfmduC1M152emEBT7dltIsBJjeiPyvv4rrRg";
+        private string authCookie = "_U=1A48W7iQL0aQ7PkvFTD1s8tMCsPlnZrqW8_JqUQUEpJsFTl1LG7x-lodNUlnqp_Lhplbj0jkrNDfaM8JTg5KefHWF7tdt447i4lnZrII9r9_5uL_-_X_2oeviSCNmxzP0KvG6elmd_K7fzdDcpxjd7gb0rFdhD5Dstk9_CWoDygESVxEU15MQN7sZS3xv6jS1cTwbuNB-8fm0fNRGlrs4";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
@@ -21,27 +21,12 @@ namespace GPTipsBot.Services
             //uncomment for sniffing requests in fiddler
             //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
-        
-        public async Task CreateImageFromText(string prompt, CancellationToken token = default)
-        {
-            var imgSrcs = await GetImageSources(prompt, token);
-            SaveImages(imgSrcs);
-        }
 
         private RestClient CreateBingRestClient()
         {
-            var cookie = new Cookie("_U", HttpUtility.UrlEncode(authCookie))
-            {
-                Domain = "www.bing.com"
-            };
-
-            var cookieContainer = new CookieContainer() { MaxCookieSize = int.MaxValue };
-            cookieContainer.Add(cookie);
-
-            var client = new RestClient(new RestClientOptions(BING_URL) {
+            var newClient = new RestClient(new RestClientOptions(BING_URL) {
                 FollowRedirects = false,
                 UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
-                //CookieContainer = cookieContainer
             });
 
             Random random = new Random();
@@ -49,16 +34,15 @@ namespace GPTipsBot.Services
             // Generate random IP between range 13.104.0.0/14
             string FORWARDED_IP = $"13.{random.Next(104, 108)}.{random.Next(0, 256)}.{random.Next(0, 256)}";
 
-            client.AddDefaultHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-            client.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
-            client.AddDefaultHeader("cache-control", "max-age=0");
-            client.AddDefaultHeader("content-type", "application/x-www-form-urlencoded");
-            client.AddDefaultHeader("referrer", "https://www.bing.com/images/create/");
-            client.AddDefaultHeader("origin", BING_URL);
-            client.AddDefaultHeader("Cookie", authCookie);
-            client.AddDefaultHeader("x-forwarded-for", FORWARDED_IP);
+            newClient.AddDefaultHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+            newClient.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
+            newClient.AddDefaultHeader("cache-control", "max-age=0");
+            newClient.AddDefaultHeader("content-type", "application/x-www-form-urlencoded");
+            newClient.AddDefaultHeader("referrer", "https://www.bing.com/images/create/");
+            newClient.AddDefaultHeader("origin", BING_URL);
+            newClient.AddDefaultHeader("x-forwarded-for", FORWARDED_IP);
 
-            return client;
+            return newClient;
         }
 
         public async Task<List<string>> GetImageSources(string prompt, CancellationToken token)
@@ -71,10 +55,11 @@ namespace GPTipsBot.Services
             string url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
             var request = new RestRequest(url, Method.Post);
             request.AddHeader("Accept-Encoding", "identity");
+            request.AddHeader("Cookie", authCookie);
             request.AddParameter($"q", urlEncodedPrompt);
             request.AddParameter($"qs", "ds");
             request.Timeout = 2000;
-             
+
             var response = await client.ExecuteAsync(request, token);
 
             if (string.IsNullOrEmpty(response?.Content))
@@ -136,87 +121,6 @@ namespace GPTipsBot.Services
             }
 
             return true;
-        }
-
-        private void SaveImages(List<string> links, string outputDir = "output")
-        {
-            Console.WriteLine("\nDownloading images...");
-            try
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-            catch (IOException)
-            {
-                // Directory already exists
-            }
-            int imageNum = 0;
-
-            var client = new RestClient();
-            foreach (string link in links)
-            {
-                try
-                {
-                    var request = new RestRequest(link);
-                    request.AddHeader("Accept", "image/jpeg");
-                    var response = client.DownloadData(request);
-                    File.WriteAllBytes($"{outputDir}/{imageNum}.jpeg", response);
-                }
-                catch (Exception)
-                {
-                    // Error downloading file
-                }
-                imageNum++;
-            }
-        }
-
-        public List<byte[]> GetImages(List<string> links)
-        {
-            var images = new List<byte[]>();
-            Console.WriteLine("Getting images...");
-
-            var client = new RestClient();
-            foreach (string link in links)
-            {
-                try
-                {
-                    var request = new RestRequest(link);
-                    request.AddHeader("Accept", "image/jpeg");
-                    var response = client.DownloadData(request);
-                    if (response != null)
-                    {
-                        images.Add(response);
-                    }
-                }
-                catch (Exception)
-                {
-                    // Error downloading file
-                }
-            }
-
-            return images;
-        }
-
-        public byte[] GetImage(string link)
-        {
-            Console.WriteLine("Getting images...");
-            byte[]? image = null;
-
-            try
-            {
-                var request = new RestRequest(link);
-                request.AddHeader("Accept", "image/jpeg");
-                image = client.DownloadData(request);
-                if (image == null)
-                {
-                    throw new Exception($"Can't get image from source {link}");
-                }
-            }
-            catch (Exception)
-            {
-                // Error downloading file
-            }
-
-            return image;
         }
 
         public void UpdateBingCookies(string messageText)
