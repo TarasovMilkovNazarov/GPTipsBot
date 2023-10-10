@@ -13,13 +13,13 @@ namespace GPTipsBot.Services
         private readonly string BING_URL = "https://cn.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1A48W7iQL0aQ7PkvFTD1s8tMCsPlnZrqW8_JqUQUEpJsFTl1LG7x-lodNUlnqp_Lhplbj0jkrNDfaM8JTg5KefHWF7tdt447i4lnZrII9r9_5uL_-_X_2oeviSCNmxzP0KvG6elmd_K7fzdDcpxjd7gb0rFdhD5Dstk9_CWoDygESVxEU15MQN7sZS3xv6jS1cTwbuNB-8fm0fNRGlrs4";
+        private string authCookie = "_U=1gOoXb6pUHg-WrEs-O6F-BV2pFeyPMJ_fdkQwNo-LljAIQjzT0Z0SDjpuaafuhT5NItxCzHlxTVbBTVYD_ahDFEOmd-c7YzbK2CGCq0G2LD0nwdzu-Y7yXOfLNtSmqqM6IQONQCeOyPxesYPPsQT07RAZCHre2NK779vGmJGwDdcaYH06ZEtDnJUmRbg3Np0ZoJ5avyPvtmxhgzXTPIcgZQ";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
 
             //uncomment for sniffing requests in fiddler
-            //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
 
         private RestClient CreateBingRestClient()
@@ -38,9 +38,10 @@ namespace GPTipsBot.Services
             newClient.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
             newClient.AddDefaultHeader("cache-control", "max-age=0");
             newClient.AddDefaultHeader("content-type", "application/x-www-form-urlencoded");
-            newClient.AddDefaultHeader("referrer", "https://www.bing.com/images/create/");
+            newClient.AddDefaultHeader("referrer", $"{BING_URL}/images/create/");
             newClient.AddDefaultHeader("origin", BING_URL);
             newClient.AddDefaultHeader("x-forwarded-for", FORWARDED_IP);
+            newClient.AddDefaultHeader("Cookie", authCookie);
 
             return newClient;
         }
@@ -49,16 +50,14 @@ namespace GPTipsBot.Services
         {
             Console.WriteLine("Sending request...");
             string urlEncodedPrompt = Uri.EscapeDataString(prompt);
-            var payload = $"q={urlEncodedPrompt}&qs=ds";
 
             // https://www.bing.com/images/create?q=<PROMPT>&rt=4&FORM=GENCRE
             string url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
             var request = new RestRequest(url, Method.Post);
             request.AddHeader("Accept-Encoding", "identity");
-            request.AddHeader("Cookie", authCookie);
             request.AddParameter($"q", urlEncodedPrompt);
             request.AddParameter($"qs", "ds");
-            request.Timeout = 2000;
+            request.Timeout = 10000;
 
             var response = await client.ExecuteAsync(request, token);
 
@@ -84,7 +83,9 @@ namespace GPTipsBot.Services
             // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
             string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
             // Poll for results
-            response = await client.ExecuteWithPredicate(new RestRequest(pollingUrl, Method.Get), token, IsImageSrcGetRequestSuccessfull);
+            var getImagesLinksRequest = new RestRequest(pollingUrl, Method.Get);
+
+            response = await client.ExecuteWithPredicate(getImagesLinksRequest, token, IsImageSrcGetRequestSuccessfull);
 
             // Use regex to search for src=""
             var imageLinks = new List<string>();
@@ -109,7 +110,7 @@ namespace GPTipsBot.Services
             {
                 throw new Exception("Could not get results");
             }
-            if (!string.IsNullOrEmpty(response.Content))
+            if (!string.IsNullOrEmpty(response.Content) && !response.Content.Contains("Pending"))
             {
                 return true;
             }
@@ -126,6 +127,8 @@ namespace GPTipsBot.Services
         public void UpdateBingCookies(string messageText)
         {
             authCookie = "_U=" + messageText;
+            client.DefaultParameters.RemoveParameter("Cookie", ParameterType.HttpHeader);
+            client.AddDefaultHeader("Cookie", authCookie);
         }
     }
 }

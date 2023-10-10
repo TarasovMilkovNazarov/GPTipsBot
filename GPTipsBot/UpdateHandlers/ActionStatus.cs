@@ -46,7 +46,11 @@ namespace GPTipsBot.UpdateHandlers
         
         public async Task Stop(UserChatKey userKey,CancellationToken cancellationToken)
         {
-            await botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId, cancellationToken: cancellationToken);
+            if (_serviceMessageId != 0)
+            {
+                await botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId, cancellationToken: cancellationToken);
+            }
+
             MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
 
             _timer?.Dispose();
