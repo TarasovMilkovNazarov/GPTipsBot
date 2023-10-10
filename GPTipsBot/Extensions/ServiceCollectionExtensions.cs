@@ -10,6 +10,7 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
+using GPTipsBot.Services.ChatGpt;
 
 namespace GPTipsBot.Extensions
 {
@@ -52,7 +53,8 @@ namespace GPTipsBot.Extensions
             .AddTransient<ImageGeneratorHandler>()
             .AddTransient<ChatGptHandler>()
             .AddScoped<MessageService>()
-            .AddTransient<IGpt, GptAPI>()
+            .AddTransient<IGpt, GptApi>()
+            .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()
             .AddScoped(x => ActivatorUtilities.CreateInstance<TelegramBotAPI>(x, AppConfig.TelegramToken))
             .AddTransient<MessageRepository>()

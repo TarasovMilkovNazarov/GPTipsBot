@@ -5,44 +5,37 @@ using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenAI;
-using OpenAI.Interfaces;
 using OpenAI.Managers;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
 using RestSharp;
 using Timer = System.Timers.Timer;
 using GptModels = OpenAI.ObjectModels;
-using System.Timers;
 using GPTipsBot.Repositories;
 using GPTipsBot.Models;
+using GPTipsBot.Services.ChatGpt;
 
 namespace GPTipsBot.Api
 {
     using static AppConfig;
 
-    public class GptAPI : IGpt
+    public class GptApi : IGpt
     {
         private readonly string betterChatGptBaseUrl = "https://free.churchless.tech/v1/chat/completions";
-        private readonly ILogger<GptAPI> logger;
+        private readonly ILogger<GptApi> logger;
         private readonly OpenaiAccountsRepository openaiAccountsRepository;
-        private IOpenAIService openAiService;
+        private readonly TokenQueue tokenQueue;
         private readonly MessageService messageService;
-        private static Timer timer;
-        private static Queue<string> OpenAiTokens;
+        private Timer timer;
 
-        public GptAPI(ILogger<GptAPI> logger, 
-            OpenaiAccountsRepository openaiAccountsRepository, MessageService messageService)
+        public GptApi(ILogger<GptApi> logger, OpenaiAccountsRepository openaiAccountsRepository,
+            MessageService messageService, TokenQueue tokenQueue)
         {
             this.logger = logger;
             this.openaiAccountsRepository = openaiAccountsRepository;
             this.messageService = messageService;
-        }
-
-        static GptAPI()
-        {
-            var tokensRepository = new OpenaiAccountsRepository(null, new Db.ApplicationContext());
-            setup_Timer(tokensRepository);
-            OpenAiTokens = new Queue<string>(tokensRepository.GetAllAvailable().Select(x => x.Token));
+            this.tokenQueue = tokenQueue;
+            this.timer = setup_Timer(openaiAccountsRepository);
         }
 
         public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
@@ -108,9 +101,9 @@ namespace GPTipsBot.Api
 
         public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)
         {
-            var currentToken = OpenAiTokens.Dequeue();
+            var currentToken = await tokenQueue.GetTokenAsync();
 
-            this.openAiService = new OpenAIService(new OpenAiOptions()
+            var openAiService = new OpenAIService(new OpenAiOptions()
             {
                 ApiKey =  currentToken
             });
@@ -125,7 +118,7 @@ namespace GPTipsBot.Api
 
             if (completionResult.Successful)
             {
-                OpenAiTokens.Enqueue(currentToken);
+                tokenQueue.AddToken(currentToken);
             }
             else if(completionResult.Error?.Message != null && completionResult.Error.Message.Contains("deactivated"))
             {
@@ -144,7 +137,7 @@ namespace GPTipsBot.Api
                 }
                 else if (completionResult.Error.Message.Contains("on requests per min"))
                 {
-                    OpenAiTokens.Enqueue(currentToken);
+                    tokenQueue.AddToken(currentToken);
                 }
                 await SendViaOpenAiApi(messages, token);
             }
@@ -152,7 +145,7 @@ namespace GPTipsBot.Api
             return completionResult;
         }
 
-        private static void setup_Timer(OpenaiAccountsRepository openaiAccountsRepository)
+        private Timer setup_Timer(OpenaiAccountsRepository openaiAccountsRepository)
         {
             var delay = TimeSpan.FromMinutes(1).TotalMinutes;
 
@@ -163,22 +156,23 @@ namespace GPTipsBot.Api
 
             double tickTime = (specificTime - nowTime).TotalMilliseconds;
             timer = new Timer(tickTime);
-            timer.Elapsed += (s, e) => UnfreezeDayLimitedTokens(s,e,openaiAccountsRepository);
+            timer.Elapsed += (s, e) => UnfreezeDayLimitedTokens(openaiAccountsRepository);
             timer.Start();
+
+            return timer;
         }
 
-        private static void UnfreezeDayLimitedTokens(object sender, ElapsedEventArgs e,
-            OpenaiAccountsRepository openaiAccountsRepository)
+        private void UnfreezeDayLimitedTokens(OpenaiAccountsRepository openaiAccountsRepository)
         {
             timer.Stop();
 
             var unfreezed = openaiAccountsRepository.UnfreezeTokens();
             foreach (var item in unfreezed)
             {
-                OpenAiTokens.Enqueue(item);
+                tokenQueue.AddToken(item);
             }
 
-            setup_Timer(openaiAccountsRepository);
+            timer = setup_Timer(openaiAccountsRepository);
         }
     }
 
