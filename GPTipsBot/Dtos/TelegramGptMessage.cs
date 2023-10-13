@@ -5,7 +5,7 @@ namespace GPTipsBot.Dtos
 
     public class TelegramGptMessageUpdate
     {
-        public TelegramGptMessageUpdate(Telegram.Bot.Types.Message message)
+        public TelegramGptMessageUpdate(Message message)
         {
             MessageId = message.MessageId;
             TelegramMessageId = message.MessageId;

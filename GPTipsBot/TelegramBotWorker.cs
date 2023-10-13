@@ -40,12 +40,12 @@ namespace GPTipsBot
             catch (Exception ex)
             {
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
-                if (ex is ApiRequestException apiEx || update.Message == null)
+                if (ex is ApiRequestException || update.Message == null)
                 {
                     return;
                 }
 
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, Api.BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
             }
         }
 

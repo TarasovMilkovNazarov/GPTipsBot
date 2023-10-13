@@ -16,7 +16,7 @@ namespace GPTipsBot.UpdateHandlers
         public ActionStatus(ITelegramBotClient botClient, ILogger<TelegramBotWorker> logger)
         {
             this.botClient = botClient;
-            this._logger = logger;
+            _logger = logger;
         }
 
         public async Task<long> Start(UserKey userKey, ChatAction chatAction, CancellationToken cancellationToken)

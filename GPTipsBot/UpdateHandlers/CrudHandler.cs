@@ -22,13 +22,13 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateWithCustomMessageDecorator update, CancellationToken cancellationToken)
         {
             if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
-                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.AwaitingImage)
+                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == UserStateEnum.AwaitingImage)
             {
                 update.TelegramGptMessage.ContextBound = false;
                 SetNextHandler(messageHandlerFactory.Create<ImageGeneratorHandler>());
             }
             if (MainHandler.userState.ContainsKey(update.TelegramGptMessage.UserKey) && 
-                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == Enums.UserStateEnum.SendingFeedback)
+                MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState == UserStateEnum.SendingFeedback)
             {
                 update.TelegramGptMessage.ContextBound = false;
                 MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;

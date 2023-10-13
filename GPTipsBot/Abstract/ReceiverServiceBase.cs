@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Abstract;
@@ -34,7 +33,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
     public async Task ReceiveAsync(CancellationToken stoppingToken)
     {
         // ToDo: we can inject ReceiverOptions through IOptions container
-        var receiverOptions = new ReceiverOptions()
+        var receiverOptions = new ReceiverOptions
         {
             AllowedUpdates = Array.Empty<UpdateType>(),
         };
@@ -51,7 +50,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         {
             await foreach (var update in updateReceiver.WithCancellation(cts.Token))
             {
-                _updateHandler.HandleUpdateAsync(_botClient, update, cts.Token);
+                await _updateHandler.HandleUpdateAsync(_botClient, update, cts.Token);
             }
         }
         catch (OperationCanceledException exception)

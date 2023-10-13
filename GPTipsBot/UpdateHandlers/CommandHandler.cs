@@ -54,24 +54,24 @@ namespace GPTipsBot.UpdateHandlers
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     update.TelegramGptMessage.Source = TelegramService.GetSource(messageText);
                     userRepository.CreateUpdateUser(update.TelegramGptMessage);
-                    responseToUser = Api.BotResponse.Greeting;
+                    responseToUser = BotResponse.Greeting;
                     break;
                 case CommandType.Help:
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
                     responseToUser = telegramBotAPI.GetMyDescription();
                     break;
                 case CommandType.CreateImage:
-                    responseToUser = Api.BotResponse.InputImageDescriptionText;
+                    responseToUser = BotResponse.InputImageDescriptionText;
                     replyMarkup = cancelKeyboard;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.AwaitingImage;
                     break;
                 case CommandType.ResetContext:
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.None;
-                    responseToUser = Api.BotResponse.ContextUpdated;
+                    responseToUser = BotResponse.ContextUpdated;
                     keepContext = false;
                     break;
                 case CommandType.Feedback:
-                    responseToUser = Api.BotResponse.SendFeedback;
+                    responseToUser = BotResponse.SendFeedback;
                     MainHandler.userState[update.TelegramGptMessage.UserKey].CurrentState = UserStateEnum.SendingFeedback;
                     replyMarkup = cancelKeyboard;
                     break;
