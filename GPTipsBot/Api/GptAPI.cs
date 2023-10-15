@@ -105,10 +105,10 @@ namespace GPTipsBot.Api
 
             var openAiService = new OpenAIService(new OpenAiOptions()
             {
-                ApiKey =  currentToken
+                ApiKey = currentToken
             });
 
-            var completionResult = await openAiService.ChatCompletion.CreateCompletion(
+            var openaAiRequest = openAiService.ChatCompletion.CreateCompletion(
                 new ChatCompletionCreateRequest
                 {
                     Messages = messages,
@@ -116,33 +116,59 @@ namespace GPTipsBot.Api
                     //MaxTokens = AppConfig.ChatGptTokensLimitPerMessage
                 }, cancellationToken: token);
 
-            if (completionResult.Successful)
+            ChatCompletionCreateResponse response = null;
+
+            try
+            {
+                response = await openaAiRequest;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, null);
+            }
+
+            if (response == null)
             {
                 tokenQueue.AddToken(currentToken);
+                return response;
             }
-            else if(completionResult.Error?.Message != null && completionResult.Error.Message.Contains("deactivated"))
+
+            if (response.Successful)
+            {
+                tokenQueue.AddToken(currentToken);
+                return response;
+            }
+
+            logger.LogError($"Failed request to OpenAi service: {response.Error?.Message}");
+
+            if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
             {
                 openaiAccountsRepository.Remove(currentToken, DeletionReason.Deactivated);
                 await SendViaOpenAiApi(messages, token);
             }
-            else if(completionResult.Error?.Code == "insufficient_quota")
+            else if (response.Error?.Code == "insufficient_quota")
             {
                 openaiAccountsRepository.Remove(currentToken, DeletionReason.InsufficientQuota);
                 await SendViaOpenAiApi(messages, token);
             }
-            else if(completionResult.Error?.Code == "rate_limit_exceeded" && completionResult.Error.Message != null) {
-                if (completionResult.Error.Message.Contains("on requests per day"))
+            else if (response.Error?.Code == "rate_limit_exceeded" && response.Error.Message != null)
+            {
+                if (response.Error.Message.Contains("on requests per day"))
                 {
                     openaiAccountsRepository.FreezeToken(currentToken);
                 }
-                else if (completionResult.Error.Message.Contains("on requests per min"))
+                else if (response.Error.Message.Contains("on requests per min"))
                 {
                     tokenQueue.AddToken(currentToken);
                 }
                 await SendViaOpenAiApi(messages, token);
             }
+            else
+            {
+                tokenQueue.AddToken(currentToken);
+            }
 
-            return completionResult;
+            return response;
         }
 
         private Timer setup_Timer(OpenaiAccountsRepository openaiAccountsRepository)
@@ -152,7 +178,7 @@ namespace GPTipsBot.Api
             DateTime nowTime = DateTime.Now;
             DateTime specificTime = nowTime.Date.AddDays(1).AddMinutes(delay);
             if (nowTime > specificTime)
-                specificTime= specificTime.AddDays(1);
+                specificTime = specificTime.AddDays(1);
 
             double tickTime = (specificTime - nowTime).TotalMilliseconds;
             timer = new Timer(tickTime);

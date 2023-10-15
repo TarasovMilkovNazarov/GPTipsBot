@@ -8,7 +8,7 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly ITelegramBotClient botClient;
         private readonly MessageRepository messageRepository;
-        private static readonly Dictionary<long, Queue<UpdateDecorator>> chatToInformAboutRecovery = new Dictionary<long, Queue<UpdateDecorator>>();
+        private static readonly Dictionary<long, Queue<UpdateDecorator>> chatToInformAboutRecovery = new ();
 
         public RecoveryHandler(ITelegramBotClient botClient,
             MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository)
@@ -30,6 +30,11 @@ namespace GPTipsBot.UpdateHandlers
 
             if (UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
             {
+                if (update.IsGroupOrChannel)
+                {
+                    return;
+                }
+
                 messageRepository.AddMessage(update.Message);
 
                 if (chatToInformAboutRecovery.ContainsKey(chatId))

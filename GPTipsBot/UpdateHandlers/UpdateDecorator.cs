@@ -66,6 +66,9 @@ namespace GPTipsBot.UpdateHandlers
                 UserId = UserChatKey.Id,
                 ChatId = UserChatKey.ChatId,
             };
+
+            var groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
+            IsGroupOrChannel = groupChatTypes.Contains(Message.ChatType);
         }
 
         public CancellationToken StatusTimerCancellationToken { get; set; }
@@ -82,6 +85,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public ChatMemberStatus? ChatMemeberStatus => _update.MyChatMember?.NewChatMember.Status;
         public bool IsRecovered { get; }
+        public bool IsGroupOrChannel { get; }
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
 

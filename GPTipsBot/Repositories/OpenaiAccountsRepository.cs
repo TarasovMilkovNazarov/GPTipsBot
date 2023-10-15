@@ -14,7 +14,7 @@ namespace GPTipsBot.Repositories
         {
             this.logger = logger;
             this.context = context;
-        }
+        } 
         
         public void FreezeToken(string token)
         {
@@ -33,7 +33,8 @@ namespace GPTipsBot.Repositories
 
         public List<string> UnfreezeTokens()
         {
-            var freezedTokens = context.OpenaiAccounts.Where(x => !x.IsDeleted && x.FreezedAt != null);
+            using var dbContext = new ApplicationContext();
+            var freezedTokens = dbContext.OpenaiAccounts.Where(x => !x.IsDeleted && x.FreezedAt != null);
             freezedTokens.ExecuteUpdate(x => x.SetProperty(y => y.FreezedAt, default(DateTime?)));
 
             return freezedTokens.Select(x => x.Token).ToList();
