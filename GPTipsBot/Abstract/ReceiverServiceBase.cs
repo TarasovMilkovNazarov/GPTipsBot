@@ -63,6 +63,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         }
         catch (OperationCanceledException exception)
         {
+            _logger.LogError($"Update receiving operation was canceled \r\n {exception.Message}");
         }
     }
 }

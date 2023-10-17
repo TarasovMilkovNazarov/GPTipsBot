@@ -68,7 +68,7 @@ namespace GPTipsBot.UpdateHandlers
             };
 
             var groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
-            IsGroupOrChannel = groupChatTypes.Contains(Message.ChatType);
+            IsGroupOrChannel = groupChatTypes.Contains(Message?.ChatType);
         }
 
         public CancellationToken StatusTimerCancellationToken { get; set; }

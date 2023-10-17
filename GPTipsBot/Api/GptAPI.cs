@@ -1,14 +1,11 @@
-﻿using GPTipsBot.Extensions;
-using GPTipsBot.Resources;
+﻿using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using OpenAI;
 using OpenAI.Managers;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
-using RestSharp;
 using Timer = System.Timers.Timer;
 using GptModels = OpenAI.ObjectModels;
 using GPTipsBot.Repositories;
@@ -17,11 +14,8 @@ using GPTipsBot.Services.ChatGpt;
 
 namespace GPTipsBot.Api
 {
-    using static AppConfig;
-
     public class GptApi : IGpt
     {
-        private readonly string betterChatGptBaseUrl = "https://free.churchless.tech/v1/chat/completions";
         private readonly ILogger<GptApi> logger;
         private readonly OpenaiAccountsRepository openaiAccountsRepository;
         private readonly TokenQueue tokenQueue;
@@ -57,48 +51,10 @@ namespace GPTipsBot.Api
                 throw new CustomException(BotResponse.TokensLimitExceeded);
             }
 
-            if (UseFreeApi)
-            {
-                return await SendViaFreeProxy(textWithContext, token);
-            }
-
             return await SendViaOpenAiApi(textWithContext, token);
         }
 
-        public async Task<ChatCompletionCreateResponse?> SendViaFreeProxy(ChatMessage[] messages, CancellationToken token = default)
-        {
-            var freeGptClient = new RestClient(betterChatGptBaseUrl);
-            var request = new RestRequest("", Method.Post);
-            request.AddHeader("Content-Type", "application/json");
-            var gptDto = new
-            {
-                model = GptModels.Models.ChatGpt3_5Turbo,
-                messages = messages.Select(m => new { role = m.Role, content = m.Content }).ToArray(),
-                stream = false
-            };
-
-            request.AddBody(gptDto);
-            ChatCompletionCreateResponse? completionResult = null;
-
-            try
-            {
-                var restResponse = await freeGptClient.ExecuteWithRetry(request, maxRetries: 10, cancellationToken: token);
-                completionResult = JsonConvert.DeserializeObject<ChatCompletionCreateResponse>(restResponse?.Content);
-
-                return completionResult;
-            }
-            catch (OperationCanceledException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error in request to proxy");
-            }
-
-            return completionResult;
-        }
-
+        // TODO: Implement this method with retry policy
         public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)
         {
             var currentToken = await tokenQueue.GetTokenAsync();
@@ -129,8 +85,9 @@ namespace GPTipsBot.Api
 
             if (response == null)
             {
+                logger.LogInformation($"Get empty response from OpenAI");
                 tokenQueue.AddToken(currentToken);
-                return response;
+                return null;
             }
 
             if (response.Successful)

@@ -10,10 +10,10 @@ namespace GPTipsBot.Services
 {
     public class ImageCreatorService
     {
-        private readonly string BING_URL = "https://cn.bing.com";
+        private readonly string BING_URL = "https://www.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
-        private string authCookie = "_U=1gOoXb6pUHg-WrEs-O6F-BV2pFeyPMJ_fdkQwNo-LljAIQjzT0Z0SDjpuaafuhT5NItxCzHlxTVbBTVYD_ahDFEOmd-c7YzbK2CGCq0G2LD0nwdzu-Y7yXOfLNtSmqqM6IQONQCeOyPxesYPPsQT07RAZCHre2NK779vGmJGwDdcaYH06ZEtDnJUmRbg3Np0ZoJ5avyPvtmxhgzXTPIcgZQ";
+        private string authCookie = "_U=1gOoXb6pUHg-WrEs-O6F-BV2pFeyPMJ_fdkQwNo-LljAIQjzT0Z0SDjpuaafuhT5NItxCzHlxTVbBTVYD_ahDFEOmd-c7YzbK2CGCq0G2LD0nwdzu-Y7yXOfLNtSmqqM6IQONQCeOyPxesYPPsQT07RAZCHre2NK779vGmJGwDdcaYH06ZEtDnJUmRbg3Np0ZoJ5avyPvtmxhgzXTPIcgZQ;";
         public ImageCreatorService() {
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
@@ -38,7 +38,7 @@ namespace GPTipsBot.Services
             newClient.AddDefaultHeader("accept-language", "en-US,en;q=0.9");
             newClient.AddDefaultHeader("cache-control", "max-age=0");
             newClient.AddDefaultHeader("content-type", "application/x-www-form-urlencoded");
-            newClient.AddDefaultHeader("referrer", $"{BING_URL}/images/create/");
+            newClient.AddDefaultHeader("referrer", $"https://www.bing.com/images/create/");
             newClient.AddDefaultHeader("origin", BING_URL);
             newClient.AddDefaultHeader("x-forwarded-for", FORWARDED_IP);
             newClient.AddDefaultHeader("Cookie", authCookie);
@@ -55,8 +55,8 @@ namespace GPTipsBot.Services
             string url = $"images/create?q={urlEncodedPrompt}&rt=4&FORM=GENCRE";
             var request = new RestRequest(url, Method.Post);
             request.AddHeader("Accept-Encoding", "identity");
-            request.AddParameter($"q", urlEncodedPrompt);
-            request.AddParameter($"qs", "ds");
+            request.AddParameter("q", urlEncodedPrompt);
+            request.AddParameter("qs", "ds");
             request.Timeout = 10000;
 
             var response = await client.ExecuteAsync(request, token);

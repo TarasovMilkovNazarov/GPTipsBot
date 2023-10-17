@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Extensions;
+using Microsoft.Extensions.Logging;
 using RestSharp;
 using Telegram.Bot.Exceptions;
 
@@ -34,8 +35,7 @@ namespace GPTipsBot.Api
         public void LogErrorMessageFromApiResponse(Exception ex)
         {
             var errorMessage = GetErrorMessageFromApiResponse(ex);
-            errorMessage = errorMessage.Length > 100 ? errorMessage.Substring(0, 100) : errorMessage;
-            logger.LogError(ex, errorMessage);
+            logger.LogError(ex, StringExtensions.Truncate(errorMessage, 30));
         }
     }
 }

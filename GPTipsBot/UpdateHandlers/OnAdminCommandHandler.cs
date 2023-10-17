@@ -33,12 +33,7 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
             }
-            if (update.Message.Text == "/switchProxy" && update.UserChatKey.Id == AppConfig.AdminId)
-            {
-                AppConfig.UseFreeApi = !AppConfig.UseFreeApi;
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, string.Format(BotResponse.SwitchProxy, AppConfig.UseFreeApi), cancellationToken: cancellationToken);
-                return;
-            }
+
             if(update.Message.Text.StartsWith("/updateBingCookie ") && update.UserChatKey.Id == AppConfig.AdminId)
             {
                 var cookie = update.Message.Text.Substring("/updateBingCookie ".Length);
