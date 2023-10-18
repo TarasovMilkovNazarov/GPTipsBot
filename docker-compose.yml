@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  gptipsbot:
+    container_name: gptipsbot-app
+    build: .
+    ports:
+      - "80:80"
+    env_file: .env
+  postgres:
+    container_name: gptipsbot-bd
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file: .env
