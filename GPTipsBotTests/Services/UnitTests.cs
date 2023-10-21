@@ -57,17 +57,16 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task ViolateBreakLimiting()
         {
-            var cts = new CancellationTokenSource();
             var mainHandler = _services.GetRequiredService<UpdateHandlerEntryPoint>();
-            await mainHandler.HandleUpdateAsync(botClient, telegramUpdate, cts.Token);
+            await mainHandler.HandleUpdateAsync(botClient, telegramUpdate);
 
-            for (int i = 0; i < MessageService.MaxMessagesCountPerMinute; i++)
+            for (var i = 0; i < MessageService.MaxMessagesCountPerMinute; i++)
             {
                 mainHandler = _services.GetRequiredService<UpdateHandlerEntryPoint>();
-                await mainHandler.HandleUpdateAsync(botClient, telegramUpdate, cts.Token);
+                await mainHandler.HandleUpdateAsync(botClient, telegramUpdate);
             }
 
-            var updateDecorator = await mainHandler.HandleUpdateAsync(botClient, telegramUpdate, cts.Token);
+            var updateDecorator = await mainHandler.HandleUpdateAsync(botClient, telegramUpdate);
 
             Assert.IsNotEmpty(updateDecorator.Message.Text);
             Assert.IsNotEmpty(updateDecorator.Reply.Text);

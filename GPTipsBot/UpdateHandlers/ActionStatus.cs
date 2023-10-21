@@ -30,15 +30,19 @@ namespace GPTipsBot.UpdateHandlers
             var tokenSource = new CancellationTokenSource();
             MainHandler.userState[userKey].messageIdToCancellation.Add(_serviceMessageId, tokenSource);
 
-            _timer = new Timer(o =>
+            _timer = new Timer(_ =>
             {
                 try
                 {
-                    botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
+                    if (!tokenSource.Token.IsCancellationRequested)
+                        botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
+                    else
+                        _logger.LogInformation("Request ChatAction to telegram was canceled");
+
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}");
+                    _logger.LogError($"Error while SendChatActionAsync {ex.Message}");
                 }
 
             }, null, 0, 8 * 1000);
@@ -56,7 +60,7 @@ namespace GPTipsBot.UpdateHandlers
 
             MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
 
-            _timer?.Dispose();
+            await _timer.DisposeAsync();
         }
     }
 } 

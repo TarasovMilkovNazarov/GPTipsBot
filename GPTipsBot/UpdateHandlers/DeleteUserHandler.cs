@@ -15,7 +15,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            if (update.ChatMemeberStatus == ChatMemberStatus.Kicked)
+            if (update.ChatMemberStatus == ChatMemberStatus.Kicked)
             {
                 userRepository.SoftlyRemoveUser(update.UserChatKey.Id);
 

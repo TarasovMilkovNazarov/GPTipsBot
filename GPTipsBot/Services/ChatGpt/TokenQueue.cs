@@ -15,14 +15,17 @@ namespace GPTipsBot.Services.ChatGpt
 
         public TokenQueue(OpenaiAccountsRepository openaiAccountsRepository)
         {
-            var initialTokens = openaiAccountsRepository.GetAllAvailable().Select(x => x.Token);
+            var initialTokens = openaiAccountsRepository.GetAllAvailable().Select(x => x.Token).ToList();
             tokens = new ConcurrentQueue<string>(initialTokens);
-            semaphore = new SemaphoreSlim(initialTokens.Count());
+            semaphore = new SemaphoreSlim(initialTokens.Count);
         }
 
         public async Task<string> GetTokenAsync()
         {
-            TimeSpan timeout = TimeSpan.FromMinutes(3);
+            if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiToken is not null)
+                return AppConfig.DebugOpenAiToken;
+                
+            var timeout = TimeSpan.FromMinutes(3);
 
             if (await semaphore.WaitAsync(timeout))
             {

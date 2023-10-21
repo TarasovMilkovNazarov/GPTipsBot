@@ -19,11 +19,14 @@ namespace GPTipsBot.UpdateHandlers
                 _update.MyChatMember?.Chat.Id ??
                 throw new ArgumentNullException(nameof(update), "Can't get ChatId");
 
-            if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Kicked && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
+            var oldChatMemberStatus = update.MyChatMember?.OldChatMember.Status;
+            var newChatMemberStatus = update.MyChatMember?.NewChatMember.Status;
+            if (oldChatMemberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked && 
+                newChatMemberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Member)
             {
                 var chat = update.MyChatMember.Chat;
 
-                User = new UserDto()
+                User = new UserDto
                 {
                     Id = chat.Id,
                     FirstName = chat.FirstName,
@@ -53,13 +56,13 @@ namespace GPTipsBot.UpdateHandlers
                 UserChatKey = new(ChatId, ChatId);
             }
 
-            ServiceMessage = new MessageDto()
+            ServiceMessage = new MessageDto
             {
                 UserId = UserChatKey.Id,
                 ChatId = UserChatKey.ChatId,
             };
 
-            Reply = new MessageDto()
+            Reply = new MessageDto
             {
                 UserId = UserChatKey.Id,
                 ChatId = UserChatKey.ChatId,
@@ -81,7 +84,7 @@ namespace GPTipsBot.UpdateHandlers
         public MessageDto Reply { get; set; }
         public MessageDto ServiceMessage { get; set; }
 
-        public ChatMemberStatus? ChatMemeberStatus => _update.MyChatMember?.NewChatMember.Status;
+        public ChatMemberStatus? ChatMemberStatus => _update.MyChatMember?.NewChatMember.Status;
         public bool IsRecovered { get; }
         public bool IsGroupOrChannel { get; }
 

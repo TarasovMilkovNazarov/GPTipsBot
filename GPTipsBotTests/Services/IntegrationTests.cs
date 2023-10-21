@@ -81,7 +81,6 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             telegramUpdate.Message.Text = "/setLang";
-            var cts = new CancellationTokenSource();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
 
             await mainHandler.HandleAsync(updateDecorator);
@@ -97,7 +96,6 @@ namespace GPTipsBotTests.Services
         public async Task SendGenerateImageRequest()
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
-            var cts = new CancellationTokenSource();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.Text = "/image гора";
 
@@ -151,16 +149,15 @@ namespace GPTipsBotTests.Services
         public async Task AddNewUser()
         {
             var userRepository = _services.GetRequiredService<UserRepository>();
-            userRepository.Delete(AppConfig.AdminId);
+            userRepository.Delete(AppConfig.AdminIds.First());
 
             var mainHandler = _services.GetRequiredService<MainHandler>();
-            var cts = new CancellationTokenSource();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator);
 
 
-            var newUser = userRepository.Get(AppConfig.AdminId);
+            var newUser = userRepository.Get(AppConfig.AdminIds.First());
 
             Assert.True(newUser != null);
         }

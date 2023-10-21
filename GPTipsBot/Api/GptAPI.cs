@@ -55,7 +55,7 @@ namespace GPTipsBot.Api
         }
 
         // TODO: Implement this method with retry policy
-        public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken token = default)
+        public async Task<ChatCompletionCreateResponse> SendViaOpenAiApi(ChatMessage[] messages, CancellationToken cancellationToken = default)
         {
             var currentToken = await tokenQueue.GetTokenAsync();
 
@@ -64,13 +64,20 @@ namespace GPTipsBot.Api
                 ApiKey = currentToken
             });
 
-            var response = await openAiService.ChatCompletion.CreateCompletion(
-                new ChatCompletionCreateRequest
-                {
-                    Messages = messages,
-                    Model = GptModels.Models.ChatGpt3_5Turbo,
-                    //MaxTokens = AppConfig.ChatGptTokensLimitPerMessage
-                }, cancellationToken: token);
+
+            logger.LogInformation("Send request to OpenAi service: {messages}", messages.Last().Content);
+
+            ChatCompletionCreateResponse response;
+            try
+            {
+                response = await openAiService.ChatCompletion.CreateCompletion(
+                    new ChatCompletionCreateRequest { Messages = messages }, GptModels.Models.ChatGpt3_5Turbo, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                tokenQueue.AddToken(currentToken);
+                throw;
+            }
             
             if (response.Successful)
             {
@@ -83,12 +90,12 @@ namespace GPTipsBot.Api
             if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
             {
                 openaiAccountsRepository.Remove(currentToken, DeletionReason.Deactivated);
-                await SendViaOpenAiApi(messages, token);
+                await SendViaOpenAiApi(messages, cancellationToken);
             }
             else if (response.Error?.Code == "insufficient_quota")
             {
                 openaiAccountsRepository.Remove(currentToken, DeletionReason.InsufficientQuota);
-                await SendViaOpenAiApi(messages, token);
+                await SendViaOpenAiApi(messages, cancellationToken);
             }
             else if (response.Error?.Code == "rate_limit_exceeded" && response.Error.Message != null)
             {
@@ -100,7 +107,7 @@ namespace GPTipsBot.Api
                 {
                     tokenQueue.AddToken(currentToken);
                 }
-                await SendViaOpenAiApi(messages, token);
+                await SendViaOpenAiApi(messages, cancellationToken);
             }
             else
             {

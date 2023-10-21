@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Resources;
+﻿using GPTipsBot.Extensions;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -19,12 +20,12 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            if (update.Message?.Text == null) {
+            if (update.Message.Text == null) {
                 await base.HandleAsync(update);
                 return;
             }
 
-            if (update.Message.Text == "/fix" && update.UserChatKey.Id == AppConfig.AdminId)
+            if (update.Message.Text == "/fix" && update.UserChatKey.IsAdmin())
             {
                 AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
                 if (!AppConfig.IsOnMaintenance)
@@ -34,9 +35,9 @@ namespace GPTipsBot.UpdateHandlers
                 }
             }
 
-            if(update.Message.Text.StartsWith("/updateBingCookie ") && update.UserChatKey.Id == AppConfig.AdminId)
+            if(update.Message.Text.StartsWith("/updateBingCookie ") && update.UserChatKey.IsAdmin())
             {
-                var cookie = update.Message.Text.Substring("/updateBingCookie ".Length);
+                var cookie = update.Message.Text["/updateBingCookie ".Length..];
                 imageCreatorService.UpdateBingCookies(cookie);
                 await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.CookiesUpdated, replyMarkup: new ReplyKeyboardRemove());
                 return;

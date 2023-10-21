@@ -48,7 +48,10 @@ namespace GPTipsBot.Services
             var message = "#newUser" + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
             message += Environment.NewLine + $"Total count: {activeUserCount}";
 
-            botClient.SendTextMessageAsync(AppConfig.AdminId, message);
+            foreach (var adminId in AppConfig.AdminIds)
+            {
+                botClient.SendTextMessageAsync(adminId, message);   
+            }
         }
     }
 }

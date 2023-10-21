@@ -35,7 +35,7 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.ChatMemeberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked)
+            if (update.ChatMemberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked)
             {
                 await base.HandleAsync(update);
                 return;
