@@ -64,32 +64,14 @@ namespace GPTipsBot.Api
                 ApiKey = currentToken
             });
 
-            var openaAiRequest = openAiService.ChatCompletion.CreateCompletion(
+            var response = await openAiService.ChatCompletion.CreateCompletion(
                 new ChatCompletionCreateRequest
                 {
                     Messages = messages,
                     Model = GptModels.Models.ChatGpt3_5Turbo,
                     //MaxTokens = AppConfig.ChatGptTokensLimitPerMessage
                 }, cancellationToken: token);
-
-            ChatCompletionCreateResponse response = null;
-
-            try
-            {
-                response = await openaAiRequest;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, null);
-            }
-
-            if (response == null)
-            {
-                logger.LogInformation($"Get empty response from OpenAI");
-                tokenQueue.AddToken(currentToken);
-                return null;
-            }
-
+            
             if (response.Successful)
             {
                 tokenQueue.AddToken(currentToken);

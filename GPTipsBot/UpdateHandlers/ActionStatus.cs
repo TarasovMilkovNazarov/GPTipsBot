@@ -30,13 +30,16 @@ namespace GPTipsBot.UpdateHandlers
             var tokenSource = new CancellationTokenSource();
             MainHandler.userState[userKey].messageIdToCancellation.Add(_serviceMessageId, tokenSource);
 
-            _timer = new((object o) =>
+            _timer = new Timer(o =>
             {
                 try
                 {
                     botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
-                catch (Exception ex) { _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}"); }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation($"Error while SendChatActionAsync {ex.Message}");
+                }
 
             }, null, 0, 8 * 1000);
 

@@ -4,21 +4,8 @@ using GPTipsBot.Extensions;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
-var host = HostBuilder.CreateHostBuilder(args)
+var host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices((_, services) => { services.ConfigureServices(); })
     .Build();
 
 await host.RunAsync();
-
-public class HostBuilder
-{
-    public static IHostBuilder CreateHostBuilder(string[] args)
-    {
-        return Host.CreateDefaultBuilder(args)
-        // Add configuration, logging, ...
-        .ConfigureServices((hostContext, services) =>
-        {
-            services.ConfigureServices();
-        });
-    }
-}
-
