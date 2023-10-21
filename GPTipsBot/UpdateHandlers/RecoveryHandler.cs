@@ -18,11 +18,11 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<OnAdminCommandHandler>());
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             if (update.UserChatKey == null)
             {
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
@@ -55,7 +55,7 @@ namespace GPTipsBot.UpdateHandlers
                 chatToInformAboutRecovery.Remove(chatId);
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

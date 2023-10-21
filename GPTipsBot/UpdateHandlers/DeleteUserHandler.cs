@@ -13,7 +13,7 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<RecoveryHandler>());
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             if (update.ChatMemeberStatus == ChatMemberStatus.Kicked)
             {
@@ -23,7 +23,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

@@ -48,17 +48,14 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         var me = await _botClient.GetMeAsync(stoppingToken);
         _logger.LogInformation("Start receiving updates for {BotName}", me.Username ?? "GPTipsBot");
 
-        // to cancel
-        var cts = new CancellationTokenSource();
-
         // Start receiving updates
         var updateReceiver = new QueuedUpdateReceiver(_botClient, receiverOptions);
         try
         {
-            await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+            await foreach (Update update in updateReceiver)
             {
                 var worker = _serviceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
-                worker.HandleUpdateAsync(_botClient, update, cts.Token);
+                worker.HandleUpdateAsync(_botClient, update);
             }
         }
         catch (OperationCanceledException exception)

@@ -17,7 +17,7 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<GroupMessageHandler>());
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             var mediaMessageTypes = new Telegram.Bot.Types.Enums.MessageType?[]{
                 Telegram.Bot.Types.Enums.MessageType.Audio, 
@@ -43,7 +43,7 @@ namespace GPTipsBot.UpdateHandlers
             logger.LogInformation($"Received a '{shortMessageText}' message in chat {message.ChatId}.");
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

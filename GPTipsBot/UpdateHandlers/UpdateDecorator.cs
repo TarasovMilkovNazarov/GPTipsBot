@@ -11,15 +11,13 @@ namespace GPTipsBot.UpdateHandlers
     {
         private Update _update;
 
-        public UpdateDecorator(Update update, CancellationToken cancellationToken)
+        public UpdateDecorator(Update update)
         {
             _update = update;
             ChatId = _update.Message?.Chat.Id ??
                 _update.CallbackQuery?.Message?.Chat.Id ??
                 _update.MyChatMember?.Chat.Id ??
                 throw new ArgumentNullException(nameof(update), "Can't get ChatId");
-
-            CancellationToken = cancellationToken;
 
             if (update.MyChatMember?.OldChatMember.Status == ChatMemberStatus.Kicked && update.MyChatMember?.NewChatMember.Status == ChatMemberStatus.Member)
             {

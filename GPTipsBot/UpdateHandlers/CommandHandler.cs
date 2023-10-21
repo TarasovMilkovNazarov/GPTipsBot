@@ -38,14 +38,14 @@ namespace GPTipsBot.UpdateHandlers
             this.imageCreatorService = imageCreatorService;
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             var messageText = update.Message.Text;
             var chatId = update.UserChatKey.ChatId;
 
             if (!TryGetCommand(messageText, out var command))
             {
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
@@ -69,7 +69,7 @@ namespace GPTipsBot.UpdateHandlers
                     {
                         update.Message.Text = messageText.Substring("/image ".Length);
                         SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
-                        await base.HandleAsync(update, cancellationToken);
+                        await base.HandleAsync(update);
                         return;
                     }
                     update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.basedOnExperienceInputLengthLimit);
@@ -146,7 +146,7 @@ namespace GPTipsBot.UpdateHandlers
             if (!string.IsNullOrEmpty(update.Reply.Text))
             {
                 unitOfWork.Messages.AddMessage(update.Message);
-                await botClient.SendTextMessageAsync(chatId, update.Reply.Text, cancellationToken: cancellationToken, replyMarkup: replyMarkup);
+                await botClient.SendTextMessageAsync(chatId, update.Reply.Text, replyMarkup: replyMarkup);
             }
 
             Task SetGameInstructions(string prompt, UserStateEnum userState)
@@ -157,7 +157,7 @@ namespace GPTipsBot.UpdateHandlers
                 update.Message.Role = MessageOwner.System;
                 MainHandler.userState[update.UserChatKey].CurrentState = userState;
                 SetNextHandler(messageHandlerFactory.Create<MainHandler>());
-                return base.HandleAsync(update, cancellationToken);
+                return base.HandleAsync(update);
             }
 
             async Task UpdateLanguage(UserChatKey userKey, string langCode)

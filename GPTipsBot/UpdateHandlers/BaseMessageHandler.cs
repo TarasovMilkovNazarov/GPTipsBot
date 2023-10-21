@@ -9,11 +9,11 @@
             nextHandler = handler;
         }
 
-        public virtual async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public virtual async Task HandleAsync(UpdateDecorator update)
         {
             if (nextHandler != null)
             {
-                await nextHandler.HandleAsync(update, cancellationToken);
+                await nextHandler.HandleAsync(update);
             }
         }
     }

@@ -66,11 +66,11 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var cts = new CancellationTokenSource();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            var updateDecorator = new UpdateDecorator(telegramUpdate);
+            await mainHandler.HandleAsync(updateDecorator);
             updateDecorator.Message.Text = "What is the capital city of France?";
             updateDecorator.Message.ContextBound = true;
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
             Assert.IsNotEmpty(updateDecorator.Message.Text);
             Assert.True(updateDecorator.Reply.Text.Contains("Paris"));
@@ -82,12 +82,12 @@ namespace GPTipsBotTests.Services
             var mainHandler = _services.GetRequiredService<MainHandler>();
             telegramUpdate.Message.Text = "/setLang";
             var cts = new CancellationTokenSource();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            var updateDecorator = new UpdateDecorator(telegramUpdate);
 
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
             updateDecorator.Message.Text = "Русский";
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
             CultureInfo.CurrentUICulture = new CultureInfo("ru");
 
             Assert.AreEqual(BotResponse.LanguageWasSetSuccessfully, updateDecorator.Reply.Text);
@@ -98,10 +98,10 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var cts = new CancellationTokenSource();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.Text = "/image гора";
 
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
             Assert.True(updateDecorator.Reply.Text.Contains("http"));
         }
@@ -111,12 +111,12 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var cts = new CancellationTokenSource();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            var updateDecorator = new UpdateDecorator(telegramUpdate);
+            await mainHandler.HandleAsync(updateDecorator);
             var initialContextId = updateDecorator.Message.ContextId;
 
             updateDecorator.Message.Text = "/reset_context";
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
             var newContextId = updateDecorator.Message.ContextId;
 
@@ -128,18 +128,18 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var cts = new CancellationTokenSource();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.ContextBound = true;
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
             var initialContextId = updateDecorator.Message.ContextId;
 
             updateDecorator.Message.Text = "2+2=?";
             updateDecorator.Message.ContextBound = true;
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
             updateDecorator.Message.Text = "add 2 to result";
             updateDecorator.Message.ContextBound = true;
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
             var newContextId = updateDecorator.Message.ContextId;
 
@@ -155,9 +155,9 @@ namespace GPTipsBotTests.Services
 
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var cts = new CancellationTokenSource();
-            var updateDecorator = new UpdateDecorator(telegramUpdate, cts.Token);
+            var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.ContextBound = true;
-            await mainHandler.HandleAsync(updateDecorator, cts.Token);
+            await mainHandler.HandleAsync(updateDecorator);
 
 
             var newUser = userRepository.Get(AppConfig.AdminId);

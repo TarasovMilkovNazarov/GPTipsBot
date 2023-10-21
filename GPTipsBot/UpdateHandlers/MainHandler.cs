@@ -28,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
             this.userService = userService;
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             if (update.IsRecovered)
             {
@@ -37,14 +37,14 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.ChatMemeberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked)
             {
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
             if (update.CallbackQuery != null)
             {
                 SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace GPTipsBot.UpdateHandlers
             // Call next handler
             try
             {
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
             }
             catch (Exception ex)
             {

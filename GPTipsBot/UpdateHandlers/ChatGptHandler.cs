@@ -24,11 +24,11 @@ namespace GPTipsBot.UpdateHandlers
             this.botClient = botClient;
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             try
             {
-                update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken);
+                update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
                 Stopwatch sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[update.UserChatKey].messageIdToCancellation[update.ServiceMessage.TelegramMessageId.Value].Token;
                 var gtpResponse = await gptAPI.SendMessage(update, token);
@@ -55,11 +55,11 @@ namespace GPTipsBot.UpdateHandlers
             }
             finally
             {
-                await typingStatus.Stop(update.UserChatKey, cancellationToken);
+                await typingStatus.Stop(update.UserChatKey);
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

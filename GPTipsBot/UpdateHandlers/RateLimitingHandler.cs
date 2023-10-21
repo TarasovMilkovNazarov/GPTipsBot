@@ -18,7 +18,7 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<MessageTypeHandler>());
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             var telegramId = update.UserChatKey.Id;
             var chatId = update.UserChatKey.ChatId;
@@ -34,7 +34,7 @@ namespace GPTipsBot.UpdateHandlers
                     logger.LogError("Max messages limit reached");
                     update.Reply.Text = string.Format(BotResponse.TooManyRequests, MessageService.ResettingInterval);
 
-                    await botClient.SendTextMessageAsync(chatId, update.Reply.Text, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, update.Reply.Text);
 
                     return;
                 }
@@ -43,7 +43,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

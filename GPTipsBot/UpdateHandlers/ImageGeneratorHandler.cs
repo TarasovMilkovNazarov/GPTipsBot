@@ -29,18 +29,18 @@ namespace GPTipsBot.UpdateHandlers
             this.messageRepository = messageRepository;
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             var userKey = update.UserChatKey;
 
             if (update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, cancellationToken: cancellationToken, replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
 
-            update.ServiceMessage.TelegramMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto, cancellationToken);
+            update.ServiceMessage.TelegramMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
@@ -65,21 +65,21 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch(CustomException ex)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, ex.Message, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(userKey.ChatId, ex.Message);
             }
             catch(Exception ex)
             {
                 logger.LogError(ex.Message);
-                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
             }
             finally
             {
                 //MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
-                await sendImageStatus.Stop(userKey, cancellationToken);
+                await sendImageStatus.Stop(userKey);
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

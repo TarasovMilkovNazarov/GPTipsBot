@@ -10,7 +10,7 @@ namespace GPTipsBot.UpdateHandlers
             SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             var message = update.Message;
 
@@ -22,7 +22,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 update.Message.Text = message.Text.Remove(0,match1.Groups[0].Length);
 
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
@@ -34,13 +34,13 @@ namespace GPTipsBot.UpdateHandlers
             {
                 update.Message.Text = message.Text.Remove(match2.Groups[2].Index,match2.Groups[2].Length);
 
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
             if (message == null)
             {
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

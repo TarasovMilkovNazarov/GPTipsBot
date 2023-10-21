@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
 {
@@ -34,7 +33,7 @@ namespace GPTipsBot
             Start = DateTime.UtcNow;
         }
 
-        public async Task<UpdateDecorator?> HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update, CancellationToken cancellationToken)
+        public async Task<UpdateDecorator?> HandleUpdateAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Update update)
         {
             if (update.Ignore())
             {
@@ -47,10 +46,10 @@ namespace GPTipsBot
             UpdateDecorator extendedUpd = null;
             try
             {
-                extendedUpd = new UpdateDecorator(update, cancellationToken);
+                extendedUpd = new UpdateDecorator(update);
 
                 CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
-                await mainHandler.HandleAsync(extendedUpd,cancellationToken);
+                await mainHandler.HandleAsync(extendedUpd);
 
                 return extendedUpd;
             }
@@ -63,17 +62,17 @@ namespace GPTipsBot
                     return null;
                 }
 
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong);
                 return null;
             }
         }
 
-        public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception)
         {
             telegramBotApi.LogErrorMessageFromApiResponse(exception);
             // Cooldown in case of network connection error
             if (exception is RequestException)
-                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(2));
         }
     }
 }

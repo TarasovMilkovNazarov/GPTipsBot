@@ -20,11 +20,11 @@ namespace GPTipsBot.UpdateHandlers
             this._logger = logger;
         }
 
-        public async Task<long> Start(UserChatKey userKey, ChatAction chatAction, CancellationToken cancellationToken)
+        public async Task<long> Start(UserChatKey userKey, ChatAction chatAction)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
-            var serviceMessage = await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.PleaseWaitMsg, 
-                cancellationToken: cancellationToken, replyMarkup: inlineKeyboard);
+            var serviceMessage = await botClient.SendTextMessageAsync
+                (userKey.ChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
 
             var tokenSource = new CancellationTokenSource();
@@ -44,11 +44,11 @@ namespace GPTipsBot.UpdateHandlers
         }
 
         
-        public async Task Stop(UserChatKey userKey,CancellationToken cancellationToken)
+        public async Task Stop(UserChatKey userKey)
         {
             if (_serviceMessageId != 0)
             {
-                await botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId, cancellationToken: cancellationToken);
+                await botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId);
             }
 
             MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);

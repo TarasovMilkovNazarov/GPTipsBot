@@ -14,7 +14,7 @@ namespace GPTipsBot.Extensions
             {
                 try
                 {
-                    response = await restClient.ExecuteAsync(request, cancellationToken);
+                    response = await restClient.ExecuteAsync(request);
                     if (cancellationToken.IsCancellationRequested)
                     {
                         throw new OperationCanceledException();

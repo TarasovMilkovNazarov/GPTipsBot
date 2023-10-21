@@ -22,7 +22,7 @@ namespace GPTipsBot.UpdateHandlers
             this.userRepository = userRepository;
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             if (MainHandler.userState.ContainsKey(update.UserChatKey) && 
                 MainHandler.userState[update.UserChatKey].CurrentState == Enums.UserStateEnum.AwaitingImage)
@@ -36,14 +36,14 @@ namespace GPTipsBot.UpdateHandlers
                 update.Message.ContextBound = false;
                 MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                 update.Message.Text = "Отзыв: " + update.Message.Text;
-                await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, BotResponse.Thanks, cancellationToken);
+                await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, BotResponse.Thanks);
                 SetNextHandler(null);
             }
 
             messageRepository.AddMessage(update.Message);
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }

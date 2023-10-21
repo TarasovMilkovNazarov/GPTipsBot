@@ -17,10 +17,10 @@ namespace GPTipsBot.UpdateHandlers
             this.imageCreatorService = imageCreatorService;
         }
 
-        public override async Task HandleAsync(UpdateDecorator update, CancellationToken cancellationToken)
+        public override async Task HandleAsync(UpdateDecorator update)
         {
             if (update.Message?.Text == null) {
-                await base.HandleAsync(update, cancellationToken);
+                await base.HandleAsync(update);
                 return;
             }
 
@@ -29,7 +29,7 @@ namespace GPTipsBot.UpdateHandlers
                 AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
                 if (!AppConfig.IsOnMaintenance)
                 {
-                    await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.Recovered, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.Recovered);
                     return;
                 }
             }
@@ -38,18 +38,18 @@ namespace GPTipsBot.UpdateHandlers
             {
                 var cookie = update.Message.Text.Substring("/updateBingCookie ".Length);
                 imageCreatorService.UpdateBingCookies(cookie);
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.CookiesUpdated, cancellationToken: cancellationToken, replyMarkup: new ReplyKeyboardRemove());
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.CookiesUpdated, replyMarkup: new ReplyKeyboardRemove());
                 return;
             }
 
             if (AppConfig.IsOnMaintenance)
             {
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.OnMaintenance, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.OnMaintenance);
                 return;
             }
 
             // Call next handler
-            await base.HandleAsync(update, cancellationToken);
+            await base.HandleAsync(update);
         }
     }
 }
