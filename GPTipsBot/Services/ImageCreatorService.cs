@@ -4,7 +4,6 @@ using GPTipsBot.Resources;
 using RestSharp;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace GPTipsBot.Services
 {

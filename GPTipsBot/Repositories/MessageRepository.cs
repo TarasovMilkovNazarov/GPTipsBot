@@ -4,7 +4,6 @@ using GPTipsBot.Models;
 using GPTipsBot.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Data;
 
 namespace GPTipsBot.Repositories
 {

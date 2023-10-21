@@ -1,7 +1,6 @@
 ﻿using GPTipsBot.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Data;
 using User = GPTipsBot.Models.User;
 
 namespace GPTipsBot.Repositories

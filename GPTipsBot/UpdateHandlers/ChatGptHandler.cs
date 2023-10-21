@@ -50,7 +50,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (OperationCanceledException ex)
             {
-                logger.LogInformation("Request to openai service was canceled");
+                logger.LogError("Request to openai service was canceled");
                 SetNextHandler(null);
             }
             finally

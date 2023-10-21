@@ -2,7 +2,7 @@
 {
     public static class AppConfig
     {
-        public static readonly long[] AdminIds = { 486363646 };
+        public static readonly long[] AdminIds = { 486363646, 396539949 }; // Саня, Даня
         public static bool IsOnMaintenance = false;
         public static readonly bool IsDevelopment = Env != "Production";
         public static readonly bool IsProduction = Env == "Production";

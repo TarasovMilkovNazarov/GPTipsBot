@@ -4,7 +4,7 @@
     {
         private BaseMessageHandler? nextHandler;
 
-        public void SetNextHandler(BaseMessageHandler handler)
+        protected void SetNextHandler(BaseMessageHandler? handler)
         {
             nextHandler = handler;
         }

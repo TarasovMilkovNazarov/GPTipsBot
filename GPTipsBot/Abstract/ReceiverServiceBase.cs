@@ -55,12 +55,12 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
             await foreach (Update update in updateReceiver)
             {
                 var worker = _serviceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
-                worker.HandleUpdateAsync(_botClient, update);
+                _ = worker.HandleUpdateAsync(_botClient, update);
             }
         }
         catch (OperationCanceledException exception)
         {
-            _logger.LogError(exception, "Update receiving operation was canceled");
+            _logger.LogCritical(exception, "Update receiving operation was canceled");
         }
     }
 }

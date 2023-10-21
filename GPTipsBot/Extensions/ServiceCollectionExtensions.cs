@@ -5,7 +5,6 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
@@ -36,7 +35,6 @@ namespace GPTipsBot.Extensions
 
             // Add your services with depedency injection.
             services
-            .AddLogging(configure => configure.AddConsole())
             .AddTransient<UserService>()
             .AddSingleton<ImageCreatorService>()
             .AddTransient<ActionStatus>()
