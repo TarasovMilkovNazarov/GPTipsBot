@@ -11,6 +11,17 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Hosting: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq
 * Deploy:
 
+## Как это работает
+* На ВМ крутятся оба контейнера. С приложением и с базой.
+* Есть третий контейнер, который обновляет приложение как только в хабе появлется новый latest образ
+* Настроен crontab на создание бэкапов БД. Посмотреть настроенные джобы `sudo crontab -l`. Там будет видно какой скрипт он запускает
+
+## Deploy
+* `docker login -u alanextar`
+* Пароль тут [DOCKER_HUB_ALANEXTAR](https://github.com/organizations/TarasovMilkovNazarov/settings/variables/actions)
+* `docker build -t alanextar/gptipsbot:latest -t alanextar/gptipsbot:%УкажиВерсию% .`
+* `docker image push --all-tags alanextar/gptipsbot`
+
 ### Tips
 #### BashLinuxEtc
 ##### adduser
@@ -31,11 +42,6 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Посмотреть что сейчас находится в crontab можно через `crontab -l`
 * Если скрипт требует sudo прав, делать всё тоже самое только с припиской `sudo`
 #### Containers
-##### Deploy
-* `docker login -u alanextar`
-* Пароль тут [DOCKER_HUB_ALANEXTAR](https://github.com/organizations/TarasovMilkovNazarov/settings/variables/actions)
-* `docker build -t alanextar/gptipsbot:latest -t alanextar/gptipsbot:%УкажиВерсию% .`
-* `docker image push --all-tags alanextar/gptipsbot`
 ##### BD
 * Данные по дефолту лежат здесь `/var/lib/postgresql/data`
 ###### BACKUP
