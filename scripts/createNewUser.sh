@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 # Запрос имени пользователя
 read -p "Введите имя пользователя: " username
@@ -21,13 +21,10 @@ mkdir .ssh
 
 # Добавление публичного ключа в файл authorized_keys
 touch .ssh/authorized_keys
-echo $ssh_key > /home/testuser/.ssh/authorized_keys
+echo $ssh_key > /home/$username/.ssh/authorized_keys
 
 # Установка правильных разрешений
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 
-# Перезапуск SSH-сервера для применения изменений
-sudo service ssh restart
-
-echo "Пользователь $username создан и настроен для входа по SSH с использованием предоставленного ключа."
+echo "Пользователь $username создан и настроен для входа по SSH с использованием предоставленного ключа. Перезапусти ВМ"
