@@ -12,9 +12,20 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Deploy:
 
 ### Tips
+#### BashLinuxEtc
+##### crontab
+* Сохранить скрипт который надо запускать и сделать его запускаемым `chmod +x backup.sh`
+* Добавить запуск скрипта по рассписанию. `crontab -e` и вписать свой запуск например `0 2 * * * /home/milkov/scripts/backup.sh` - вызывать каждый день в 2 часа ночи скрипт backup.sh
+* Если сохранилось успешно в консоли будет следующий вывод `crontab: installing new crontab`
+* Посмотреть что сейчас находится в crontab можно через `crontab -l`
+* Если скрипт требует sudo прав, делать всё тоже самое только с припиской `sudo`
 #### Containers
 ##### BD
 * Данные по дефолту лежат здесь `/var/lib/postgresql/data`
+###### BACKUP
+```docker exec -t gptipsbot-bd pg_dumpall -c -U postgres > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql```
+###### RESTORE
+```cat your_dump.sql | docker exec -i gptipsbot-bd psql -U postgres```
 ###### list of db with size
 ```
 docker exec -it 1d3350fd80f7 psql -U postgres -c '\l+'
