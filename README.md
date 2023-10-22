@@ -13,6 +13,17 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 
 ### Tips
 #### BashLinuxEtc
+##### adduser
+* `sudo useradd -m -d /home/$username -s /bin/bash $username`
+* `sudo su - $username`
+* `mkdir .ssh`
+* `touch .ssh/authorized_keys`
+* `echo $ssh_key > /home/$username/.ssh/authorized_keys`
+* `chmod 700 ~/.ssh`
+* `chmod 600 ~/.ssh/authorized_keys`
+* `sudo usermod -aG sudo $username`
+* `sudo usermod -aG docker $username`
+
 ##### crontab
 * Сохранить скрипт который надо запускать и сделать его запускаемым `chmod +x backup.sh`
 * Добавить запуск скрипта по рассписанию. `crontab -e` и вписать свой запуск например `0 2 * * * /home/milkov/scripts/backup.sh` - вызывать каждый день в 2 часа ночи скрипт backup.sh
@@ -20,6 +31,11 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Посмотреть что сейчас находится в crontab можно через `crontab -l`
 * Если скрипт требует sudo прав, делать всё тоже самое только с припиской `sudo`
 #### Containers
+##### Deploy
+* `docker login -u alanextar`
+* Пароль тут [DOCKER_HUB_ALANEXTAR](https://github.com/organizations/TarasovMilkovNazarov/settings/variables/actions)
+* `docker build -t alanextar/gptipsbot:latest -t alanextar/gptipsbot:%УкажиВерсию% .`
+* `docker image push --all-tags alanextar/gptipsbot`
 ##### BD
 * Данные по дефолту лежат здесь `/var/lib/postgresql/data`
 ###### BACKUP
@@ -28,7 +44,7 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 ```cat your_dump.sql | docker exec -i gptipsbot-bd psql -U postgres```
 ###### list of db with size
 ```
-docker exec -it 1d3350fd80f7 psql -U postgres -c '\l+'
+docker exec -it gptipsbot-bd psql -U postgres -c '\l+'
 ```
 ###### multicommand
 ```
