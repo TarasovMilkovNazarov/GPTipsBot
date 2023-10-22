@@ -15,6 +15,8 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * На ВМ крутятся оба контейнера. С приложением и с базой.
 * Есть третий контейнер, который обновляет приложение как только в хабе появлется новый latest образ
 * Настроен crontab на создание бэкапов БД. Посмотреть настроенные джобы `sudo crontab -l`. Там будет видно какой скрипт он запускает
+* Для рестора надо выполнить эту команду, **указав имя нужного файла**
+```cat /home/app/backup/full_backup_$DATE.sql | docker exec -i gptipsbot-bd psql -U postgres```
 
 ## Deploy
 * `docker login -u alanextar`
