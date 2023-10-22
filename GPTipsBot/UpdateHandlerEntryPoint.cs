@@ -55,9 +55,9 @@ namespace GPTipsBot
             }
             catch (Exception ex)
             {
-                _logger.LogError(update.Serialize());
+                _logger.LogError(ex, update.Serialize());
                 telegramBotApi.LogErrorMessageFromApiResponse(ex);
-                if (ex is ApiRequestException apiEx || update.Message == null)
+                if (ex is ApiRequestException || update.Message == null)
                 {
                     return null;
                 }

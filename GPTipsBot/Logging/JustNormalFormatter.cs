@@ -34,7 +34,7 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
 
         var lotText =
             $"{now:yyyy-MM-dd HH:mm:ss,fff} " +
-            $"{TransformLevel(logEntry),-6} " +
+            $"{TransformLevel(logEntry),-5} " +
             $"{message}";
         textWriter.WriteLine(lotText);
 
@@ -55,7 +55,7 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
         logEntry.LogLevel switch
         {
             LogLevel.Information => "INFO",
-            LogLevel.Critical => "FAILED",
+            LogLevel.Critical => "FATAL",
             LogLevel.Warning => "WARN",
             _ => logEntry.LogLevel.ToString("G")
                 .ToUpperInvariant()
