@@ -43,7 +43,7 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Если скрипт требует sudo прав, делать всё тоже самое только с припиской `sudo`
 #### Containers
 ##### BD
-* Данные по дефолту лежат здесь `/var/lib/postgresql/data`
+* Данные БД по дефолту хранятся здесь `/var/lib/postgresql/data`
 ###### BACKUP
 ```docker exec -t gptipsbot-bd pg_dumpall -c -U postgres > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql```
 ###### RESTORE
