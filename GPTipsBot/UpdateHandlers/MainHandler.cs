@@ -62,7 +62,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (DbUpdateException ex)
             {
-                logger.LogError(ex.Message);
+                logger.LogError(ex, $"Couldn't create user with telegramId {newUser.Id} in database");
             }
 
             var language = unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;

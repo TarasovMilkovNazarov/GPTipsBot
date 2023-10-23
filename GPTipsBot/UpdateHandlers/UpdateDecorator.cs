@@ -73,7 +73,6 @@ namespace GPTipsBot.UpdateHandlers
         }
 
         public CancellationToken StatusTimerCancellationToken { get; set; }
-        public CancellationToken CancellationToken { get; set; }
 
         public long ChatId { get; }
 

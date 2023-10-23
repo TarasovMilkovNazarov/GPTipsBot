@@ -45,8 +45,7 @@ namespace GPTipsBot.UpdateHandlers
                     q.Enqueue(update);
                     chatToInformAboutRecovery.Add(chatId, q);
                     
-                    await botClient.SendTextMessageAsync(chatId,
-                        BotResponse.Recovered, cancellationToken: update.CancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, BotResponse.Recovered);
                 }
 
                 return;

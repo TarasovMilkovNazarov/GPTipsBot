@@ -34,11 +34,13 @@ namespace GPTipsBot.UpdateHandlers
             {
                 try
                 {
-                    if (!tokenSource.Token.IsCancellationRequested)
-                        botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
-                    else
+                    if (tokenSource.Token.IsCancellationRequested)
+                    {
                         _logger.LogInformation("Request ChatAction to telegram was canceled");
+                        return;
+                    }
 
+                    botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
                 catch (Exception ex)
                 {

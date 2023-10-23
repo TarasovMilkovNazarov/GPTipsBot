@@ -69,7 +69,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch(Exception ex)
             {
-                logger.LogError(ex.Message);
+                logger.LogError(ex, "Couldn't get images from bing");
                 await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
             }
             finally

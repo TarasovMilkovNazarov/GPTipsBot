@@ -27,8 +27,7 @@ namespace GPTipsBot.UpdateHandlers
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (mediaMessageTypes.Contains(update.Message?.Type))
             {
-                await botClient.SendTextMessageAsync(update.ChatId,
-                        BotResponse.OnlyMessagesAvailable, cancellationToken: update.CancellationToken);
+                await botClient.SendTextMessageAsync(update.ChatId, BotResponse.OnlyMessagesAvailable);
                 
                 return;
             }
