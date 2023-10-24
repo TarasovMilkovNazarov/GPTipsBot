@@ -49,8 +49,9 @@ namespace GPTipsBot
             }
             catch (Exception e)
             {
-                logger.LogError(e, "{exMessage}. Update object from telegram: '{update}'", e.Message, update.Serialize());
-                
+                logger.LogError(e, "{exMessage}. Update details: text: '{UpdateText}', username: '{UserName}', updateId: '{UpdateId}', chatId: '{ChatId}'", 
+                    e.Message, update.Message?.Text, update.Message?.Chat.Username, update.Id, update.Message?.Chat.Id);
+
                 if (update.Message == null)
                     return;
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong);

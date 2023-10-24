@@ -64,7 +64,7 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
         catch (Exception e1)
         {
             diagnosticLog.WriteLine($"Не смогли отправить сообщение об ошибке админам в телеграм{Environment.NewLine}" +
-                                    $"EXCEPTION #1{Environment.NewLine}" +
+                                    $"!EXCEPTION #1{Environment.NewLine}" +
                                     $"{e1}");
             
             try
