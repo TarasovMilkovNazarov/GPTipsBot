@@ -9,6 +9,7 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
   * CLOUD https://t.me/GPTipBot
 * Секреты: https://github.com/organizations/TarasovMilkovNazarov/settings/variables/actions
 * Hosting: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq
+* Logs: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq/logging/group/e23pildlggn1clcjtr5u/logs?from=now-1h&to=now&size=100&linesInRow=1
 * Deploy:
 
 ## Как это работает
