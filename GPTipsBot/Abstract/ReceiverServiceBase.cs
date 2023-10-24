@@ -58,9 +58,15 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                 _ = worker.HandleUpdateAsync(_botClient, update);
             }
         }
-        catch (OperationCanceledException exception)
+        catch (OperationCanceledException e)
         {
-            _logger.LogCritical(exception, "Update receiving operation was canceled");
+            _logger.LogCritical(e, "Update receiving operation was canceled." +
+                                           "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
+        }
+        catch (Exception e)
+        {
+            _logger.LogCritical(e, "Пипец упалось всё!" +
+                                   "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
         }
     }
 }

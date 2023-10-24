@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
@@ -32,22 +33,57 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
 
         var message = logEntry.Formatter(logEntry.State, logEntry.Exception);
 
-        var lotText =
-            $"{now:yyyy-MM-dd HH:mm:ss,fff} " +
-            $"{TransformLevel(logEntry),-5} " +
-            $"{message}";
-        textWriter.WriteLine(lotText);
+        textWriter.WriteLine($"{now:yyyy-MM-dd HH:mm:ss,fff} " +
+                             $"{TransformLevel(logEntry),-5} " +
+                             $"{message}");
 
-        AlertIfError(logEntry.LogLevel, lotText);
+        if (logEntry.Exception != null)
+        {
+            textWriter.WriteLine("```stackTrace");
+            textWriter.WriteLine(logEntry.Exception.ToString());
+            textWriter.WriteLine("```");
+        }
+
+        SendAlertIfError(logEntry.LogLevel, textWriter.ToString()!, textWriter);
     }
 
-    private void AlertIfError(LogLevel logLevel, string logText)
+    private static void SendAlertIfError(LogLevel logLevel, string logText, TextWriter diagnosticLog)
     {
-        if (logLevel is LogLevel.Critical or LogLevel.Error)
+        if (logLevel is not (LogLevel.Critical or LogLevel.Error)) return;
+
+        const string errorPrefix = "🚧🚧🚧 ПАРДОН МЕСЬЕ Я ПРИУНЫЛ:";
+        try
         {
             var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
             foreach (var adminId in AppConfig.AdminIds)
-                botClient.SendTextMessageAsync(adminId, $"🚧 ПАМАГИ МНЕ ДРУГ, Я СЛОМАЛСЯ:{Environment.NewLine}{logText}");
+            {
+                var text = $"{errorPrefix}{Environment.NewLine}{logText}";
+                botClient.SendMarkdown2MessageAsync(adminId, text).GetAwaiter().GetResult();
+            }
+        }
+        catch (Exception e1)
+        {
+            diagnosticLog.WriteLine($"Не смогли отправить сообщение об ошибке админам в телеграм{Environment.NewLine}" +
+                                    $"EXCEPTION #1{Environment.NewLine}" +
+                                    $"{e1}");
+            
+            try
+            {
+                var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
+                foreach (var adminId in AppConfig.AdminIds)
+                {
+                    var text = $"{errorPrefix}{Environment.NewLine}" +
+                               $"Не смогли отправить полное сообщение об ошибке в телегу, посмотри его срочно в логах. " +
+                               $"Там же будет написано почему оно не попало в телегу";
+                    botClient.SendTextMessageAsync(adminId, text).GetAwaiter().GetResult();
+                }
+            }
+            catch (Exception e2)
+            {
+                diagnosticLog.WriteLine($"Не смогли отправить сообщение об ошибке админам в телеграм{Environment.NewLine}" +
+                                        $"EXCEPTION #2{Environment.NewLine}" +
+                                        $"{e2}");
+            }
         }
     }
 

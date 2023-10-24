@@ -20,22 +20,5 @@ namespace GPTipsBot.Api
             baseUrl = $"https://api.telegram.org/bot{_botToken}";
             telegramHttpClient = new RestClient(baseUrl);
         }
-
-        public string? GetErrorMessageFromApiResponse(Exception ex)
-        {
-            var ErrorMessage = ex switch
-            {
-                ApiRequestException apiRequestException
-                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
-                _ => ex.ToString()
-            };
-
-            return ErrorMessage;
-        }
-        public void LogErrorMessageFromApiResponse(Exception ex)
-        {
-            var errorMessage = GetErrorMessageFromApiResponse(ex);
-            logger.LogError(ex, StringExtensions.Truncate(errorMessage, 30));
-        }
     }
 }

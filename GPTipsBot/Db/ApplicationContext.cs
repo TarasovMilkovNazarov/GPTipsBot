@@ -14,6 +14,7 @@ namespace GPTipsBot.Db
         {
             Database.EnsureCreated();
         }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = Environment.GetEnvironmentVariable("PG_CONNECTION_STRING");
