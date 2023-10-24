@@ -25,14 +25,11 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.Message.Text == "/fix" && update.UserChatKey.IsAdmin())
+            if (update.Message.Text == "/fix" && update.UserChatKey.IsAdmin() && AppConfig.IsOnMaintenance)
             {
-                AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
-                if (!AppConfig.IsOnMaintenance)
-                {
-                    await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.Recovered);
-                    return;
-                }
+                AppConfig.IsOnMaintenance = false;
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.Recovered);
+                return;
             }
 
             if(update.Message.Text.StartsWith("/updateBingCookie ") && update.UserChatKey.IsAdmin())
