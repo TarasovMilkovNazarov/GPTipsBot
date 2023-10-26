@@ -24,8 +24,9 @@ cat /home/app/backup/full_backup_$DATE.sql | docker exec -i gptipsbot-bd psql -U
 ## Deploy
 * `docker login -u alanextar`
 * Пароль тут [DOCKER_HUB_ALANEXTAR](https://github.com/organizations/TarasovMilkovNazarov/settings/variables/actions)
-* `docker build -t alanextar/gptipsbot:latest -t alanextar/gptipsbot:%УкажиВерсию% .`
-* `docker image push --all-tags alanextar/gptipsbot`
+* `docker build -t alanextar/gptipsbot:latest -t alanextar/gptipsbot:%НоваяВерсию% .`
+* `docker image push alanextar/gptipsbot`
+* `docker image push alanextar/gptipsbot:%НоваяВерсию%`
 
 ### Tips
 #### BashLinuxEtc
