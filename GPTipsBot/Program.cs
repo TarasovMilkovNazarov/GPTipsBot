@@ -2,22 +2,17 @@
 using dotenv.net;
 using GPTipsBot.Extensions;
 using GPTipsBot.Logging;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
+using Serilog;
 
-DotEnv.Fluent()
-    .WithProbeForEnv(10)
-    .Load();
+DotEnv.Fluent().WithProbeForEnv(10).Load();
+
+Log.Logger = new LoggerConfiguration()
+    .AddBotLogger()
+    .CreateBootstrapLogger();
 
 var host = Host.CreateDefaultBuilder(args)
-    .ConfigureLogging((context, logging) =>
-    {
-        logging.AddConfiguration(context.Configuration.GetSection("Logging"));
-        logging.AddConsole((options => options.FormatterName = nameof(JustNormalFormatter)));
-        logging.AddConsoleFormatter<JustNormalFormatter, ConsoleFormatterOptions>();
-        logging.AddFilter("System.Net.Http.HttpClient", level => level == LogLevel.Error);
-    })
-    .ConfigureServices((_, services) => { services.ConfigureServices(); })
+    .UseSerilog((context, services, configuration) => configuration.AddBotLogger(context.Configuration, services))
+    .ConfigureServices((_, services) => services.ConfigureServices())
     .Build();
 
 await host.RunAsync();

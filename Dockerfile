@@ -9,7 +9,7 @@ COPY GPTipsBot/. ./GPTipsBot/
 WORKDIR /src/GPTipsBot
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
-FROM mcr.microsoft.com/dotnet/runtime:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
 COPY --from=build /app/publish ./
 ENTRYPOINT ["dotnet", "GPTipsBot.dll"]
