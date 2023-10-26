@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Abstract;
@@ -48,25 +47,29 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         var me = await _botClient.GetMeAsync(stoppingToken);
         _logger.LogInformation("Start receiving updates for {BotName}", me.Username ?? "GPTipsBot");
 
-        // Start receiving updates
-        var updateReceiver = new QueuedUpdateReceiver(_botClient, receiverOptions);
         try
         {
-            await foreach (Update update in updateReceiver)
+            var updateReceiver = new QueuedUpdateReceiver(_botClient, receiverOptions, PollingErrorHandler); // Start receiving updates
+            await foreach (var update in updateReceiver.WithCancellation(stoppingToken))
             {
                 var worker = _serviceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
                 _ = worker.HandleUpdateAsync(_botClient, update);
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.LogCritical(e, "Update receiving operation was canceled." +
-                                           "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
+            _logger.LogInformation("Update receiving operation was canceled");
         }
         catch (Exception e)
         {
-            _logger.LogCritical(e, "Пипец упалось всё!" +
+            _logger.LogCritical(e, "Пипец упалось всё! Получение сообщений от телеграмма остановленно" +
                                    "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
         }
+    }
+
+    private Task PollingErrorHandler(Exception e, CancellationToken arg2)
+    {
+        _logger.LogError(e, "Update receiving operation has error");
+        return Task.CompletedTask;
     }
 }
