@@ -4,35 +4,41 @@ namespace GPTipsBot.Services
 {
     public class ContextWindow
     {
-        private LinkedList<ChatMessage> messages;
         public static readonly int WindowSize = 30;
+        public static readonly int TokensLimit = 1000;
+
         private readonly ChatGptService chatGptService;
-        private long tokensCount;
+        private LinkedList<ChatMessage> messages;
+        public long TokensCount { get; private set; }
 
         public ContextWindow(ChatGptService chatGptService)
         {
             messages = new LinkedList<ChatMessage>();
             this.chatGptService = chatGptService;
-            tokensCount = 0;
+            TokensCount = 0;
         }
 
-        public bool TryToAddMessage(string message, string role)
+        public bool TryToAddMessage(string message, string role, out long messageTokensCount)
         {
-            if (messages.Count < WindowSize)
-            {
-                var messageTokensCount = chatGptService.CountTokens(message);
-                if (messageTokensCount + tokensCount <= ChatGptService.MaxTokensLimit)
-                {
-                    tokensCount += messageTokensCount;
-                    messages.AddFirst(new ChatMessage(role, message));
+            messageTokensCount = 0;
 
-                    return true;
-                }
+            if (messages.Count > WindowSize)
+            {
+                return false;
             }
 
-            return false;
-        }
+            messageTokensCount = chatGptService.CountTokens(message);
+            if (TokensCount + messageTokensCount > TokensLimit)
+            {
+                return false;
+            }
 
+            TokensCount += messageTokensCount;
+            messages.AddFirst(new ChatMessage(role, message));
+
+            return true;
+        }
+        
         public ChatMessage[] GetContext()
         {
             return messages.ToArray();

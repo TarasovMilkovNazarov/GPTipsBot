@@ -282,7 +282,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Превышен лимит на количество символов. Попробуйте сократить ваш запрос.
+        ///   Looks up a localized string similar to Количество токенов в вашем сообщении {1} превышает лимит в {0} токенов. Сократите своё сообщение. Считайте, что в одном слове содержится примерно 1 токен.
         /// </summary>
         public static string TokensLimitExceeded {
             get {

@@ -1,5 +1,7 @@
-﻿using GPTipsBot.Dtos;
+﻿using GPTipsBot.Api;
+using GPTipsBot.Dtos;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using OpenAI.ObjectModels.RequestModels;
 
 namespace GPTipsBot.Services
@@ -42,8 +44,19 @@ namespace GPTipsBot.Services
 
             foreach (var item in messages)
             {
-                var isMessageAddedToContext = contextWindow.TryToAddMessage(item.Text, item.Role.ToString().ToLower());
-                if (!isMessageAddedToContext) break;
+                var isMessageAddedToContext = contextWindow.TryToAddMessage(item.Text, item.Role.ToString().ToLower(), out var messageTokensCount);
+                if (isMessageAddedToContext)
+                {
+                    continue;
+                }
+
+                if (contextWindow.TokensCount == 0)
+                {
+                    //todo reset context or suggest user to reset: send inline command with reset
+                    throw new ClientException(string.Format(BotResponse.TokensLimitExceeded, ContextWindow.TokensLimit, messageTokensCount));
+                }
+
+                break;
             }
 
             return contextWindow.GetContext();

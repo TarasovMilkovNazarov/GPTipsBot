@@ -28,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            var shotMessage = update.Message.Text.Truncate(30) + "...";
+            var shortMessage = update.Message.Text.Truncate(30) + "...";
             try
             {
                 update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
@@ -40,7 +40,7 @@ namespace GPTipsBot.UpdateHandlers
                     throw new Exception(JsonConvert.SerializeObject(gtpResponse.Error));
                 sw.Stop();
                 
-                logger.LogInformation("Get response to promt '{promt}' takes {duration}s", shotMessage, sw.Elapsed.TotalSeconds);
+                logger.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
                 
                 update.Reply.Text = gtpResponse.Choices.FirstOrDefault()?.Message.Content ?? "";
                 update.Reply.Role = Enums.MessageOwner.Assistant;
@@ -50,8 +50,14 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (OperationCanceledException)
             {
-                logger.LogInformation("Request to openai service with promt '{promt}' was canceled", shotMessage);
-                SetNextHandler(null);
+                logger.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
+                return;
+            }
+            catch (ClientException ex)
+            {
+                logger.LogInformation(ex, shortMessage);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                return;
             }
             finally
             {

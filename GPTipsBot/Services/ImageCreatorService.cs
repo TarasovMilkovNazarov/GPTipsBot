@@ -62,16 +62,16 @@ namespace GPTipsBot.Services
 
             if (string.IsNullOrEmpty(response?.Content))
             {
-                throw new CustomException(BotResponse.SomethingWentWrongWithImageService);
+                throw new ClientException(BotResponse.SomethingWentWrongWithImageService);
             }
 
             if (response.Content.ToLower().Contains("this prompt has been blocked"))
             {
-                throw new CustomException(BingResponse.BlockedPromptError);
+                throw new ClientException(BingResponse.BlockedPromptError);
             }
             if (response.Content.ToLower().Contains("we're working hard to offer image creator in more languages"))
             {
-                throw new CustomException(BingResponse.UnsupportedLangError);
+                throw new ClientException(BingResponse.UnsupportedLangError);
             }
 
             // Get redirect URL

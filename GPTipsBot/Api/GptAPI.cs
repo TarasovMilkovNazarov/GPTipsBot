@@ -45,12 +45,6 @@ namespace GPTipsBot.Api
                 textWithContext = messageService.PrepareContext(update.UserChatKey, update.Message.ContextId.Value);
             }
 
-            if (textWithContext.Length == 0)
-            {
-                //todo reset context or suggest user to reset: send inline command with reset
-                throw new CustomException(BotResponse.TokensLimitExceeded);
-            }
-
             return await SendViaOpenAiApi(textWithContext, token);
         }
 

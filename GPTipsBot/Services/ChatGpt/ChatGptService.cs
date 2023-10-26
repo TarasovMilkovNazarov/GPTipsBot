@@ -4,8 +4,6 @@ namespace GPTipsBot.Services
 {
     public class ChatGptService
     {
-        public const int MaxTokensLimit = 1000;
-
         public ChatGptService() { }
 
         public long CountTokens(string message)

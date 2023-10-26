@@ -63,9 +63,9 @@ namespace GPTipsBot.UpdateHandlers
             {
                 logger.LogInformation("Image generation task was canceled");
             }
-            catch(CustomException ex)
+            catch(ClientException ex)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, ex.Message);
+                await botClient.SendTextMessageAsync(userKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
             }
             catch(Exception ex)
             {

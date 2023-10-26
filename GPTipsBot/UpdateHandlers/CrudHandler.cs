@@ -37,7 +37,7 @@ namespace GPTipsBot.UpdateHandlers
                 MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                 update.Message.Text = "Отзыв: " + update.Message.Text;
                 await botClient.SendTextMessageWithMenuKeyboard(update.UserChatKey.ChatId, BotResponse.Thanks);
-                SetNextHandler(null);
+                return;
             }
 
             messageRepository.AddMessage(update.Message);
