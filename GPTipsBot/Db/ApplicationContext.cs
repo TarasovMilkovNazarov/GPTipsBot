@@ -3,13 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GPTipsBot.Db
 {
-    public class ApplicationContext : DbContext
+    public sealed class ApplicationContext : DbContext
     {
         public Guid Guid { get; } = Guid.NewGuid();
-        public DbSet<User> Users { get; set; }
-        public DbSet<Message> Messages { get; set; }
-        public DbSet<BotSettings> BotSettings { get; set; }
-        public DbSet<OpenaiAccount> OpenaiAccounts { get; set; }
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Message> Messages { get; set; } = null!;
+        public DbSet<BotSettings> BotSettings { get; set; } = null!;
+        public DbSet<OpenaiAccount> OpenaiAccounts { get; set; } = null!;
+
         public ApplicationContext()
         {
             Database.EnsureCreated();

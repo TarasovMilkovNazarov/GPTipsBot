@@ -22,14 +22,20 @@ public static class SerilogExtensions
         if (servicesProvider is not null)
             loggerConfiguration.ReadFrom.Services(servicesProvider);
 
-        return loggerConfiguration
+        loggerConfiguration
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Error)
             .Enrich.FromLogContext()
-            .Enrich.With<Log4NetLevelMapperEnricher>()
-            .WriteToAdminsAboutError()
-            .WriteToCustomJsonConsole();
-        // .WriteToJsonConsole();
-        // .WriteToJsonFile();
+            .Enrich.With<Log4NetLevelMapperEnricher>();
+
+        if (AppConfig.IsProduction)
+            loggerConfiguration
+                .WriteToAdminsAboutError()
+                .WriteToCustomJsonConsole();
+        else
+            loggerConfiguration
+                .WriteToConsole();
+
+        return loggerConfiguration;
     }
 
     private static LoggerConfiguration WriteToCustomJsonConsole(this LoggerConfiguration loggerConfiguration) =>
@@ -42,6 +48,9 @@ public static class SerilogExtensions
     
     private static LoggerConfiguration WriteToJsonConsole(this LoggerConfiguration loggerConfiguration) =>
         loggerConfiguration.WriteTo.Console(new RenderedCompactJsonFormatter());
+    
+    private static LoggerConfiguration WriteToConsole(this LoggerConfiguration loggerConfiguration) =>
+        loggerConfiguration.WriteTo.Console(outputTemplate: OutputTemplate);
 
     private static LoggerConfiguration WriteToJsonFile(this LoggerConfiguration loggerConfiguration) =>
         loggerConfiguration
