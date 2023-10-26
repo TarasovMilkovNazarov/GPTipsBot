@@ -32,14 +32,9 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var message = update.Message;
-
             // Only process text messages
-            if (message?.Text is not { } messageText)
+            if (update.Message?.Text is null)
                 return;
-
-            var shortMessageText = messageText.Length > 100 ? messageText.Substring(0, 100) : messageText;
-            logger.LogInformation($"Received a '{shortMessageText}' message in chat {message.ChatId}.");
 
             // Call next handler
             await base.HandleAsync(update);

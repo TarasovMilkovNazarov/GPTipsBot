@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {

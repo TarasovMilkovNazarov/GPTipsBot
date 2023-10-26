@@ -23,7 +23,7 @@ namespace GPTipsBot.Extensions
             });
 
             services.AddHttpClient("telegram_bot_client")
-                    .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
+                    .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
                     {
                         TelegramBotClientOptions options = new(AppConfig.TelegramToken);
                         return new TelegramBotClient(options);

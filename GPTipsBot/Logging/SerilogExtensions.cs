@@ -2,6 +2,8 @@
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using Serilog.Templates;
+using Serilog.Templates.Themes;
 
 namespace GPTipsBot.Logging;
 
@@ -24,10 +26,20 @@ public static class SerilogExtensions
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Error)
             .Enrich.FromLogContext()
             .Enrich.With<Log4NetLevelMapperEnricher>()
-            .WriteToJsonConsole();
+            .WriteToAdminsAboutError()
+            .WriteToCustomJsonConsole();
+        // .WriteToJsonConsole();
         // .WriteToJsonFile();
     }
 
+    private static LoggerConfiguration WriteToCustomJsonConsole(this LoggerConfiguration loggerConfiguration) =>
+        loggerConfiguration.WriteTo.Console(new ExpressionTemplate(
+            "{ {@t, @mt, @m, @l: Log4NetLevel, @x, ..@p, Log4NetLevel: undefined()} }\n",
+            theme: TemplateTheme.Code));
+
+    private static LoggerConfiguration WriteToAdminsAboutError(this LoggerConfiguration loggerConfiguration) =>
+        loggerConfiguration.WriteTo.Sink<TelegramSink>(LogEventLevel.Error);
+    
     private static LoggerConfiguration WriteToJsonConsole(this LoggerConfiguration loggerConfiguration) =>
         loggerConfiguration.WriteTo.Console(new RenderedCompactJsonFormatter());
 

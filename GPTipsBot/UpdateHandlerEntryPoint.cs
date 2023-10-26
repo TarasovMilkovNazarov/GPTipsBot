@@ -45,12 +45,12 @@ namespace GPTipsBot
             }
             catch (ApiRequestException e)
             {
-                logger.LogError(e, $"Telegram API Error:\n[{e.ErrorCode}]\n{e.Message}");
+                logger.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "{exMessage}. Update details: text: '{UpdateText}', username: '{UserName}', updateId: '{UpdateId}', chatId: '{ChatId}'", 
-                    e.Message, update.Message?.Text, update.Message?.Chat.Username, update.Id, update.Message?.Chat.Id);
+                logger.LogError(e, "Error while handling update. Update details: text: '{UpdateText}', username: '{UserName}', updateId: '{UpdateId}', chatId: '{ChatId}'", 
+                    update.Message?.Text, update.Message?.Chat.Username, update.Id, update.Message?.Chat.Id);
 
                 if (update.Message == null)
                     return;

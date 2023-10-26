@@ -1,7 +1,5 @@
-﻿using GPTipsBot.Extensions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using RestSharp;
-using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.Api
 {
