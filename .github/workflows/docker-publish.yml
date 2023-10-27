@@ -6,7 +6,7 @@ on:
 
 env:
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository.repo }}
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   docker:
