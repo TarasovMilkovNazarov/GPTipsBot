@@ -16,7 +16,12 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ILogger<ChatGptHandler> logger;
         private readonly ITelegramBotClient botClient;
 
-        public ChatGptHandler(MessageRepository messageRepository, IGpt gptApi, ActionStatus typingStatus, ILogger<ChatGptHandler> logger, ITelegramBotClient botClient)
+        public ChatGptHandler(
+            MessageRepository messageRepository,
+            IGpt gptApi,
+            ActionStatus typingStatus,
+            ILogger<ChatGptHandler> logger,
+            ITelegramBotClient botClient)
         {
             this.messageRepository = messageRepository;
             this.gptApi = gptApi;
@@ -31,16 +36,16 @@ namespace GPTipsBot.UpdateHandlers
             try
             {
                 update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
-                
+
                 var sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[update.UserChatKey].messageIdToCancellation[update.ServiceMessage.TelegramMessageId.Value].Token;
                 var gtpResponse = await gptApi.SendMessage(update, token);
                 if (gtpResponse.Error != null)
                     throw new Exception(JsonConvert.SerializeObject(gtpResponse.Error));
                 sw.Stop();
-                
+
                 logger.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
-                
+
                 update.Reply.Text = gtpResponse.Choices.FirstOrDefault()?.Message.Content ?? "";
                 update.Reply.Role = Enums.MessageOwner.Assistant;
                 update.Reply.ContextBound = true;

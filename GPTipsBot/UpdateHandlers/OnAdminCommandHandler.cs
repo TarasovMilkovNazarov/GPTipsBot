@@ -11,7 +11,10 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient botClient;
         private readonly ImageCreatorService imageCreatorService;
 
-        public OnAdminCommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, ImageCreatorService imageCreatorService)
+        public OnAdminCommandHandler(
+            MessageHandlerFactory messageHandlerFactory,
+            ITelegramBotClient botClient,
+            ImageCreatorService imageCreatorService)
         {
             this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<RateLimitingHandler>());
@@ -20,29 +23,38 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            if (update.Message.Text == null) {
+            if (string.IsNullOrEmpty(update.Message.Text))
+            {
                 await base.HandleAsync(update);
                 return;
             }
 
-            if (update.Message.Text == "/fix" && update.UserChatKey.IsAdmin() && AppConfig.IsOnMaintenance)
+            var chatKey = update.UserChatKey;
+            if (update.Message.Text == "/fix" && chatKey.IsAdmin() && AppConfig.IsOnMaintenance)
             {
                 AppConfig.IsOnMaintenance = false;
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.Recovered);
+                await botClient.SendTextMessageAsync(chatKey.ChatId, BotResponse.Recovered);
                 return;
             }
 
-            if(update.Message.Text.StartsWith("/updateBingCookie ") && update.UserChatKey.IsAdmin())
+            if (update.Message.Text.StartsWith("/updateBingCookie ") && chatKey.IsAdmin())
             {
                 var cookie = update.Message.Text["/updateBingCookie ".Length..];
                 imageCreatorService.UpdateBingCookies(cookie);
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.CookiesUpdated, replyMarkup: new ReplyKeyboardRemove());
+                await botClient.SendTextMessageAsync(chatKey.ChatId, BotResponse.CookiesUpdated, replyMarkup: new ReplyKeyboardRemove());
                 return;
             }
 
+            if (update.Message.Text.StartsWith("/version ") && chatKey.IsAdmin())
+            {
+                await botClient.SendTextMessageAsync(chatKey.ChatId, "Не умею ещё");
+                return;
+            }
+
+
             if (AppConfig.IsOnMaintenance)
             {
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.OnMaintenance);
+                await botClient.SendTextMessageAsync(chatKey.ChatId, BotResponse.OnMaintenance);
                 return;
             }
 
