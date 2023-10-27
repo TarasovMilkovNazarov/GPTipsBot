@@ -47,7 +47,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text.StartsWith("/version ") && chatKey.IsAdmin())
             {
-                await botClient.SendTextMessageAsync(chatKey.ChatId, "Не умею ещё");
+                await botClient.SendTextMessageAsync(chatKey.ChatId, "Не умею ещё, но скоро научусь");
                 return;
             }
 
