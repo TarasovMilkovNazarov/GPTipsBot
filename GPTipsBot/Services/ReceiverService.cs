@@ -10,8 +10,8 @@ namespace Telegram.Bot.Services
         public ReceiverService(
             ITelegramBotClient botClient,
             IServiceProvider serviceProvider,
-            ILogger<ReceiverServiceBase<UpdateHandlerEntryPoint>> logger)
-            : base(botClient, serviceProvider, logger)
+            ILogger<ReceiverServiceBase<UpdateHandlerEntryPoint>> log)
+            : base(botClient, serviceProvider, log)
         {
         }
     }

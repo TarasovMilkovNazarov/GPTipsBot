@@ -78,7 +78,7 @@ namespace GPTipsBot.Api
                 return response;
             }
 
-            logger.LogError($"Failed request to OpenAi service: {response.Error?.Message}");
+            logger.LogError("Failed request to OpenAi service: [{Code}] {Message}, token: {Token}", response.Error?.Code, response.Error?.Message, currentToken[..10]);
 
             if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
             {

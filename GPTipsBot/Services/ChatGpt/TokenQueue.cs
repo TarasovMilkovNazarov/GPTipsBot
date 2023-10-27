@@ -23,12 +23,11 @@ namespace GPTipsBot.Services.ChatGpt
             if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiToken is not null)
                 return AppConfig.DebugOpenAiToken;
             
-            logger.LogInformation("Получаем токен из базы");
             if (await semaphore.WaitAsync(TimeSpan.FromMinutes(3)))
             {
                 if (tokens.TryDequeue(out var token))
                 {
-                    logger.LogInformation($"Получили токен {token[..10]}");
+                    logger.LogInformation("Получили токен {Token}***", token[..10]);
                     return token;
                 }
 

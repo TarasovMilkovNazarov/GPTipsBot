@@ -2,7 +2,6 @@
 using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Telegram.Bot;
@@ -14,14 +13,14 @@ namespace GPTipsBot
     public class UpdateHandlerEntryPoint
     {
         private readonly ILogger<UpdateHandlerEntryPoint> logger;
-        private readonly IServiceProvider serviceProvider;
+        private readonly MainHandler mainHandler;
 
         public static DateTime Start { get; private set; }
 
-        public UpdateHandlerEntryPoint(ILogger<UpdateHandlerEntryPoint> logger, IServiceProvider serviceProvider)
+        public UpdateHandlerEntryPoint(ILogger<UpdateHandlerEntryPoint> logger, MainHandler mainHandler)
         {
             this.logger = logger;
-            this.serviceProvider = serviceProvider;
+            this.mainHandler = mainHandler;
         }
 
         static UpdateHandlerEntryPoint()
@@ -31,13 +30,11 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update)
         {
-            if (update.Ignore())
-                return;
-
             try
             {
-                using var scope = serviceProvider.CreateScope();
-                var mainHandler = scope.ServiceProvider.GetRequiredService<MainHandler>();
+                if (update.Ignore())
+                    return;
+                
                 var extendedUpd = new UpdateDecorator(update);
 
                 CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
@@ -54,6 +51,7 @@ namespace GPTipsBot
 
                 if (update.Message == null)
                     return;
+                
                 await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong);
             }
         }
