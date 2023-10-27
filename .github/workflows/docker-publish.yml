@@ -7,6 +7,7 @@ on:
 env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME2: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository.repo }}
 
 jobs:
   docker:
@@ -22,7 +23,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Build and push ${{ IMAGE_NAME }}
+        name: Build and push ${{ env.IMAGE_NAME }} -- ${{ env.IMAGE_NAME2 }}
         uses: docker/build-push-action@v5
         with:
           push: true
