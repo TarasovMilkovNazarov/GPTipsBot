@@ -2,7 +2,8 @@ name: ci
 
 on:
   push:
-    tags: [ 'v*.*.*' ]
+    tags:
+      - 'v*'
 
 env:
   # github.repository as <account>/<repo>
