@@ -25,18 +25,12 @@ public static class SerilogExtensions
         loggerConfiguration
             .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Error)
             .Enrich.FromLogContext()
-            .Enrich.With<Log4NetLevelMapperEnricher>();
+            .Enrich.With<Log4NetLevelMapperEnricher>()
+            .WriteToAdminsAboutError();
 
-        if (AppConfig.IsProduction)
-            loggerConfiguration
-                .WriteToAdminsAboutError()
-                .WriteToCustomJsonConsole();
-        else
-            loggerConfiguration
-                .WriteToAdminsAboutError()
-                .WriteToConsole();
-
-        return loggerConfiguration;
+        return AppConfig.IsProduction
+            ? loggerConfiguration.WriteToCustomJsonConsole()
+            : loggerConfiguration.WriteToConsole();
     }
 
     private static LoggerConfiguration WriteToCustomJsonConsole(this LoggerConfiguration loggerConfiguration) =>
@@ -46,10 +40,10 @@ public static class SerilogExtensions
 
     private static LoggerConfiguration WriteToAdminsAboutError(this LoggerConfiguration loggerConfiguration) =>
         loggerConfiguration.WriteTo.Sink<TelegramSink>(LogEventLevel.Error);
-    
+
     private static LoggerConfiguration WriteToJsonConsole(this LoggerConfiguration loggerConfiguration) =>
         loggerConfiguration.WriteTo.Console(new RenderedCompactJsonFormatter());
-    
+
     private static LoggerConfiguration WriteToConsole(this LoggerConfiguration loggerConfiguration) =>
         loggerConfiguration.WriteTo.Console(outputTemplate: OutputTemplate);
 

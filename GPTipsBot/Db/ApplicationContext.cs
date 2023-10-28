@@ -18,9 +18,7 @@ namespace GPTipsBot.Db
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = Environment.GetEnvironmentVariable("PG_CONNECTION_STRING");
-
-            optionsBuilder.UseNpgsql(connectionString);
+            optionsBuilder.UseNpgsql(AppConfig.ConnectionString);
         }
 
         //protected override void OnModelCreating(ModelBuilder modelBuilder)

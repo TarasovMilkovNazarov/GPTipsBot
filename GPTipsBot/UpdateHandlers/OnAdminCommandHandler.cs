@@ -2,6 +2,7 @@
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
@@ -45,9 +46,12 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.Message.Text.StartsWith("/version ") && chatKey.IsAdmin())
+            if (update.Message.Text == "/version" && chatKey.IsAdmin())
             {
-                await botClient.SendTextMessageAsync(chatKey.ChatId, "Не умею ещё, но скоро научусь");
+                await botClient.SendTextMessageAsync(chatKey.ChatId, $"""
+Version: {AppConfig.Version}
+CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPTipsBot/commit/{AppConfig.CommitHash})
+""", null, ParseMode.MarkdownV2);
                 return;
             }
 
