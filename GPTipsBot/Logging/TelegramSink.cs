@@ -9,6 +9,9 @@ public class TelegramSink : ILogEventSink
 {
     public void Emit(LogEvent logEvent)
     {
+        if (logEvent.Exception is TelegramErrorReportException)
+            return;
+
         try
         {
             var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
@@ -24,7 +27,7 @@ public class TelegramSink : ILogEventSink
         }
         catch (Exception e)
         {
-            Log.Logger.Fatal(e, "Не смогли отправить сообщение об ошибке в телеграмм");
+            Log.Logger.Fatal(new TelegramErrorReportException(e), "Не смогли отправить сообщение об ошибке в телеграмм");
         }
     }
 }

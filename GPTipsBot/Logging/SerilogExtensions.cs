@@ -33,6 +33,7 @@ public static class SerilogExtensions
                 .WriteToCustomJsonConsole();
         else
             loggerConfiguration
+                .WriteToAdminsAboutError()
                 .WriteToConsole();
 
         return loggerConfiguration;
