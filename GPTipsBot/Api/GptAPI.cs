@@ -57,7 +57,8 @@ namespace GPTipsBot.Api
                 ApiKey = currentToken
             });
 
-            logger.LogInformation("Send request to OpenAi service: {prompt}", messages.Last().Content);
+
+            logger.LogInformation("Send request to OpenAi service: {messages}", messages.Last().Content);
 
             ChatCompletionCreateResponse response;
             try
