@@ -60,41 +60,48 @@ namespace GPTipsBot.Services
 
             var response = await client.ExecuteAsync(request, token);
 
-            if (string.IsNullOrEmpty(response?.Content))
+            try
             {
-                throw new ClientException(BotResponse.SomethingWentWrongWithImageService);
-            }
+                if (string.IsNullOrEmpty(response?.Content))
+                {
+                    throw new ClientException(BotResponse.SomethingWentWrongWithImageService);
+                }
 
-            if (response.Content.ToLower().Contains("this prompt has been blocked"))
+                if (response.Content.ToLower().Contains("this prompt has been blocked"))
+                {
+                    throw new ClientException(BingResponse.BlockedPromptError);
+                }
+                if (response.Content.ToLower().Contains("we're working hard to offer image creator in more languages"))
+                {
+                    throw new ClientException(BingResponse.UnsupportedLangError);
+                }
+
+                // Get redirect URL
+                string? redirectUrl = response.Headers?.First(x => x.Name == "Location").Value?.ToString()?.Replace("&nfy=1", "");
+                string requestId = redirectUrl.Split("id=")[^1];
+                await client.ExecuteAsync(new RestRequest(redirectUrl, Method.Get), token);
+
+                // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
+                string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
+                // Poll for results
+                var getImagesLinksRequest = new RestRequest(pollingUrl, Method.Get);
+
+                response = await client.ExecuteWithPredicate(getImagesLinksRequest, token, IsImageSrcGetRequestSuccessfull);
+
+                // Use regex to search for src=""
+                var imageLinks = new List<string>();
+                foreach (Match match in regex.Matches(response.Content))
+                {
+                    // split removes size limits
+                    imageLinks.Add(match.Groups[1].Value.Split("?w=")[0]);
+                }
+                // Remove duplicates
+                return new HashSet<string>(imageLinks).ToList();
+            }
+            catch (Exception e)
             {
-                throw new ClientException(BingResponse.BlockedPromptError);
+                throw new ImageCreatorException(e, request);
             }
-            if (response.Content.ToLower().Contains("we're working hard to offer image creator in more languages"))
-            {
-                throw new ClientException(BingResponse.UnsupportedLangError);
-            }
-
-            // Get redirect URL
-            string? redirectUrl = response.Headers?.First(x => x.Name == "Location").Value?.ToString()?.Replace("&nfy=1", "");
-            string requestId = redirectUrl.Split("id=")[^1];
-            await client.ExecuteAsync(new RestRequest(redirectUrl, Method.Get), token);
-
-            // https://www.bing.com/images/create/async/results/{ID}?q={PROMPT}
-            string pollingUrl = $"images/create/async/results/{requestId}?q={urlEncodedPrompt}";
-            // Poll for results
-            var getImagesLinksRequest = new RestRequest(pollingUrl, Method.Get);
-
-            response = await client.ExecuteWithPredicate(getImagesLinksRequest, token, IsImageSrcGetRequestSuccessfull);
-
-            // Use regex to search for src=""
-            var imageLinks = new List<string>();
-            foreach (Match match in regex.Matches(response.Content))
-            {
-                // split removes size limits
-                imageLinks.Add(match.Groups[1].Value.Split("?w=")[0]);
-            }
-            // Remove duplicates
-            return new HashSet<string>(imageLinks).ToList();
         }
 
         private bool IsImageSrcGetRequestSuccessfull(RestResponse response, int currentAttempt)
