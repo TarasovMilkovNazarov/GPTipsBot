@@ -195,7 +195,7 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
     <value>Your feedback has been sent to the author. Thank you for making the bot better!</value>
   </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
-    <value>The number of tokens in your message {1} exceeds the limit of {0} tokens. Approximately, one word contains one token.</value>
+    <value>The number of tokens in your message {1} exceeds the limit of {0} tokens. Please shorten your request. Consider that one word approximately contains one token.</value>
   </data>
   <data name="TooManyRequests" xml:space="preserve">
     <value>❗️ Too many requests, please try again after {0} seconds.</value>

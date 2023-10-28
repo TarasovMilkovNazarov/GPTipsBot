@@ -35,9 +35,9 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
     {
         var tasks = new List<Task>();
         var me = await botClient.GetMeAsync(stoppingToken);
-        log.LogInformation("Start receiving updates for {BotName}", me.Username ?? "GPTipsBot");
+        AppConfig.BotName = me.Username ?? "GPTipsBot";
+        log.LogInformation("Start receiving updates for {BotName}", AppConfig.BotName);
 
-        
         try
         { 
             // Start receiving updates
