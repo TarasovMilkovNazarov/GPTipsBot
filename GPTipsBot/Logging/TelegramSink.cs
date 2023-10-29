@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using GPTipsBot.Extensions;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Telegram.Bot;
@@ -17,10 +18,14 @@ public class TelegramSink : ILogEventSink
             var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
             foreach (var adminId in AppConfig.AdminIds)
             {
+                var updateIdQuery = logEvent.Properties.TryGetValue("updateId", out var updateId)
+                    ? "?query=json_payload.updateId+%3D+" + updateId
+                    : "";
+                
                 var text = $"""
 🚧🚧🚧 ПАРДОН МЕСЬЕ Я ПРИУНЫЛ:
-{logEvent.RenderMessage()}
-Подробнее: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq/logging/group/e23pildlggn1clcjtr5u/logs
+{logEvent.RenderMessage().Truncate(1000)}
+Подробнее: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq/logging/group/e23pildlggn1clcjtr5u/logs{updateIdQuery}
 """;
                 botClient.SendTextMessageAsync(adminId, text).GetAwaiter().GetResult();
             }

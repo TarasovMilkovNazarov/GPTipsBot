@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -56,4 +57,12 @@ public static class SerilogExtensions
                 rollOnFileSizeLimit: true,
                 retainedFileCountLimit: 3,
                 rollingInterval: RollingInterval.Day);
+
+    public static void WithProps<T>(this ILogger<T> log, Action logAction, params (string name, string? value)[] props)
+    {
+        using (log.BeginScope(props.ToDictionary(p => p.name, p => p.value)))
+        {
+            logAction();
+        }
+    }
 }

@@ -1,6 +1,8 @@
 ﻿using GPTipsBot;
+using GPTipsBot.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
@@ -49,15 +51,23 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                     try
                     {
                         using var scope = serviceProvider.CreateScope();
-                        using (ForContext(update))
+                        using (CreateLogContextFor(update))
                         {
                             var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
-                            await worker.HandleUpdateAsync(botClient, update);
+                            await worker.HandleUpdateAsync(update);
                         }
+                    }
+                    catch (ApiRequestException e)
+                    {
+                        log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
                     }
                     catch (Exception e)
                     {
-                        log.LogError(e, "Ошибка при обработке запроса");
+                        log.LogError(e, "Error while handling update");
+                        if (update.Message == null)
+                            return;
+                
+                        await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: stoppingToken);
                     }
                 }, stoppingToken));
             }
@@ -77,12 +87,12 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         }
     }
 
-    private IDisposable? ForContext(Update update)
+    private IDisposable? CreateLogContextFor(Update update)
     {
-        var scope = log.BeginScope("Handling message with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-            update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
-        log.LogInformation("Handling message with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-            update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
+        var scope = log.BeginScope("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
+        log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
         return scope;
     }
     

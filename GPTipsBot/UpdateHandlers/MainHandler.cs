@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
-using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -19,7 +18,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ILogger<MainHandler> logger;
 
         public MainHandler(MessageHandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
-            ILogger<MainHandler> logger, ITelegramBotClient botClient, UserService userService)
+            ILogger<MainHandler> logger, UserService userService)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.unitOfWork = unitOfWork;
@@ -62,7 +61,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (DbUpdateException ex)
             {
-                logger.LogError(ex, $"Couldn't create user with telegramId {newUser.Id} in database");
+                logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
             }
 
             var language = unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
@@ -73,10 +72,6 @@ namespace GPTipsBot.UpdateHandlers
             try
             {
                 await base.HandleAsync(update);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, update.ToString());
             }
             finally
             {
