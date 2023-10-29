@@ -79,7 +79,7 @@ namespace GPTipsBot.UpdateHandlers
                 
                 logger.WithProps(
                     () => logger.LogError(ex, "Что-то пошло не так при получении ответа от создателя картинок."),
-                    ("Code", statusCode), ("ContentBase64", contentBase64), ("ResponseHeadersBase64", headersBase64)
+                    ("StatusCode", statusCode) // , ("ContentBase64", contentBase64), ("ResponseHeadersBase64", headersBase64) - очень большие получаются в логи не влазят
                     );
                 
                 await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
