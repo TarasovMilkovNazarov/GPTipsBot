@@ -4,50 +4,29 @@ using Microsoft.Extensions.Logging;
 
 namespace Telegram.Bot.Abstract;
 
-// A background service consuming a scoped service.
-// See more: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services#consuming-a-scoped-service-in-a-background-task
-/// <summary>
-/// An abstract class to compose Polling background service and Receiver implementation classes
-/// </summary>
-/// <typeparam name="TReceiverService">Receiver implementation class</typeparam>
 public abstract class PollingServiceBase<TReceiverService> : BackgroundService
     where TReceiverService : IReceiverService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger _logger;
+    private readonly IServiceProvider serviceProvider;
+    private readonly ILogger log;
 
     internal PollingServiceBase(
         IServiceProvider serviceProvider,
-        ILogger<PollingServiceBase<TReceiverService>> logger)
+        ILogger log)
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this.serviceProvider = serviceProvider;
+        this.log = log;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting polling service");
-
+        log.LogInformation("Starting polling service");
         await DoWork(stoppingToken);
     }
 
     private async Task DoWork(CancellationToken stoppingToken)
     {
-        try
-        {
-            var receiver = _serviceProvider.GetRequiredService<TReceiverService>();
-
-            await receiver.ReceiveAsync(stoppingToken);
-        }
-        // Update Handler only captures exception inside update polling loop
-        // We'll catch all other exceptions here
-        // see: https://github.com/TelegramBots/Telegram.Bot/issues/1106
-        catch (Exception ex)
-        {
-            _logger.LogError($"Polling failed with exception: {ex}", ex);
-
-            // Cooldown if something goes wrong
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
-        }
+        var receiver = serviceProvider.GetRequiredService<TReceiverService>();
+        await receiver.ReceiveAsync(stoppingToken);
     }
 }

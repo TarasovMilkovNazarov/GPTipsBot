@@ -5,6 +5,8 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using GPTipsBot.Utilities;
+using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -58,7 +60,7 @@ namespace GPTipsBot.UpdateHandlers
 
                 sw.Stop();
                 logger.LogInformation(
-                    $"Successfull image generation for request {StringExtensions.Truncate(update.Message.Text, 30)} takes {sw.Elapsed.TotalSeconds}s");
+                    $"Successful image generation for request {update.Message.Text.Truncate(30)} takes {sw.Elapsed.TotalSeconds}s");
             }
             catch (OperationCanceledException)
             {
@@ -70,7 +72,13 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (ImageCreatorException ex)
             {
-                logger.LogError(ex, "Что-то пошло не так при получении ответа от создателя картинок. Request: {Request}", ex.Request);
+                var statusCode = ex.Response?.StatusCode;
+                var contentBase64 = StringUtilities.Base64Encode(ex.Response?.Content);
+                var headersBase64 = StringUtilities.Base64Encode(JsonConvert.SerializeObject(ex.Response?.Headers));
+                
+                logger.LogError(ex, "Что-то пошло не так при получении ответа от создателя картинок." +
+                                    "Code: {ResponseCode}, ContentBase64: {ResponseContentBase64}, ResponseHeadersBase64: {ResponseHeadersBase64}", 
+                    statusCode?.ToString("G"), contentBase64, headersBase64);
                 await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
             }
             catch(Exception ex)

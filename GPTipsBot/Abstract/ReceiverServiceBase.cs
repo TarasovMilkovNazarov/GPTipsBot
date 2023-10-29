@@ -46,11 +46,18 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    using var scope = serviceProvider.CreateScope();
-                    using (ForContext(update))
+                    try
                     {
-                        var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
-                        await worker.HandleUpdateAsync(botClient, update);
+                        using var scope = serviceProvider.CreateScope();
+                        using (ForContext(update))
+                        {
+                            var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
+                            await worker.HandleUpdateAsync(botClient, update);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        log.LogError(e, "Ошибка при обработке запроса");
                     }
                 }, stoppingToken));
             }
@@ -61,7 +68,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         }
         catch (Exception e)
         {
-            log.LogCritical(e, "Пипец упалось всё! Получение сообщений от телеграмма остановленно. " +
+            log.LogCritical(e, "Пипец упалось всё! Получение сообщений от телеграмма остановленно. Завершаем работу приложения. " +
                                   "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
         }
         finally
@@ -72,13 +79,21 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
     private IDisposable? ForContext(Update update)
     {
-        return log.BeginScope("Handling message with {updateId} from {userName}({userId})",
-            update.Id, update.Message?.From?.Username, update.Message?.From?.Id);
+        var scope = log.BeginScope("Handling message with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+            update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
+        log.LogInformation("Handling message with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+            update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
+        return scope;
     }
     
     private async Task WaitForUnfinishedTasks(List<Task> tasks, TimeSpan timeout)
     {
-        log.LogInformation("Wait for {UnfinishedRequestCount} unfinished request from users", tasks.Count);
+        var unfinished = tasks.Where(t => t is { IsCanceled: false, IsCompleted: false, IsFaulted: false });
+        
+        if (!unfinished.Any())
+            return;
+        
+        log.LogInformation("Wait for {UnfinishedRequestCount} unfinished request from users", unfinished);
 
         var timeoutTask = TimeoutTask(timeout);
         var completedTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask);
