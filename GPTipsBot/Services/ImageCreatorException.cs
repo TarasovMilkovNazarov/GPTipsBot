@@ -3,11 +3,11 @@
 namespace GPTipsBot.Services;
 public class ImageCreatorException : Exception
 {
-    public RestRequest Request { get; }
+    public RestResponse? Response { get; }
 
-    public ImageCreatorException(Exception ex, RestRequest request) 
+    public ImageCreatorException(Exception ex, RestResponse? response) 
         : base(null, ex)
     {
-        Request = request;
+        Response = response;
     }
 }

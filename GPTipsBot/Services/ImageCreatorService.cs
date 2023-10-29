@@ -4,16 +4,19 @@ using GPTipsBot.Resources;
 using RestSharp;
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Services
 {
     public class ImageCreatorService
     {
+        private readonly ILogger<ImageCreatorService> log;
         private readonly string BING_URL = "https://www.bing.com";
         private readonly RestClient client;
         private readonly Regex regex;
         private string authCookie = "_U=1456EW-a6Az8mMPrb16LGlUdXHoW9vvDSqJshkOX3RxDwKitZsomgd1gOdMR_XUaPzuskHy0LntA9xFn2_zFim8HOS_Ej9NYZPNvuD6PyhnlD7q8RmnW3bV93kU9PspJoFbKRsP3AnEG8BdF3GevJg2qaQlufUOcjmNKwhccHXejsHX893adP1EybSy79kOEDizLmFa0SUzmcTBygkaxCTA;";
-        public ImageCreatorService() {
+        public ImageCreatorService(ILogger<ImageCreatorService> log) {
+            this.log = log;
             client = CreateBingRestClient();
             regex = new Regex(@"src=""([^""]+)""");
 
@@ -47,7 +50,8 @@ namespace GPTipsBot.Services
 
         public async Task<List<string>> GetImageSources(string prompt, CancellationToken token)
         {
-            Console.WriteLine("Sending request...");
+            log.LogInformation("Send request to Bing Image Creator service: {prompt}", prompt);
+            
             string urlEncodedPrompt = Uri.EscapeDataString(prompt);
 
             // https://www.bing.com/images/create?q=<PROMPT>&rt=4&FORM=GENCRE
@@ -100,7 +104,7 @@ namespace GPTipsBot.Services
             }
             catch (Exception e)
             {
-                throw new ImageCreatorException(e, request);
+                throw new ImageCreatorException(e, response);
             }
         }
 
