@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
+using GPTipsBot.Utilities;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -49,7 +50,7 @@ namespace GPTipsBot.UpdateHandlers
             if (update.Message.Text == "/version" && chatKey.IsAdmin())
             {
                 await botClient.SendTextMessageAsync(chatKey.ChatId, $"""
-Version: {AppConfig.Version}
+Version: {StringUtilities.EscapeTextForMarkdown2(AppConfig.Version)}
 CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPTipsBot/commit/{AppConfig.CommitHash})
 """, null, ParseMode.MarkdownV2);
                 return;

@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using GPTipsBot.Services;
+﻿using GPTipsBot.Services;
+using GPTipsBot.Utilities;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
@@ -25,7 +25,7 @@ namespace GPTipsBot.Extensions
 
             foreach (var part in textParts.Take(partsCount))
             {
-                var escapedText = EscapeText(part);
+                var escapedText = StringUtilities.EscapeTextForMarkdown2(part)!;
                 await botClient.SendTextMessageAsync(chatId, escapedText, null, ParseMode.MarkdownV2, replyToMessageId: replyToMessageId);
             }
         }
@@ -66,14 +66,5 @@ namespace GPTipsBot.Extensions
         }
 
         private static bool HasUnclosedCodeBlock(string text) => (text.Split(new[] { "```" }, StringSplitOptions.None).Length - 1) % 2 != 0;
-
-        private static string EscapeText(string partedText)
-        {
-            var slash = new Regex(@"(\\[\w:])");
-            foreach (var s in new[] { "*", "[", "]", "(", ")", "~", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!" })
-                partedText = partedText.Replace(s, @$"\{s}");
-            partedText = slash.Replace(partedText, @"\$1");
-            return partedText;
-        }
     }
 }
