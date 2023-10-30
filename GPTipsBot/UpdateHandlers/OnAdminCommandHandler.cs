@@ -39,14 +39,6 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.Message.Text.StartsWith("/updateBingCookie ") && chatKey.IsAdmin())
-            {
-                var cookie = update.Message.Text["/updateBingCookie ".Length..];
-                imageCreatorService.UpdateBingCookies(cookie);
-                await botClient.SendTextMessageAsync(chatKey.ChatId, BotResponse.CookiesUpdated, replyMarkup: new ReplyKeyboardRemove());
-                return;
-            }
-
             if (update.Message.Text == "/version" && chatKey.IsAdmin())
             {
                 await botClient.SendTextMessageAsync(chatKey.ChatId, $"""

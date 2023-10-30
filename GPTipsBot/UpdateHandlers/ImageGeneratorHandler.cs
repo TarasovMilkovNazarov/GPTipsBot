@@ -43,14 +43,16 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            update.ServiceMessage.TelegramMessageId = await sendImageStatus.Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto);
+            update.ServiceMessage.TelegramMessageId = await sendImageStatus
+                .Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 var token = MainHandler.userState[update.UserChatKey]
-                    .messageIdToCancellation[update.ServiceMessage.TelegramMessageId ?? throw new InvalidOperationException()].Token;
+                    .messageIdToCancellation[update.ServiceMessage.TelegramMessageId ?? 
+                        throw new InvalidOperationException()].Token;
 
-                var imgSrcs = await imageCreatorService.GetImageSources(update.Message.Text, token);
+                var imgSrcs = await imageCreatorService.GenerateImage(update.Message.Text);
                 update.Reply.Text = string.Join("\n", imgSrcs);
                 messageRepository.AddMessage(update.Reply);
                 var replyMarkup = TelegramBotUIService.cancelKeyboard;

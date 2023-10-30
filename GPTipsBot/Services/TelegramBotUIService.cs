@@ -23,7 +23,6 @@ namespace GPTipsBot.Services
         public const string GamesStr = "/games";
         public const string CancelStr = "/cancel";
         public const string StopRequestStr = "/stopRequest";
-        public const string UpdateBingCookieStr = "/updateBingCookie";
         public const string TickTackToeStr = "/tickTackToe";
         public const string EmojiTranslationStr = "/emojiTranslation";
         public const string BookDivinationStr = "/bookDivination";

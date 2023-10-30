@@ -7,8 +7,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Betalgo.OpenAI" Version="7.0.0" />
-    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="Betalgo.OpenAI" Version="7.3.1" />
     <PackageReference Include="dotenv.net" Version="3.1.2" />
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />
@@ -39,10 +38,10 @@
     <PackageReference Include="TiktokenSharp" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Resources\BingResponse.Designer.cs">
+    <Compile Update="Resources\DalleResponse.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>BingResponse.resx</DependentUpon>
+      <DependentUpon>DalleResponse.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\BotResponse.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -66,9 +65,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Resources\BingResponse.resx">
+    <EmbeddedResource Update="Resources\DalleResponse.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>BingResponse.Designer.cs</LastGenOutput>
+      <LastGenOutput>DalleResponse.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\BotResponse.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

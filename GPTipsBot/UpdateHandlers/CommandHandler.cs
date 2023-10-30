@@ -198,10 +198,6 @@ namespace GPTipsBot.UpdateHandlers
             {
                 command = CommandType.CreateImage;
             }
-            else if (message.StartsWith(UpdateBingCookieStr.ToLower()))
-            {
-                command = CommandType.UpdateBingCookie;
-            }
             else if (message.Equals(ResetContext.Command.ToLower()) || ButtonToLocalizations[ResetContextStr].Any(b => b.ToLower() == message))
             {
                 command = CommandType.ResetContext;
