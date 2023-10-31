@@ -210,7 +210,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Введите сообщение ниже. Будем рад любой обратной связи..
+        ///   Looks up a localized string similar to Введите сообщение ниже. Будем рады любой обратной связи..
         /// </summary>
         public static string SendFeedback {
             get {

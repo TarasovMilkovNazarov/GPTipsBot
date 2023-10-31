@@ -37,12 +37,16 @@ namespace GPTipsBot.Services
         public static BotCommand ChooseLang => new BotCommand { Command = ChooseLangStr, Description = BotUI.SetLang };
         public static BotCommand SetRuLang => new BotCommand { Command = SetRuLangStr, Description = BotUI.SetRuLang };
         public static BotCommand SetEngLang => new BotCommand { Command = SetEngLangStr, Description = BotUI.SetEngLang };
+        public static BotCommand StopRequest => new BotCommand { Command = StopRequestStr };
+
+        #region Games commands
         public static BotCommand Games => new BotCommand { Command = GamesStr, Description = BotUI.GamesButton };
         public static BotCommand TickTackToe => new BotCommand { Command = TickTackToeStr, Description = BotUI.TickTackToeButton };
         public static BotCommand EmojiTranslation => new BotCommand { Command = EmojiTranslationStr, Description = BotUI.EmojiTranslationButton };
         public static BotCommand BookDivination => new BotCommand { Command = BookDivinationStr, Description = BotUI.BookDivinationButton };
         public static BotCommand GuessWho => new BotCommand { Command = GuessWhoStr, Description = BotUI.GuessWhoButton };
         public static BotCommand Adventure => new BotCommand { Command = AdventureStr, Description = BotUI.AdventureButton };
+        #endregion
 
         public BotMenu()
         {
@@ -64,8 +68,6 @@ namespace GPTipsBot.Services
 
     public class TelegramBotUIService
     {
-        private readonly ITelegramBotClient botClient;
-
         public static ReplyKeyboardMarkup startKeyboard => GetMenuKeyboardMarkup();
         public static ReplyKeyboardMarkup cancelKeyboard => GetCancelKeyboardMarkup();
         public static ReplyKeyboardMarkup chooseLangKeyboard => GetLanguageKeyboardMarkup();
@@ -89,9 +91,8 @@ namespace GPTipsBot.Services
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
-        public TelegramBotUIService(ITelegramBotClient botClient)
+        public TelegramBotUIService()
         {
-            this.botClient = botClient;
         }
 
         static TelegramBotUIService()
@@ -99,6 +100,7 @@ namespace GPTipsBot.Services
             SetButtonToLocalizations();
         }
 
+        // If user sends command from keyboard then it sends as text on choosen button
         private static void SetButtonToLocalizations()
         {
             ButtonToLocalizations = new Dictionary<string, List<string>>()
