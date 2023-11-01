@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 
-namespace GPTipsBot.Services.ChatGpt
+namespace GPTipsBot.Services
 {
     public class TokenQueue
     {
@@ -22,7 +22,7 @@ namespace GPTipsBot.Services.ChatGpt
         {
             if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiToken is not null)
                 return AppConfig.DebugOpenAiToken;
-            
+
             if (await semaphore.WaitAsync(TimeSpan.FromMinutes(3)))
             {
                 if (tokens.TryDequeue(out var token))

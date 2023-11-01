@@ -1,25 +1,15 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Dtos;
-using GPTipsBot.Repositories;
-using GPTipsBot.Resources;
-using OpenAI.ObjectModels.RequestModels;
-
-namespace GPTipsBot.Services
+﻿namespace GPTipsBot.Services
 {
     public class MessageService
     {
-        private readonly MessageRepository messageContextRepository;
-        private readonly ChatGptService chatGptService;
         public const int MaxMessagesCountPerMinute = 10;
         public static Timer resetMessageCountsPerMinuteTimer;
         public static TimeSpan ResettingInterval => TimeSpan.FromSeconds(60); 
 
         public static Dictionary<long, int> UserToMessageCount { get; set; }
 
-        public MessageService(MessageRepository messageContextRepository, ChatGptService chatGptService)
+        public MessageService()
         {
-            this.messageContextRepository = messageContextRepository;
-            this.chatGptService = chatGptService;
         }
 
         static MessageService()
@@ -34,32 +24,6 @@ namespace GPTipsBot.Services
             {
                 UserToMessageCount[userId] = 0;
             }
-        }
-
-        public ChatMessage[] PrepareContext(UserChatKey userKey, long contextId)
-        {
-            var messages = messageContextRepository
-                .GetRecentContextMessages(userKey, contextId).Where(x => !string.IsNullOrEmpty(x.Text));
-            var contextWindow = new ContextWindow(chatGptService);
-
-            foreach (var item in messages)
-            {
-                var isMessageAddedToContext = contextWindow.TryToAddMessage(item.Text, item.Role.ToString().ToLower(), out var messageTokensCount);
-                if (isMessageAddedToContext)
-                {
-                    continue;
-                }
-
-                if (contextWindow.TokensCount == 0)
-                {
-                    //todo reset context or suggest user to reset: send inline command with reset
-                    throw new ClientException(string.Format(BotResponse.TokensLimitExceeded, ContextWindow.TokensLimit, messageTokensCount));
-                }
-
-                break;
-            }
-
-            return contextWindow.GetContext();
         }
     }
 }

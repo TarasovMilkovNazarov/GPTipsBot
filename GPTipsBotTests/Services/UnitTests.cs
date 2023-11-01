@@ -1,14 +1,11 @@
 ﻿using dotenv.net;
 using GPTipsBot;
-using GPTipsBot.Api;
 using GPTipsBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Extensions;
-
 namespace GPTipsBotTests.Services
 {
     public class UnitTests

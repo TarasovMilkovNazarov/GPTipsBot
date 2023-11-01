@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Extensions;
+﻿using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
@@ -10,6 +9,7 @@ using GPTipsBot.Utilities;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using GPTipsBot.Exceptions;
 
 namespace GPTipsBot.UpdateHandlers
 {
