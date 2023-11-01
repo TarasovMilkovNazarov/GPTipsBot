@@ -1,16 +1,20 @@
 ﻿using dotenv.net;
 using GPTipsBot;
+using GPTipsBot.Api;
 using GPTipsBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Extensions;
+
 namespace GPTipsBotTests.Services
 {
     public class UnitTests
     {
         private readonly Update telegramUpdate;
+        private readonly TelegramBotClient botClient;
         private readonly ServiceProvider _services;
 
         public UnitTests()
@@ -46,21 +50,23 @@ namespace GPTipsBotTests.Services
                     Text = "/start"
                 }
             };
+
+            botClient = new TelegramBotClient(AppConfig.TelegramToken);
         }
         
         [Test]
         public async Task ViolateBreakLimiting()
         {
             var mainHandler = _services.GetRequiredService<UpdateHandlerEntryPoint>();
-            await mainHandler.HandleUpdateAsync(telegramUpdate);
+            await mainHandler.HandleUpdateAsync(botClient, telegramUpdate);
 
             for (var i = 0; i < MessageService.MaxMessagesCountPerMinute; i++)
             {
                 mainHandler = _services.GetRequiredService<UpdateHandlerEntryPoint>();
-                await mainHandler.HandleUpdateAsync(telegramUpdate);
+                await mainHandler.HandleUpdateAsync(botClient, telegramUpdate);
             }
 
-            // var updateDecorator = await mainHandler.HandleUpdateAsync(telegramUpdate);
+            // var updateDecorator = await mainHandler.HandleUpdateAsync(botClient, telegramUpdate);
             //
             // Assert.IsNotEmpty(updateDecorator.Message.Text);
             // Assert.IsNotEmpty(updateDecorator.Reply.Text);

@@ -1,11 +1,11 @@
-﻿using GPTipsBot.Db;
+﻿using GPTipsBot.Api;
+using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
-using System.Reflection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -18,18 +18,24 @@ namespace GPTipsBot.UpdateHandlers
     public class CommandHandler : BaseMessageHandler
     {
         private readonly MessageHandlerFactory messageHandlerFactory;
+        private readonly UserService userService;
+        private readonly ImageCreatorService imageCreatorService;
         private readonly ITelegramBotClient botClient;
         private readonly UnitOfWork unitOfWork;
+        private readonly TelegramBotAPI telegramBotAPI;
         private readonly ILogger<CommandHandler> logger;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, 
-            UnitOfWork unitOfWork, ILogger<CommandHandler> logger)
+        public CommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, UnitOfWork unitOfWork,
+            TelegramBotAPI telegramBotAPI, ILogger<CommandHandler> logger, UserService userService, ImageCreatorService imageCreatorService)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.botClient = botClient;
             this.unitOfWork = unitOfWork;
+            this.telegramBotAPI = telegramBotAPI;
             this.logger = logger;
             SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+            this.userService = userService;
+            this.imageCreatorService = imageCreatorService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -46,18 +52,18 @@ namespace GPTipsBot.UpdateHandlers
             IReplyMarkup? replyMarkup = startKeyboard;
             update.Message.ContextBound = false;
 
-            switch (command!.Command)
+            switch (command)
             {
-                case StartCommand:
+                case CommandType.Start:
                     await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.Greeting;
                     break;
-                case HelpCommand:
+                case CommandType.Help:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.BotDescription;
                     break;
-                case ImageCommand:
+                case CommandType.CreateImage:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingImage;
                     if (messageText.StartsWith("/image "))
                     {
@@ -66,35 +72,35 @@ namespace GPTipsBot.UpdateHandlers
                         await base.HandleAsync(update);
                         return;
                     }
-                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.imageTextDescriptionLimit);
+                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.basedOnExperienceInputLengthLimit);
                     replyMarkup = cancelKeyboard;
                     break;
-                case ResetContextCommand:
+                case CommandType.ResetContext:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.ContextUpdated;
                     update.Message.NewContext = true;
                     break;
-                case FeedbackCommand:
+                case CommandType.Feedback:
                     update.Reply.Text = BotResponse.SendFeedback;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.SendingFeedback;
                     replyMarkup = cancelKeyboard;
                     break;
-                case ChooseLangCommand:
+                case CommandType.ChooseLang:
                     update.Reply.Text = BotResponse.ChooseLanguagePlease;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingLanguage;
                     replyMarkup = chooseLangKeyboard;
                     break;
-                case SetEngLangCommand:
+                case CommandType.SetEngLang:
                     await UpdateLanguage(update.UserChatKey, "en");
                     break;
-                case SetRuLangCommand:
+                case CommandType.SetRuLang:
                     await UpdateLanguage(update.UserChatKey, "ru");
                     break;
-                case CancelCommand:
+                case CommandType.Cancel:
                     update.Reply.Text = BotResponse.Cancel;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     break;
-                case StopRequestCommand:
+                case CommandType.StopRequest:
                     update.Reply.Text = BotResponse.Cancel;
                     if (MainHandler.userState.ContainsKey(update.UserChatKey))
                     {
@@ -115,24 +121,24 @@ namespace GPTipsBot.UpdateHandlers
                         }
                     }
                     break;
-                case GamesCommand:
+                case CommandType.Games:
                     update.Reply.Text = BotResponse.ChooseGame;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingGames;
                     replyMarkup = gamesKeyboard;
                     break;
-                case TickTackToeCommand:
+                case CommandType.TickTackToe:
                     await SetGameInstructions(ChatGptGamesPrompts.TickTacToe, UserStateEnum.PlayingTickTacToe);
                     return;
-                case EmojiTranslationCommand:
+                case CommandType.EmojiTranslation:
                     await SetGameInstructions(ChatGptGamesPrompts.EmojiTranslation, UserStateEnum.PlayingEmojiTranslations);
                     return;
-                case BookDivinationCommand:
+                case CommandType.BookDivination:
                     await SetGameInstructions(ChatGptGamesPrompts.BookDivination, UserStateEnum.PlayingBookDivination);
                     return;
-                case GuessWhoCommand:
+                case CommandType.GuessWho:
                     await SetGameInstructions(ChatGptGamesPrompts.GuessWho, UserStateEnum.PlayingGuessWho);
                     return;
-                case AdventureCommand:
+                case CommandType.AdventureGame:
                     await SetGameInstructions(ChatGptGamesPrompts.Adventure, UserStateEnum.PlayingAdventureGame);
                     return;
             }
@@ -176,34 +182,80 @@ namespace GPTipsBot.UpdateHandlers
             }
         }
 
-        private bool TryGetCommand(string message, out BotCommand? command)
+        private bool TryGetCommand(string message, out CommandType? command)
         {
             message = message.Trim().ToLower();
 
-            Type classType = typeof(BotMenu);
-            var properties = classType.GetProperties(BindingFlags.Static | BindingFlags.Public)
-                .Where(p => p.PropertyType == typeof(BotCommand));
-
-            foreach (PropertyInfo property in properties)
+            if (message.StartsWith(Start.Command.ToLower()))
             {
-                BotCommand? botCommand = property.GetValue(null) as BotCommand;
-
-                if (botCommand == null) continue;
-
-                var slashCommandValue = botCommand.Command;
-
-                if (message.StartsWith(slashCommandValue.ToLower()) || 
-                    (ButtonToLocalizations.ContainsKey(slashCommandValue) && 
-                        ButtonToLocalizations[slashCommandValue].Exists(b => b.ToLower() == message)))
-                {
-                    command = botCommand;
-                    return true;
-                }
+                command = CommandType.Start;
+            }
+            else if (message.Equals(Help.Command.ToLower()) || ButtonToLocalizations[HelpStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.Help;
+            }
+            else if (message.StartsWith(Image.Command.ToLower()) || ButtonToLocalizations[ImageStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.CreateImage;
+            }
+            else if (message.Equals(ResetContext.Command.ToLower()) || ButtonToLocalizations[ResetContextStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.ResetContext;
+            }
+            else if (message.Equals(Feedback.Command.ToLower()) || ButtonToLocalizations[FeedbackStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.Feedback;
+            }
+            else if (message.Equals(ChooseLang.Command.ToLower()) || ButtonToLocalizations[ChooseLangStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.ChooseLang;
+            }
+            else if (message.Equals(SetRuLang.Command.ToLower()) || ButtonToLocalizations[SetRuLangStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.SetRuLang;
+            }
+            else if (message.Equals(SetEngLang.Command.ToLower()) || ButtonToLocalizations[SetEngLangStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.SetEngLang;
+            }
+            else if (message.Equals(CancelStr.ToLower()) || ButtonToLocalizations[CancelStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.Cancel;
+            }
+            else if (message.Equals(StopRequestStr.ToLower()))
+            {
+                command = CommandType.StopRequest;
+            }
+            else if (message.Equals(GamesStr.ToLower()) || ButtonToLocalizations[GamesStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.Games;
+            }
+            else if (message.Equals(TickTackToeStr.ToLower()) || ButtonToLocalizations[TickTackToeStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.TickTackToe;
+            }
+            else if (message.Equals(BookDivinationStr.ToLower()) || ButtonToLocalizations[BookDivinationStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.BookDivination;
+            }
+            else if (message.Equals(GuessWhoStr.ToLower()) || ButtonToLocalizations[GuessWhoStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.GuessWho;
+            }
+            else if (message.Equals(EmojiTranslationStr.ToLower()) || ButtonToLocalizations[EmojiTranslationStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.EmojiTranslation;
+            }
+            else if (message.Equals(AdventureStr.ToLower()) || ButtonToLocalizations[AdventureStr].Any(b => b.ToLower() == message))
+            {
+                command = CommandType.AdventureGame;
+            }
+            else
+            {
+                command = null;
             }
 
-            command = null;
-
-            return false;
+            return command.HasValue;
         }
     }
 }

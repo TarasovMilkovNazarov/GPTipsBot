@@ -156,7 +156,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку &apos;Отмена&apos;.
+        ///   Looks up a localized string similar to Введите текстовое описание изображения длиной до {0} символов.
         /// </summary>
         public static string InputImageDescriptionText {
             get {
@@ -210,7 +210,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Введите сообщение ниже. Будем рады любой обратной связи..
+        ///   Looks up a localized string similar to Введите сообщение ниже. Будем рад любой обратной связи..
         /// </summary>
         public static string SendFeedback {
             get {

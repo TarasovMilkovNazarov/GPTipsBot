@@ -1,4 +1,4 @@
-﻿namespace GPTipsBot.Exceptions
+﻿namespace GPTipsBot.Api
 {
     /// <summary>
     /// Exception for sending to user's chat
@@ -7,7 +7,7 @@
     {
         public ClientException(string error) : base(error)
         {
-
+            
         }
     }
 }

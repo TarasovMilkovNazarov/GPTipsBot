@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Extensions;
+﻿using GPTipsBot.Api;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
@@ -9,7 +10,6 @@ using GPTipsBot.Utilities;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using GPTipsBot.Exceptions;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -20,7 +20,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ActionStatus sendImageStatus;
         private readonly ImageCreatorService imageCreatorService;
         private readonly MessageRepository messageRepository;
-        public const int imageTextDescriptionLimit = 1000;
+        public const int basedOnExperienceInputLengthLimit = 150;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
@@ -36,9 +36,9 @@ namespace GPTipsBot.UpdateHandlers
         {
             var userKey = update.UserChatKey;
 
-            if (update.Message.Text.Length > imageTextDescriptionLimit)
+            if (update.Message.Text.Length > basedOnExperienceInputLengthLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
@@ -58,11 +58,8 @@ namespace GPTipsBot.UpdateHandlers
                 var replyMarkup = TelegramBotUIService.cancelKeyboard;
                 var telegramMediaList = imgSrcs.Select((src, i) => new InputMediaPhoto(InputFile.FromString(src))).ToList();
 
-                await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true,
+                var photoMessage = await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true,
                     replyToMessageId: (int?)update.Message.TelegramMessageId, cancellationToken: token);
-
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.InputImageDescriptionText, 
-                    imageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
 
                 sw.Stop();
                 logger.LogInformation(
@@ -96,6 +93,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             finally
             {
+                //MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 await sendImageStatus.Stop(userKey);
             }
 
