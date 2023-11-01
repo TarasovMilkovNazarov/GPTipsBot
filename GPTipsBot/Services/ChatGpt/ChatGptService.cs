@@ -117,6 +117,7 @@ namespace GPTipsBot.Services
 
                     if (response.Successful)
                     {
+                       tokenQueue.AddToken(currentToken);
                        return;
                     }
                 }
