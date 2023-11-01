@@ -12,40 +12,41 @@ namespace GPTipsBot.Services
     [JsonObject(MemberSerialization.OptIn, NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class BotMenu
     {
-        public const string StartStr = "/start";
-        public const string ImageStr = "/image";
-        public const string ResetContextStr = "/reset_context";
-        public const string FeedbackStr = "/feedback";
-        public const string HelpStr = "/help";
-        public const string ChooseLangStr = "/setLang";
-        public const string SetRuLangStr = "/setRuLang";
-        public const string SetEngLangStr = "/setEngLang";
-        public const string GamesStr = "/games";
-        public const string CancelStr = "/cancel";
-        public const string StopRequestStr = "/stopRequest";
-        public const string TickTackToeStr = "/tickTackToe";
-        public const string EmojiTranslationStr = "/emojiTranslation";
-        public const string BookDivinationStr = "/bookDivination";
-        public const string GuessWhoStr = "/guessWho";
-        public const string AdventureStr = "/adventureGame";
+        public const string StartCommand = "/start";
+        public const string ImageCommand = "/image";
+        public const string ResetContextCommand = "/reset_context";
+        public const string FeedbackCommand = "/feedback";
+        public const string HelpCommand = "/help";
+        public const string ChooseLangCommand = "/setLang";
+        public const string SetRuLangCommand = "/setRuLang";
+        public const string SetEngLangCommand = "/setEngLang";
+        public const string GamesCommand = "/games";
+        public const string CancelCommand = "/cancel";
+        public const string StopRequestCommand = "/stopRequest";
+        public const string TickTackToeCommand = "/tickTackToe";
+        public const string EmojiTranslationCommand = "/emojiTranslation";
+        public const string BookDivinationCommand = "/bookDivination";
+        public const string GuessWhoCommand = "/guessWho";
+        public const string AdventureCommand = "/adventureGame";
 
-        public static BotCommand Start => new BotCommand { Command = StartStr, Description = BotUI.Start };
-        public static BotCommand Image => new BotCommand { Command = ImageStr, Description = BotUI.Image };
-        public static BotCommand ResetContext => new BotCommand { Command = ResetContextStr, Description = BotUI.ResetContext };
-        public static BotCommand Feedback => new BotCommand { Command = FeedbackStr, Description = BotUI.Feedback };
-        public static BotCommand Help => new BotCommand { Command = HelpStr, Description = BotUI.Help };
-        public static BotCommand ChooseLang => new BotCommand { Command = ChooseLangStr, Description = BotUI.SetLang };
-        public static BotCommand SetRuLang => new BotCommand { Command = SetRuLangStr, Description = BotUI.SetRuLang };
-        public static BotCommand SetEngLang => new BotCommand { Command = SetEngLangStr, Description = BotUI.SetEngLang };
-        public static BotCommand StopRequest => new BotCommand { Command = StopRequestStr };
+        public static BotCommand Start => new BotCommand { Command = StartCommand, Description = BotUI.Start };
+        public static BotCommand Image => new BotCommand { Command = ImageCommand, Description = BotUI.Image };
+        public static BotCommand ResetContext => new BotCommand { Command = ResetContextCommand, Description = BotUI.ResetContext };
+        public static BotCommand Feedback => new BotCommand { Command = FeedbackCommand, Description = BotUI.Feedback };
+        public static BotCommand Help => new BotCommand { Command = HelpCommand, Description = BotUI.Help };
+        public static BotCommand ChooseLang => new BotCommand { Command = ChooseLangCommand, Description = BotUI.SetLang };
+        public static BotCommand SetRuLang => new BotCommand { Command = SetRuLangCommand, Description = BotUI.SetRuLang };
+        public static BotCommand SetEngLang => new BotCommand { Command = SetEngLangCommand, Description = BotUI.SetEngLang };
+        public static BotCommand StopRequest => new BotCommand { Command = StopRequestCommand };
+        public static BotCommand Cancel => new BotCommand { Command = CancelCommand };
 
         #region Games commands
-        public static BotCommand Games => new BotCommand { Command = GamesStr, Description = BotUI.GamesButton };
-        public static BotCommand TickTackToe => new BotCommand { Command = TickTackToeStr, Description = BotUI.TickTackToeButton };
-        public static BotCommand EmojiTranslation => new BotCommand { Command = EmojiTranslationStr, Description = BotUI.EmojiTranslationButton };
-        public static BotCommand BookDivination => new BotCommand { Command = BookDivinationStr, Description = BotUI.BookDivinationButton };
-        public static BotCommand GuessWho => new BotCommand { Command = GuessWhoStr, Description = BotUI.GuessWhoButton };
-        public static BotCommand Adventure => new BotCommand { Command = AdventureStr, Description = BotUI.AdventureButton };
+        public static BotCommand Games => new BotCommand { Command = GamesCommand, Description = BotUI.GamesButton };
+        public static BotCommand TickTackToe => new BotCommand { Command = TickTackToeCommand, Description = BotUI.TickTackToeButton };
+        public static BotCommand EmojiTranslation => new BotCommand { Command = EmojiTranslationCommand, Description = BotUI.EmojiTranslationButton };
+        public static BotCommand BookDivination => new BotCommand { Command = BookDivinationCommand, Description = BotUI.BookDivinationButton };
+        public static BotCommand GuessWho => new BotCommand { Command = GuessWhoCommand, Description = BotUI.GuessWhoButton };
+        public static BotCommand Adventure => new BotCommand { Command = AdventureCommand, Description = BotUI.AdventureButton };
         #endregion
 
         public BotMenu()
@@ -105,20 +106,20 @@ namespace GPTipsBot.Services
         {
             ButtonToLocalizations = new Dictionary<string, List<string>>()
             {
-                { BotMenu.ImageStr, new() },
-                { BotMenu.ResetContextStr, new() },
-                { BotMenu.HelpStr, new() },
-                { BotMenu.FeedbackStr, new() },
-                { BotMenu.CancelStr, new() },
-                { BotMenu.ChooseLangStr, new() },
-                { BotMenu.SetRuLangStr, new() },
-                { BotMenu.SetEngLangStr, new() },
-                { BotMenu.GamesStr, new() },
-                { BotMenu.TickTackToeStr, new() },
-                { BotMenu.BookDivinationStr, new() },
-                { BotMenu.EmojiTranslationStr, new() },
-                { BotMenu.GuessWhoStr, new() },
-                { BotMenu.AdventureStr, new() },
+                { BotMenu.ImageCommand, new() },
+                { BotMenu.ResetContextCommand, new() },
+                { BotMenu.HelpCommand, new() },
+                { BotMenu.FeedbackCommand, new() },
+                { BotMenu.CancelCommand, new() },
+                { BotMenu.ChooseLangCommand, new() },
+                { BotMenu.SetRuLangCommand, new() },
+                { BotMenu.SetEngLangCommand, new() },
+                { BotMenu.GamesCommand, new() },
+                { BotMenu.TickTackToeCommand, new() },
+                { BotMenu.BookDivinationCommand, new() },
+                { BotMenu.EmojiTranslationCommand, new() },
+                { BotMenu.GuessWhoCommand, new() },
+                { BotMenu.AdventureCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -127,20 +128,20 @@ namespace GPTipsBot.Services
             {
                 CultureInfo.CurrentUICulture = culture;
 
-                ButtonToLocalizations[BotMenu.ImageStr].Add(BotUI.ImageButton);
-                ButtonToLocalizations[BotMenu.ResetContextStr].Add(BotUI.ResetContextButton);
-                ButtonToLocalizations[BotMenu.HelpStr].Add(BotUI.HelpButton);
-                ButtonToLocalizations[BotMenu.FeedbackStr].Add(BotUI.FeedbackButton);
-                ButtonToLocalizations[BotMenu.CancelStr].Add(BotUI.CancelButton);
-                ButtonToLocalizations[BotMenu.ChooseLangStr].Add(BotUI.LangButton);
-                ButtonToLocalizations[BotMenu.SetRuLangStr].Add(BotUI.RussianButton);
-                ButtonToLocalizations[BotMenu.SetEngLangStr].Add(BotUI.EnglishButton);
-                ButtonToLocalizations[BotMenu.GamesStr].Add(BotUI.GamesButton);
-                ButtonToLocalizations[BotMenu.TickTackToeStr].Add(BotUI.TickTackToeButton);
-                ButtonToLocalizations[BotMenu.BookDivinationStr].Add(BotUI.BookDivinationButton);
-                ButtonToLocalizations[BotMenu.EmojiTranslationStr].Add(BotUI.EmojiTranslationButton);
-                ButtonToLocalizations[BotMenu.GuessWhoStr].Add(BotUI.GuessWhoButton);
-                ButtonToLocalizations[BotMenu.AdventureStr].Add(BotUI.AdventureButton);
+                ButtonToLocalizations[BotMenu.ImageCommand].Add(BotUI.ImageButton);
+                ButtonToLocalizations[BotMenu.ResetContextCommand].Add(BotUI.ResetContextButton);
+                ButtonToLocalizations[BotMenu.HelpCommand].Add(BotUI.HelpButton);
+                ButtonToLocalizations[BotMenu.FeedbackCommand].Add(BotUI.FeedbackButton);
+                ButtonToLocalizations[BotMenu.CancelCommand].Add(BotUI.CancelButton);
+                ButtonToLocalizations[BotMenu.ChooseLangCommand].Add(BotUI.LangButton);
+                ButtonToLocalizations[BotMenu.SetRuLangCommand].Add(BotUI.RussianButton);
+                ButtonToLocalizations[BotMenu.SetEngLangCommand].Add(BotUI.EnglishButton);
+                ButtonToLocalizations[BotMenu.GamesCommand].Add(BotUI.GamesButton);
+                ButtonToLocalizations[BotMenu.TickTackToeCommand].Add(BotUI.TickTackToeButton);
+                ButtonToLocalizations[BotMenu.BookDivinationCommand].Add(BotUI.BookDivinationButton);
+                ButtonToLocalizations[BotMenu.EmojiTranslationCommand].Add(BotUI.EmojiTranslationButton);
+                ButtonToLocalizations[BotMenu.GuessWhoCommand].Add(BotUI.GuessWhoButton);
+                ButtonToLocalizations[BotMenu.AdventureCommand].Add(BotUI.AdventureButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;

@@ -156,7 +156,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Введите текстовое описание изображения длиной до {0} символов.
+        ///   Looks up a localized string similar to Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку &apos;Отмена&apos;.
         /// </summary>
         public static string InputImageDescriptionText {
             get {

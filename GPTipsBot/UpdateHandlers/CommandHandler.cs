@@ -48,16 +48,16 @@ namespace GPTipsBot.UpdateHandlers
 
             switch (command!.Command)
             {
-                case StartStr:
+                case StartCommand:
                     await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.Greeting;
                     break;
-                case HelpStr:
+                case HelpCommand:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.BotDescription;
                     break;
-                case ImageStr:
+                case ImageCommand:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingImage;
                     if (messageText.StartsWith("/image "))
                     {
@@ -66,35 +66,35 @@ namespace GPTipsBot.UpdateHandlers
                         await base.HandleAsync(update);
                         return;
                     }
-                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.basedOnExperienceInputLengthLimit);
+                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.imageTextDescriptionLimit);
                     replyMarkup = cancelKeyboard;
                     break;
-                case ResetContextStr:
+                case ResetContextCommand:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     update.Reply.Text = BotResponse.ContextUpdated;
                     update.Message.NewContext = true;
                     break;
-                case FeedbackStr:
+                case FeedbackCommand:
                     update.Reply.Text = BotResponse.SendFeedback;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.SendingFeedback;
                     replyMarkup = cancelKeyboard;
                     break;
-                case ChooseLangStr:
+                case ChooseLangCommand:
                     update.Reply.Text = BotResponse.ChooseLanguagePlease;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingLanguage;
                     replyMarkup = chooseLangKeyboard;
                     break;
-                case SetEngLangStr:
+                case SetEngLangCommand:
                     await UpdateLanguage(update.UserChatKey, "en");
                     break;
-                case SetRuLangStr:
+                case SetRuLangCommand:
                     await UpdateLanguage(update.UserChatKey, "ru");
                     break;
-                case CancelStr:
+                case CancelCommand:
                     update.Reply.Text = BotResponse.Cancel;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
                     break;
-                case StopRequestStr:
+                case StopRequestCommand:
                     update.Reply.Text = BotResponse.Cancel;
                     if (MainHandler.userState.ContainsKey(update.UserChatKey))
                     {
@@ -115,24 +115,24 @@ namespace GPTipsBot.UpdateHandlers
                         }
                     }
                     break;
-                case GamesStr:
+                case GamesCommand:
                     update.Reply.Text = BotResponse.ChooseGame;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingGames;
                     replyMarkup = gamesKeyboard;
                     break;
-                case TickTackToeStr:
+                case TickTackToeCommand:
                     await SetGameInstructions(ChatGptGamesPrompts.TickTacToe, UserStateEnum.PlayingTickTacToe);
                     return;
-                case EmojiTranslationStr:
+                case EmojiTranslationCommand:
                     await SetGameInstructions(ChatGptGamesPrompts.EmojiTranslation, UserStateEnum.PlayingEmojiTranslations);
                     return;
-                case BookDivinationStr:
+                case BookDivinationCommand:
                     await SetGameInstructions(ChatGptGamesPrompts.BookDivination, UserStateEnum.PlayingBookDivination);
                     return;
-                case GuessWhoStr:
+                case GuessWhoCommand:
                     await SetGameInstructions(ChatGptGamesPrompts.GuessWho, UserStateEnum.PlayingGuessWho);
                     return;
-                case AdventureStr:
+                case AdventureCommand:
                     await SetGameInstructions(ChatGptGamesPrompts.Adventure, UserStateEnum.PlayingAdventureGame);
                     return;
             }

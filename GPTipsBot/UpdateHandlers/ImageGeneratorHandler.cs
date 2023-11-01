@@ -20,7 +20,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ActionStatus sendImageStatus;
         private readonly ImageCreatorService imageCreatorService;
         private readonly MessageRepository messageRepository;
-        public const int basedOnExperienceInputLengthLimit = 150;
+        public const int imageTextDescriptionLimit = 1000;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
@@ -36,9 +36,9 @@ namespace GPTipsBot.UpdateHandlers
         {
             var userKey = update.UserChatKey;
 
-            if (update.Message.Text.Length > basedOnExperienceInputLengthLimit)
+            if (update.Message.Text.Length > imageTextDescriptionLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.ImageDescriptionLimitWarning, replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
@@ -58,8 +58,11 @@ namespace GPTipsBot.UpdateHandlers
                 var replyMarkup = TelegramBotUIService.cancelKeyboard;
                 var telegramMediaList = imgSrcs.Select((src, i) => new InputMediaPhoto(InputFile.FromString(src))).ToList();
 
-                var photoMessage = await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true,
+                await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true,
                     replyToMessageId: (int?)update.Message.TelegramMessageId, cancellationToken: token);
+
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.InputImageDescriptionText, 
+                    imageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
 
                 sw.Stop();
                 logger.LogInformation(
@@ -93,7 +96,6 @@ namespace GPTipsBot.UpdateHandlers
             }
             finally
             {
-                //MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 await sendImageStatus.Stop(userKey);
             }
 

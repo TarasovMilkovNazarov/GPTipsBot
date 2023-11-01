@@ -84,7 +84,7 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
-            updateDecorator.Message.Text = BotMenu.ChooseLangStr;
+            updateDecorator.Message.Text = BotMenu.ChooseLangCommand;
 
             await mainHandler.HandleAsync(updateDecorator);
 

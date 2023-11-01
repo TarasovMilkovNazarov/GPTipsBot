@@ -1,12 +1,12 @@
-﻿using GPTipsBot.Api;
-using GPTipsBot.Resources;
+﻿using GPTipsBot.Resources;
 using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels;
 using OpenAI.Managers;
 using OpenAI;
 using OpenAI.ObjectModels.ResponseModels.ImageResponseModel;
-using GPTipsBot.Services.ChatGpt;
+using System.Drawing;
+using GPTipsBot.Exceptions;
 
 namespace GPTipsBot.Services
 {
@@ -19,6 +19,7 @@ namespace GPTipsBot.Services
             this.log = log;
             this.tokensQueue = tokensQueue;
         }
+
         public async Task<List<string>> GenerateImage(string prompt)
         {
             var apiKey = await tokensQueue.GetTokenAsync();
@@ -45,6 +46,12 @@ namespace GPTipsBot.Services
             }
 
             log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}", imageResult.Error?.Code, imageResult.Error?.Message, apiKey[..10]);
+
+            if (imageResult.Error?.Code == "content_policy_violation")
+            {
+                throw new ClientException(DalleResponse.BlockedPromptError);
+            }
+
             throw new ClientException(BotResponse.SomethingWentWrongWithImageService);
         }
     }
