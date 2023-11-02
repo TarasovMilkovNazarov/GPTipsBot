@@ -7,6 +7,7 @@ using GPTipsBot.Exceptions;
 using GPTipsBot.Services;
 using GPTipsBot.Resources;
 using OpenAI.ObjectModels.ResponseModels;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -77,6 +78,14 @@ namespace GPTipsBot.UpdateHandlers
             {
                 log.LogInformation(ex, shortMessage);
                 await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                return;
+            }
+            catch (ApiRequestException ex)
+            when (ex.Message.Contains("can't parse entities"))
+            {
+                var shortReply = update.Reply.Text.Truncate(30) + "...";
+                log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
+                await botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             finally

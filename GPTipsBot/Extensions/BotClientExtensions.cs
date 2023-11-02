@@ -30,6 +30,23 @@ namespace GPTipsBot.Extensions
             }
         }
 
+        public static async Task SendSplittedTextMessageAsync(
+            this ITelegramBotClient botClient, 
+            long chatId, 
+            string text, 
+            int? replyToMessageId = null,
+            int partsLimit = -1
+            )
+        {
+            var textParts = SplitIfTooLong(text);
+            var partsCount = partsLimit == -1 || partsLimit > textParts.Count ? textParts.Count : partsLimit;
+
+            foreach (var part in textParts.Take(partsCount))
+            {
+                await botClient.SendTextMessageAsync(chatId, part, null, replyToMessageId: replyToMessageId);
+            }
+        }
+
         private static List<string> SplitIfTooLong(string input)
         {
             var parts = new List<string>();
