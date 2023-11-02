@@ -41,6 +41,7 @@ jobs:
         id: version
         with:
           scheme: calver
+          release_branch: release
       -
         name: Build and push ${{ steps.meta.outputs.tags }}
         uses: docker/build-push-action@v5
