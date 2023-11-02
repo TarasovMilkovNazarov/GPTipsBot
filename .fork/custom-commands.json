@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Set release here",
+    "target": "revision",
+    "ui": {
+      "title": "Set release here",
+      "description": "Do you want to set release to this commit?",
+      "buttons": [
+        {
+          "title": "OK",
+          "action": {
+            "type": "process",
+            "path": "$git",
+            "args": "branch release $SHA --force",
+            "showOutput": false,
+            "waitForExit": true
+          }
+        },
+        {
+          "title": "Cancel",
+          "action": {
+            "type": "cancel"
+          }
+        }
+      ]
+    }
+  }
+]

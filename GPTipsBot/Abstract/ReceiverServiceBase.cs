@@ -48,27 +48,27 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    try
-                    {
-                        using var scope = serviceProvider.CreateScope();
-                        using (CreateLogContextFor(update))
+                    using var scope = serviceProvider.CreateScope();
+                    using (CreateLogContextFor(update))
+                        try
                         {
-                            var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
-                            await worker.HandleUpdateAsync(update);
+                            {
+                                var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
+                                await worker.HandleUpdateAsync(update);
+                            }
                         }
-                    }
-                    catch (ApiRequestException e)
-                    {
-                        log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        log.LogError(e, "Error while handling update");
-                        if (update.Message == null)
-                            return;
+                        catch (ApiRequestException e)
+                        {
+                            log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
+                        }
+                        catch (Exception e)
+                        {
+                            log.LogError(e, "Error while handling update");
+                            if (update.Message == null)
+                                return;
                 
-                        await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: stoppingToken);
-                    }
+                            await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: stoppingToken);
+                        }
                 }, stoppingToken));
             }
         }
@@ -89,11 +89,10 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
     private IDisposable? CreateLogContextFor(Update update)
     {
-        var scope = log.BeginScope("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
         log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
             update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
-        return scope;
+        return log.BeginScope("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
     }
     
     private async Task WaitForUnfinishedTasks(List<Task> tasks, TimeSpan timeout)
