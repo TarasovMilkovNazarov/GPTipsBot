@@ -2,8 +2,8 @@ name: ci
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'release'
 
 env:
   # github.repository as <account>/<repo>
@@ -32,14 +32,30 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - 
+        name: Get next version
+        uses: reecetech/version-increment@2023.9.3
+        id: version
+        with:
+          scheme: calver
       -
         name: Build and push ${{ steps.meta.outputs.tags }}
         uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VERSION=${{ github.ref_name }}
+            VERSION=${{ steps.version.outputs.version }}
             COMMITHASH=${{ github.sha }}
+      - 
+        name: Push Git Tag
+        run: |
+          tagName=releases/${{ steps.version.outputs.version }}
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag tagName
+          git push origin tagName
