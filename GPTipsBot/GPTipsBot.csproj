@@ -7,7 +7,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Betalgo.OpenAI" Version="7.3.1" />
+    <PackageReference Include="Betalgo.OpenAI" Version="7.4.0" />
     <PackageReference Include="dotenv.net" Version="3.1.2" />
     <PackageReference Include="FluentMigrator" Version="3.3.2" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.3.2" />

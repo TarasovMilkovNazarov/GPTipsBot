@@ -132,6 +132,9 @@
   <data name="NoResultsError" xml:space="preserve">
     <value>Не удалось получить результаты.</value>
   </data>
+  <data name="RateLimit" xml:space="preserve">
+    <value>Превышен лимит запросов</value>
+  </data>
   <data name="RedirectError" xml:space="preserve">
     <value>⚠️Не удалось выполнить перенаправление.</value>
   </data>

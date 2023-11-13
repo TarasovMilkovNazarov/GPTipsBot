@@ -132,6 +132,9 @@
   <data name="NoResultsError" xml:space="preserve">
     <value>Failed to retrieve results.</value>
   </data>
+  <data name="RateLimit" xml:space="preserve">
+    <value>Rate limit exceeded</value>
+  </data>
   <data name="RedirectError" xml:space="preserve">
     <value>⚠️ Failed to perform the redirection.</value>
   </data>

@@ -106,6 +106,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Превышен лимит запросов.
+        /// </summary>
+        internal static string RateLimit {
+            get {
+                return ResourceManager.GetString("RateLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ⚠️Не удалось выполнить перенаправление..
         /// </summary>
         internal static string RedirectError {

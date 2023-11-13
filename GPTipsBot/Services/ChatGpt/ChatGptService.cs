@@ -124,11 +124,7 @@ namespace GPTipsBot.Services
                 catch (OperationCanceledException)
                 {
                     tokenQueue.AddToken(currentToken);
-
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        throw;
-                    }
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (Exception ex) {
                     //exceptions handled below

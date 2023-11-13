@@ -79,9 +79,9 @@ namespace GPTipsBot.Extensions
         {
             var botMenu = new BotMenu();
             botClient.SetMyCommandsAsync(botMenu.GetBotCommands(), languageCode: langCode);
-            botClient.SetMyNameAsync(AppConfig.Env == "Production" ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
+            botClient.SetMyNameAsync(AppConfig.IsProduction ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
             botClient.SetMyDescriptionAsync(BotResponse.BotDescription, languageCode: langCode);
-            botClient.SetMyShortDescriptionAsync(AppConfig.Env == "Production" ? BotResponse.ShortDescription : BotResponse.ShortDevDescription, languageCode: langCode);
+            botClient.SetMyShortDescriptionAsync(AppConfig.IsProduction ? BotResponse.ShortDescription : BotResponse.ShortDevDescription, languageCode: langCode);
         }
     }
 }
