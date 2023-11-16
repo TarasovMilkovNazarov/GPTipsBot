@@ -6,7 +6,7 @@ using Serilog;
 using System.Net;
 
 //uncomment for sniffing requests in fiddler
-ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+//ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
