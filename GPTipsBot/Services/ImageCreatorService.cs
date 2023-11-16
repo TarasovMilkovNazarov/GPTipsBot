@@ -19,9 +19,6 @@ namespace GPTipsBot.Services
         {
             this.log = log;
             this.tokensQueue = tokensQueue;
-
-            //uncomment for sniffing requests in fiddler
-            //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
         }
 
         public async Task<List<string>> GenerateImage(string prompt)

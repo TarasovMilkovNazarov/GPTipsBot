@@ -32,10 +32,21 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var chatKey = update.UserChatKey;
-            if (update.Message.Text == "/fix" && chatKey.IsAdmin() && AppConfig.IsOnMaintenance)
+            if (update.Message.Text == "/fix" && chatKey.IsAdmin())
             {
-                AppConfig.IsOnMaintenance = false;
-                await botClient.SendTextMessageAsync(chatKey.ChatId, BotResponse.Recovered);
+                string response;
+                if (AppConfig.IsOnMaintenance)
+                {
+                    response = BotResponse.Recovered;
+                }
+                else
+                {
+                    response = BotResponse.OnMaintenance;
+                }
+
+                AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
+
+                await botClient.SendTextMessageAsync(chatKey.ChatId, response);
                 return;
             }
 
