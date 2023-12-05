@@ -127,15 +127,15 @@ namespace GPTipsBot.Services
                     cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (Exception ex) {
-                    context["retryAttempt"] = retryAttempt + 1;
-
-                    HandleResponseErrors(response, currentToken);
-                    log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}", 
-                        retryAttempt, response?.Error?.Code, response?.Error?.Message);
-                    throw new ChatGptException(retryAttempt);
+                    //exceptions handled below
                 }
 
-                
+                context["retryAttempt"] = retryAttempt + 1;
+
+                HandleResponseErrors(response, currentToken);
+                log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}", 
+                    retryAttempt, response?.Error?.Code, response?.Error?.Message);
+                throw new ChatGptException(retryAttempt);
             }, new Context(), cancellationToken);
 
             return response;

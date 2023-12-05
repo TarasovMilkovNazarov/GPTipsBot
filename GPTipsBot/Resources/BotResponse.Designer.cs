@@ -156,6 +156,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ❗️Превышен дневной лимит запросов на генерацию изображений (&gt; {0}).
+        /// </summary>
+        public static string ImagesPerDayLimit {
+            get {
+                return ResourceManager.GetString("ImagesPerDayLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку &apos;Отмена&apos;.
         /// </summary>
         public static string InputImageDescriptionText {

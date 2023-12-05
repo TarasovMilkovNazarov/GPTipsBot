@@ -152,6 +152,9 @@
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>
   </data>
+  <data name="ImagesPerDayLimit" xml:space="preserve">
+    <value>❗️Превышен дневной лимит запросов на генерацию изображений (&gt; {0})</value>
+  </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку 'Отмена'</value>
   </data>
