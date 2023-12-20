@@ -28,7 +28,7 @@ namespace GPTipsBot.Services
             var openAiService = new OpenAIService(new OpenAiOptions()
             {
                 ApiKey = apiKey
-            });
+            }, ChatGptService.CreateProxyHttpClient());
 
             ImageCreateResponse imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
             {
