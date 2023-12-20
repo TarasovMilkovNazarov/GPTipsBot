@@ -5,9 +5,7 @@ using OpenAI.ObjectModels;
 using OpenAI.Managers;
 using OpenAI;
 using OpenAI.ObjectModels.ResponseModels.ImageResponseModel;
-using System.Drawing;
 using GPTipsBot.Exceptions;
-using System.Net;
 
 namespace GPTipsBot.Services
 {
