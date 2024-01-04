@@ -35,7 +35,7 @@ namespace GPTipsBot.Services
                 Size = StaticValues.ImageStatics.Size.Size1024,
                 ResponseFormat = StaticValues.ImageStatics.ResponseFormat.Url,
                 User = "TestUser",
-                Model = "dall-e-2"
+                Model = "dall-e-3"
             });
 
             tokensQueue.AddToken(apiKey);
