@@ -35,6 +35,7 @@ namespace GPTipsBot.Extensions
             services
             .AddTransient<UserService>()
             .AddSingleton<ImageCreatorService>()
+            .AddSingleton<SpeechToTextService>()
             .AddTransient<ActionStatus>()
             .AddTransient<MessageHandlerFactory>()
             .AddTransient<MainHandler>()
