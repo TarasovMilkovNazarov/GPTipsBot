@@ -27,11 +27,11 @@ namespace GPTipsBot.Services
                 request.AddParameter("application/octet-stream", stream.ToArray(), ParameterType.RequestBody);
                 var cancellationTokenSource = new CancellationTokenSource();
 
-                var response = await client.ExecuteAsync(request, cancellationTokenSource.Token);
+                var response = await client.ExecuteAsync<RecognitionResult>(request, cancellationTokenSource.Token);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    return response.Content;
+                    return response.Data.Result;
                 }
                 else
                 {
@@ -44,5 +44,10 @@ namespace GPTipsBot.Services
         {
             this.telegramBotClient = telegramBotClient;
         }
+    }
+
+    class RecognitionResult
+    {
+        public string Result { get; set; }
     }
 }
