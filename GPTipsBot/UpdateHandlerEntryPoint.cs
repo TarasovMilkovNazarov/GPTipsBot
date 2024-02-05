@@ -13,15 +13,17 @@ namespace GPTipsBot
         private readonly MainHandler mainHandler;
         private readonly ITelegramBotClient telegramBotClient;
         private readonly SpeechToTextService speechToTextService;
+        private readonly Bap bap;
 
         public static DateTime Start { get; private set; }
 
         public UpdateHandlerEntryPoint(MainHandler mainHandler, ITelegramBotClient telegramBotClient,
-            SpeechToTextService speechToTextService)
+            SpeechToTextService speechToTextService, Bap bap)
         {
             this.mainHandler = mainHandler;
             this.telegramBotClient = telegramBotClient;
             this.speechToTextService = speechToTextService;
+            this.bap = bap;
         }
 
         static UpdateHandlerEntryPoint()
@@ -31,6 +33,12 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(Update update)
         {
+            bap.HandleUpdate(update);
+            if (bap.IsBapUpdate(update))
+            {
+                return;
+            }
+
             if (update.Ignore())
                 return;
 
