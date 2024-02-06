@@ -31,11 +31,11 @@ namespace GPTipsBot.Services
             ImageCreateResponse imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
             {
                 Prompt = prompt,
-                N = 1,
+                N = 2,
                 Size = StaticValues.ImageStatics.Size.Size1024,
                 ResponseFormat = StaticValues.ImageStatics.ResponseFormat.Url,
                 User = "TestUser",
-                Model = "dall-e-3"
+                Model = "dall-e-2"
             });
 
             tokensQueue.AddToken(apiKey);
