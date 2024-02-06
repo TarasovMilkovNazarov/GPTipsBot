@@ -38,7 +38,8 @@ namespace GPTipsBot.Services
                     {
                         api_key = _apiKey,
                         version = _apiVersion,
-                        update
+                        update = update,
+                        method = method
                     };
                     string json = JsonConvert.SerializeObject(obj);
 
