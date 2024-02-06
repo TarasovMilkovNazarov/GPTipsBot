@@ -34,7 +34,7 @@ namespace GPTipsBot.Extensions
             // Add your services with depedency injection.
             services
             .AddTransient<UserService>()
-            .AddSingleton<Bap>()
+            .AddSingleton<TelejetAdClient>()
             .AddSingleton<ImageCreatorService>()
             .AddSingleton<SpeechToTextService>()
             .AddTransient<ActionStatus>()
