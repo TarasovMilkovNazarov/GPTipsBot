@@ -128,7 +128,7 @@ namespace GPTipsBot.Services
                     cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (Exception ex) {
-                    //exceptions handled below
+                    //just skip exceptions handled below
                 }
 
                 context["retryAttempt"] = retryAttempt + 1;
