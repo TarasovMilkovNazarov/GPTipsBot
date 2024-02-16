@@ -126,7 +126,7 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
 - To generate an image, enter the command /image, or use the menu button</value>
   </data>
   <data name="BotName" xml:space="preserve">
-    <value>ChatGPT + DALL-E | FREE</value>
+    <value>ChatGPT + DALL-E | FREE | Sora</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Operation canceled</value>
