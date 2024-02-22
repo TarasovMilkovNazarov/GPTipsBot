@@ -9,7 +9,7 @@ namespace GPTipsBot.Extensions
     {
         public static async Task SendTextMessageWithMenuKeyboard(this ITelegramBotClient botClient, long chatId, string text)
         {
-            await botClient.SendTextMessageAsync(chatId, text, replyMarkup: TelegramBotUIService.startKeyboard);
+            await botClient.SendTextMessageAsync(chatId, text, replyMarkup: CommandService.StartKeyboard);
         }
 
         public static async Task SendMarkdown2MessageAsync(

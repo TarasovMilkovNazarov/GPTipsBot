@@ -7,7 +7,7 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly UserRepository userRepository;
 
-        public DeleteUserHandler(MessageHandlerFactory messageHandlerFactory, UserRepository userRepository)
+        public DeleteUserHandler(HandlerFactory messageHandlerFactory, UserRepository userRepository)
         {
             this.userRepository = userRepository;
             SetNextHandler(messageHandlerFactory.Create<RecoveryHandler>());

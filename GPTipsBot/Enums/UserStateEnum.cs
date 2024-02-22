@@ -5,12 +5,6 @@
         AwaitingImage,
         SendingFeedback,
         AwaitingMessage,
-        AwaitingLanguage,
-        AwaitingGames,
-        PlayingGuessWho,
-        PlayingTickTacToe,
-        PlayingBookDivination,
-        PlayingEmojiTranslations,
-        PlayingAdventureGame,
+        AwaitingLanguage
     }
 }

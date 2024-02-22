@@ -180,7 +180,8 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
     <value>Enter your message below. We appreciate any feedback.</value>
   </data>
   <data name="ShortDescription" xml:space="preserve">
-    <value>A bot integrated with GPT-3.5 + DALL-E. Helps to answer questions and create images based on text 🤖👋 (Author @alanextar)</value>
+    <value>Chat GPT-3.5 + DALL-E (@alanextar)
+tags: #OpenAI, #GPT4, #stablediffusion, #midjourney, #sora</value>
   </data>
   <data name="ShortDevDescription" xml:space="preserve">
     <value>It's for debugging purpose of the main bot(@GPTipsBot)</value>

@@ -10,7 +10,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<RateLimitingHandler> logger;
 
-        public RateLimitingHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, ILogger<RateLimitingHandler> logger)
+        public RateLimitingHandler(HandlerFactory messageHandlerFactory, ITelegramBotClient botClient, ILogger<RateLimitingHandler> logger)
         {
             this.botClient = botClient;
             this.logger = logger;

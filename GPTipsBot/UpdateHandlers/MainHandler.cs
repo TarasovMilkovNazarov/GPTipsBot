@@ -12,12 +12,12 @@ namespace GPTipsBot.UpdateHandlers
     public class MainHandler : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
-        private readonly MessageHandlerFactory messageHandlerFactory;
+        private readonly HandlerFactory messageHandlerFactory;
         private readonly UserService userService;
         private readonly UnitOfWork unitOfWork;
         private readonly ILogger<MainHandler> logger;
 
-        public MainHandler(MessageHandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
+        public MainHandler(HandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
             ILogger<MainHandler> logger, UserService userService)
         {
             this.messageHandlerFactory = messageHandlerFactory;
@@ -42,7 +42,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.CallbackQuery != null)
             {
-                SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
+                SetNextHandler(messageHandlerFactory.Create<CommandHandlerNew>());
                 await base.HandleAsync(update);
                 return;
             }

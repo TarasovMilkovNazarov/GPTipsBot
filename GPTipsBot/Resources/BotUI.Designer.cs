@@ -61,24 +61,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Приключение.
-        /// </summary>
-        internal static string AdventureButton {
-            get {
-                return ResourceManager.GetString("AdventureButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Гадание по книгам.
-        /// </summary>
-        internal static string BookDivinationButton {
-            get {
-                return ResourceManager.GetString("BookDivinationButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Отмена.
         /// </summary>
         internal static string CancelButton {
@@ -93,15 +75,6 @@ namespace GPTipsBot.Resources {
         internal static string ContinueButton {
             get {
                 return ResourceManager.GetString("ContinueButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Эмодзи ребус.
-        /// </summary>
-        internal static string EmojiTranslationButton {
-            get {
-                return ResourceManager.GetString("EmojiTranslationButton", resourceCulture);
             }
         }
         
@@ -129,24 +102,6 @@ namespace GPTipsBot.Resources {
         internal static string FeedbackButton {
             get {
                 return ResourceManager.GetString("FeedbackButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Игры.
-        /// </summary>
-        internal static string GamesButton {
-            get {
-                return ResourceManager.GetString("GamesButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Отгадай кто.
-        /// </summary>
-        internal static string GuessWhoButton {
-            get {
-                return ResourceManager.GetString("GuessWhoButton", resourceCulture);
             }
         }
         
@@ -264,15 +219,6 @@ namespace GPTipsBot.Resources {
         internal static string StopRequestButton {
             get {
                 return ResourceManager.GetString("StopRequestButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Крестики нолики.
-        /// </summary>
-        internal static string TickTackToeButton {
-            get {
-                return ResourceManager.GetString("TickTackToeButton", resourceCulture);
             }
         }
     }

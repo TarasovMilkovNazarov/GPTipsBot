@@ -228,7 +228,8 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Бот с интеграцией GPT-3.5 + DALL-E. Поможет ответить на вопросы и создать изображение по тексту 🤖👋 (Автор @alanextar).
+        ///   Looks up a localized string similar to Chat GPT-3.5 + DALL-E (@alanextar)
+        ///тэги: #нейросеть, #OpenAI, #GPT4, #stablediffusion, #midjourney, #sora.
         /// </summary>
         public static string ShortDescription {
             get {

@@ -5,9 +5,9 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class GroupMessageHandler : BaseMessageHandler
     {
-        public GroupMessageHandler(MessageHandlerFactory messageHandlerFactory)
+        public GroupMessageHandler(HandlerFactory messageHandlerFactory)
         {
-            SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
+            SetNextHandler(messageHandlerFactory.Create<CommandHandlerNew>());
         }
 
         public override async Task HandleAsync(UpdateDecorator update)

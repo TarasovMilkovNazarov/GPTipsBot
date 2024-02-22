@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -20,50 +21,44 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ActionStatus sendImageStatus;
         private readonly ImageCreatorService imageCreatorService;
         private readonly MessageRepository messageRepository;
+        private readonly HandlerFactory messageHandlerFactory;
         public const int imageTextDescriptionLimit = 1000;
         public const int imagesPerDayLimit = 10;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
-            ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
+            ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository,
+            HandlerFactory messageHandlerFactor)
         {
             this.botClient = botClient;
             this.logger = logger;
             this.sendImageStatus = sendImagestatus;
             this.imageCreatorService = imageCreatorService;
             this.messageRepository = messageRepository;
+            this.messageHandlerFactory = messageHandlerFactor;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
+            var isProhibitedRequest = await HandleViolations(update);
+            if (isProhibitedRequest)
+            {
+                return;
+            }
+
             var userKey = update.UserChatKey;
-
-            if (update.Message.Text.Length > imageTextDescriptionLimit)
-            {
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
-                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
-                return;
-            }
-
-            if (messageRepository.GetTodayImagesCount(userKey) > imagesPerDayLimit)
-            {
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImagesPerDayLimit, imagesPerDayLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
-                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
-                return;
-            }
-
             update.ServiceMessage.TelegramMessageId = await sendImageStatus
                 .Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto);
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                var token = MainHandler.userState[update.UserChatKey]
+                var token = MainHandler.userState[userKey]
                     .messageIdToCancellation[update.ServiceMessage.TelegramMessageId ?? 
                         throw new InvalidOperationException()].Token;
 
                 var imgSrcs = await imageCreatorService.GenerateImage(update.Message.Text);
                 update.Reply.Text = string.Join("\n", imgSrcs);
                 messageRepository.AddMessage(update.Reply);
-                var replyMarkup = TelegramBotUIService.cancelKeyboard;
+                var replyMarkup = CommandService.CancelKeyboard;
                 var telegramMediaList = imgSrcs.Select((src, i) => new InputMediaPhoto(InputFile.FromString(src))).ToList();
 
                 await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true,
@@ -109,6 +104,28 @@ namespace GPTipsBot.UpdateHandlers
 
             // Call next handler
             await base.HandleAsync(update);
+        }
+
+        private async Task<bool> HandleViolations(UpdateDecorator update)
+        {
+            var userKey = update.UserChatKey;
+
+            if (update.Message.Text.Length > imageTextDescriptionLimit)
+            {
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: CommandService.CancelKeyboard);
+                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
+
+                return true;
+            }
+
+            if (messageRepository.GetTodayImagesCount(userKey) > imagesPerDayLimit)
+            {
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImagesPerDayLimit, imagesPerDayLimit), replyMarkup: CommandService.CancelKeyboard);
+                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
+                return true;
+            }
+
+            return false;
         }
     }
 }

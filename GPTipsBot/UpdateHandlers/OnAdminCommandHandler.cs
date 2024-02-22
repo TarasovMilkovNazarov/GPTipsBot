@@ -11,7 +11,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient botClient;
 
         public OnAdminCommandHandler(
-            MessageHandlerFactory messageHandlerFactory,
+            HandlerFactory messageHandlerFactory,
             ITelegramBotClient botClient)
         {
             this.botClient = botClient;

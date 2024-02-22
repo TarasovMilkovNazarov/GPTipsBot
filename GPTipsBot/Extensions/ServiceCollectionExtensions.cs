@@ -8,6 +8,7 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
+using GPTipsBot.Dtos.Commands;
 
 namespace GPTipsBot.Extensions
 {
@@ -35,10 +36,11 @@ namespace GPTipsBot.Extensions
             services
             .AddTransient<UserService>()
             .AddSingleton<TelejetAdClient>()
+            .AddScoped<CommandService>()
             .AddSingleton<ImageCreatorService>()
             .AddSingleton<SpeechToTextService>()
             .AddTransient<ActionStatus>()
-            .AddTransient<MessageHandlerFactory>()
+            .AddTransient<HandlerFactory>()
             .AddTransient<MainHandler>()
             .AddTransient<DeleteUserHandler>()
             .AddTransient<RecoveryHandler>()
@@ -47,7 +49,7 @@ namespace GPTipsBot.Extensions
             .AddTransient<MessageTypeHandler>()
             .AddTransient<GroupMessageHandler>()
             .AddTransient<CrudHandler>()
-            .AddTransient<CommandHandler>()
+            .AddTransient<CommandHandlerNew>()
             .AddTransient<ImageGeneratorHandler>()
             .AddTransient<ChatGptHandler>()
             .AddScoped<MessageService>()
@@ -73,6 +75,14 @@ namespace GPTipsBot.Extensions
             });
 
             services.AddDbContext<ApplicationContext>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddCommands(this IServiceCollection services)
+        {
+            services
+            .AddSingleton<ImageCommand>();
 
             return services;
         }

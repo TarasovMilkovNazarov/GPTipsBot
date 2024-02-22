@@ -2,11 +2,11 @@
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class MessageHandlerFactory
+    public class HandlerFactory
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public MessageHandlerFactory(IServiceProvider serviceProvider)
+        public HandlerFactory(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }

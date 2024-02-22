@@ -2,6 +2,7 @@
 using GPTipsBot;
 using GPTipsBot.Db;
 using GPTipsBot.Extensions;
+using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
@@ -84,13 +85,13 @@ namespace GPTipsBotTests.Services
         {
             var mainHandler = _services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
-            updateDecorator.Message.Text = BotMenu.ChooseLangCommand;
+            updateDecorator.Message.Text = CommandHelper.SelectLanguage;
 
             await mainHandler.HandleAsync(updateDecorator);
 
             updateDecorator.Message.Text = "Русский";
             await mainHandler.HandleAsync(updateDecorator);
-            CultureInfo.CurrentUICulture = new CultureInfo("ru");
+            CultureInfo.CurrentUICulture = LocalizationManager.Ru;
 
             Assert.AreEqual(BotResponse.LanguageWasSetSuccessfully, updateDecorator.Reply.Text);
         }
