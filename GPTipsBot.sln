@@ -5,7 +5,12 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPTipsBot", "GPTipsBot\GPTipsBot.csproj", "{31CAB337-D2AD-45A7-9664-039626051318}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPTipsBotTests", "GPTipsBotTests\GPTipsBotTests.csproj", "{01DADEF3-32FA-40A6-864C-B05FB6E1C57A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPTipsBotTests", "GPTipsBotTests\GPTipsBotTests.csproj", "{01DADEF3-32FA-40A6-864C-B05FB6E1C57A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AB37E43D-9D60-47F7-998B-724EAAEB6712}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

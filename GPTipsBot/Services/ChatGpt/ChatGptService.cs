@@ -48,7 +48,7 @@ namespace GPTipsBot.Services
                 textWithContext = PrepareContext(update.UserChatKey, update.Message.ContextId.Value);
             }
 
-            return await SendMessageInternal(textWithContext, token);
+            return await SendMessageToChatGpt(textWithContext, token);
         }
 
         public ChatMessage[] PrepareContext(UserChatKey userKey, long contextId)
@@ -77,7 +77,7 @@ namespace GPTipsBot.Services
             return contextWindow.GetContext();
         }
 
-        private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
+        public async Task<ChatCompletionCreateResponse?> SendMessageToChatGpt(ChatMessage[] messages, CancellationToken cancellationToken)
         {
             const int maxRetryCount = 4;
 
@@ -234,5 +234,6 @@ namespace GPTipsBot.Services
     public interface IGpt
     {
         Task<ChatCompletionCreateResponse?> SendMessage(UpdateDecorator update, CancellationToken token);
+        Task<ChatCompletionCreateResponse?> SendMessageToChatGpt(ChatMessage[] messages, CancellationToken cancellationToken);
     }
 }

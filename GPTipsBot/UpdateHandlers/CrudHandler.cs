@@ -23,6 +23,15 @@ namespace GPTipsBot.UpdateHandlers
                 SetNextHandler(messageHandlerFactory.Create<ImageGeneratorHandler>());
             }
 
+            if (MainHandler.userState.ContainsKey(update.UserChatKey) && 
+                MainHandler.userState[update.UserChatKey].CurrentState == Enums.UserStateEnum.AwaitingSummary)
+            {
+                update.Message.ContextBound = false;
+                SetNextHandler(messageHandlerFactory.Create<ChatGptHandler>());
+                await base.HandleAsync(update);
+                return;
+            }
+
             messageRepository.AddMessage(update.Message);
 
             await base.HandleAsync(update);

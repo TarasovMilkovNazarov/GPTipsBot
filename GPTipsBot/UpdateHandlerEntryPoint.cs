@@ -2,6 +2,7 @@
 using GPTipsBot.Localization;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
+using Microsoft.SemanticKernel.Text;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -34,6 +35,29 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(Update update)
         {
+            string filePath = "John Grey - Men Are from Mars Women Are from Venus.txt";
+            var text = "";
+
+            // Check if the file exists
+            if (System.IO.File.Exists(filePath))
+            {
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        text += line;
+                        Console.WriteLine(line);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("File not found.");
+            }
+
+            update.Message.Text = text;
+
             var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
             if (!needHandleUpd)
             {

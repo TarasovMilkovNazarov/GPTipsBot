@@ -9,20 +9,20 @@ using GPTipsBot.Resources;
 using OpenAI.ObjectModels.ResponseModels;
 using Telegram.Bot.Exceptions;
 using Microsoft.SemanticKernel.Text;
-using static System.Net.Mime.MediaTypeNames;
 using OpenAI.ObjectModels.RequestModels;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class ChatGptHandler : BaseMessageHandler
+    public class SummaryHandler : BaseMessageHandler
     {
+        private const long MaxCharactersCount = 10000;
         private readonly MessageRepository messageRepository;
         private readonly IGpt gptService;
         private readonly ActionStatus typingStatus;
         private readonly ILogger<ChatGptHandler> log;
         private readonly ITelegramBotClient botClient;
 
-        public ChatGptHandler(
+        public SummaryHandler(
             MessageRepository messageRepository,
             IGpt gptService,
             ActionStatus typingStatus,
@@ -38,9 +38,10 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            var shortMessage = update.Message.Text.Truncate(30) + "...";
             try
             {
+                var fileText = ReadFile();
+
                 update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
                 var sw = Stopwatch.StartNew();
@@ -51,14 +52,14 @@ namespace GPTipsBot.UpdateHandlers
 
                 try
                 {
-                    var lines = TextChunker.SplitPlainTextLines(update.Message.Text, 40);
+                    var systemPropmpt = new ChatMessage("system", "Сделай краткое резюме по тексту");
+                    var lines = TextChunker.SplitPlainTextLines(fileText, 40);
                     var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 1000, chunkHeader: "DOCUMENT NAME: test.txt\n\n");
 
                     string[] summaries = new string[paragraphs.Count];
                     for (int i = 0; i < paragraphs.Count; i++)
                     {
                         string? paragraph = paragraphs[i];
-                        var systemPropmpt = new ChatMessage("system", "Сделай краткое резюме по тексту");
                         var paragraphToResume = new ChatMessage("user", paragraph);
                         var summary = await gptService.SendMessageToChatGpt(new[] { systemPropmpt, paragraphToResume }, token);
                         summaries[i] = summary.Choices.FirstOrDefault()?.Message.Content;
@@ -67,7 +68,6 @@ namespace GPTipsBot.UpdateHandlers
                     currentSummary = summaries[0];
                     for (int i = 1; i < summaries.Length; i++)
                     {
-                        var systemPropmpt = new ChatMessage("system", "Сделай краткое резюме по тексту");
                         var mergedSummaryWithText = currentSummary + "\r\n" + summaries[i];
                         var textToResume = new ChatMessage("user", mergedSummaryWithText);
                         var summaryResponse = await gptService.SendMessageToChatGpt(new[] { systemPropmpt, textToResume }, token);
@@ -76,7 +76,7 @@ namespace GPTipsBot.UpdateHandlers
                 }
                 catch (OperationCanceledException)
                 {
-                    log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
+                    log.LogInformation("Summarization was canceled");
                     return;
                 }
                 catch (ChatGptException ex)
@@ -91,26 +91,18 @@ namespace GPTipsBot.UpdateHandlers
                     sw.Stop();
                 }
 
-                log.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
+                log.LogInformation("Get response to summarization takes {duration}s", sw.Elapsed.TotalSeconds);
 
                 update.Reply.Text = currentSummary;
                 update.Reply.Role = Enums.MessageOwner.Assistant;
                 update.Reply.ContextBound = true;
                 messageRepository.AddMessage(update.Reply, update.Message.Id);
-                await botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, update.Reply.Text, (int)update.Message.TelegramMessageId!);
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, (int)update.Message.TelegramMessageId!);
             }
             catch (ClientException ex)
             {
-                log.LogInformation(ex, shortMessage);
+                log.LogInformation(ex, null);
                 await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
-                return;
-            }
-            catch (ApiRequestException ex)
-            when (ex.Message.Contains("can't parse entities"))
-            {
-                var shortReply = update.Reply.Text.Truncate(30) + "...";
-                log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
-                await botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             finally
@@ -120,6 +112,37 @@ namespace GPTipsBot.UpdateHandlers
 
             // Call next handler
             await base.HandleAsync(update);
+        }
+
+        private string ReadFile()
+        {
+            string filePath = "John Grey - Men Are from Mars Women Are from Venus.txt";
+            var text = "";
+            var numberOfCharacters = File.ReadAllLines(filePath).Sum(s => s.Length);
+            if (numberOfCharacters > MaxCharactersCount)
+            {
+                throw new ClientException($"Too much characters in file. Please send file with less that {MaxCharactersCount}");
+            }
+
+            // Check if the file exists
+            if (System.IO.File.Exists(filePath))
+            {
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        text += line;
+                        Console.WriteLine(line);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("File not found.");
+            }
+
+            return text;
         }
     }
 }

@@ -5,6 +5,7 @@
         AwaitingImage,
         SendingFeedback,
         AwaitingMessage,
-        AwaitingLanguage
+        AwaitingLanguage,
+        AwaitingSummary
     }
 }
