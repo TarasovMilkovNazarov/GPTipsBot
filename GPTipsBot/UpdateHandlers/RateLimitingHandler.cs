@@ -23,10 +23,13 @@ namespace GPTipsBot.UpdateHandlers
             var telegramId = update.UserChatKey.Id;
             var chatId = update.UserChatKey.ChatId;
 
-            if (MessageService.UserToMessageCount.TryGetValue(telegramId, out var mesCount))
+            if(!MessageService.UserToMessageCount.ContainsKey(telegramId))
             {
-                MessageService.UserToMessageCount[telegramId] += 1;
+                MessageService.UserToMessageCount.Add(telegramId, 0);
             }
+
+            MessageService.UserToMessageCount[telegramId] += 1;
+            var mesCount = MessageService.UserToMessageCount[telegramId];
             
             if(mesCount > MessageService.MaxMessagesCountPerMinute)
             {
