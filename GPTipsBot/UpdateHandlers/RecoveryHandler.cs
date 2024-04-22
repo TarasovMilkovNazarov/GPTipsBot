@@ -28,6 +28,11 @@ namespace GPTipsBot.UpdateHandlers
 
             var chatId = update.UserChatKey.ChatId;
 
+            if (update.Message.CreatedAt < UpdateHandlerEntryPoint.Start)
+            {
+                return;
+            }
+
             if (UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
             {
                 if (update.IsGroupOrChannel)
