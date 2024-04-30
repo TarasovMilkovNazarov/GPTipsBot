@@ -11,11 +11,11 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Hosting: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq
 * Logs: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq/logging/group/e23pildlggn1clcjtr5u/logs?from=now-1h&to=now&size=100&linesInRow=1
 * Registry: https://hub.docker.com/r/alanextar/gptipsbot
-* Auto Deploy: нужно запушить тег с именем `v*`, например `v4.27.3`, `v0.4.91-alfa03`, `v5.3`
+* Auto Deploy: пушим ветку release
 
 ## Как это работает
 * На ВМ крутятся оба контейнера. С приложением и с базой.
-* Есть третий контейнер, который обновляет приложение как только в хабе появлется новый latest образ
+* Есть третий контейнер, который обновляет приложение как только в registry появлется новый latest образ
 * Настроен crontab на создание бэкапов БД. Посмотреть настроенные джобы `sudo crontab -l`. Там будет видно какой скрипт он запускает
 * Для рестора надо выполнить эту команду, **указав имя нужного файла**
 ```bash
@@ -30,7 +30,11 @@ cat /home/app/backup/full_backup_$DATE.sql | docker exec -i gptipsbot-bd psql -U
 * `docker image push alanextar/gptipsbot:%НоваяВерсию%`
 
 ### Tips
-#### BashLinuxEtc
+#### 
+
+#### Автозапускалка контейнеров от яндекса
+* Логи смотреть тут `sudo journalctl -n 11 -r -u yc-container-daemon`
+
 ##### adduser
 * `sudo useradd -m -d /home/$username -s /bin/bash $username`
 * `sudo su - $username`
