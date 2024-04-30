@@ -56,7 +56,7 @@ namespace GPTipsBot.Repositories
 
             return lastMes?.ContextId;
         }
-
+        
         public List<Message> GetRecentContextMessages(UserChatKey userKey, long contextId)
         {
             var messages = context.Messages.AsNoTracking().Where(x => 
@@ -67,6 +67,16 @@ namespace GPTipsBot.Repositories
                 .OrderByDescending(x => x.CreatedAt).Take(ContextWindow.WindowSize);
 
             return messages.ToList();
+        }
+
+        public int GetTodayImagesCount(UserChatKey userKey)
+        {
+            var imagesCount = context.Messages.AsNoTracking().Where(x => 
+                    x.UserId == userKey.Id &&  x.Text != null && 
+                    x.Text.Contains("https://oaidalleapiprodscus"))
+                .Where(m => m.CreatedAt.Date == DateTime.UtcNow.Date).Count();
+
+            return imagesCount;
         }
     }
 }

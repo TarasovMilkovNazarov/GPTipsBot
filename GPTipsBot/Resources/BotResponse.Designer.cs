@@ -75,7 +75,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ChatGPT + DALL-E | Бесплатный.
+        ///   Looks up a localized string similar to ChatGPT + DALL-E | Бесплатный | Sora.
         /// </summary>
         public static string BotName {
             get {
@@ -152,6 +152,15 @@ namespace GPTipsBot.Resources {
         public static string ImageDescriptionLimitWarning {
             get {
                 return ResourceManager.GetString("ImageDescriptionLimitWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ❗️Превышен дневной лимит запросов на генерацию изображений (&gt; {0}).
+        /// </summary>
+        public static string ImagesPerDayLimit {
+            get {
+                return ResourceManager.GetString("ImagesPerDayLimit", resourceCulture);
             }
         }
         

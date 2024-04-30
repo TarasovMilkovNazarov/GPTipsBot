@@ -126,7 +126,7 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
 - To generate an image, enter the command /image, or use the menu button</value>
   </data>
   <data name="BotName" xml:space="preserve">
-    <value>ChatGPT + DALL-E | FREE</value>
+    <value>ChatGPT + DALL-E | FREE | Sora</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Operation canceled</value>
@@ -151,6 +151,9 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and start again with the /image command.</value>
+  </data>
+  <data name="ImagesPerDayLimit" xml:space="preserve">
+    <value>❗️ Generated images per day exceeded (&gt; {0})</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>To continue please enter a text description of the image up to {0} characters in length. To quit from image generation mode send /cancel command or press 'Cancel' bots keyboard button.</value>

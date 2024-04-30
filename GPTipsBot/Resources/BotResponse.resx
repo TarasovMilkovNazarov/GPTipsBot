@@ -126,7 +126,7 @@
 - для генерации изображения введите команду /image, либо воспользуйтесь кнопкой меню</value>
   </data>
   <data name="BotName" xml:space="preserve">
-    <value>ChatGPT + DALL-E | Бесплатный</value>
+    <value>ChatGPT + DALL-E | Бесплатный | Sora</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Операция отменена</value>
@@ -151,6 +151,9 @@
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>
+  </data>
+  <data name="ImagesPerDayLimit" xml:space="preserve">
+    <value>❗️Превышен дневной лимит запросов на генерацию изображений (&gt; {0})</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку 'Отмена'</value>

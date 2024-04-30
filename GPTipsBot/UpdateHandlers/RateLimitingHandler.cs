@@ -23,26 +23,27 @@ namespace GPTipsBot.UpdateHandlers
             var telegramId = update.UserChatKey.Id;
             var chatId = update.UserChatKey.ChatId;
 
-            if (!MessageService.UserToMessageCount.TryGetValue(telegramId, out var mesCount))
+            if(!MessageService.UserToMessageCount.ContainsKey(telegramId))
             {
-                MessageService.UserToMessageCount[telegramId] = 1;
-            }
-            else
-            {
-                if (mesCount + 1 > MessageService.MaxMessagesCountPerMinute)
-                {
-                    logger.LogError("Max messages limit reached");
-                    update.Reply.Text = string.Format(BotResponse.TooManyRequests, MessageService.ResettingInterval);
-
-                    await botClient.SendTextMessageAsync(chatId, update.Reply.Text);
-
-                    return;
-                }
-
-                MessageService.UserToMessageCount[telegramId] += 1;
+                MessageService.UserToMessageCount.Add(telegramId, 0);
             }
 
-            // Call next handler
+            MessageService.UserToMessageCount[telegramId] += 1;
+            var mesCount = MessageService.UserToMessageCount[telegramId];
+            
+            if(mesCount > MessageService.MaxMessagesCountPerMinute)
+            {
+                return;
+            }
+            //send message for the first limit breaking
+            else if(mesCount == MessageService.MaxMessagesCountPerMinute)
+            {
+                logger.LogError("Max messages limit reached");
+                update.Reply.Text = string.Format(BotResponse.TooManyRequests, MessageService.ResettingInterval);
+                await botClient.SendTextMessageAsync(chatId, update.Reply.Text);
+                return;
+            }
+
             await base.HandleAsync(update);
         }
     }

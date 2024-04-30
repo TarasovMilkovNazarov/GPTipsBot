@@ -1,26 +1,21 @@
 ﻿using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
-using GPTipsBot.Services;
 using GPTipsBot.Utilities;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
     public class OnAdminCommandHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
-        private readonly ImageCreatorService imageCreatorService;
 
         public OnAdminCommandHandler(
             MessageHandlerFactory messageHandlerFactory,
-            ITelegramBotClient botClient,
-            ImageCreatorService imageCreatorService)
+            ITelegramBotClient botClient)
         {
             this.botClient = botClient;
             SetNextHandler(messageHandlerFactory.Create<RateLimitingHandler>());
-            this.imageCreatorService = imageCreatorService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)

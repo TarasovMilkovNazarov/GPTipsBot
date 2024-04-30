@@ -21,6 +21,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ImageCreatorService imageCreatorService;
         private readonly MessageRepository messageRepository;
         public const int imageTextDescriptionLimit = 1000;
+        public const int imagesPerDayLimit = 10;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             ActionStatus sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
@@ -39,6 +40,13 @@ namespace GPTipsBot.UpdateHandlers
             if (update.Message.Text.Length > imageTextDescriptionLimit)
             {
                 await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
+                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
+                return;
+            }
+
+            if (messageRepository.GetTodayImagesCount(userKey) > imagesPerDayLimit)
+            {
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImagesPerDayLimit, imagesPerDayLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }

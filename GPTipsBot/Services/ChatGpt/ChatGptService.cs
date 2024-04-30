@@ -13,6 +13,7 @@ using GPTipsBot.Exceptions;
 using TiktokenSharp;
 using GPTipsBot.Dtos;
 using GPTipsBot.Resources;
+using System.Net;
 
 namespace GPTipsBot.Services
 {
@@ -104,7 +105,7 @@ namespace GPTipsBot.Services
                 var openAiService = new OpenAIService(new OpenAiOptions()
                 {
                     ApiKey = currentToken
-                });
+                }, CreateProxyHttpClient());
 
                 var retryAttempt = context.ContainsKey("retryAttempt")
                     ? (int)context["retryAttempt"] : 0;
@@ -127,15 +128,15 @@ namespace GPTipsBot.Services
                     cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (Exception ex) {
-                    context["retryAttempt"] = retryAttempt + 1;
-
-                    HandleResponseErrors(response, currentToken);
-                    log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}", 
-                        retryAttempt, response?.Error?.Code, response?.Error?.Message);
-                    throw new ChatGptException(retryAttempt);
+                    //just skip exceptions handled below
                 }
 
-                
+                context["retryAttempt"] = retryAttempt + 1;
+
+                HandleResponseErrors(response, currentToken);
+                log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}", 
+                    retryAttempt, response?.Error?.Code, response?.Error?.Message);
+                throw new ChatGptException(retryAttempt);
             }, new Context(), cancellationToken);
 
             return response;
@@ -211,6 +212,22 @@ namespace GPTipsBot.Services
             }
 
             timer = setup_Timer(openaiAccountsRepository);
+        }
+
+        public static HttpClient CreateProxyHttpClient()
+        {
+            HttpClientHandler handler = new HttpClientHandler()
+            {
+                Proxy = new WebProxy(AppConfig.ProxyIP, int.Parse(AppConfig.ProxyPort))
+                {
+                    Credentials = new NetworkCredential(AppConfig.ProxyLogin, AppConfig.ProxyPwd)
+                },
+                UseProxy = true
+            };
+
+            HttpClient httpClient = new HttpClient(handler);
+
+            return httpClient;
         }
     }
 

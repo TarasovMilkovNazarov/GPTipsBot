@@ -62,7 +62,10 @@ namespace GPTipsBot.UpdateHandlers
 
             MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
 
-            await _timer.DisposeAsync();
+            if (_timer != null)
+            {
+                await _timer.DisposeAsync();
+            }
         }
     }
 } 
