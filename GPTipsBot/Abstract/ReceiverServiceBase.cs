@@ -91,8 +91,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
     {
         log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
             update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
-        return log.BeginScope("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
+        return log.BeginScope(update.Id);
     }
     
     private async Task WaitForUnfinishedTasks(List<Task> tasks, TimeSpan timeout)
