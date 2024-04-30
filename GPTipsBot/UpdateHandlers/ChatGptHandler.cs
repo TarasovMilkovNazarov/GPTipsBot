@@ -80,11 +80,9 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
-            catch (ApiRequestException ex)
-            when (ex.Message.Contains("can't parse entities"))
+            catch (ApiRequestException ex) when (ex.Message.Contains("can't parse entities"))
             {
-                var shortReply = update.Reply.Text.Truncate(30) + "...";
-                log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
+                log.LogInformation(ex, "Telegram returns error while parsing markdown in message. Trying to resend without markdown. Message: {reply}", update.Reply.Text);
                 await botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
