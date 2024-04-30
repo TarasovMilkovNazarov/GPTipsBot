@@ -11,12 +11,9 @@ RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
-COPY --from=build /app/publish .
-COPY scripts/*.conf ./fluentbit-conf/
-
+COPY --from=build /app/publish ./
 ARG VERSION
 ARG COMMITHASH
 ENV GPTIPSBOT_VERSION=$VERSION
 ENV GPTIPSBOT_COMMITHASH=$COMMITHASH
-
 ENTRYPOINT ["dotnet", "GPTipsBot.dll"]
