@@ -1,4 +1,5 @@
 ﻿using GPTipsBot;
+using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,11 +36,9 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
     /// <returns></returns>
     public async Task ReceiveAsync(CancellationToken stoppingToken)
     {
-        var tasks = new List<Task>();
-        var me = await botClient.GetMeAsync(stoppingToken);
-        AppConfig.BotName = me.Username ?? "GPTipsBot";
-        log.LogInformation("Start receiving updates for {BotName}", AppConfig.BotName);
+        await Init(stoppingToken);
 
+        var tasks = new List<Task>();
         try
         {
             // Start receiving updates
@@ -88,6 +87,14 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         {
             await WaitForUnfinishedTasks(tasks, TimeSpan.FromMinutes(1));
         }
+    }
+
+    private async Task Init(CancellationToken stoppingToken)
+    {
+        var me = await botClient.GetMeAsync(stoppingToken);
+        AppConfig.BotName = me.Username ?? "GPTipsBot";
+        log.LogInformation("Bot running. {BotName} is ready to receive messages", AppConfig.BotName);
+        _ = botClient.SendBotVersionAsync(AppConfig.AdminIds);
     }
 
     private async Task WaitForUnfinishedTasks(List<Task> tasks, TimeSpan timeout)

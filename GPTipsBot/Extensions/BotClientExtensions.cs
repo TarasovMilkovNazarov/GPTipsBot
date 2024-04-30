@@ -11,6 +11,19 @@ namespace GPTipsBot.Extensions
         {
             await botClient.SendTextMessageAsync(chatId, text, replyMarkup: TelegramBotUIService.startKeyboard);
         }
+        
+        public static async Task SendBotVersionAsync(this ITelegramBotClient botClient, params long[] chatIds)
+        {
+            foreach (var chatId in chatIds)
+            {
+                await botClient.SendTextMessageAsync(chatId, $"""
+Bot running on:
+
+Version: {StringUtilities.EscapeTextForMarkdown2(AppConfig.Version)}
+CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPTipsBot/commit/{AppConfig.CommitHash})
+""", null, ParseMode.MarkdownV2);
+            }
+        }
 
         public static async Task SendMarkdown2MessageAsync(
             this ITelegramBotClient botClient, 

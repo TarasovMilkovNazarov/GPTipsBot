@@ -47,10 +47,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text == "/version" && chatKey.IsAdmin())
             {
-                await botClient.SendTextMessageAsync(chatKey.ChatId, $"""
-Version: {StringUtilities.EscapeTextForMarkdown2(AppConfig.Version)}
-CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPTipsBot/commit/{AppConfig.CommitHash})
-""", null, ParseMode.MarkdownV2);
+                await botClient.SendBotVersionAsync(chatKey.ChatId);
                 return;
             }
 
