@@ -48,7 +48,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                 tasks.Add(Task.Run(async () =>
                 {
                     using var scope = serviceProvider.CreateScope();
-                    using (log.BeginScope(new { msgId = update.Id }))
+                    using (log.BeginScope(new [] {update.Id, update.Message?.From?.Id}))
                     {
                         log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
                             update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat.Id);
