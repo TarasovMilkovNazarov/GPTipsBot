@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
 
+// ReSharper disable once CheckNamespace
 namespace Telegram.Bot.Abstract;
 
 /// <summary>
@@ -41,7 +41,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         log.LogInformation("Start receiving updates for {BotName}", AppConfig.BotName);
 
         try
-        { 
+        {
             // Start receiving updates
             var updateReceiver = new QueuedUpdateReceiver(botClient, new ReceiverOptions(), PollingErrorHandler);
             await foreach (var update in updateReceiver.WithCancellation(stoppingToken))
@@ -49,13 +49,14 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                 tasks.Add(Task.Run(async () =>
                 {
                     using var scope = serviceProvider.CreateScope();
-                    using (CreateLogContextFor(update))
+                    using (log.BeginScope(new { msgId = update.Id }))
+                    {
+                        log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+                            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat.Id);
                         try
                         {
-                            {
-                                var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
-                                await worker.HandleUpdateAsync(update);
-                            }
+                            var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
+                            await worker.HandleUpdateAsync(update);
                         }
                         catch (ApiRequestException e)
                         {
@@ -66,9 +67,11 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             log.LogError(e, "Error while handling update");
                             if (update.Message == null)
                                 return;
-                
-                            await botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong, cancellationToken: stoppingToken);
+
+                            await botClient.SendTextMessageAsync(update.Message.Chat!.Id, BotResponse.SomethingWentWrong,
+                                cancellationToken: stoppingToken);
                         }
+                    }
                 }, stoppingToken));
             }
         }
@@ -79,7 +82,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         catch (Exception e)
         {
             log.LogCritical(e, "Пипец упалось всё! Получение сообщений от телеграмма остановленно. Завершаем работу приложения. " +
-                                  "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
+                               "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
         }
         finally
         {
@@ -87,20 +90,13 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         }
     }
 
-    private IDisposable? CreateLogContextFor(Update update)
-    {
-        log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat?.Id);
-        return log.BeginScope(update.Id);
-    }
-    
     private async Task WaitForUnfinishedTasks(List<Task> tasks, TimeSpan timeout)
     {
         var unfinished = tasks.Where(t => t is { IsCanceled: false, IsCompleted: false, IsFaulted: false });
-        
+
         if (!unfinished.Any())
             return;
-        
+
         log.LogInformation("Wait for {UnfinishedRequestCount} unfinished request from users", unfinished);
 
         var timeoutTask = TimeoutTask(timeout);
@@ -111,7 +107,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         else
             log.LogInformation("All tasks have been completed.");
     }
-    
+
     private static Task TimeoutTask(TimeSpan timeout)
     {
 #pragma warning disable CA2016
