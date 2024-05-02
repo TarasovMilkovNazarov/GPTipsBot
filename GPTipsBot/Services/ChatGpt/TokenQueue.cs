@@ -23,6 +23,7 @@ namespace GPTipsBot.Services
             if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiToken is not null)
                 return AppConfig.DebugOpenAiToken;
 
+            logger.LogInformation("Tokens count {tokensCount}", tokens.Count);
             if (await semaphore.WaitAsync(TimeSpan.FromMinutes(3)))
             {
                 if (tokens.TryDequeue(out var token))
@@ -40,6 +41,7 @@ namespace GPTipsBot.Services
         public void AddToken(string token)
         {
             tokens.Enqueue(token);
+            logger.LogInformation("Tokens count {tokensCount}", tokens.Count);
             semaphore.Release();
         }
     }
