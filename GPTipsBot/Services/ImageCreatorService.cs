@@ -13,20 +13,21 @@ namespace GPTipsBot.Services
     {
         private readonly ILogger<ImageCreatorService> log;
         private readonly TokenQueue tokensQueue;
-        public ImageCreatorService(ILogger<ImageCreatorService> log, TokenQueue tokensQueue)
+        private readonly OpenAiServiceCreator openAiServiceCreator;
+
+        public ImageCreatorService(ILogger<ImageCreatorService> log, TokenQueue tokensQueue, 
+            OpenAiServiceCreator openAiServiceCreator)
         {
             this.log = log;
             this.tokensQueue = tokensQueue;
+            this.openAiServiceCreator = openAiServiceCreator;
         }
 
         public async Task<List<string>> GenerateImage(string prompt)
         {
             var apiKey = await tokensQueue.GetTokenAsync();
 
-            var openAiService = new OpenAIService(new OpenAiOptions()
-            {
-                ApiKey = apiKey
-            }, ChatGptService.CreateProxyHttpClient());
+            var openAiService = openAiServiceCreator.Create(apiKey);
 
             ImageCreateResponse imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
             {

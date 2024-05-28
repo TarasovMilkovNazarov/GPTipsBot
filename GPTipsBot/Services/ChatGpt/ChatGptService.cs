@@ -1,19 +1,13 @@
 ﻿using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
-using OpenAI;
-using OpenAI.Managers;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
 using Timer = System.Timers.Timer;
-using GptModels = OpenAI.ObjectModels;
 using GPTipsBot.Repositories;
 using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
-using TiktokenSharp;
-using GPTipsBot.Dtos;
-using GPTipsBot.Resources;
-using System.Net;
+using System.Text.Json;
 
 namespace GPTipsBot.Services
 {
@@ -22,16 +16,18 @@ namespace GPTipsBot.Services
         private readonly ILogger<ChatGptService> log;
         private readonly OpenaiAccountsRepository openaiAccountsRepository;
         private readonly TokenQueue tokenQueue;
-        private readonly MessageRepository messageRepository;
+        private readonly OpenAiServiceCreator openAiServiceCreator;
+        private readonly ContextWindow contextWindow;
         private Timer timer;
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
-            MessageRepository messageRepository, TokenQueue tokenQueue)
+            TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow)
         {
             this.log = log;
             this.openaiAccountsRepository = openaiAccountsRepository;
-            this.messageRepository = messageRepository;
             this.tokenQueue = tokenQueue;
+            this.openAiServiceCreator = openAiServiceCreator;
+            this.contextWindow = contextWindow;
             timer = setup_Timer(openaiAccountsRepository);
         }
 
@@ -45,36 +41,10 @@ namespace GPTipsBot.Services
             }
             else
             {
-                textWithContext = PrepareContext(update.UserChatKey, update.Message.ContextId.Value);
+                textWithContext = contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value);
             }
 
             return await SendMessageInternal(textWithContext, token);
-        }
-
-        public ChatMessage[] PrepareContext(UserChatKey userKey, long contextId)
-        {
-            var messages = messageRepository
-                .GetRecentContextMessages(userKey, contextId).Where(x => !string.IsNullOrEmpty(x.Text));
-            var contextWindow = new ContextWindow();
-
-            foreach (var item in messages)
-            {
-                var isMessageAddedToContext = contextWindow.TryToAddMessage(item.Text, item.Role.ToString().ToLower(), out var messageTokensCount);
-                if (isMessageAddedToContext)
-                {
-                    continue;
-                }
-
-                if (contextWindow.TokensCount == 0)
-                {
-                    //todo reset context or suggest user to reset: send inline command with reset
-                    throw new ClientException(string.Format(BotResponse.TokensLimitExceeded, ContextWindow.TokensLimit, messageTokensCount));
-                }
-
-                break;
-            }
-
-            return contextWindow.GetContext();
         }
 
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
@@ -101,11 +71,8 @@ namespace GPTipsBot.Services
 
             await policy.ExecuteAsync(async (context, cancellationToken) =>
             {
-                var currentToken = await tokenQueue.GetTokenAsync();
-                var openAiService = new OpenAIService(new OpenAiOptions()
-                {
-                    ApiKey = currentToken
-                }, CreateProxyHttpClient());
+                var currentToken = await openAiServiceCreator.GetApiKeyAsync();
+                var openAiService = openAiServiceCreator.Create(currentToken);
 
                 var retryAttempt = context.ContainsKey("retryAttempt")
                     ? (int)context["retryAttempt"] : 0;
@@ -113,28 +80,32 @@ namespace GPTipsBot.Services
                 try
                 {
                     response = await openAiService.ChatCompletion.CreateCompletion(
-                        new ChatCompletionCreateRequest { Messages = messages }, 
-                        GptModels.Models.Gpt_3_5_Turbo, cancellationToken);
+                        new ChatCompletionCreateRequest { Messages = messages }, cancellationToken: cancellationToken);
 
                     if (response.Successful)
                     {
-                       tokenQueue.AddToken(currentToken);
-                       return;
+                        openAiServiceCreator.ReturnApiKey(currentToken);
+                        return;
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    tokenQueue.AddToken(currentToken);
+                    openAiServiceCreator.ReturnApiKey(currentToken);
                     cancellationToken.ThrowIfCancellationRequested();
                 }
-                catch (Exception ex) {
+                catch (JsonException)
+                {
+
+                }
+                catch (Exception ex)
+                {
                     //just skip exceptions handled below
                 }
 
                 context["retryAttempt"] = retryAttempt + 1;
 
                 HandleResponseErrors(response, currentToken);
-                log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}", 
+                log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}",
                     retryAttempt, response?.Error?.Code, response?.Error?.Message);
                 throw new ChatGptException(retryAttempt);
             }, new Context(), cancellationToken);
@@ -142,45 +113,36 @@ namespace GPTipsBot.Services
             return response;
         }
 
-        
-        public static long CountTokens(string message)
-        {
-            TikToken tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
-            var i = tikToken.Encode(message); //[15339, 1917]
-
-            return i.Count;
-        }
-
-        private void HandleResponseErrors(ChatCompletionCreateResponse? response, string currentToken)
+        private void HandleResponseErrors(ChatCompletionCreateResponse? response, string apiKey)
         {
             if (response == null)
             {
-                tokenQueue.AddToken(currentToken);
+                openAiServiceCreator.ReturnApiKey(apiKey);
                 return;
             }
 
             if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
             {
-                openaiAccountsRepository.Remove(currentToken, DeletionReason.Deactivated);
+                openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.Deactivated);
             }
             else if (response.Error?.Code == "insufficient_quota")
             {
-                openaiAccountsRepository.Remove(currentToken, DeletionReason.InsufficientQuota);
+                openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.InsufficientQuota);
             }
             else if (response.Error?.Code == "rate_limit_exceeded" && response.Error.Message != null)
             {
                 if (response.Error.Message.Contains("on requests per day"))
                 {
-                    openaiAccountsRepository.FreezeToken(currentToken);
+                    openaiAccountsRepository.FreezeApiKey(apiKey);
                 }
                 else if (response.Error.Message.Contains("on requests per min"))
                 {
-                    tokenQueue.AddToken(currentToken);
+                    openAiServiceCreator.ReturnApiKey(apiKey);
                 }
             }
             else
             {
-                tokenQueue.AddToken(currentToken);
+                openAiServiceCreator.ReturnApiKey(apiKey);
             }
         }
 
@@ -212,22 +174,6 @@ namespace GPTipsBot.Services
             }
 
             timer = setup_Timer(openaiAccountsRepository);
-        }
-
-        public static HttpClient CreateProxyHttpClient()
-        {
-            HttpClientHandler handler = new HttpClientHandler()
-            {
-                Proxy = new WebProxy(AppConfig.ProxyIP, int.Parse(AppConfig.ProxyPort))
-                {
-                    Credentials = new NetworkCredential(AppConfig.ProxyLogin, AppConfig.ProxyPwd)
-                },
-                UseProxy = true
-            };
-
-            HttpClient httpClient = new HttpClient(handler);
-
-            return httpClient;
         }
     }
 

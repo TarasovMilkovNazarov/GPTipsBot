@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Services
 {
-    public class TokenQueue
+    public class TokenQueue : IDisposable
     {
         private readonly ILogger<TokenQueue> logger;
         private readonly ConcurrentQueue<string> tokens;
@@ -20,8 +20,8 @@ namespace GPTipsBot.Services
 
         public async Task<string> GetTokenAsync()
         {
-            if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiToken is not null)
-                return AppConfig.DebugOpenAiToken;
+            if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiApiKey is not null)
+                return AppConfig.DebugOpenAiApiKey;
 
             logger.LogInformation("Tokens count {tokensCount}", tokens.Count);
             if (await semaphore.WaitAsync(TimeSpan.FromMinutes(3)))
@@ -43,6 +43,11 @@ namespace GPTipsBot.Services
             tokens.Enqueue(token);
             logger.LogInformation("Tokens count {tokensCount}", tokens.Count);
             semaphore.Release();
+        }
+
+        public void Dispose()
+        {
+            semaphore.Dispose();
         }
     }
 }

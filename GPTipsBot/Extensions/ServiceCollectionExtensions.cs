@@ -8,6 +8,8 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace GPTipsBot.Extensions
 {
@@ -54,6 +56,10 @@ namespace GPTipsBot.Extensions
             .AddTransient<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()
+            //.AddTransient<OpenAiServiceCreator, EuroHosterService>()
+            .AddTransient<OpenAiServiceCreator, ProxyApiService>()
+            //.AddTransient<OpenAiServiceCreator, PawanOsmanApiService>()
+            .AddTransient<ContextWindow>()
             .AddTransient<MessageRepository>()
             .AddTransient<UserRepository>()
             .AddTransient<BotSettingsRepository>()

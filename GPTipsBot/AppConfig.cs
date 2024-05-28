@@ -16,10 +16,12 @@
         public static string Env => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         public static string? Version => Environment.GetEnvironmentVariable("GPTIPSBOT_VERSION");
         public static string? CommitHash => Environment.GetEnvironmentVariable("GPTIPSBOT_COMMITHASH");
-        public static string? DebugOpenAiToken => Environment.GetEnvironmentVariable("DEBUG_OPENAI_TOKEN");
+        public static string? DebugOpenAiApiKey => Environment.GetEnvironmentVariable("DEBUG_OPENAI_TOKEN");
         public static string YandexCloudApiKey => Environment.GetEnvironmentVariable("YC_API_KEY");
         public static string YandexCloudFolderId => Environment.GetEnvironmentVariable("YC_FOLDER_ID");
         public static string TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
+        public static string ProxyApiApiKey => Environment.GetEnvironmentVariable("WWW_PROXY_API_API_KEY");
+        public static string PawanOsmanApiKey => Environment.GetEnvironmentVariable("PAWAN_OSMAN_API_KEY");
 
         private static string GetEnvStrict(string name)
         {

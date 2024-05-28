@@ -2,6 +2,7 @@
 using GPTipsBot.Localization;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
+using Prometheus;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -33,6 +34,8 @@ namespace GPTipsBot
 
         public async Task HandleUpdateAsync(Update update)
         {
+            //PrometheusMetrics.ProcessedItemsCounter.Inc();
+            //return;
             var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
             if (!needHandleUpd)
             {

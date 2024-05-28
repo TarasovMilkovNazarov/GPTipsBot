@@ -16,13 +16,13 @@ namespace GPTipsBot.Repositories
             this.context = context;
         } 
         
-        public void FreezeToken(string token)
+        public void FreezeApiKey(string token)
         {
             context.OpenaiAccounts.Where(x => x.Token == token)
                 .ExecuteUpdate(x => x.SetProperty(y => y.FreezedAt, DateTime.UtcNow));
         }
 
-        public void Remove(string token, DeletionReason reason)
+        public void RemoveApiKey(string token, DeletionReason reason)
         {
             context.OpenaiAccounts.Where(x => x.Token == token)
                 .ExecuteUpdate(x => x.SetProperty(y => y.IsDeleted, true));
