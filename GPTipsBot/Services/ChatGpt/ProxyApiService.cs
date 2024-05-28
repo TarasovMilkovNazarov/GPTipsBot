@@ -19,7 +19,7 @@ namespace GPTipsBot.Services
             {
                 BaseDomain = "https://api.proxyapi.ru/openai/v1",
                 ApiKey = token,
-                DefaultModelId = GptModels.Models.Gpt_3_5_Turbo
+                DefaultModelId = GptModels.Models.Gpt_3_5_Turbo_0125
             });
 
             return openAiService;
