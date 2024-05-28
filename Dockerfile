@@ -3,9 +3,12 @@ WORKDIR /src
 
 COPY *.sln .
 COPY GPTipsBot/GPTipsBot.csproj ./GPTipsBot/
+COPY OpenAI.SDK/OpenAI.csproj ./OpenAI.SDK/
 RUN dotnet restore GPTipsBot/GPTipsBot.csproj
+RUN dotnet restore OpenAI.SDK/OpenAI.csproj
 
 COPY GPTipsBot/. ./GPTipsBot/
+COPY OpenAI.SDK/. ./OpenAI.SDK/
 WORKDIR /src/GPTipsBot
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
