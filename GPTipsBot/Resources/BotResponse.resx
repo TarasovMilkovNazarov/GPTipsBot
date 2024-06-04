@@ -149,6 +149,10 @@
   <data name="Greeting" xml:space="preserve">
     <value>Привет!:) Чем могу помочь?</value>
   </data>
+  <data name="Hamster" xml:space="preserve">
+    <value>В hamster играют буквально все: бабушки в автобусе, таксисты, даже самые скептики нажимают на хайпового хомяка и зарабатывают реальную крипту. Успей, листинг должен состояться в июле
+https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
+  </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>
   </data>

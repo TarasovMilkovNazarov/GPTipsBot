@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Prometheus;
@@ -15,6 +16,7 @@ namespace GPTipsBot
         private readonly ITelegramBotClient telegramBotClient;
         private readonly SpeechToTextService speechToTextService;
         private readonly TelejetAdClient telejetAdClient;
+        private static HashSet<long> hamsterAdvertisedUsers = new HashSet<long>();
 
         public static DateTime Start { get; private set; }
 
@@ -36,11 +38,13 @@ namespace GPTipsBot
         {
             //PrometheusMetrics.ProcessedItemsCounter.Inc();
             //return;
-            var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
-            if (!needHandleUpd)
-            {
-                return;
-            }
+
+            //dont remove! uncomment telejet advertisement later
+            //var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
+            //if (!needHandleUpd)
+            //{
+            //    return;
+            //}
 
             if (update.Ignore())
                 return;
@@ -52,6 +56,14 @@ namespace GPTipsBot
             }
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
+
+            var chatId = extendedUpd.ChatId;
+            if (!hamsterAdvertisedUsers.Contains(chatId))
+            {
+                hamsterAdvertisedUsers.Add(chatId);
+                await telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster);
+            }
+
             await mainHandler.HandleAsync(extendedUpd);
         }
     }

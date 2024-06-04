@@ -147,6 +147,16 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to В hamster играют буквально все: бабушки в автобусе, таксисты, даже самые скептики нажимают на хайпового хомяка и зарабатывают реальную крипту. Успей, листинг должен состояться в июле
+        ///https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646.
+        /// </summary>
+        public static string Hamster {
+            get {
+                return ResourceManager.GetString("Hamster", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image.
         /// </summary>
         public static string ImageDescriptionLimitWarning {
