@@ -18,19 +18,22 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ActionStatus typingStatus;
         private readonly ILogger<ChatGptHandler> log;
         private readonly ITelegramBotClient botClient;
+        private readonly RateLimitCache rateLimitCache;
 
         public ChatGptHandler(
             MessageRepository messageRepository,
             IGpt gptService,
             ActionStatus typingStatus,
             ILogger<ChatGptHandler> log,
-            ITelegramBotClient botClient)
+            ITelegramBotClient botClient,
+            RateLimitCache rateLimitCache)
         {
             this.messageRepository = messageRepository;
             this.gptService = gptService;
             this.typingStatus = typingStatus;
             this.log = log;
             this.botClient = botClient;
+            this.rateLimitCache = rateLimitCache;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -63,6 +66,7 @@ namespace GPTipsBot.UpdateHandlers
                 }
                 finally
                 {
+                    // !response.Successful decrement
                     sw.Stop();
                 }
 

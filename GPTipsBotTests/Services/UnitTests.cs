@@ -2,7 +2,6 @@
 using GPTipsBot;
 using GPTipsBot.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using GPTipsBot.Extensions;
@@ -54,7 +53,7 @@ namespace GPTipsBotTests.Services
             var mainHandler = _services.GetRequiredService<UpdateHandlerEntryPoint>();
             await mainHandler.HandleUpdateAsync(telegramUpdate);
 
-            for (var i = 0; i < MessageService.MaxMessagesCountPerMinute; i++)
+            for (var i = 0; i < RateLimitCache.MaxMessagesCountPerMinute; i++)
             {
                 mainHandler = _services.GetRequiredService<UpdateHandlerEntryPoint>();
                 await mainHandler.HandleUpdateAsync(telegramUpdate);

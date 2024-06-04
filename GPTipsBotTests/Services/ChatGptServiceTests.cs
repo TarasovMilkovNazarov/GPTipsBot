@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-
-namespace GPTipsBot.Services.Tests
+﻿namespace GPTipsBot.Services.Tests
 {
     public class ChatGptServiceTests
     {

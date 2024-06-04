@@ -1,8 +1,6 @@
 ﻿using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
-using GPTipsBot.Utilities;
 using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {

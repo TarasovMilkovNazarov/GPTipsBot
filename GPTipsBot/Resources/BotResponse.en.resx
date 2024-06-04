@@ -150,7 +150,7 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
     <value>Hello! How can I help you?</value>
   </data>
   <data name="Hamster" xml:space="preserve">
-    <value>Everyone plays the hamster game: grandmothers on the bus, taxi drivers, even the most skeptical press the trendy hamster and earn real crypto. The story with NOTCOIN can repeat itself, hurry up, the listing should take place in July
+    <value>Hamster Kombat is a crypto exchange CEO simulator where you can become a CEO and build not only your own exchange, but also contribute to this whole project!
 https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
@@ -205,6 +205,9 @@ https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
     <value>The number of tokens in your message {1} exceeds the limit of {0} tokens. Please shorten your request. Consider that one word approximately contains one token.</value>
   </data>
   <data name="TooManyRequests" xml:space="preserve">
-    <value>❗️ Too many requests, please try again after {0} seconds.</value>
+    <value>❗️ Too many requests per minute, please try again later</value>
+  </data>
+  <data name="DailyLimitViolation" xml:space="preserve">
+    <value>❗️The daily limit of {0} requests has been reached. We look forward to seeing you tomorrow.</value>
   </data>
 </root>

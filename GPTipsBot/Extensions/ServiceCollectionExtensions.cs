@@ -8,8 +8,6 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
-using System.Text.Json;
-using Newtonsoft.Json;
 
 namespace GPTipsBot.Extensions
 {
@@ -52,7 +50,7 @@ namespace GPTipsBot.Extensions
             .AddTransient<CommandHandler>()
             .AddTransient<ImageGeneratorHandler>()
             .AddTransient<ChatGptHandler>()
-            .AddScoped<MessageService>()
+            .AddSingleton<RateLimitCache>()
             .AddTransient<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()

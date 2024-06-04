@@ -3,7 +3,6 @@ using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
-using Prometheus;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -16,12 +15,17 @@ namespace GPTipsBot
         private readonly ITelegramBotClient telegramBotClient;
         private readonly SpeechToTextService speechToTextService;
         private readonly TelejetAdClient telejetAdClient;
-        private static HashSet<long> hamsterAdvertisedUsers = new HashSet<long>();
+        private static object advertisementSyncObj = new object();
+        private static readonly HashSet<long> HamsterSent = new();
 
         public static DateTime Start { get; private set; }
 
-        public UpdateHandlerEntryPoint(MainHandler mainHandler, ITelegramBotClient telegramBotClient,
-            SpeechToTextService speechToTextService, TelejetAdClient telejetAdClient)
+        public UpdateHandlerEntryPoint(
+            MainHandler mainHandler,
+            ITelegramBotClient telegramBotClient,
+            SpeechToTextService speechToTextService,
+            TelejetAdClient telejetAdClient,
+            RateLimitCache rateLimitCache)
         {
             this.mainHandler = mainHandler;
             this.telegramBotClient = telegramBotClient;
@@ -49,7 +53,7 @@ namespace GPTipsBot
             if (update.Ignore())
                 return;
 
-            var extendedUpd = new UpdateDecorator(update);
+            var extendedUpd = new  UpdateDecorator(update);
             if (update.Message?.Voice != null)
             {
                 extendedUpd.Message.Text = await speechToTextService.RecognizeVoice(update.Message.Voice.FileId);
@@ -58,10 +62,13 @@ namespace GPTipsBot
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
 
             var chatId = extendedUpd.ChatId;
-            if (!hamsterAdvertisedUsers.Contains(chatId))
+
+            lock (advertisementSyncObj)
             {
-                hamsterAdvertisedUsers.Add(chatId);
-                await telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster);
+                if (HamsterSent.Add(chatId))
+                {
+                    telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster);
+                }
             }
 
             await mainHandler.HandleAsync(extendedUpd);

@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels;
-using OpenAI.Managers;
-using OpenAI;
 using OpenAI.ObjectModels.ResponseModels.ImageResponseModel;
 using GPTipsBot.Exceptions;
 

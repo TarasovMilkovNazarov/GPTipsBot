@@ -7,7 +7,6 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
 using System.Globalization;
 using Telegram.Bot;
@@ -59,7 +58,7 @@ namespace GPTipsBotTests.Services
         [SetUp]
         public void Setup()
         {
-            MessageService.ResetMessageCountsPerMinute(null);
+            RateLimitCache.ResetMessageCountsPerMinute(null);
         }
 
         [Test]

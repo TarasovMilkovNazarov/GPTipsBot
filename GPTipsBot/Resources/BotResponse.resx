@@ -150,8 +150,7 @@
     <value>Привет!:) Чем могу помочь?</value>
   </data>
   <data name="Hamster" xml:space="preserve">
-    <value>В hamster играют буквально все: бабушки в автобусе, таксисты, даже самые скептики нажимают на хайпового хомяка и зарабатывают реальную крипту. Успей, листинг должен состояться в июле
-https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
+    <value>Жмякай хомяка скорей https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>
@@ -205,6 +204,12 @@ https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
     <value>Количество токенов в вашем сообщении {1} превышает лимит в {0} токенов. Сократите своё сообщение. Считайте, что в одном слове содержится примерно 1 токен</value>
   </data>
   <data name="TooManyRequests" xml:space="preserve">
-    <value>❗️Слишком много запросов, попробуйте через {0} секунд</value>
+    <value>❗️Слишком много запросов в минуту, попробуйте позже</value>
+  </data>
+  <data name="DailyLimitViolation" xml:space="preserve">
+    <value>❗️Дневной лимит в {0} запросов исчерпан. Ждем вас завтра</value>
+  </data>
+  <data name="PleaseSetLanguage" xml:space="preserve">
+    <value>Выберите язык интерфейса(влияет только на перевод кнопок, общаться можно на люом языке)</value>
   </data>
 </root>

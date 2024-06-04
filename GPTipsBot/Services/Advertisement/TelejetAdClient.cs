@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Text;
 using Telegram.Bot.Types;
 using Newtonsoft.Json;
-using System.Net;
 using Newtonsoft.Json.Serialization;
 
 namespace GPTipsBot.Services

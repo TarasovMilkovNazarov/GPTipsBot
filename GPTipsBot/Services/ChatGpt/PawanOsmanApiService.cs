@@ -1,6 +1,5 @@
 ﻿using OpenAI;
 using OpenAI.Managers;
-using GptModels = OpenAI.ObjectModels;
 
 namespace GPTipsBot.Services
 {

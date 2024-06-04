@@ -3,7 +3,6 @@ using dotenv.net;
 using GPTipsBot.Extensions;
 using GPTipsBot.Logging;
 using Serilog;
-using Prometheus;
 
 //uncomment for sniffing requests in fiddler
 //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;

@@ -99,9 +99,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="Services\Games\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenAI.SDK\OpenAI.csproj" />
+    <ProjectReference Include="..\OpenAI.SDK\OpenAI.csproj">
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
 </Project>

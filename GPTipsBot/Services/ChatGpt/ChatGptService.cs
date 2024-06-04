@@ -7,7 +7,6 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
-using System.Text.Json;
 
 namespace GPTipsBot.Services
 {
@@ -82,6 +81,11 @@ namespace GPTipsBot.Services
                     response = await openAiService.ChatCompletion.CreateCompletion(
                         new ChatCompletionCreateRequest { Messages = messages }, cancellationToken: cancellationToken);
 
+                    // response = new ChatCompletionCreateResponse();
+                    // response.Choices = new() { new()
+                    //     { Message = new("system", "test") } };
+                    // await Task.Delay(2000);
+
                     if (response.Successful)
                     {
                         openAiServiceCreator.ReturnApiKey(currentToken);
@@ -92,10 +96,6 @@ namespace GPTipsBot.Services
                 {
                     openAiServiceCreator.ReturnApiKey(currentToken);
                     cancellationToken.ThrowIfCancellationRequested();
-                }
-                catch (JsonException)
-                {
-
                 }
                 catch (Exception ex)
                 {

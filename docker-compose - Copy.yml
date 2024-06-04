@@ -1,0 +1,55 @@
+version: '3'
+ 
+services:
+  gptipsbot:
+    container_name: gptipsbot-app
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./logs:/app/logs
+    env_file: .env
+    depends_on:
+      - fluentbit
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        tag: gptipsbot-app.logs
+    
+  postgres:
+    container_name: gptipsbot-db
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file: .env
+    
+  fluentbit:
+    container_name: fluentbit
+    image: fluent/fluent-bit
+    ports:
+      - 2020:2020
+      - 24224:24224
+      - 24224:24224/udp
+    volumes:
+      - ./scripts/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./scripts/parser.conf:/fluent-bit/etc/parsers.conf
+      - ./logs:/fluent-bit/input/logs
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
