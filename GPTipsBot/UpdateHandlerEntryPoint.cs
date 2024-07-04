@@ -44,11 +44,11 @@ namespace GPTipsBot
             //return;
 
             //dont remove! uncomment telejet advertisement later
-            //var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
-            //if (!needHandleUpd)
-            //{
-            //    return;
-            //}
+            var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
+            if (!needHandleUpd)
+            {
+                return;
+            }
 
             if (update.Ignore())
                 return;
