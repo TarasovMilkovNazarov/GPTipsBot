@@ -21,6 +21,7 @@
         public static string YandexCloudFolderId => Environment.GetEnvironmentVariable("YC_FOLDER_ID");
         public static string TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
         public static string ProxyApiApiKey => Environment.GetEnvironmentVariable("WWW_PROXY_API_API_KEY");
+        // public static string ProxyApiUrl => Environment.GetEnvironmentVariable("PROXY_API_URL");
         public static string PawanOsmanApiKey => Environment.GetEnvironmentVariable("PAWAN_OSMAN_API_KEY");
 
         private static string GetEnvStrict(string name)

@@ -37,7 +37,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message != null)
             {
-                User = UserMapper.Map(update.Message.From);
+                User = UserMapper.MapToDto(update.Message.From);
                 User.Source = TelegramService.GetSource(update.Message.Text);
                 Message = MessageMapper.Map(update.Message, ChatId, Enums.MessageOwner.User);
 

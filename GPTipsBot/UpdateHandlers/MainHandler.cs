@@ -54,7 +54,7 @@ namespace GPTipsBot.UpdateHandlers
                 userState.TryAdd(userKey, new UserStateDto(userKey));
             }
 
-            var newUser = UserMapper.Map(update.User);
+            var newUser = UserMapper.MapToEntity(update.User);
             try
             {
                 userService.CreateUpdateUser(newUser);

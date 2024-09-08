@@ -5,7 +5,7 @@ namespace GPTipsBot.Mapper
 {
     public static class UserMapper
     {
-        public static User Map(UserDto userDto)
+        public static User MapToEntity(UserDto userDto)
         {
             User user = new User()
             {
@@ -20,7 +20,7 @@ namespace GPTipsBot.Mapper
             return user;
         }
 
-        public static UserDto Map(Telegram.Bot.Types.User? telegramUser)
+        public static UserDto MapToDto(Telegram.Bot.Types.User? telegramUser)
         {
             UserDto user = new UserDto()
             {
