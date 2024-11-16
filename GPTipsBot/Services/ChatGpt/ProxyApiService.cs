@@ -1,5 +1,6 @@
 ﻿using OpenAI;
 using OpenAI.Managers;
+using GptModels = OpenAI.ObjectModels;
 
 namespace GPTipsBot.Services
 {
@@ -16,9 +17,9 @@ namespace GPTipsBot.Services
         {
             var openAiService = new OpenAIService(new OpenAiOptions()
             {
-                BaseDomain = "https://api.vsegpt.ru/v1",
+                BaseDomain = "https://api.proxyapi.ru/openai/v1",
                 ApiKey = token,
-                DefaultModelId = "openai/gpt-3.5-turbo",
+                DefaultModelId = GptModels.Models.Gpt_3_5_Turbo_0125
             });
 
             return openAiService;
