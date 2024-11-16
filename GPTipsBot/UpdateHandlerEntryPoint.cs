@@ -61,6 +61,11 @@ namespace GPTipsBot
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
 
+            await mainHandler.HandleAsync(extendedUpd);
+        }
+
+        private void SendHamsterAdvertisement(UpdateDecorator extendedUpd)
+        {
             var chatId = extendedUpd.ChatId;
 
             lock (advertisementSyncObj)
@@ -70,8 +75,6 @@ namespace GPTipsBot
                     telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster);
                 }
             }
-
-            await mainHandler.HandleAsync(extendedUpd);
         }
     }
 }
