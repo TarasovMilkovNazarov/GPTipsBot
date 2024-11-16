@@ -76,16 +76,15 @@ namespace GPTipsBot.Services
                 var retryAttempt = context.ContainsKey("retryAttempt")
                     ? (int)context["retryAttempt"] : 0;
 
-                var requestData = new ChatCompletionCreateRequest
-                {
-                    Messages = messages,
-                    Stream = false,
-                };
-
                 try
                 {
                     response = await openAiService.ChatCompletion.CreateCompletion(
-                        requestData, cancellationToken: cancellationToken);
+                        new ChatCompletionCreateRequest { Messages = messages }, cancellationToken: cancellationToken);
+
+                    // response = new ChatCompletionCreateResponse();
+                    // response.Choices = new() { new()
+                    //     { Message = new("system", "test") } };
+                    // await Task.Delay(2000);
 
                     if (response.Successful)
                     {

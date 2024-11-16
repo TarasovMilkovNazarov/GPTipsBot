@@ -15,10 +15,7 @@ public static class OpenAIServiceCollectionExtensions
             optionsBuilder.Configure(setupAction);
         }
 
-        return services.AddHttpClient<IOpenAIService, OpenAIService>(client =>
-        {
-            client.DefaultRequestHeaders.TransferEncodingChunked = false;
-        });
+        return services.AddHttpClient<IOpenAIService, OpenAIService>();
     }
 
     public static IHttpClientBuilder AddOpenAIService<TServiceInterface>(this IServiceCollection services, string name, Action<OpenAiOptions>? setupAction = null) where TServiceInterface : class, IOpenAIService

@@ -6,7 +6,7 @@ using OpenAI.ObjectModels.ResponseModels;
 
 namespace OpenAI.Extensions;
 
-public static class HttpClientExtensions
+internal static class HttpClientExtensions
 {
     public static async Task<TResponse> GetReadAsAsync<TResponse>(this HttpClient client, string uri, CancellationToken cancellationToken = default) where TResponse : BaseResponse, new()
     {
