@@ -87,9 +87,7 @@ namespace GPTipsBot.Services
         {
             if (request.Content != null)
             {
-                string requestBody = await request.Content.ReadAsStringAsync();
-                // Console.WriteLine($"Request Content: {requestBody}");
-                // request.Headers.Add("Content-Length", requestBody.Length.ToString());
+                string requestBody = await request.Content.ReadAsStringAsync(cancellationToken);
             }
 
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
