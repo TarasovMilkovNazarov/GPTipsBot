@@ -1,26 +1,40 @@
-﻿using OpenAI;
+﻿using Microsoft.Extensions.Logging;
+using OpenAI;
 using OpenAI.Managers;
-using GptModels = OpenAI.ObjectModels;
 
 namespace GPTipsBot.Services
 {
     public class ProxyApiService : OpenAiServiceCreator
     {
+        private readonly ILogger<ProxyApiService> logger;
         private readonly string _token;
 
-        public ProxyApiService()
+        public ProxyApiService(ILogger<ProxyApiService> logger)
         {
+            this.logger = logger;
             _token = AppConfig.ProxyApiApiKey;
         }
 
         public override OpenAIService Create(string token)
         {
+            var clientHandler = new HttpClientHandler()
+            {
+                // ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true,
+            };
+            var loggingHandler = new LoggingHandler()
+            {
+                InnerHandler = clientHandler
+            };
+
+            var httpClient = new HttpClient(loggingHandler);
+            // httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json; charset=utf-8");
+
             var openAiService = new OpenAIService(new OpenAiOptions()
             {
-                BaseDomain = "https://api.proxyapi.ru/openai/v1",
+                BaseDomain = "https://api.vsegpt.ru/v1",
                 ApiKey = token,
-                DefaultModelId = GptModels.Models.Gpt_3_5_Turbo_0125
-            });
+                DefaultModelId = "openai/gpt-3.5-turbo",
+            }, httpClient);
 
             return openAiService;
         }
@@ -33,6 +47,54 @@ namespace GPTipsBot.Services
         public override void ReturnApiKey(string apiKey)
         {
             
+        }
+    }
+
+    class LoggingHandler : DelegatingHandler
+    {
+        // protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        // {
+        //     // Log the request details
+        //     Console.WriteLine($"Request: {request.Method} {request.RequestUri}");
+        //
+        //     if (request.Content != null)
+        //     {
+        //         string requestBody = await request.Content.ReadAsStringAsync();
+        //         Console.WriteLine($"Request Content: {requestBody}");
+        //     }
+        //
+        //     // Log the request headers
+        //     foreach(var header in request.Headers)
+        //     {
+        //         Console.WriteLine($"Header: {header.Key} - {string.Join(",", header.Value)}");
+        //     }
+        //
+        //     // Forward the request to the inner handler
+        //     HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+        //
+        //     // Log the response details
+        //     Console.WriteLine($"Response: {response.StatusCode}");
+        //
+        //     if (response.Content != null)
+        //     {
+        //         string responseBody = await response.Content.ReadAsStringAsync();
+        //         Console.WriteLine($"Response Content: {responseBody}");
+        //     }
+        //
+        //     return response;
+        // }
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (request.Content != null)
+            {
+                string requestBody = await request.Content.ReadAsStringAsync();
+                // Console.WriteLine($"Request Content: {requestBody}");
+                // request.Headers.Add("Content-Length", requestBody.Length.ToString());
+            }
+
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+
+            return response;
         }
     }
 }
