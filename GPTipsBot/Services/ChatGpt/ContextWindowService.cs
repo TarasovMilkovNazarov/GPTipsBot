@@ -9,7 +9,7 @@ namespace GPTipsBot.Services
 {
     public class ContextWindow
     {
-        public static readonly int WindowSize = 30;
+        public static readonly int WindowSize = 15;
         public static readonly int TokensLimit = 1000;
         private readonly MessageRepository messageRepository;
         private LinkedList<ChatMessage> chatMessages;
