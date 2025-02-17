@@ -22,6 +22,7 @@
         public static string TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
         public static string ProxyApiApiKey => Environment.GetEnvironmentVariable("WWW_PROXY_API_API_KEY");
         public static string PawanOsmanApiKey => Environment.GetEnvironmentVariable("PAWAN_OSMAN_API_KEY");
+        public static string GramadsBearerToken => Environment.GetEnvironmentVariable("GRAMADS_BEARER");
 
         private static string GetEnvStrict(string name)
         {

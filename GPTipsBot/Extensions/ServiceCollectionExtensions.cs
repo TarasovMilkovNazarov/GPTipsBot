@@ -35,6 +35,7 @@ namespace GPTipsBot.Extensions
             services
             .AddTransient<UserService>()
             .AddSingleton<TelejetAdClient>()
+            .AddSingleton<GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
             .AddSingleton<SpeechToTextService>()
             .AddTransient<ActionStatus>()

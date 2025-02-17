@@ -15,6 +15,7 @@ namespace GPTipsBot
         private readonly ITelegramBotClient telegramBotClient;
         private readonly SpeechToTextService speechToTextService;
         private readonly TelejetAdClient telejetAdClient;
+        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
         private static object advertisementSyncObj = new object();
         private static readonly HashSet<long> HamsterSent = new();
 
@@ -25,12 +26,13 @@ namespace GPTipsBot
             ITelegramBotClient telegramBotClient,
             SpeechToTextService speechToTextService,
             TelejetAdClient telejetAdClient,
-            RateLimitCache rateLimitCache)
+            GramadsAdvertisementClient gramadsAdvertisementClient)
         {
             this.mainHandler = mainHandler;
             this.telegramBotClient = telegramBotClient;
             this.speechToTextService = speechToTextService;
             this.telejetAdClient = telejetAdClient;
+            _gramadsAdvertisementClient = gramadsAdvertisementClient;
         }
 
         static UpdateHandlerEntryPoint()
@@ -53,7 +55,10 @@ namespace GPTipsBot
             if (update.Ignore())
                 return;
 
-            var extendedUpd = new  UpdateDecorator(update);
+            var extendedUpd = new UpdateDecorator(update);
+
+            await _gramadsAdvertisementClient.SendPostToChat(extendedUpd.ChatId);
+
             if (update.Message?.Voice != null)
             {
                 extendedUpd.Message.Text = await speechToTextService.RecognizeVoice(update.Message.Voice.FileId);
