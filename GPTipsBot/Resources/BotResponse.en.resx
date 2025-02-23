@@ -210,4 +210,10 @@ https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646</value>
   <data name="DailyLimitViolation" xml:space="preserve">
     <value>❗️The daily limit of {0} requests has been reached. We look forward to seeing you tomorrow.</value>
   </data>
+  <data name="SendTextRecognitionImage" xml:space="preserve">
+    <value>Send image for text recognition</value>
+  </data>
+  <data name="CantRecognizeText" xml:space="preserve">
+    <value>Failed to recognize text on image</value>
+  </data>
 </root>

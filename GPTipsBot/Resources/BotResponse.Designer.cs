@@ -92,6 +92,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Не удалось распознать текст.
+        /// </summary>
+        public static string CantRecognizeText {
+            get {
+                return ResourceManager.GetString("CantRecognizeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Пожалуйста выберите игру.
         /// </summary>
         public static string ChooseGame {
@@ -250,6 +259,15 @@ namespace GPTipsBot.Resources {
         public static string SendFeedback {
             get {
                 return ResourceManager.GetString("SendFeedback", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Отправьте изображение для распознавания текста.
+        /// </summary>
+        public static string SendTextRecognitionImage {
+            get {
+                return ResourceManager.GetString("SendTextRecognitionImage", resourceCulture);
             }
         }
         

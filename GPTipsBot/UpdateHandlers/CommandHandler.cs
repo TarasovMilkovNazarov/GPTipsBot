@@ -12,7 +12,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    using static TelegramBotUIService;
+    using static TelegramBotUiService;
     using static BotMenu;
 
     public class CommandHandler : BaseMessageHandler
@@ -37,16 +37,16 @@ namespace GPTipsBot.UpdateHandlers
             var messageText = update.Message.Text;
             var chatId = update.UserChatKey.ChatId;
 
-            if (!TryGetCommand(messageText, out var command))
+            if (!update.IsCommand)
             {
                 await base.HandleAsync(update);
                 return;
             }
 
-            IReplyMarkup? replyMarkup = startKeyboard;
+            IReplyMarkup? replyMarkup = StartKeyboard;
             update.Message.ContextBound = false;
 
-            switch (command!.Command)
+            switch (update!.Command.Command)
             {
                 case StartCommand:
                     await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
@@ -67,7 +67,12 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
                     update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.imageTextDescriptionLimit);
-                    replyMarkup = cancelKeyboard;
+                    replyMarkup = CancelKeyboard;
+                    break;
+                case ImageTextRecognizeCommand:
+                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingTextRecognitionImage;
+                    update.Reply.Text = BotResponse.SendTextRecognitionImage;
+                    replyMarkup = CancelKeyboard;
                     break;
                 case ResetContextCommand:
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
@@ -77,12 +82,12 @@ namespace GPTipsBot.UpdateHandlers
                 case FeedbackCommand:
                     update.Reply.Text = BotResponse.SendFeedback;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.SendingFeedback;
-                    replyMarkup = cancelKeyboard;
+                    replyMarkup = CancelKeyboard;
                     break;
                 case ChooseLangCommand:
                     update.Reply.Text = BotResponse.ChooseLanguagePlease;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingLanguage;
-                    replyMarkup = chooseLangKeyboard;
+                    replyMarkup = ChooseLangKeyboard;
                     break;
                 case SetEngLangCommand:
                     await UpdateLanguage(update.UserChatKey, "en");
@@ -96,17 +101,15 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case StopRequestCommand:
                     update.Reply.Text = BotResponse.Cancel;
-                    if (MainHandler.userState.ContainsKey(update.UserChatKey))
+                    if (MainHandler.userState.TryGetValue(update.UserChatKey, out var state))
                     {
-                        var state = MainHandler.userState[update.UserChatKey];
-
                         if (state.CurrentState == UserStateEnum.None)
                         {
                             replyMarkup = new ReplyKeyboardRemove();
                         }
                         else
                         {
-                            replyMarkup = cancelKeyboard;
+                            replyMarkup = CancelKeyboard;
                         }
 
                         if (update.Message.TelegramMessageId.HasValue && state.messageIdToCancellation.ContainsKey(update.Message.TelegramMessageId.Value))
@@ -118,7 +121,7 @@ namespace GPTipsBot.UpdateHandlers
                 case GamesCommand:
                     update.Reply.Text = BotResponse.ChooseGame;
                     MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingGames;
-                    replyMarkup = gamesKeyboard;
+                    replyMarkup = GamesKeyboard;
                     break;
                 case TickTackToeCommand:
                     await SetGameInstructions(ChatGptGamesPrompts.TickTacToe, UserStateEnum.PlayingTickTacToe);
@@ -180,25 +183,21 @@ namespace GPTipsBot.UpdateHandlers
         {
             message = message.Trim().ToLower();
 
-            Type classType = typeof(BotMenu);
+            var classType = typeof(BotMenu);
             var properties = classType.GetProperties(BindingFlags.Static | BindingFlags.Public)
                 .Where(p => p.PropertyType == typeof(BotCommand));
 
-            foreach (PropertyInfo property in properties)
+            foreach (var property in properties)
             {
-                BotCommand? botCommand = property.GetValue(null) as BotCommand;
-
-                if (botCommand == null) continue;
+                if (property.GetValue(null) is not BotCommand botCommand) continue;
 
                 var slashCommandValue = botCommand.Command;
 
-                if (message.StartsWith(slashCommandValue.ToLower()) || 
-                    (ButtonToLocalizations.ContainsKey(slashCommandValue) && 
-                        ButtonToLocalizations[slashCommandValue].Exists(b => b.ToLower() == message)))
-                {
-                    command = botCommand;
-                    return true;
-                }
+                if (!message.StartsWith(slashCommandValue.ToLower()) &&
+                    (!ButtonToLocalizations.ContainsKey(slashCommandValue) ||
+                     !ButtonToLocalizations[slashCommandValue].Exists(b => b.ToLower() == message))) continue;
+                command = botCommand;
+                return true;
             }
 
             command = null;

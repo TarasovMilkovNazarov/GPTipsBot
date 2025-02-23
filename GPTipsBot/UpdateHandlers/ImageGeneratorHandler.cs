@@ -35,7 +35,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUIService.cancelKeyboard);
+            await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
 
             return;
 
@@ -43,14 +43,14 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text.Length > imageTextDescriptionLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, imageTextDescriptionLimit), replyMarkup: TelegramBotUiService.CancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
 
             if (messageRepository.GetTodayImagesCount(userKey) > imagesPerDayLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImagesPerDayLimit, imagesPerDayLimit), replyMarkup: TelegramBotUIService.cancelKeyboard);
+                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImagesPerDayLimit, imagesPerDayLimit), replyMarkup: TelegramBotUiService.CancelKeyboard);
                 MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
@@ -67,7 +67,7 @@ namespace GPTipsBot.UpdateHandlers
                 var imgSrcs = await imageCreatorService.GenerateImage(update.Message.Text);
                 update.Reply.Text = string.Join("\n", imgSrcs);
                 messageRepository.AddMessage(update.Reply);
-                var replyMarkup = TelegramBotUIService.cancelKeyboard;
+                var replyMarkup = TelegramBotUiService.CancelKeyboard;
                 var telegramMediaList = imgSrcs.Select((src, i) => new InputMediaPhoto(InputFile.FromString(src))).ToList();
 
                 await botClient.SendMediaGroupAsync(userKey.ChatId, telegramMediaList, disableNotification: true,

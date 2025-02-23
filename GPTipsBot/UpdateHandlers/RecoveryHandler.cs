@@ -8,7 +8,7 @@ namespace GPTipsBot.UpdateHandlers
     {
         private readonly ITelegramBotClient botClient;
         private readonly MessageRepository messageRepository;
-        private static readonly Dictionary<long, Queue<UpdateDecorator>> chatToInformAboutRecovery = new ();
+        private static readonly Dictionary<long, Queue<UpdateDecorator>> ChatToInformAboutRecovery = new();
 
         public RecoveryHandler(ITelegramBotClient botClient,
             MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository)
@@ -42,21 +42,21 @@ namespace GPTipsBot.UpdateHandlers
 
                 messageRepository.AddMessage(update.Message);
 
-                if (chatToInformAboutRecovery.ContainsKey(chatId))
-                    chatToInformAboutRecovery[chatId].Enqueue(update);
+                if (ChatToInformAboutRecovery.ContainsKey(chatId))
+                    ChatToInformAboutRecovery[chatId].Enqueue(update);
                 else
                 {
                     var q = new Queue<UpdateDecorator>();
                     q.Enqueue(update);
-                    chatToInformAboutRecovery.Add(chatId, q);
+                    ChatToInformAboutRecovery.Add(chatId, q);
                     
                     await botClient.SendTextMessageAsync(chatId, BotResponse.Recovered);
                 }
 
                 return;
             }
-            else if(chatToInformAboutRecovery.ContainsKey(chatId))
-                chatToInformAboutRecovery.Remove(chatId);
+            else if(ChatToInformAboutRecovery.ContainsKey(chatId))
+                ChatToInformAboutRecovery.Remove(chatId);
 
             // Call next handler
             await base.HandleAsync(update);

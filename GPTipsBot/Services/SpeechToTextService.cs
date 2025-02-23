@@ -10,34 +10,30 @@ namespace GPTipsBot.Services
 
         public async Task<string> RecognizeVoice(string fileId)
         {
-            using (var stream = new MemoryStream())
+            using var stream = new MemoryStream();
+            var file = await telegramBotClient.GetInfoAndDownloadFileAsync(fileId, stream);
+            if (file == null)
             {
-                var file = await telegramBotClient.GetInfoAndDownloadFileAsync(fileId, stream);
-                if (file == null)
-                {
-                    throw new Exception("Can't download file from telegram. The file size should be less than 20mb");
-                }
-
-                string lang = "auto";
-                var client = new RestClient("https://stt.api.cloud.yandex.net");
-                var request = new RestRequest($"speech/v1/stt:recognize?topic=general&lang={lang}&" +
-                    $"folderId={AppConfig.YandexCloudFolderId}", Method.Post);
-                request.AddHeader("Authorization", $"Api-Key {AppConfig.YandexCloudApiKey}");
-                request.AddHeader("Content-Type", "application/octet-stream");
-                request.AddParameter("application/octet-stream", stream.ToArray(), ParameterType.RequestBody);
-                var cancellationTokenSource = new CancellationTokenSource();
-
-                var response = await client.ExecuteAsync<RecognitionResult>(request, cancellationTokenSource.Token);
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return response.Data.Result;
-                }
-                else
-                {
-                    throw new Exception("Request failed: " + response.ErrorMessage);
-                }
+                throw new Exception("Can't download file from telegram. The file size should be less than 20mb");
             }
+
+            var lang = "auto";
+            var client = new RestClient("https://stt.api.cloud.yandex.net");
+            var request = new RestRequest($"speech/v1/stt:recognize?topic=general&lang={lang}&" +
+                                          $"folderId={AppConfig.YandexCloudFolderId}", Method.Post);
+            request.AddHeader("Authorization", $"Api-Key {AppConfig.YandexCloudApiKey}");
+            request.AddHeader("Content-Type", "application/octet-stream");
+            request.AddParameter("application/octet-stream", stream.ToArray(), ParameterType.RequestBody);
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            var response = await client.ExecuteAsync<RecognitionResult>(request, cancellationTokenSource.Token);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return response.Data.Result;
+            }
+
+            throw new Exception("Request failed: " + response.ErrorMessage);
         }
          
         public SpeechToTextService(ITelegramBotClient telegramBotClient)

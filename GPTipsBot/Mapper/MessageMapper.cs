@@ -14,6 +14,7 @@ namespace GPTipsBot.Mapper
                 TelegramMessageId = tMessage.MessageId,
                 ChatId = chatId,
                 Text = tMessage.Text,
+                Type = tMessage.Type,
                 UserId = tMessage.From.Id,
                 CreatedAt = tMessage.Date,
                 Role = role,

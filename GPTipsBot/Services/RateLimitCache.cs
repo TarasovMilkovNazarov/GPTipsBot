@@ -10,7 +10,7 @@ namespace GPTipsBot.Services
         private Timer resetMessageCountsPerMinuteTimer;
         private Timer resetMessageCountsPerDayTimer;
 
-        public const int MaxMessagesCountPerMinute = 3;
+        public const int MaxMessagesCountPerMinute = 5;
         public const int MaxMessageCountPerDay = 30;
         private TimeSpan MinuteResetInterval { get; } = TimeSpan.FromSeconds(60);
         private TimeSpan DayResetInterval { get; } = TimeSpan.FromDays(1);
@@ -75,17 +75,13 @@ namespace GPTipsBot.Services
         {
             lock (sync)
             {
-                Console.WriteLine(guid);
                 IncrementMinuteMessageCount(chatId);
                 var isAllLimitsOk = IsMinuteLimitOk(chatId, botClient) && IsDailyLimitOk(chatId, botClient);
-                if (isAllLimitsOk)
-                {
-                    var daysCount = IncrementDailyMessageCount(chatId);
+                if (!isAllLimitsOk) return false;
+                IncrementDailyMessageCount(chatId);
                 
-                    return true;
-                }
-                
-                return false;
+                return true;
+
             }
         }
         private int IncrementMinuteMessageCount(long chatId)

@@ -189,4 +189,10 @@
   <data name="TickTackToeButton" xml:space="preserve">
     <value>Tick tack toe</value>
   </data>
+  <data name="ImageTextRecognizeButton" xml:space="preserve">
+    <value>Get text on image</value>
+  </data>
+  <data name="ImageTextRecognize" xml:space="preserve">
+    <value>Get text on image</value>
+  </data>
 </root>

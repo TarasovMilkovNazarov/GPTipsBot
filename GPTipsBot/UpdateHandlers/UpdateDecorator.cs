@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Dtos;
+﻿using System.Reflection;
+using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
 using GPTipsBot.Services;
 using Newtonsoft.Json;
@@ -35,6 +36,8 @@ namespace GPTipsBot.UpdateHandlers
                 IsRecovered = true;
             }
 
+
+
             if (update.Message != null)
             {
                 User = UserMapper.Map(update.Message.From);
@@ -70,7 +73,20 @@ namespace GPTipsBot.UpdateHandlers
 
             var groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             IsGroupOrChannel = groupChatTypes.Contains(Message?.ChatType);
+
+            if (update.Message?.Type == MessageType.Photo)
+            {
+                // Get the file id of the photo (the largest size)
+                FileId = update.Message!.Photo[^1].FileId;
+            }
+
+            IsCommand = TryGetCommand(Message.Text, out var command);
+            Command = command;
         }
+
+        public BotCommand? Command { get; set; }
+
+        public string FileId { get; set; }
 
         public CancellationToken StatusTimerCancellationToken { get; set; }
 
@@ -85,6 +101,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public ChatMemberStatus? ChatMemberStatus => _update.MyChatMember?.NewChatMember.Status;
         public bool IsRecovered { get; }
+        public bool IsCommand { get; set; }
         public bool IsGroupOrChannel { get; }
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
@@ -107,6 +124,43 @@ namespace GPTipsBot.UpdateHandlers
             string serialized = JsonConvert.SerializeObject(_update, Formatting.Indented);
 
             return serialized;
+        }
+
+        private bool TryGetCommand(string message, out BotCommand? command)
+        {
+            command = null;
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return false;
+            }
+
+            message = message.Trim().ToLower();
+
+            var classType = typeof(BotMenu);
+            var properties = classType.GetProperties(BindingFlags.Static | BindingFlags.Public)
+                .Where(p => p.PropertyType == typeof(BotCommand));
+
+            foreach (var property in properties)
+            {
+                if (property.GetValue(null) is not BotCommand botCommand) continue;
+
+                var slashCommandValue = botCommand.Command;
+
+                if (!message.StartsWith(slashCommandValue.ToLower()) &&
+                    (!TelegramBotUiService.ButtonToLocalizations.ContainsKey(slashCommandValue) ||
+                     !TelegramBotUiService.ButtonToLocalizations[slashCommandValue].Exists(b => b.ToLower() == message))) continue;
+                command = botCommand;
+                return true;
+            }
+
+            if (message is "/version" or "/fix")
+            {
+
+            }
+
+            command = null;
+
+            return false;
         }
     }
 }

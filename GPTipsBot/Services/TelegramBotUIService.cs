@@ -11,6 +11,7 @@ namespace GPTipsBot.Services
     [JsonObject(MemberSerialization.OptIn, NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class BotMenu
     {
+        // Note! command with several words must use underscore like do_smth_new
         public const string StartCommand = "/start";
         public const string ImageCommand = "/image";
         public const string ResetContextCommand = "/reset_context";
@@ -27,25 +28,27 @@ namespace GPTipsBot.Services
         public const string BookDivinationCommand = "/bookDivination";
         public const string GuessWhoCommand = "/guessWho";
         public const string AdventureCommand = "/adventureGame";
+        public const string ImageTextRecognizeCommand = "/get_image_text";
 
-        public static BotCommand Start => new BotCommand { Command = StartCommand, Description = BotUI.Start };
-        public static BotCommand Image => new BotCommand { Command = ImageCommand, Description = BotUI.Image };
-        public static BotCommand ResetContext => new BotCommand { Command = ResetContextCommand, Description = BotUI.ResetContext };
-        public static BotCommand Feedback => new BotCommand { Command = FeedbackCommand, Description = BotUI.Feedback };
-        public static BotCommand Help => new BotCommand { Command = HelpCommand, Description = BotUI.Help };
-        public static BotCommand ChooseLang => new BotCommand { Command = ChooseLangCommand, Description = BotUI.SetLang };
-        public static BotCommand SetRuLang => new BotCommand { Command = SetRuLangCommand, Description = BotUI.SetRuLang };
-        public static BotCommand SetEngLang => new BotCommand { Command = SetEngLangCommand, Description = BotUI.SetEngLang };
-        public static BotCommand StopRequest => new BotCommand { Command = StopRequestCommand };
-        public static BotCommand Cancel => new BotCommand { Command = CancelCommand };
+        public static BotCommand Start => new() { Command = StartCommand, Description = BotUI.Start };
+        public static BotCommand Image => new() { Command = ImageCommand, Description = BotUI.Image };
+        public static BotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize };
+        public static BotCommand ResetContext => new() { Command = ResetContextCommand, Description = BotUI.ResetContext };
+        public static BotCommand Feedback => new() { Command = FeedbackCommand, Description = BotUI.Feedback };
+        public static BotCommand Help => new() { Command = HelpCommand, Description = BotUI.Help };
+        public static BotCommand ChooseLang => new() { Command = ChooseLangCommand, Description = BotUI.SetLang };
+        public static BotCommand SetRuLang => new() { Command = SetRuLangCommand, Description = BotUI.SetRuLang };
+        public static BotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang };
+        public static BotCommand StopRequest => new() { Command = StopRequestCommand };
+        public static BotCommand Cancel => new() { Command = CancelCommand };
 
         #region Games commands
-        public static BotCommand Games => new BotCommand { Command = GamesCommand, Description = BotUI.GamesButton };
-        public static BotCommand TickTackToe => new BotCommand { Command = TickTackToeCommand, Description = BotUI.TickTackToeButton };
-        public static BotCommand EmojiTranslation => new BotCommand { Command = EmojiTranslationCommand, Description = BotUI.EmojiTranslationButton };
-        public static BotCommand BookDivination => new BotCommand { Command = BookDivinationCommand, Description = BotUI.BookDivinationButton };
-        public static BotCommand GuessWho => new BotCommand { Command = GuessWhoCommand, Description = BotUI.GuessWhoButton };
-        public static BotCommand Adventure => new BotCommand { Command = AdventureCommand, Description = BotUI.AdventureButton };
+        public static BotCommand Games => new() { Command = GamesCommand, Description = BotUI.GamesButton };
+        public static BotCommand TickTackToe => new() { Command = TickTackToeCommand, Description = BotUI.TickTackToeButton };
+        public static BotCommand EmojiTranslation => new() { Command = EmojiTranslationCommand, Description = BotUI.EmojiTranslationButton };
+        public static BotCommand BookDivination => new() { Command = BookDivinationCommand, Description = BotUI.BookDivinationButton };
+        public static BotCommand GuessWho => new() { Command = GuessWhoCommand, Description = BotUI.GuessWhoButton };
+        public static BotCommand Adventure => new() { Command = AdventureCommand, Description = BotUI.AdventureButton };
         #endregion
 
         public BotMenu()
@@ -54,48 +57,43 @@ namespace GPTipsBot.Services
 
         public BotCommand[] GetBotCommands()
         {
-            return new BotCommand[]
+            return new[]
             {
                 Start,
-                Image,
+                ImageRecText,
                 ResetContext,
-                Games,
-                Feedback,
-                Help
+                Help,
             };
         }
     }
 
-    public class TelegramBotUIService
+    public class TelegramBotUiService
     {
-        public static ReplyKeyboardMarkup startKeyboard => GetMenuKeyboardMarkup();
-        public static ReplyKeyboardMarkup cancelKeyboard => GetCancelKeyboardMarkup();
-        public static ReplyKeyboardMarkup chooseLangKeyboard => GetLanguageKeyboardMarkup();
-        public static ReplyKeyboardMarkup gamesKeyboard => GetGamesKeyboardMarkup();
+        public static ReplyKeyboardMarkup StartKeyboard => GetMenuKeyboardMarkup();
+        public static ReplyKeyboardMarkup CancelKeyboard => GetCancelKeyboardMarkup();
+        public static ReplyKeyboardMarkup ChooseLangKeyboard => GetLanguageKeyboardMarkup();
+        public static ReplyKeyboardMarkup GamesKeyboard => GetGamesKeyboardMarkup();
 
-        public static KeyboardButton imageButton => new KeyboardButton(BotUI.ImageButton);
-        public static KeyboardButton resetContextButton => new KeyboardButton(BotUI.ResetContextButton);
-        public static KeyboardButton feedbackButton => new KeyboardButton(BotUI.FeedbackButton);
-        public static KeyboardButton helpButton => new KeyboardButton(BotUI.HelpButton);
-        public static KeyboardButton cancelButton => new KeyboardButton(BotUI.CancelButton);
-        public static KeyboardButton langButton => new KeyboardButton(BotUI.LangButton);
-        public static KeyboardButton ruLangButton => new KeyboardButton(BotUI.RussianButton);
-        public static KeyboardButton engLangButton => new KeyboardButton(BotUI.EnglishButton);
+        private static KeyboardButton ImageButton => new(BotUI.ImageButton);
+        private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
+        private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
+        private static KeyboardButton FeedbackButton => new(BotUI.FeedbackButton);
+        private static KeyboardButton HelpButton => new(BotUI.HelpButton);
+        private static KeyboardButton CancelButton => new(BotUI.CancelButton);
+        private static KeyboardButton LangButton => new(BotUI.LangButton);
+        private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
+        private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
 
-        public static KeyboardButton gamesButton => new KeyboardButton(BotUI.GamesButton);
-        public static KeyboardButton tickTackToeButton => new KeyboardButton(BotUI.TickTackToeButton);
-        public static KeyboardButton emojiTranslationButton => new KeyboardButton(BotUI.EmojiTranslationButton);
-        public static KeyboardButton guessWhoButton => new KeyboardButton(BotUI.GuessWhoButton);
-        public static KeyboardButton bookDivinationButton => new KeyboardButton(BotUI.BookDivinationButton);
-        public static KeyboardButton adventureGameButton => new KeyboardButton(BotUI.AdventureButton);
+        private static KeyboardButton GamesButton => new(BotUI.GamesButton);
+        private static KeyboardButton TickTackToeButton => new(BotUI.TickTackToeButton);
+        private static KeyboardButton EmojiTranslationButton => new(BotUI.EmojiTranslationButton);
+        private static KeyboardButton GuessWhoButton => new(BotUI.GuessWhoButton);
+        private static KeyboardButton BookDivinationButton => new(BotUI.BookDivinationButton);
+        private static KeyboardButton AdventureGameButton => new(BotUI.AdventureButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
-        public TelegramBotUIService()
-        {
-        }
-
-        static TelegramBotUIService()
+        static TelegramBotUiService()
         {
             SetButtonToLocalizations();
         }
@@ -119,6 +117,7 @@ namespace GPTipsBot.Services
                 { BotMenu.EmojiTranslationCommand, new() },
                 { BotMenu.GuessWhoCommand, new() },
                 { BotMenu.AdventureCommand, new() },
+                { BotMenu.ImageTextRecognizeCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -141,6 +140,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.EmojiTranslationCommand].Add(BotUI.EmojiTranslationButton);
                 ButtonToLocalizations[BotMenu.GuessWhoCommand].Add(BotUI.GuessWhoButton);
                 ButtonToLocalizations[BotMenu.AdventureCommand].Add(BotUI.AdventureButton);
+                ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -152,21 +152,13 @@ namespace GPTipsBot.Services
             {
                 new[]
                 {
-                    resetContextButton,
-                    imageButton
+                    ResetContextButton,
+                    ImageRecognizeTextButton,
                 },
                 new[]
                 {
-                    gamesButton
-                },
-                new[]
-                {
-                    helpButton,
-                    feedbackButton
-                },
-                new[]
-                {
-                    langButton
+                    LangButton,
+                    HelpButton
                 }
             });
 
@@ -178,7 +170,7 @@ namespace GPTipsBot.Services
         
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
         {
-            var keyboardMarkup = new ReplyKeyboardMarkup(cancelButton);
+            var keyboardMarkup = new ReplyKeyboardMarkup(CancelButton);
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = true;
@@ -191,17 +183,17 @@ namespace GPTipsBot.Services
             {
                 new[]
                 {
-                    tickTackToeButton,
-                    emojiTranslationButton
+                    TickTackToeButton,
+                    EmojiTranslationButton
                 },
                 new[]
                 {
-                    guessWhoButton,
-                    bookDivinationButton
+                    GuessWhoButton,
+                    BookDivinationButton
                 },
                 new[]
                 {
-                    adventureGameButton
+                    AdventureGameButton
                 }
             });
 
@@ -212,7 +204,7 @@ namespace GPTipsBot.Services
         }
         private static ReplyKeyboardMarkup GetLanguageKeyboardMarkup()
         {
-            var keyboardMarkup = new ReplyKeyboardMarkup(new[] { ruLangButton, engLangButton });
+            var keyboardMarkup = new ReplyKeyboardMarkup(new[] { RuLangButton, EngLangButton });
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = true;

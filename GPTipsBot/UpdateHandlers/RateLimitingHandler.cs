@@ -27,7 +27,7 @@ namespace GPTipsBot.UpdateHandlers
         {
             var chatId = update.UserChatKey.ChatId;
 
-            if (rateLimitCache.TryIncrementMessageCount(botClient, chatId))
+            if (update.IsCommand || rateLimitCache.TryIncrementMessageCount(botClient, chatId))
             {
                 await base.HandleAsync(update);
             }

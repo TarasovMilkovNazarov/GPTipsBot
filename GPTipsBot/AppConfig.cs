@@ -18,6 +18,7 @@
         public static string? CommitHash => Environment.GetEnvironmentVariable("GPTIPSBOT_COMMITHASH");
         public static string? DebugOpenAiApiKey => Environment.GetEnvironmentVariable("DEBUG_OPENAI_TOKEN");
         public static string YandexCloudApiKey => Environment.GetEnvironmentVariable("YC_API_KEY");
+        public static string YandexIamToken => Environment.GetEnvironmentVariable("YC_IAM_TOKEN");
         public static string YandexCloudFolderId => Environment.GetEnvironmentVariable("YC_FOLDER_ID");
         public static string TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
         public static string ProxyApiApiKey => Environment.GetEnvironmentVariable("WWW_PROXY_API_API_KEY");

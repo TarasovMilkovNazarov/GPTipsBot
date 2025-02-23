@@ -189,4 +189,10 @@
   <data name="TickTackToeButton" xml:space="preserve">
     <value>Крестики нолики</value>
   </data>
+  <data name="ImageTextRecognizeButton" xml:space="preserve">
+    <value>Распознать текст на изображении</value>
+  </data>
+  <data name="ImageTextRecognize" xml:space="preserve">
+    <value>Текс на картинке</value>
+  </data>
 </root>

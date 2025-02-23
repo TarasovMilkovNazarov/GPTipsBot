@@ -15,7 +15,7 @@ namespace GPTipsBot.UpdateHandlers
             var message = update.Message;
 
             // @GPTipBot /start any text
-            string pattern1 = @$"(@{AppConfig.BotName})\s(\/.*?)\s?(.*)";
+            var pattern1 = @$"(@{AppConfig.BotName})\s(\/.*?)\s?(.*)";
             var match1 = Regex.Matches(message.Text, pattern1).FirstOrDefault();
 
             if (match1 != null)
@@ -27,7 +27,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             // image@GPTipBot text image description
-            string pattern2 = @$"(\/.*?)(@{AppConfig.BotName})\s?(.*)";
+            var pattern2 = @$"(\/.*?)(@{AppConfig.BotName})\s?(.*)";
             var match2 = Regex.Matches(message.Text, pattern2).FirstOrDefault();
 
             if (match2 != null)
@@ -49,14 +49,13 @@ namespace GPTipsBot.UpdateHandlers
             var isReplyToBotMessage = message?.ReplyToMessage?.From?.IsBot ?? false;
             var isUserWaitingResponse = MainHandler.userState[update.UserChatKey].CurrentState != Enums.UserStateEnum.None;
 
-            if (!isBotMentioned && !isReplyToBotMessage && update.IsGroupOrChannel && !isUserWaitingResponse)
+            switch (isBotMentioned)
             {
-                return;
-            }
-
-            if (isBotMentioned)
-            {
-                update.Message.Text = update.Message.Text.Substring(botMentionedEntity.Length).Trim();
+                case false when !isReplyToBotMessage && update.IsGroupOrChannel && !isUserWaitingResponse:
+                    return;
+                case true:
+                    update.Message.Text = update.Message.Text.Substring(botMentionedEntity.Length).Trim();
+                    break;
             }
 
             // Call next handler

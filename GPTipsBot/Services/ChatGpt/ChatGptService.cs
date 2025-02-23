@@ -7,6 +7,7 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
+using Polly.Retry;
 
 namespace GPTipsBot.Services
 {
@@ -18,6 +19,7 @@ namespace GPTipsBot.Services
         private readonly OpenAiServiceCreator openAiServiceCreator;
         private readonly ContextWindow contextWindow;
         private Timer timer;
+        private readonly AsyncRetryPolicy policy;
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
             TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow)
@@ -28,6 +30,13 @@ namespace GPTipsBot.Services
             this.openAiServiceCreator = openAiServiceCreator;
             this.contextWindow = contextWindow;
             timer = setup_Timer(openaiAccountsRepository);
+            policy = Policy
+                .Handle<ChatGptException>()
+                .WaitAndRetryAsync(4, (retryAttempt) =>
+                {
+                    var delay = TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+                    return delay;
+                });
         }
 
         public async Task<ChatCompletionCreateResponse?> SendMessage(UpdateDecorator update, CancellationToken token)
@@ -54,27 +63,15 @@ namespace GPTipsBot.Services
 
             ChatCompletionCreateResponse? response = null;
 
-            var policy = Policy
-                .Handle<ChatGptException>()
-                .WaitAndRetryAsync(maxRetryCount, (retryAttempt) =>
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        throw new OperationCanceledException();
-                    }
-
-                    var delay = TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
-
-                    return delay;
-                });
+            
 
             await policy.ExecuteAsync(async (context, cancellationToken) =>
             {
                 var currentToken = await openAiServiceCreator.GetApiKeyAsync();
                 var openAiService = openAiServiceCreator.Create(currentToken);
 
-                var retryAttempt = context.ContainsKey("retryAttempt")
-                    ? (int)context["retryAttempt"] : 0;
+                var retryAttempt = context.TryGetValue("retryAttempt", out var value)
+                    ? (int)value : 0;
 
                 try
                 {

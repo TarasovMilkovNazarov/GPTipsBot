@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
+using GPTipsBot.Repositories;
+using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -14,17 +16,19 @@ namespace GPTipsBot.UpdateHandlers
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
         private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly UserService userService;
+        private readonly UserRepository userRepository;
         private readonly UnitOfWork unitOfWork;
         private readonly ILogger<MainHandler> logger;
 
         public MainHandler(MessageHandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
-            ILogger<MainHandler> logger, UserService userService)
+            ILogger<MainHandler> logger, UserService userService, UserRepository userRepository)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.unitOfWork = unitOfWork;
             this.logger = logger;
-            SetNextHandler(messageHandlerFactory.Create<DeleteUserHandler>());
             this.userService = userService;
+            this.userRepository = userRepository;
+            SetNextHandler(messageHandlerFactory.Create<RecoveryHandler>());
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -34,9 +38,9 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.ChatMemberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked)
+            if (update.ChatMemberStatus == ChatMemberStatus.Kicked)
             {
-                await base.HandleAsync(update);
+                userRepository.SoftlyRemoveUser(update.UserChatKey.Id);
                 return;
             }
 
