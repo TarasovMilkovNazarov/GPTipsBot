@@ -60,6 +60,7 @@ namespace GPTipsBot.Services
             return new[]
             {
                 Start,
+                Image,
                 ImageRecText,
                 ResetContext,
                 Help,
@@ -153,7 +154,12 @@ namespace GPTipsBot.Services
                 new[]
                 {
                     ResetContextButton,
-                    ImageRecognizeTextButton,
+
+                },
+                new[]
+                {
+                    ImageButton,
+                    ImageRecognizeTextButton
                 },
                 new[]
                 {

@@ -66,7 +66,7 @@ namespace GPTipsBot.UpdateHandlers
                         await base.HandleAsync(update);
                         return;
                     }
-                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.imageTextDescriptionLimit);
+                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
                     replyMarkup = CancelKeyboard;
                     break;
                 case ImageTextRecognizeCommand:
