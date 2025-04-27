@@ -164,7 +164,14 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Жмякай хомяка скорей https://t.me/hamsTer_kombat_bot/start?startapp=kentId486363646.
+        ///   Looks up a localized string similar to [VPN в телеграмме по цене чашки кофе](https://t.me/t_consult_service_bot?start=referral_486363646)
+        ///
+        ///🎁 Первые 2 дня бесплатно
+        ///🚀 Высокая скорость
+        ///🔄 Стабильность
+        ///💬 Отзывчивая поддержка
+        ///📱💻 Для телефонов, компьютеров и планшетов
+        ///💰 Постоянная реферальная программа с начислением бонусов.
         /// </summary>
         public static string Hamster {
             get {

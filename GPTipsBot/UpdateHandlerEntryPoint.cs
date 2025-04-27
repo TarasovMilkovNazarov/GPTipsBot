@@ -6,6 +6,7 @@ using GPTipsBot.UpdateHandlers;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
 {
@@ -66,6 +67,8 @@ namespace GPTipsBot
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
 
+            SendHamsterAdvertisement(extendedUpd);
+
             await mainHandler.HandleAsync(extendedUpd);
         }
 
@@ -77,7 +80,7 @@ namespace GPTipsBot
             {
                 if (HamsterSent.Add(chatId))
                 {
-                    telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster);
+                    telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster, null, ParseMode.MarkdownV2).GetAwaiter().GetResult();
                 }
             }
         }
