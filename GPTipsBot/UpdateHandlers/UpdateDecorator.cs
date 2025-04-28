@@ -15,9 +15,9 @@ namespace GPTipsBot.UpdateHandlers
         public UpdateDecorator(Update update)
         {
             _update = update;
-            ChatId = _update.Message?.Chat.Id ??
-                _update.CallbackQuery?.Message?.Chat.Id ??
-                _update.MyChatMember?.Chat.Id ??
+            ChatId = _update.Message?.Chat?.Id ??
+                _update.CallbackQuery?.Message?.Chat?.Id ??
+                _update.MyChatMember?.Chat?.Id ??
                 throw new ArgumentNullException(nameof(update), "Can't get ChatId");
 
             var oldChatMemberStatus = update.MyChatMember?.OldChatMember.Status;
@@ -36,8 +36,6 @@ namespace GPTipsBot.UpdateHandlers
                 IsRecovered = true;
             }
 
-
-
             if (update.Message != null)
             {
                 User = UserMapper.Map(update.Message.From);
@@ -54,10 +52,7 @@ namespace GPTipsBot.UpdateHandlers
                 Message.Text = _update.CallbackQuery.Data;
             }
 
-            if (UserChatKey == null)
-            {
-                UserChatKey = new(ChatId, ChatId);
-            }
+            UserChatKey ??= new(ChatId, ChatId);
 
             ServiceMessage = new MessageDto
             {

@@ -17,14 +17,14 @@ namespace GPTipsBotTests.Services
     public class IntegrationTests
     {
         private readonly Update telegramUpdate;
-        readonly IServiceProvider _services;
-        private readonly ITelegramBotClient botClient;
+        private readonly IServiceCollection serviceCollection;
+        private IServiceProvider services;
+        private ITelegramBotClient botClient;
 
         public IntegrationTests()
         {
             DotEnv.Fluent().WithProbeForEnv(10).Load();
-            _services = new ServiceCollection().ConfigureServices().BuildServiceProvider();
-            botClient = _services.GetRequiredService<ITelegramBotClient>();
+            serviceCollection = new ServiceCollection().ConfigureServices();
 
             telegramUpdate = new Update
             {
@@ -58,13 +58,27 @@ namespace GPTipsBotTests.Services
         [SetUp]
         public void Setup()
         {
-            RateLimitCache.ResetMessageCountsPerMinute(null);
+            ResetRequestsRateLimit();
+
+            services = serviceCollection.ConfigureServices().BuildServiceProvider();
+            botClient = services.GetRequiredService<ITelegramBotClient>();
+        }
+
+        private void ResetRequestsRateLimit()
+        {
+            var descriptor = serviceCollection.FirstOrDefault(d => d.ServiceType == typeof(RateLimitCache));
+            if (descriptor != null)
+            {
+                serviceCollection.Remove(descriptor);
+            }
+
+            serviceCollection.AddSingleton<RateLimitCache>();
         }
 
         [Test]
         public async Task SendTextMessage()
         {
-            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var mainHandler = services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             await mainHandler.HandleAsync(updateDecorator);
 
@@ -81,7 +95,7 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task SetBotUiLanguage()
         {
-            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var mainHandler = services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.Text = BotMenu.ChooseLangCommand;
 
@@ -97,7 +111,7 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task SendGenerateImageRequest()
         {
-            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var mainHandler = services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.Text = "/image гора";
 
@@ -109,7 +123,7 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task ResetContext()
         {
-            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var mainHandler = services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             await mainHandler.HandleAsync(updateDecorator);
             var initialContextId = updateDecorator.Message.ContextId;
@@ -127,7 +141,7 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task TestContext()
         {
-            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var mainHandler = services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator);
@@ -155,17 +169,19 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task AddNewUser()
         {
-            var userRepository = _services.GetRequiredService<UserRepository>();
-            var context = _services.GetRequiredService<ApplicationContext>();
+            var userRepository = services.GetRequiredService<UserRepository>();
+            var context = services.GetRequiredService<ApplicationContext>();
             try
             {
                 userRepository.Delete(AppConfig.AdminIds.First());
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
-            catch (Exception) {}
-            
+            catch (Exception)
+            {
+                // ignored
+            }
 
-            var mainHandler = _services.GetRequiredService<MainHandler>();
+            var mainHandler = services.GetRequiredService<MainHandler>();
             var updateDecorator = new UpdateDecorator(telegramUpdate);
             updateDecorator.Message.ContextBound = true;
             await mainHandler.HandleAsync(updateDecorator);
