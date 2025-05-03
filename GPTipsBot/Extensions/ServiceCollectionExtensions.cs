@@ -8,7 +8,6 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
-using GPTipsBot.Services.Advertisement;
 
 namespace GPTipsBot.Extensions
 {
@@ -80,7 +79,6 @@ namespace GPTipsBot.Extensions
             });
 
             services.AddDbContext<ApplicationContext>();
-            services.AddHostedService<TelegramBroadcaster>();
 
             return services;
         }
