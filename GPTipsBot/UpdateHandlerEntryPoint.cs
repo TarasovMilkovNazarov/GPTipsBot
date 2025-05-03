@@ -67,7 +67,7 @@ namespace GPTipsBot
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
 
-            SendHamsterAdvertisement(extendedUpd);
+            // SendHamsterAdvertisement(extendedUpd);
 
             await mainHandler.HandleAsync(extendedUpd);
         }
