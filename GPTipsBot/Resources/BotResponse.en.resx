@@ -150,14 +150,12 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
     <value>Hello! How can I help you?</value>
   </data>
   <data name="Hamster" xml:space="preserve">
-    <value>[VPN in Telegram for the price of a cup of coffee](https://t.me/t_consult_service_bot?start=referral_486363646)
+    <value>[VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
 
-🎁 The first 2 days are free  
-🚀 High speed  
-🔄 Stability  
-💬 Responsive support  
-📱💻 For phones, computers, and tablets  
-💰 Ongoing referral program with bonus rewards  </value>
+🎁 Первые 2 дня бесплатно
+🚀 Высокая скорость
+▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
+📱💻 Для телефонов, компьютеров и планшетов</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and start again with the /image command.</value>

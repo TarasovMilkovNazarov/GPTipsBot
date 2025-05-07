@@ -66,6 +66,11 @@ namespace GPTipsBot.Repositories
             return context.Users.AsNoTracking().ToList();
         }
 
+        public IEnumerable<long> GetAllIdentificators()
+        {
+            return context.Users.AsNoTracking().Select(c => c.Id);
+        }
+
         public long GetActiveUsersCount()
         {
             return context.Users.AsNoTracking().Where(x => x.IsActive).Count();

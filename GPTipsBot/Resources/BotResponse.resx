@@ -150,14 +150,12 @@
     <value>Привет!:) Чем могу помочь?</value>
   </data>
   <data name="Hamster" xml:space="preserve">
-    <value>[VPN в телеграмме по цене чашки кофе](https://t.me/t_consult_service_bot?start=referral_486363646)
+    <value>[VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
 
 🎁 Первые 2 дня бесплатно
 🚀 Высокая скорость
-🔄 Стабильность
-💬 Отзывчивая поддержка
-📱💻 Для телефонов, компьютеров и планшетов
-💰 Постоянная реферальная программа с начислением бонусов</value>
+▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
+📱💻 Для телефонов, компьютеров и планшетов</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>

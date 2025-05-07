@@ -164,14 +164,12 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [VPN в телеграмме по цене чашки кофе](https://t.me/t_consult_service_bot?start=referral_486363646)
+        ///   Looks up a localized string similar to [VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
         ///
         ///🎁 Первые 2 дня бесплатно
         ///🚀 Высокая скорость
-        ///🔄 Стабильность
-        ///💬 Отзывчивая поддержка
-        ///📱💻 Для телефонов, компьютеров и планшетов
-        ///💰 Постоянная реферальная программа с начислением бонусов.
+        ///▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
+        ///📱💻 Для телефонов, компьютеров и планшетов.
         /// </summary>
         public static string Hamster {
             get {
