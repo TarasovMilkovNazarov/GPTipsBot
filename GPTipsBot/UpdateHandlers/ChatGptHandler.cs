@@ -18,22 +18,19 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ActionStatus typingStatus;
         private readonly ILogger<ChatGptHandler> log;
         private readonly ITelegramBotClient botClient;
-        private readonly RateLimitCache rateLimitCache;
 
         public ChatGptHandler(
             MessageRepository messageRepository,
             IGpt gptService,
             ActionStatus typingStatus,
             ILogger<ChatGptHandler> log,
-            ITelegramBotClient botClient,
-            RateLimitCache rateLimitCache)
+            ITelegramBotClient botClient)
         {
             this.messageRepository = messageRepository;
             this.gptService = gptService;
             this.typingStatus = typingStatus;
             this.log = log;
             this.botClient = botClient;
-            this.rateLimitCache = rateLimitCache;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -60,7 +57,11 @@ namespace GPTipsBot.UpdateHandlers
                 catch (ChatGptException ex)
                 {
                     log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                    await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.SomethingWentWrong, (int)update.Message.TelegramMessageId!);
+                    await botClient.SendTextMessageAsync(
+                        update.UserChatKey.ChatId,
+                        BotResponse.SomethingWentWrong,
+                        (int)update.Message.TelegramMessageId!, cancellationToken: token
+                        );
 
                     return;
                 }

@@ -9,12 +9,14 @@ namespace GPTipsBot.Logging;
 
 public class JustNormalFormatter : ConsoleFormatter, IDisposable
 {
+    private readonly ITelegramBotClient botClient;
     private readonly IDisposable? optionsReloadToken;
     private ConsoleFormatterOptions formatterOptions;
 
-    public JustNormalFormatter(IOptionsMonitor<ConsoleFormatterOptions> options)
+    public JustNormalFormatter(IOptionsMonitor<ConsoleFormatterOptions> options, ITelegramBotClient botClient)
         : base(nameof(JustNormalFormatter))
     {
+        this.botClient = botClient;
         (optionsReloadToken, formatterOptions) =
             (options.OnChange(ReloadLoggerOptions), options.CurrentValue);
     }
@@ -47,14 +49,13 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
         SendAlertIfError(logEntry.LogLevel, textWriter.ToString()!, textWriter);
     }
 
-    private static void SendAlertIfError(LogLevel logLevel, string logText, TextWriter diagnosticLog)
+    private void SendAlertIfError(LogLevel logLevel, string logText, TextWriter diagnosticLog)
     {
         if (logLevel is not (LogLevel.Critical or LogLevel.Error)) return;
 
         const string errorPrefix = "🚧🚧🚧 ПАРДОН МЕСЬЕ Я ПРИУНЫЛ:";
         try
         {
-            var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
             foreach (var adminId in AppConfig.AdminIds)
             {
                 var text = $"{errorPrefix}{Environment.NewLine}{logText}";
@@ -69,7 +70,6 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
             
             try
             {
-                var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
                 foreach (var adminId in AppConfig.AdminIds)
                 {
                     var text = $"{errorPrefix}{Environment.NewLine}" +

@@ -20,14 +20,8 @@ namespace GPTipsBot.Services
         public const string ChooseLangCommand = "/setLang";
         public const string SetRuLangCommand = "/setRuLang";
         public const string SetEngLangCommand = "/setEngLang";
-        public const string GamesCommand = "/games";
         public const string CancelCommand = "/cancel";
         public const string StopRequestCommand = "/stopRequest";
-        public const string TickTackToeCommand = "/tickTackToe";
-        public const string EmojiTranslationCommand = "/emojiTranslation";
-        public const string BookDivinationCommand = "/bookDivination";
-        public const string GuessWhoCommand = "/guessWho";
-        public const string AdventureCommand = "/adventureGame";
         public const string ImageTextRecognizeCommand = "/get_image_text";
 
         public static BotCommand Start => new() { Command = StartCommand, Description = BotUI.Start };
@@ -41,15 +35,6 @@ namespace GPTipsBot.Services
         public static BotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang };
         public static BotCommand StopRequest => new() { Command = StopRequestCommand };
         public static BotCommand Cancel => new() { Command = CancelCommand };
-
-        #region Games commands
-        public static BotCommand Games => new() { Command = GamesCommand, Description = BotUI.GamesButton };
-        public static BotCommand TickTackToe => new() { Command = TickTackToeCommand, Description = BotUI.TickTackToeButton };
-        public static BotCommand EmojiTranslation => new() { Command = EmojiTranslationCommand, Description = BotUI.EmojiTranslationButton };
-        public static BotCommand BookDivination => new() { Command = BookDivinationCommand, Description = BotUI.BookDivinationButton };
-        public static BotCommand GuessWho => new() { Command = GuessWhoCommand, Description = BotUI.GuessWhoButton };
-        public static BotCommand Adventure => new() { Command = AdventureCommand, Description = BotUI.AdventureButton };
-        #endregion
 
         public BotMenu()
         {
@@ -112,12 +97,6 @@ namespace GPTipsBot.Services
                 { BotMenu.ChooseLangCommand, new() },
                 { BotMenu.SetRuLangCommand, new() },
                 { BotMenu.SetEngLangCommand, new() },
-                { BotMenu.GamesCommand, new() },
-                { BotMenu.TickTackToeCommand, new() },
-                { BotMenu.BookDivinationCommand, new() },
-                { BotMenu.EmojiTranslationCommand, new() },
-                { BotMenu.GuessWhoCommand, new() },
-                { BotMenu.AdventureCommand, new() },
                 { BotMenu.ImageTextRecognizeCommand, new() },
             };
 
@@ -135,12 +114,6 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ChooseLangCommand].Add(BotUI.LangButton);
                 ButtonToLocalizations[BotMenu.SetRuLangCommand].Add(BotUI.RussianButton);
                 ButtonToLocalizations[BotMenu.SetEngLangCommand].Add(BotUI.EnglishButton);
-                ButtonToLocalizations[BotMenu.GamesCommand].Add(BotUI.GamesButton);
-                ButtonToLocalizations[BotMenu.TickTackToeCommand].Add(BotUI.TickTackToeButton);
-                ButtonToLocalizations[BotMenu.BookDivinationCommand].Add(BotUI.BookDivinationButton);
-                ButtonToLocalizations[BotMenu.EmojiTranslationCommand].Add(BotUI.EmojiTranslationButton);
-                ButtonToLocalizations[BotMenu.GuessWhoCommand].Add(BotUI.GuessWhoButton);
-                ButtonToLocalizations[BotMenu.AdventureCommand].Add(BotUI.AdventureButton);
                 ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
             }
 

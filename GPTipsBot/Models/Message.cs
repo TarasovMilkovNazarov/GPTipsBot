@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
+using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.Models
 {
@@ -20,5 +21,17 @@ namespace GPTipsBot.Models
         public DateTime CreatedAt { get; set; }
         public MessageOwner Role { get; set; }
         public bool ContextBound { get; set; }
+
+        public BotMessageType? Type { get; set; }
     }
+}
+
+public enum BotMessageType
+{
+    Unknown = 0,
+    RecognizeText = 1,
+    RecognizeVoice = 2,
+    ImageGenerated = 3,
+    ChatGptPrompt = 4,
+    ImagePrompt = 5,
 }

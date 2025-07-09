@@ -1,51 +1,69 @@
-﻿using GPTipsBot.Extensions;
+﻿using GPTipsBot.Enums;
+using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using GPTipsBot.Logging;
-using GPTipsBot.Utilities;
-using Newtonsoft.Json;
 using Telegram.Bot;
-using Telegram.Bot.Types;
-using GPTipsBot.Exceptions;
-
 namespace GPTipsBot.UpdateHandlers
 {
     public class ImageTextRecognitionHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<ImageTextRecognitionHandler> logger;
-        private readonly YandexTextRecognitionService yandexTextRecognitionService;
+        private readonly ITextRecognizer yaCloudClient;
+        private readonly MessageRepository messageRepository;
+        public const int ImagesPerDayLimit = 5;
 
-        public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger, YandexTextRecognitionService yandexTextRecognitionService)
+        public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger,
+            ITextRecognizer yaCloudClient, MessageRepository messageRepository)
         {
             this.botClient = botClient;
             this.logger = logger;
-            this.yandexTextRecognitionService = yandexTextRecognitionService;
+            this.yaCloudClient = yaCloudClient;
+            this.messageRepository = messageRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
+            // await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
+            //
+            // return;
+            var value = MainHandler.userState.GetValueOrDefault(update.UserChatKey)?.CurrentState;
+            var isAdmin = update.UserChatKey.IsAdmin();
 
-            return;
+            if (!isAdmin && value != UserStateEnum.AwaitingTextRecognitionImage)
+            {
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                    BotResponse.SendImageTextRecognitionCommandFirst,
+                    replyMarkup: TelegramBotUiService.CancelKeyboard);
+
+                return;
+            }
+
+            if (messageRepository.GetTodayTextRecognitionCount(update.UserChatKey) > ImagesPerDayLimit)
+            {
+                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                    String.Format(BotResponse.ImagesPerDayLimit, ImagesPerDayLimit),
+                    replyMarkup: TelegramBotUiService.CancelKeyboard);
+                MainHandler.userState[update.UserChatKey].CurrentState = Enums.UserStateEnum.None;
+                return;
+            }
 
             var file = await botClient.GetFileAsync(update.FileId);
 
             using var memoryStream = new MemoryStream();
-            // Download the file into the MemoryStream
             await botClient.DownloadFileAsync(file.FilePath, memoryStream);
-
-            // Reset the position of the MemoryStream to the beginning
             memoryStream.Position = 0;
 
-            // Here you can process the image in memory as needed
-            // For example, you can convert it to a byte array
             var base64String = Convert.ToBase64String(memoryStream.ToArray());
-            var text = await yandexTextRecognitionService.Recognize(base64String);
+            var text = await yaCloudClient.Recognize(base64String);
+            update.Reply.Text = text;
+            update.Reply.BotMessageType = BotMessageType.RecognizeText;
+            update.Reply.ContextBound = false;
+            update.Reply.Role = MessageOwner.Ya;
 
+            messageRepository.AddMessage(update.Reply);
 
             await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, text, replyToMessageId: (int)update.Message.TelegramMessageId!);
         }

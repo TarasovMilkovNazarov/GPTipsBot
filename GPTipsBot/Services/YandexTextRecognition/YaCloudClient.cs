@@ -1,24 +1,32 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using GPTipsBot.Models;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.YandexTextRecognition;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using HttpRequestMessage = System.Net.Http.HttpRequestMessage;
 using Message = GPTipsBot.Services.YandexTextRecognition.Message;
 
 namespace GPTipsBot.Services
 {
-    public class YandexTextRecognitionService
+    public interface ITextRecognizer
     {
-        private readonly ILogger<YandexTextRecognitionService> logger;
+        Task<string> Recognize(string base64String);
+    }
+
+    public interface IImageGenerator
+    {
+        Task<string> GenerateImage(string prompt);
+    }
+
+    public class YaCloudClient : ITextRecognizer, IImageGenerator
+    {
+        private readonly ILogger<YaCloudClient> logger;
         private readonly HttpClient _httpClient;
         private readonly string _token;
         private readonly string _folderId;
 
-        public YandexTextRecognitionService(ILogger<YandexTextRecognitionService> logger, HttpClient httpClient)
+        public YaCloudClient(ILogger<YaCloudClient> logger, HttpClient httpClient)
         {
             this.logger = logger;
             _httpClient = httpClient;

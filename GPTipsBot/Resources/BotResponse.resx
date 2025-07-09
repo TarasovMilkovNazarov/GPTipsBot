@@ -223,4 +223,7 @@
   <data name="CantRecognizeText" xml:space="preserve">
     <value>Не удалось распознать текст</value>
   </data>
+  <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
+    <value>Для распознавания текста на изображении сначала выберите команду из меню</value>
+  </data>
 </root>

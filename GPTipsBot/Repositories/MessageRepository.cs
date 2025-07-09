@@ -20,7 +20,8 @@ namespace GPTipsBot.Repositories
 
         public long? AddMessage(MessageDto messageDto, long? replyToId = null)
         {
-            long? contextId = messageDto.NewContext ? null : GetLastContext(messageDto.UserId, messageDto.ChatId);
+            var contextId = messageDto is { ContextBound: true, NewContext: false } ?
+                GetLastContext(messageDto.UserId, messageDto.ChatId) : null;
 
             var newMessage = new Message()
             {
@@ -33,6 +34,7 @@ namespace GPTipsBot.Repositories
                 TelegramMessageId = messageDto.TelegramMessageId,
                 ReplyToId = replyToId,
                 CreatedAt = DateTime.UtcNow,
+                Type = messageDto.BotMessageType
             };
 
             context.Messages.Add(newMessage);
@@ -71,10 +73,19 @@ namespace GPTipsBot.Repositories
 
         public int GetTodayImagesCount(UserChatKey userKey)
         {
-            var imagesCount = context.Messages.AsNoTracking().Where(x => 
-                    x.UserId == userKey.Id &&  x.Text != null && 
-                    x.Text.Contains("https://oaidalleapiprodscus"))
-                .Where(m => m.CreatedAt.Date == DateTime.UtcNow.Date).Count();
+            var imagesCount = context.Messages.AsNoTracking()
+                .Where(x => x.UserId == userKey.Id && x.Type == BotMessageType.ImageGenerated)
+                .Count(m => m.CreatedAt.Date == DateTime.UtcNow.Date)
+                ;
+
+            return imagesCount;
+        }
+
+        public int GetTodayTextRecognitionCount(UserChatKey userKey)
+        {
+            var imagesCount = context.Messages.AsNoTracking()
+                .Where(x => x.Type == BotMessageType.RecognizeText)
+                .Count(m => m.CreatedAt.Date == DateTime.UtcNow.Date);
 
             return imagesCount;
         }

@@ -6,12 +6,13 @@ namespace GPTipsBot.Services
 {
     public class RateLimitCache
     {
-        private Guid guid = Guid.NewGuid();
         private Timer resetMessageCountsPerMinuteTimer;
         private Timer resetMessageCountsPerDayTimer;
 
         public const int MaxMessagesCountPerMinute = 5;
         public const int MaxMessageCountPerDay = 30;
+        public const int ConsiderTelegramPerMinuteLimit = 2;
+
         private TimeSpan MinuteResetInterval { get; } = TimeSpan.FromSeconds(60);
         private TimeSpan DayResetInterval { get; } = TimeSpan.FromDays(1);
 
@@ -21,12 +22,12 @@ namespace GPTipsBot.Services
 
         private bool IsMinuteLimitOk(long chatId, ITelegramBotClient botClient)
         {
-            Console.WriteLine(guid);
             var value = UserToMinuteMessageCount.GetOrAdd(chatId, 0);
 
             var diff = value - MaxMessagesCountPerMinute;
-            var isBlockingRequest = diff >= 0;
-            if (isBlockingRequest && diff < 2)
+            var isBlockingRequest = diff > 0;
+            var telegramSpamLimitPass = diff < 2;
+            if (isBlockingRequest && telegramSpamLimitPass)
             {
                 botClient.SendTextMessageAsync(chatId, BotResponse.TooManyRequests);
             }

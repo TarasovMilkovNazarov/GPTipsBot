@@ -28,12 +28,10 @@ namespace GPTipsBot.UpdateHandlers
 
             var chatId = update.UserChatKey.ChatId;
 
-            if (update.Message.CreatedAt + TimeSpan.FromSeconds(5) < UpdateHandlerEntryPoint.Start)
-            {
-                return;
-            }
+            // todo проверка игнорит недавние сообщения, не понятно
+            if (IsEarlyRecovery(update)) return;
 
-            if (UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2))
+            if (IsLateRecovery(update))
             {
                 if (update.IsGroupOrChannel)
                 {
@@ -42,24 +40,34 @@ namespace GPTipsBot.UpdateHandlers
 
                 messageRepository.AddMessage(update.Message);
 
-                if (ChatToInformAboutRecovery.ContainsKey(chatId))
-                    ChatToInformAboutRecovery[chatId].Enqueue(update);
+                if (ChatToInformAboutRecovery.TryGetValue(chatId, out var value))
+                    value.Enqueue(update);
                 else
                 {
                     var q = new Queue<UpdateDecorator>();
                     q.Enqueue(update);
                     ChatToInformAboutRecovery.Add(chatId, q);
-                    
+
                     await botClient.SendTextMessageAsync(chatId, BotResponse.Recovered);
                 }
 
                 return;
             }
-            else if(ChatToInformAboutRecovery.ContainsKey(chatId))
-                ChatToInformAboutRecovery.Remove(chatId);
+
+            ChatToInformAboutRecovery.Remove(chatId);
 
             // Call next handler
             await base.HandleAsync(update);
+        }
+
+        private static bool IsLateRecovery(UpdateDecorator update)
+        {
+            return UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2);
+        }
+
+        private static bool IsEarlyRecovery(UpdateDecorator update)
+        {
+            return UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromSeconds(35);
         }
     }
 }

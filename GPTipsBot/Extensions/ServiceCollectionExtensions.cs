@@ -37,7 +37,8 @@ namespace GPTipsBot.Extensions
             .AddSingleton<TelejetAdClient>()
             .AddSingleton<GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
-            .AddSingleton<YandexTextRecognitionService>()
+            .AddSingleton<IImageGenerator, YaCloudClient>()
+            .AddSingleton<ITextRecognizer, YaCloudClient>()
             .AddSingleton<SpeechToTextService>()
             .AddTransient<ActionStatus>()
             .AddTransient<MessageHandlerFactory>()
@@ -65,7 +66,7 @@ namespace GPTipsBot.Extensions
             .AddTransient<BotSettingsRepository>()
             .AddTransient<OpenaiAccountsRepository>()
             .AddTransient<UnitOfWork>()
-            .AddSingleton<ITelegramBotClient, TelegramBotClient>(x =>
+            .AddSingleton<ITelegramBotClient>(x =>
             {
                 var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
 
@@ -76,7 +77,8 @@ namespace GPTipsBot.Extensions
                 InitializeBot(botClient);
 
                 return botClient;
-            });
+            })
+            ;
 
             services.AddDbContext<ApplicationContext>();
 

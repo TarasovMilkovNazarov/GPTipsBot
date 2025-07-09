@@ -118,43 +118,12 @@ namespace GPTipsBot.UpdateHandlers
                         }
                     }
                     break;
-                case GamesCommand:
-                    update.Reply.Text = BotResponse.ChooseGame;
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingGames;
-                    replyMarkup = GamesKeyboard;
-                    break;
-                case TickTackToeCommand:
-                    await SetGameInstructions(ChatGptGamesPrompts.TickTacToe, UserStateEnum.PlayingTickTacToe);
-                    return;
-                case EmojiTranslationCommand:
-                    await SetGameInstructions(ChatGptGamesPrompts.EmojiTranslation, UserStateEnum.PlayingEmojiTranslations);
-                    return;
-                case BookDivinationCommand:
-                    await SetGameInstructions(ChatGptGamesPrompts.BookDivination, UserStateEnum.PlayingBookDivination);
-                    return;
-                case GuessWhoCommand:
-                    await SetGameInstructions(ChatGptGamesPrompts.GuessWho, UserStateEnum.PlayingGuessWho);
-                    return;
-                case AdventureCommand:
-                    await SetGameInstructions(ChatGptGamesPrompts.Adventure, UserStateEnum.PlayingAdventureGame);
-                    return;
             }
 
             if (!string.IsNullOrEmpty(update.Reply.Text))
             {
                 unitOfWork.Messages.AddMessage(update.Message);
                 await botClient.SendTextMessageAsync(chatId, update.Reply.Text, replyMarkup: replyMarkup);
-            }
-
-            Task SetGameInstructions(string prompt, UserStateEnum userState)
-            {
-                update.Message.Text = prompt;
-                update.Message.NewContext = true;
-                update.Message.ContextBound = true;
-                update.Message.Role = MessageOwner.System;
-                MainHandler.userState[update.UserChatKey].CurrentState = userState;
-                SetNextHandler(messageHandlerFactory.Create<MainHandler>());
-                return base.HandleAsync(update);
             }
 
             async Task UpdateLanguage(UserChatKey userKey, string langCode)
@@ -177,32 +146,6 @@ namespace GPTipsBot.UpdateHandlers
                     unitOfWork.BotSettings.Update(userKey.Id, langCode);
                 }
             }
-        }
-
-        private bool TryGetCommand(string message, out BotCommand? command)
-        {
-            message = message.Trim().ToLower();
-
-            var classType = typeof(BotMenu);
-            var properties = classType.GetProperties(BindingFlags.Static | BindingFlags.Public)
-                .Where(p => p.PropertyType == typeof(BotCommand));
-
-            foreach (var property in properties)
-            {
-                if (property.GetValue(null) is not BotCommand botCommand) continue;
-
-                var slashCommandValue = botCommand.Command;
-
-                if (!message.StartsWith(slashCommandValue.ToLower()) &&
-                    (!ButtonToLocalizations.ContainsKey(slashCommandValue) ||
-                     !ButtonToLocalizations[slashCommandValue].Exists(b => b.ToLower() == message))) continue;
-                command = botCommand;
-                return true;
-            }
-
-            command = null;
-
-            return false;
         }
     }
 }

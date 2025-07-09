@@ -220,4 +220,7 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="CantRecognizeText" xml:space="preserve">
     <value>Failed to recognize text on image</value>
   </data>
+  <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
+    <value>For image text recognition choose command from bot menu first</value>
+  </data>
 </root>

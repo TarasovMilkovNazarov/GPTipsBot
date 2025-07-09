@@ -1,17 +1,24 @@
 ﻿using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
+using Moq;
 using OpenAI.ObjectModels.ResponseModels;
 
 namespace GPTipsBotTests.Services
 {
-    internal class GptApiMock : IGpt
+    public static class GptApiMock
     {
-        public Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
+        public static Mock<IGpt> CreateGptMock()
         {
-            var response = new ChatCompletionCreateResponse();
-            response.Choices = new() { new(){ Message = new("system", "test") } };
+            var mock = new Mock<IGpt>();
+            var response = new ChatCompletionCreateResponse
+            {
+                Choices = new() { new(){ Message = new("system", "test") } }
+            };
 
-            return Task.FromResult(new ChatCompletionCreateResponse());
+            mock.Setup(m => m.SendMessage(It.IsAny<UpdateDecorator>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(response);
+
+            return mock;
         }
     }
 }

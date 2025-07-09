@@ -21,6 +21,8 @@ namespace GPTipsBot.Services
         private Timer timer;
         private readonly AsyncRetryPolicy policy;
 
+        private const int MaxRetryCount = 4;
+
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
             TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow)
         {
@@ -32,20 +34,20 @@ namespace GPTipsBot.Services
             timer = setup_Timer(openaiAccountsRepository);
             policy = Policy
                 .Handle<ChatGptException>()
-                .WaitAndRetryAsync(4, (retryAttempt) =>
+                .WaitAndRetryAsync(MaxRetryCount, (retryAttempt) =>
                 {
                     var delay = TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
                     return delay;
                 });
         }
 
-        public async Task<ChatCompletionCreateResponse?> SendMessage(UpdateDecorator update, CancellationToken token)
+        public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
         {
             ChatMessage[] textWithContext;
 
             if (update.Message.NewContext)
             {
-                textWithContext = new ChatMessage[] { new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text) };
+                textWithContext = new[] { new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text) };
             }
             else
             {
@@ -57,15 +59,11 @@ namespace GPTipsBot.Services
 
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
         {
-            const int maxRetryCount = 4;
-
             log.LogInformation("Send request to OpenAi service: {messages}", messages.Last().Content);
 
             ChatCompletionCreateResponse? response = null;
 
-            
-
-            await policy.ExecuteAsync(async (context, cancellationToken) =>
+            await policy.ExecuteAsync(async (context, _) =>
             {
                 var currentToken = await openAiServiceCreator.GetApiKeyAsync();
                 var openAiService = openAiServiceCreator.Create(currentToken);
@@ -77,11 +75,6 @@ namespace GPTipsBot.Services
                 {
                     response = await openAiService.ChatCompletion.CreateCompletion(
                         new ChatCompletionCreateRequest { Messages = messages }, cancellationToken: cancellationToken);
-
-                    // response = new ChatCompletionCreateResponse();
-                    // response.Choices = new() { new()
-                    //     { Message = new("system", "test") } };
-                    // await Task.Delay(2000);
 
                     if (response.Successful)
                     {
@@ -176,6 +169,6 @@ namespace GPTipsBot.Services
 
     public interface IGpt
     {
-        Task<ChatCompletionCreateResponse?> SendMessage(UpdateDecorator update, CancellationToken token);
+        Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
     }
 }

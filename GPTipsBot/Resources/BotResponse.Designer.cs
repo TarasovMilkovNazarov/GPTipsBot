@@ -268,6 +268,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Для распознавания текста на изображении сначала выберите команду из меню.
+        /// </summary>
+        public static string SendImageTextRecognitionCommandFirst {
+            get {
+                return ResourceManager.GetString("SendImageTextRecognitionCommandFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Отправьте изображение для распознавания текста.
         /// </summary>
         public static string SendTextRecognitionImage {

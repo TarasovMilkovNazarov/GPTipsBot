@@ -9,21 +9,21 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class ActionStatus
     {
-        private readonly ITelegramBotClient botClient;
+        private readonly ITelegramBotClient _botClient;
         private readonly ILogger<ActionStatus> _logger;
         private int _serviceMessageId;
         private Timer _timer;
 
         public ActionStatus(ITelegramBotClient botClient, ILogger<ActionStatus> logger)
         {
-            this.botClient = botClient;
-            this._logger = logger;
+            _botClient = botClient;
+            _logger = logger;
         }
 
         public async Task<long> Start(UserChatKey userKey, ChatAction chatAction)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
-            var serviceMessage = await botClient.SendTextMessageAsync
+            var serviceMessage = await _botClient.SendTextMessageAsync
                 (userKey.ChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
 
@@ -40,7 +40,7 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
+                    _botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
                 catch (Exception ex)
                 {
@@ -57,7 +57,7 @@ namespace GPTipsBot.UpdateHandlers
         {
             if (_serviceMessageId != 0)
             {
-                await botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId);
+                await _botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId);
             }
 
             MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
