@@ -10,6 +10,7 @@ using NUnit.Framework;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AutoFixture;
 using FluentAssertions;
 using GPTipsBot;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using OpenAI.ObjectModels.ResponseModels;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using File = Telegram.Bot.Types.File;
 using Range = Moq.Range;
 
@@ -34,11 +36,13 @@ namespace GPTipsBotTests.Services
         private readonly Mock<IImageGenerator> _imageGeneratorMock;
         private UpdateHandlerEntryPoint _updateHandlerEntryPoint;
         private readonly Mock<ITextRecognizer> _recognitionServiceMock;
+        private readonly Fixture _fixture;
 
         private ITelegramBotClient BotClient => botClientMock.Object;
 
         public MainHandlerTests()
         {
+            _fixture = new Fixture();
             DotEnv.Fluent().WithProbeForEnv(10).Load();
             serviceCollection = new ServiceCollection().ConfigureServices();
 
@@ -132,6 +136,51 @@ namespace GPTipsBotTests.Services
             }
 
             serviceCollection.AddSingleton<RateLimitCache>();
+        }
+
+
+        [Test]
+        public async Task UpdateHandler_Kicked_Ignored()
+        {
+            var update = new Update()
+            {
+                Id = 1234,
+                MyChatMember = new ChatMemberUpdated
+                {
+                    Chat = new Chat()
+                    {
+                        Id = 1234,
+                    },
+                    From = null,
+                    Date = default,
+                    OldChatMember = new ChatMemberMember(),
+                    NewChatMember = new ChatMemberBanned(),
+                    InviteLink = null,
+                    ViaChatFolderInviteLink = null
+                }
+            };
+
+            var updateHandlerFunc = async () => await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            await updateHandlerFunc.Should().NotThrowAsync("Kicked member just ignored");
+        }
+
+        [Test]
+        [TestCase(MessageType.Sticker)]
+        [TestCase(MessageType.ChannelCreated)]
+        [TestCase(MessageType.ChatTitleChanged)]
+        public async Task UpdateHandler_MessageTypeArgument_Ignored(MessageType messageType)
+        {
+            var update = new Update()
+            {
+                Id = 1234,
+                Message = new()
+                {
+                    Sticker = new Sticker()
+                }
+            };
+
+            var updateHandlerFunc = async () => await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            await updateHandlerFunc.Should().NotThrowAsync("Sticker message ignored");
         }
 
         [Test]

@@ -63,7 +63,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         }
                         catch (Exception e)
                         {
-                            log.LogError(e, "Error while handling update: '{message}'", e.Message);
+                            log.LogError(e, "Unknown error while handling update");
                             if (update.Message == null)
                                 return;
 

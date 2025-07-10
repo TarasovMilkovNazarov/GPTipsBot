@@ -38,12 +38,6 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.ChatMemberStatus == ChatMemberStatus.Kicked)
-            {
-                userRepository.SoftlyRemoveUser(update.UserChatKey.Id);
-                return;
-            }
-
             if (update.CallbackQuery != null)
             {
                 SetNextHandler(messageHandlerFactory.Create<CommandHandler>());

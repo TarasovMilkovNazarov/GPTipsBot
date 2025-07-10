@@ -18,6 +18,19 @@ namespace GPTipsBot.Extensions
                 return true;
             }
 
+            switch (update.Message?.Type)
+            {
+                case null:
+                    break;
+                case MessageType.Text:
+                case MessageType.Audio:
+                case MessageType.Voice:
+                case MessageType.Photo:
+                    return false;
+                default:
+                    return true;
+            }
+
             var botsChatStatus = update.MyChatMember;
 
             if (botsChatStatus == null) { return false; }
@@ -25,25 +38,16 @@ namespace GPTipsBot.Extensions
             var oldStatus = botsChatStatus.OldChatMember.Status;
             var newStatus = botsChatStatus.NewChatMember.Status;
 
-            if (newStatus == ChatMemberStatus.Administrator)
+            switch (newStatus)
             {
-                return true;
-            }
-            if (oldStatus == ChatMemberStatus.Administrator)
-            {
-                return true;
-            }
-            if (newStatus == ChatMemberStatus.Left)
-            {
-                return true;
-            }
-            if (oldStatus == ChatMemberStatus.Left && 
-                newStatus == ChatMemberStatus.Member)
-            {
-                return true;
+                case ChatMemberStatus.Left:
+                case ChatMemberStatus.Administrator:
+                case ChatMemberStatus.Kicked:
+                case ChatMemberStatus.Member when oldStatus == ChatMemberStatus.Left:
+                    return true;
             }
 
-            return false;
-        } 
+            return oldStatus == ChatMemberStatus.Administrator;
+        }
     }
 }
