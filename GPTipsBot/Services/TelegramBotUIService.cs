@@ -11,7 +11,6 @@ namespace GPTipsBot.Services
     [JsonObject(MemberSerialization.OptIn, NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class BotMenu
     {
-        // Note! command with several words must use underscore like do_smth_new
         public const string StartCommand = "/start";
         public const string ImageCommand = "/image";
         public const string ResetContextCommand = "/reset_context";
@@ -58,24 +57,15 @@ namespace GPTipsBot.Services
         public static ReplyKeyboardMarkup StartKeyboard => GetMenuKeyboardMarkup();
         public static ReplyKeyboardMarkup CancelKeyboard => GetCancelKeyboardMarkup();
         public static ReplyKeyboardMarkup ChooseLangKeyboard => GetLanguageKeyboardMarkup();
-        public static ReplyKeyboardMarkup GamesKeyboard => GetGamesKeyboardMarkup();
 
         private static KeyboardButton ImageButton => new(BotUI.ImageButton);
         private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
-        private static KeyboardButton FeedbackButton => new(BotUI.FeedbackButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
         private static KeyboardButton CancelButton => new(BotUI.CancelButton);
         private static KeyboardButton LangButton => new(BotUI.LangButton);
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
-
-        private static KeyboardButton GamesButton => new(BotUI.GamesButton);
-        private static KeyboardButton TickTackToeButton => new(BotUI.TickTackToeButton);
-        private static KeyboardButton EmojiTranslationButton => new(BotUI.EmojiTranslationButton);
-        private static KeyboardButton GuessWhoButton => new(BotUI.GuessWhoButton);
-        private static KeyboardButton BookDivinationButton => new(BotUI.BookDivinationButton);
-        private static KeyboardButton AdventureGameButton => new(BotUI.AdventureButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -150,31 +140,6 @@ namespace GPTipsBot.Services
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
         {
             var keyboardMarkup = new ReplyKeyboardMarkup(CancelButton);
-
-            keyboardMarkup.ResizeKeyboard = true;
-            keyboardMarkup.OneTimeKeyboard = true;
-
-            return keyboardMarkup;
-        }
-        private static ReplyKeyboardMarkup GetGamesKeyboardMarkup()
-        {
-            var keyboardMarkup = new ReplyKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    TickTackToeButton,
-                    EmojiTranslationButton
-                },
-                new[]
-                {
-                    GuessWhoButton,
-                    BookDivinationButton
-                },
-                new[]
-                {
-                    AdventureGameButton
-                }
-            });
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = true;
