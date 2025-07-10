@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Models;
 using GPTipsBot.Repositories;
+using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
 
 namespace GPTipsBot.Services
@@ -8,27 +9,48 @@ namespace GPTipsBot.Services
     {
         private readonly ITelegramBotClient botClient;
         private readonly UserRepository userRepository;
+        private readonly IMemoryCache _memoryCache;
+        private readonly MemoryCacheEntryOptions _cacheOptions;
         public event EventHandler<User> UserCreated;
         public static long? activeUserCount;
 
-        public UserService(ITelegramBotClient botClient, UserRepository userRepository)
+        public UserService(ITelegramBotClient botClient, UserRepository userRepository, IMemoryCache memoryCache)
         {
             this.botClient = botClient;
             this.userRepository = userRepository;
             UserCreated += UserCreatedEventHandler;
+
+            _memoryCache = memoryCache;
+
+            // Cache for 1 day (adjust as needed)
+            _cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
+                SlidingExpiration = TimeSpan.FromMinutes(20),
+            };
         }
 
         public void CreateUpdateUser(User user)
         {
+            string cacheKey = $"User_{user.Id}";
+
+            if (_memoryCache.TryGetValue(cacheKey, out User _))
+            {
+                return;
+            }
+
             var isExists = userRepository.Any(user.Id);
             if (isExists)
             {
                 userRepository.Update(user);
-                return;
+            }
+            else
+            {
+                userRepository.Create(user);
+                UserCreated?.Invoke(this, user);
             }
 
-            userRepository.Create(user);
-            UserCreated?.Invoke(this, user);
+            _memoryCache.Set(cacheKey, user, _cacheOptions);
         }
 
         public void UserCreatedEventHandler(object sender, User user)

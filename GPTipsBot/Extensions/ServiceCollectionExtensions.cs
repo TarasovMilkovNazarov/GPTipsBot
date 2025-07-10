@@ -8,6 +8,7 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GPTipsBot.Extensions
 {
@@ -15,6 +16,7 @@ namespace GPTipsBot.Extensions
     {
         public static IServiceCollection ConfigureServices(this IServiceCollection services)
         {
+            services.AddMemoryCache();
             services.AddLocalization(options =>
             {
                 options.ResourcesPath = "Resources";

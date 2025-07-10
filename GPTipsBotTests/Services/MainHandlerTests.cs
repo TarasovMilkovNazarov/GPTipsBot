@@ -14,6 +14,7 @@ using AutoFixture;
 using FluentAssertions;
 using GPTipsBot;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using OpenAI.ObjectModels.ResponseModels;
 using Telegram.Bot;
@@ -37,6 +38,7 @@ namespace GPTipsBotTests.Services
         private UpdateHandlerEntryPoint _updateHandlerEntryPoint;
         private readonly Mock<ITextRecognizer> _recognitionServiceMock;
         private readonly Fixture _fixture;
+        private IMemoryCache _memoryCache;
 
         private ITelegramBotClient BotClient => botClientMock.Object;
 
@@ -117,6 +119,7 @@ namespace GPTipsBotTests.Services
             await ClearDatabase(appContext);
             messageRepository = services.GetRequiredService<MessageRepository>();
             _updateHandlerEntryPoint = services.GetRequiredService<UpdateHandlerEntryPoint>();
+            _memoryCache = services.GetRequiredService<IMemoryCache>();
         }
 
         [OneTimeSetUp]
@@ -415,6 +418,19 @@ namespace GPTipsBotTests.Services
             var newUser = userRepository.Get(TestConstants.UserId);
 
             newUser.Should().NotBeNull();
+        }
+
+        [Test]
+        public async Task TextMessage_TwoTimes_UserCached()
+        {
+            var userRepository = services.GetRequiredService<UserRepository>();
+
+            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
+
+            var newUser = userRepository.Get(TestConstants.UserId);
+            var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + startTelegramUpdate.Message.From.Id);
+            cached.Should().BeEquivalentTo(newUser);
         }
 
         private async Task ClearDatabase(ApplicationContext context)
