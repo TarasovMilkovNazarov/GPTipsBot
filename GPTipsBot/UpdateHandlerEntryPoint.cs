@@ -22,7 +22,7 @@ namespace GPTipsBot
         private static object advertisementSyncObj = new object();
         private static readonly HashSet<long> HamsterSent = new();
 
-        public static DateTime Start { get; } = DateTime.UtcNow;
+        public static DateTime Start { get; private set; }
 
         public UpdateHandlerEntryPoint(
             MainHandler mainHandler,
@@ -38,6 +38,7 @@ namespace GPTipsBot
             this.telejetAdClient = telejetAdClient;
             _gramadsAdvertisementClient = gramadsAdvertisementClient;
             this.botClient = botClient;
+            Start = DateTime.UtcNow;
         }
 
         public async Task HandleUpdateAsync(Update update)

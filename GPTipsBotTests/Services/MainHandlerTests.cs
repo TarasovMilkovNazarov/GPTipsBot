@@ -8,9 +8,13 @@ using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentAssertions;
+using GPTipsBot;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using OpenAI.ObjectModels.ResponseModels;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
@@ -28,6 +32,8 @@ namespace GPTipsBotTests.Services
         private MessageRepository messageRepository;
         private readonly Mock<IGpt> gptMock;
         private readonly Mock<IImageGenerator> _imageGeneratorMock;
+        private UpdateHandlerEntryPoint _updateHandlerEntryPoint;
+        private readonly Mock<ITextRecognizer> _recognitionServiceMock;
 
         private ITelegramBotClient BotClient => botClientMock.Object;
 
@@ -36,17 +42,18 @@ namespace GPTipsBotTests.Services
             DotEnv.Fluent().WithProbeForEnv(10).Load();
             serviceCollection = new ServiceCollection().ConfigureServices();
 
-            var recognitionServiceMock = new Mock<ITextRecognizer>();
+            _recognitionServiceMock = new Mock<ITextRecognizer>();
             _imageGeneratorMock = new Mock<IImageGenerator>();
-            recognitionServiceMock.Setup(s => s.Recognize(It.IsAny<string>())).ReturnsAsync(TestConstants.ImageTextResponse);
+            _recognitionServiceMock.Setup(s => s.Recognize(It.IsAny<string>())).ReturnsAsync(TestConstants.ImageTextResponse);
             _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>())).ReturnsAsync(TestConstants.GeneratedImage);
             gptMock = GptApiMock.CreateGptMock();
 
             serviceCollection
-                .AddSingleton(recognitionServiceMock.Object)
+                .AddSingleton(_recognitionServiceMock.Object)
                 .AddSingleton(_imageGeneratorMock.Object)
                 .AddSingleton(BotClient)
-                .AddSingleton<IGpt>(gptMock.Object);
+                .AddSingleton<IGpt>(gptMock.Object)
+                .AddSingleton(new Mock<GramadsAdvertisementClient>().Object);
 
             botClientMock.Setup(b => b.MakeRequestAsync(It.IsAny<GetFileRequest>(),
                 It.IsAny<CancellationToken>())).ReturnsAsync(new File
@@ -100,11 +107,12 @@ namespace GPTipsBotTests.Services
         [SetUp]
         public async Task Setup()
         {
-            ResetRequestsRateLimit();
             services = serviceCollection.BuildServiceProvider();
-            messageRepository = services.GetRequiredService<MessageRepository>();
+            ResetRequestsRateLimit();
             var appContext = services.GetRequiredService<ApplicationContext>();
             await ClearDatabase(appContext);
+            messageRepository = services.GetRequiredService<MessageRepository>();
+            _updateHandlerEntryPoint = services.GetRequiredService<UpdateHandlerEntryPoint>();
         }
 
         [OneTimeSetUp]
@@ -129,36 +137,84 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task SendTextMessage_NewUser_ReturnsGtpResponse()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
+            var prompt = "What is the capital city of France?";
+            var gtpResponse = "Paris";
+            var response = new ChatCompletionCreateResponse
+            {
+                Choices = new() { new(){ Message = new("system", gtpResponse) } }
+            };
 
-            var messageUpd = CreateTelegramUpdate(1, 2, "What is the capital city of France?");
-            var messageUpdDecorator = new UpdateDecorator(messageUpd);
-            await mainHandler.HandleAsync(messageUpdDecorator);
+            gptMock.Setup(m => m.SendMessage(It.Is<UpdateDecorator>(arg =>
+                    arg.Message.Text.Equals(prompt)), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(response);
 
-            messageUpdDecorator.Reply.Text.Should().Be("test");
+            var messageUpd = CreateTelegramUpdate(1, 2, prompt);
+            var userId = messageUpd.Message.From.Id;
+            await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
+
+            gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
+                        arg.Message.Text.Equals(prompt)
+                    ),
+                It.IsAny<CancellationToken>()), Times.Once);
+
+            var message = messageRepository.GetAllUserMessages(userId)
+                .OrderByDescending(m => m.CreatedAt)
+                .First();
+
+            message.Should().NotBeNull();
+            message.Text.Should().Be(gtpResponse);
         }
 
         [Test]
         public async Task SendTextMessage_ManyRequestsPerMinute_LimitExceeded()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
+            var prompt = "How much it would be add 2 to previous result";
+            var messageUpd = CreateTelegramUpdate(1, 2, prompt);
 
-            var messageUpd = CreateTelegramUpdate(1, 2, "What is the capital city of France?");
-
-            UpdateDecorator messageUpdDecorator = null!;
             for (var i = 0; i < RateLimitCache.MaxMessagesCountPerMinute + 1; i++)
             {
-                messageUpdDecorator = new UpdateDecorator(messageUpd);
-                await mainHandler.HandleAsync(messageUpdDecorator);
+                await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
             }
 
             botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
-                    arg.ChatId == messageUpdDecorator.ChatId &&
+                    arg.ChatId == messageUpd.Message.Chat.Id &&
+                    arg.Text == BotResponse.TooManyRequests
+                ),
+                It.IsAny<CancellationToken>()), Times.Exactly(2));
+
+            gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+                It.IsAny<CancellationToken>()), Times.Exactly(RateLimitCache.MaxMessagesCountPerMinute));
+        }
+
+        [Test]
+        public async Task SendTextMessage_ManyParallelRequestsPerMinute_LimitExceeded()
+        {
+            var prompt = "SendTextMessage_ManyParallelRequestsPerMinute_LimitExceeded";
+            var messageUpd = CreateTelegramUpdate(1, 2, prompt);
+
+            var response = new ChatCompletionCreateResponse
+            {
+                Choices = new() { new() { Message = new("system", "test") } }
+            };
+            gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(async (UpdateDecorator upd, CancellationToken token) => {
+                    // await Task.Delay(100, token);
+                    return response;
+                });
+
+            for (var i = 0; i < RateLimitCache.MaxMessagesCountPerMinute + 1; i++)
+            {
+                await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
+            }
+
+            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+                    arg.ChatId == messageUpd.Message!.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
-            gptMock.Verify(g => g.SendMessage(It.IsAny<UpdateDecorator>(),
+            gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
                 It.IsAny<CancellationToken>()), Times.Exactly(RateLimitCache.MaxMessagesCountPerMinute));
         }
 
@@ -166,33 +222,35 @@ namespace GPTipsBotTests.Services
         public async Task SetBotUiLanguageCommand_RussianCulture_ReturnsChooseLanguageInstruction()
         {
             CultureInfo.CurrentUICulture = new CultureInfo("ru");
-            var mainHandler = services.GetRequiredService<MainHandler>();
-            var updateDecorator = new UpdateDecorator(CreateTelegramUpdate(1, 2, BotMenu.ChooseLangCommand));
+            var update = CreateTelegramUpdate(1, 2, BotMenu.ChooseLangCommand);
 
-            await mainHandler.HandleAsync(updateDecorator);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
 
-            updateDecorator.Reply.Text.Should().Be(BotResponse.ChooseLanguagePlease);
+            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+                    arg.ChatId == update.Message!.Chat.Id &&
+                    arg.Text == BotResponse.ChooseLanguagePlease
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
         public async Task GenerateImageRequest_ManyRequests_ImagesPerDayLimitResponse()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
-            var getImageUpdate = CreateTelegramUpdate(1, 2, "/image гора");
-            UpdateDecorator updateDecorator = null!;
+            var update = CreateTelegramUpdate(1, 2, "/image гора");
 
             for (int i = 0; i < ImageGeneratorHandler.ImagesPerDayLimit + 1; i++)
             {
-                updateDecorator = new UpdateDecorator(getImageUpdate);
-                await mainHandler.HandleAsync(updateDecorator);
+                await _updateHandlerEntryPoint.HandleUpdateAsync(update);
             }
 
-            var generatedImagesCount = messageRepository.GetTodayImagesCount(updateDecorator.UserChatKey);
+            var userId = update.Message!.From.Id;
+
+            var generatedImagesCount = messageRepository.GetTodayImagesCount(userId);
 
             generatedImagesCount.Should().Be(ImageGeneratorHandler.ImagesPerDayLimit);
 
             botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
-                    arg.ChatId == updateDecorator.ChatId &&
+                    arg.ChatId == userId &&
                     arg.Text == String.Format(BotResponse.ImagesPerDayLimit, ImageGeneratorHandler.ImagesPerDayLimit)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
@@ -204,12 +262,11 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task GenerateImageRequest_ImageWithDescriptionCommand_GenerateImage()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
-            var getImageUpdate = CreateTelegramUpdate(1, 2, "/image гора");
-            var updateDecorator = new UpdateDecorator(getImageUpdate);
-            await mainHandler.HandleAsync(updateDecorator);
+            var imagePromptWithCommand = "/image кракозябра";
+            var getImageUpdate = CreateTelegramUpdate(1, 2, imagePromptWithCommand);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(getImageUpdate);
 
-            var generatedImagesCount = messageRepository.GetTodayImagesCount(updateDecorator.UserChatKey);
+            var generatedImagesCount = messageRepository.GetTodayImagesCount(getImageUpdate.Message!.From.Id);
 
             generatedImagesCount.Should().Be(1);
         }
@@ -217,10 +274,10 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task RecognizeImageTextRequest_ImageTextRecognizeCommand_ReturnsText()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
             var update = CreateTelegramUpdate(1, 2, BotMenu.ImageTextRecognizeCommand);
-            var commandUpdate = new UpdateDecorator(update);
-            await mainHandler.HandleAsync(commandUpdate);
+            var userId = update.Message!.From.Id;
+
+            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
             update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[] { new PhotoSize
                 {
@@ -228,28 +285,32 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            var sendImageToProccessUpd = new UpdateDecorator(update);
-            await mainHandler.HandleAsync(sendImageToProccessUpd);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
 
-            commandUpdate.Reply.Text.Should().Be(BotResponse.SendTextRecognitionImage);
-            sendImageToProccessUpd.Reply?.Text.Should().Be(TestConstants.ImageTextResponse);
+            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+                    arg.ChatId == userId &&
+                    arg.Text == BotResponse.SendTextRecognitionImage
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
+
+            _recognitionServiceMock.Verify(g => g.Recognize(It.IsAny<string>()),
+                Times.Once);
         }
 
         [Test]
         public async Task RecognizeImageTextRequest_ImageFirst_ChooseCommandFirstResponse()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
             var update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[] { new PhotoSize
                 {
                     FileId = "test"
                 }
             };
+            var userId = update.Message!.From.Id;
 
-            var sendImageToProccessUpd = new UpdateDecorator(update);
-            await mainHandler.HandleAsync(sendImageToProccessUpd);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
 
-            var sendMessageRequestExpected = new SendMessageRequest(sendImageToProccessUpd.UserChatKey.Id,
+            var sendMessageRequestExpected = new SendMessageRequest(userId,
                 BotResponse.SendImageTextRecognitionCommandFirst)
             {
                 ReplyMarkup = TelegramBotUiService.CancelKeyboard
@@ -265,15 +326,14 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task ResetContext_OldContextExists_ReturnNewContextId()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
-            var startUpdateDecorator = new UpdateDecorator(startTelegramUpdate);
-            await mainHandler.HandleAsync(startUpdateDecorator);
-            var initialContextId = startUpdateDecorator.Message.ContextId;
+            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
+            var userId = startTelegramUpdate.Message!.From.Id;
+            var initialContextId = messageRepository.GetLastContext(userId, userId);
 
-            var resetContextUpdDecorator = new UpdateDecorator(CreateTelegramUpdate(1, 2, BotMenu.ResetContextCommand));
-            await mainHandler.HandleAsync(resetContextUpdDecorator);
+            var resetContextUpdDecorator = CreateTelegramUpdate(1, 2, BotMenu.ResetContextCommand);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(resetContextUpdDecorator);
 
-            var newContextId = resetContextUpdDecorator.Message.ContextId;
+            var newContextId = messageRepository.GetLastContext(userId, userId);
 
             newContextId.Should().NotBe(initialContextId);
         }
@@ -281,18 +341,17 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task SendMessage_ContextExists_SameContext()
         {
-            var mainHandler = services.GetRequiredService<MainHandler>();
-            var startUpdateDecorator = new UpdateDecorator(startTelegramUpdate);
-            await mainHandler.HandleAsync(startUpdateDecorator);
-            var initialContextId = startUpdateDecorator.Message.ContextId;
+            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
+            var userId = startTelegramUpdate.Message!.From.Id;
+            var initialContextId = messageRepository.GetLastContext(userId, userId);
 
-            var firstMessageUpd = new UpdateDecorator(CreateTelegramUpdate(1,2, "first"));
-            await mainHandler.HandleAsync(firstMessageUpd);
+            var firstMessageUpd = CreateTelegramUpdate(1,2, "first");
+            await _updateHandlerEntryPoint.HandleUpdateAsync(firstMessageUpd);
 
-            var secondMessageUpd = new UpdateDecorator(CreateTelegramUpdate(3,4, "second"));
-            await mainHandler.HandleAsync(secondMessageUpd);
+            var secondMessageUpd = CreateTelegramUpdate(3,4, "second");
+            await _updateHandlerEntryPoint.HandleUpdateAsync(secondMessageUpd);
 
-            var newContextId = secondMessageUpd.Message.ContextId;
+            var newContextId = messageRepository.GetLastContext(userId, userId);
 
             newContextId.Should().Be(initialContextId);
         }
@@ -301,21 +360,8 @@ namespace GPTipsBotTests.Services
         public async Task StartCommand_UserNotExists_NewUserAdded()
         {
             var userRepository = services.GetRequiredService<UserRepository>();
-            var context = services.GetRequiredService<ApplicationContext>();
-            try
-            {
-                userRepository.Delete(TestConstants.UserId);
-                await context.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
 
-            var mainHandler = services.GetRequiredService<MainHandler>();
-            var updateDecorator = new UpdateDecorator(startTelegramUpdate);
-            updateDecorator.Message.ContextBound = true;
-            await mainHandler.HandleAsync(updateDecorator);
+            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
 

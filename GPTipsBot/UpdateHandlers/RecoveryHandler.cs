@@ -28,9 +28,6 @@ namespace GPTipsBot.UpdateHandlers
 
             var chatId = update.UserChatKey.ChatId;
 
-            // todo проверка игнорит недавние сообщения, не понятно
-            if (IsEarlyRecovery(update)) return;
-
             if (IsLateRecovery(update))
             {
                 if (update.IsGroupOrChannel)
@@ -62,12 +59,7 @@ namespace GPTipsBot.UpdateHandlers
 
         private static bool IsLateRecovery(UpdateDecorator update)
         {
-            return UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromMinutes(2);
-        }
-
-        private static bool IsEarlyRecovery(UpdateDecorator update)
-        {
-            return UpdateHandlerEntryPoint.Start - update.Message.CreatedAt >= TimeSpan.FromSeconds(35);
+            return update.Message.CreatedAt <= UpdateHandlerEntryPoint.Start - TimeSpan.FromMinutes(2);
         }
     }
 }

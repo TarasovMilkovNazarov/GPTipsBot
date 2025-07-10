@@ -75,7 +75,7 @@ namespace GPTipsBot.UpdateHandlers
                 FileId = update.Message!.Photo[^1].FileId;
             }
 
-            IsCommand = TryGetCommand(Message.Text, out var command);
+            IsCommand = TryGetCommand(Message?.Text, out var command);
             Command = command;
         }
 
