@@ -1,5 +1,4 @@
 ﻿using GPTipsBot.Exceptions;
-using GPTipsBot.UpdateHandlers;
 using Newtonsoft.Json;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -13,7 +12,15 @@ namespace GPTipsBot.Extensions
             return JsonConvert.SerializeObject(update, Formatting.Indented);
         }
 
-        public static bool Validate(this Update update)
+        public static string GetLanguageOrDefault(this Update update, string language = "ru")
+        {
+            return update.Message?.From?.LanguageCode ??
+                   update.CallbackQuery?.Message?.From?.LanguageCode ??
+                   update.ChatMember?.From?.LanguageCode ??
+                   update.ChannelPost?.From?.LanguageCode ?? language;
+        }
+
+        public static bool Ignore(this Update update)
         {
             if (update.EditedMessage != null)
             {

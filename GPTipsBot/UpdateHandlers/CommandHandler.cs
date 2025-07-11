@@ -19,7 +19,6 @@ namespace GPTipsBot.UpdateHandlers
 
     public class CommandHandler : BaseMessageHandler
     {
-        private readonly MessageHandlerFactory messageHandlerFactory;
         private readonly ITelegramBotClient botClient;
         private readonly UnitOfWork unitOfWork;
         private readonly ILogger<CommandHandler> logger;
@@ -27,11 +26,10 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserCommandRepository userCommandRepository;
         private readonly ImageGeneratorHandler imageGeneratorHandler;
 
-        public CommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, 
+        public CommandHandler(ITelegramBotClient botClient,
             UnitOfWork unitOfWork, ILogger<CommandHandler> logger, MessageRepository messageRepository,
             UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler)
         {
-            this.messageHandlerFactory = messageHandlerFactory;
             this.botClient = botClient;
             this.unitOfWork = unitOfWork;
             this.logger = logger;
@@ -118,10 +116,10 @@ namespace GPTipsBot.UpdateHandlers
                         replyMarkup = new ReplyKeyboardRemove();
                     }
 
-                    if (update.Message.TelegramMessageId.HasValue && state.messageIdToCancellation
+                    if (update.Message.TelegramMessageId.HasValue && state.MessageIdToCancellation
                             .ContainsKey(update.Message.TelegramMessageId.Value))
                     {
-                        state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
+                        state.MessageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
                     }
 
                     break;
@@ -136,7 +134,6 @@ namespace GPTipsBot.UpdateHandlers
             async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
-                MainHandler.UserState[userKey].LanguageCode = langCode;
 
                 await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();
@@ -151,7 +148,7 @@ namespace GPTipsBot.UpdateHandlers
                     unitOfWork.BotSettings.Update(userKey.Id, langCode);
                 }
 
-                return BotResponse.LanguageWasSetSuccessfully;;
+                return BotResponse.LanguageWasSetSuccessfully;
             }
         }
     }

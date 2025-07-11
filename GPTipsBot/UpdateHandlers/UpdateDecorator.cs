@@ -1,5 +1,8 @@
 ﻿using System.Reflection;
+using System.Text.RegularExpressions;
+using Ardalis.GuardClauses;
 using GPTipsBot.Dtos;
+using GPTipsBot.Extensions;
 using GPTipsBot.Mapper;
 using GPTipsBot.Mappers;
 using GPTipsBot.Services;
@@ -15,16 +18,21 @@ namespace GPTipsBot.UpdateHandlers
 
         public UpdateDecorator(Update update)
         {
+            Language = update.GetLanguageOrDefault();
+
             _update = update;
-            ChatId = _update.Message?.Chat?.Id ??
-                _update.CallbackQuery?.Message?.Chat?.Id ??
-                _update.MyChatMember?.Chat?.Id ??
-                throw new ArgumentNullException(nameof(update), "Can't get ChatId");
+            var chatId = _update.Message?.Chat?.Id ??
+                     _update.CallbackQuery?.Message?.Chat?.Id ??
+                     _update.MyChatMember?.Chat?.Id;
+
+            Guard.Against.Null(chatId, nameof(chatId));
+
+            ChatId = chatId.Value;
 
             var oldChatMemberStatus = update.MyChatMember?.OldChatMember.Status;
             var newChatMemberStatus = update.MyChatMember?.NewChatMember.Status;
-            if (oldChatMemberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Kicked && 
-                newChatMemberStatus == Telegram.Bot.Types.Enums.ChatMemberStatus.Member)
+            if (oldChatMemberStatus == ChatMemberStatus.Kicked &&
+                newChatMemberStatus == ChatMemberStatus.Member)
             {
                 var chat = update.MyChatMember.Chat;
 
@@ -45,15 +53,16 @@ namespace GPTipsBot.UpdateHandlers
 
                 UserChatKey = new(User.Id, ChatId);
             }
+            // if user press button below message like "stop request"
             else if (_update.CallbackQuery?.Message != null)
             {
-                //User = UserMapper.Map(_update.CallbackQuery?.Message.From);
                 Message = MessageMapper.Map(_update.CallbackQuery.Message, ChatId, Enums.MessageOwner.User);
-                Message.UserId = _update.CallbackQuery.Message.Chat.Id;
+                Message.UserId = _update.CallbackQuery.From.Id;
+                User = UserMapper.Map(_update.CallbackQuery.From);
                 Message.Text = _update.CallbackQuery.Data;
             }
 
-            UserChatKey ??= new(ChatId, ChatId);
+            UserChatKey ??= ChatId;
 
             var groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             IsGroupOrChannel = groupChatTypes.Contains(Message?.ChatType);
@@ -68,38 +77,23 @@ namespace GPTipsBot.UpdateHandlers
             Command = command;
         }
 
-        public CustomBotCommand? Command { get; set; }
+        public CustomBotCommand? Command { get; }
 
-        public string FileId { get; set; }
-
-        public CancellationToken StatusTimerCancellationToken { get; set; }
+        public string? FileId { get; }
 
         public long ChatId { get; }
 
         public UserChatKey UserChatKey { get; }
-        public UserDto User { get; set; }
+        public UserDto User { get; }
 
-        public MessageDto Message { get; set; }
-
-        public ChatMemberStatus? ChatMemberStatus => _update.MyChatMember?.NewChatMember.Status;
+        public MessageDto Message { get; }
         public bool IsRecovered { get; }
-        public bool IsCommand { get; set; }
+        public bool IsCommand { get; }
         public bool IsGroupOrChannel { get; }
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
 
-        public string Language => GetUserLanguage();
-
-
-        string GetUserLanguage()
-        {
-            if (MainHandler.UserState.ContainsKey(UserChatKey) && MainHandler.UserState[UserChatKey].LanguageCode != null)
-            {
-                return MainHandler.UserState[UserChatKey].LanguageCode;
-            }
-
-            return Message?.LanguageCode ?? "ru";
-        }
+        public string Language { get; }
 
         public override string ToString()
         {
@@ -108,7 +102,7 @@ namespace GPTipsBot.UpdateHandlers
             return serialized;
         }
 
-        private bool TryGetCommand(string message, out CustomBotCommand? command)
+        private static bool TryGetCommand(string message, out CustomBotCommand? command)
         {
             command = null;
             if (string.IsNullOrWhiteSpace(message))

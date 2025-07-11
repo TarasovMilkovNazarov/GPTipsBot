@@ -4,12 +4,12 @@ namespace GPTipsBot.Localization
 {
     public class LocalizationManager
     {
-        public static CultureInfo[] SupportedCultures;
+        public static readonly CultureInfo[] SupportedCultures;
         public static readonly CultureInfo Ru;
         public static readonly CultureInfo En;
 
         // Страны СНГ
-        public static string[] CisCountries;
+        private static readonly string[] CisCountries;
 
         static LocalizationManager()
         {
@@ -34,12 +34,7 @@ namespace GPTipsBot.Localization
 
         public static CultureInfo GetCulture(string? langCode)
         {
-            if (CisCountries.Contains(langCode))
-            {
-                return Ru;
-            }
-
-            return En;
+            return CisCountries.Contains(langCode) ? Ru : En;
         }
     }
 }

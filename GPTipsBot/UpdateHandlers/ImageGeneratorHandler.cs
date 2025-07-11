@@ -68,7 +68,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 var sw = Stopwatch.StartNew();
                 var token = MainHandler.UserState[update.UserChatKey]
-                    .messageIdToCancellation[serviceMessageId].Token;
+                    .MessageIdToCancellation[serviceMessageId].Token;
 
                 var response = await ya.GenerateImage(update.Message.Text);
                 var replyMarkup = TelegramBotUiService.CancelKeyboard;

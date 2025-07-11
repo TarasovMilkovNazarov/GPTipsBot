@@ -44,7 +44,7 @@ namespace GPTipsBot.UpdateHandlers
                 var serviceMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
                 var sw = Stopwatch.StartNew();
-                var token = MainHandler.UserState[update.UserChatKey].messageIdToCancellation[serviceMessageId].Token;
+                var token = MainHandler.UserState[update.UserChatKey].MessageIdToCancellation[serviceMessageId].Token;
 
                 ChatCompletionCreateResponse? response = null;
 

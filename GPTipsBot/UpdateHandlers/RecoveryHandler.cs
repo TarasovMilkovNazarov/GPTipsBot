@@ -11,21 +11,15 @@ namespace GPTipsBot.UpdateHandlers
         private static readonly Dictionary<long, Queue<UpdateDecorator>> ChatToInformAboutRecovery = new();
 
         public RecoveryHandler(ITelegramBotClient botClient,
-            MessageHandlerFactory messageHandlerFactory, MessageRepository messageRepository)
+            OnAdminCommandHandler onAdminCommandHandler, MessageRepository messageRepository)
         {
             this.botClient = botClient;
             this.messageRepository = messageRepository;
-            SetNextHandler(messageHandlerFactory.GetRequiredService<OnAdminCommandHandler>());
+            SetNextHandler(onAdminCommandHandler);
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            if (update.UserChatKey == null)
-            {
-                await base.HandleAsync(update);
-                return;
-            }
-
             var chatId = update.UserChatKey.ChatId;
 
             if (IsLateRecovery(update))

@@ -47,7 +47,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (!UserState.ContainsKey(userKey))
             {
-                UserState.TryAdd(userKey, new UserStateDto(userKey));
+                UserState.TryAdd(userKey, new UserStateDto());
             }
 
             var newUser = UserMapper.Map(update.User);
@@ -62,7 +62,6 @@ namespace GPTipsBot.UpdateHandlers
 
             var language = unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
-            UserState[userKey].LanguageCode = language;
 
             var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
             if (update.CallbackQuery != null || update.IsCommand)

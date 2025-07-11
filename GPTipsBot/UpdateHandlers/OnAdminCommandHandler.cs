@@ -9,11 +9,11 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient botClient;
 
         public OnAdminCommandHandler(
-            MessageHandlerFactory messageHandlerFactory,
+            RateLimitingHandler rateLimitingHandler,
             ITelegramBotClient botClient)
         {
             this.botClient = botClient;
-            SetNextHandler(messageHandlerFactory.GetRequiredService<RateLimitingHandler>());
+            SetNextHandler(rateLimitingHandler);
         }
 
         public override async Task HandleAsync(UpdateDecorator update)

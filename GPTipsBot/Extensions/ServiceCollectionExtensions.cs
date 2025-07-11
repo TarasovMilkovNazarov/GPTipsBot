@@ -8,7 +8,6 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace GPTipsBot.Extensions
 {
@@ -43,12 +42,10 @@ namespace GPTipsBot.Extensions
             .AddSingleton<ITextRecognizer, YaCloudClient>()
             .AddSingleton<SpeechToTextService>()
             .AddTransient<ActionStatus>()
-            .AddTransient<MessageHandlerFactory>()
             .AddTransient<MainHandler>()
             .AddTransient<RecoveryHandler>()
             .AddTransient<OnAdminCommandHandler>()
             .AddTransient<RateLimitingHandler>()
-            .AddTransient<GroupMessageHandler>()
             .AddTransient<CommandHandler>()
             .AddTransient<ImageGeneratorHandler>()
             .AddTransient<ImageTextRecognitionHandler>()
@@ -57,9 +54,7 @@ namespace GPTipsBot.Extensions
             .AddTransient<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()
-            //.AddTransient<OpenAiServiceCreator, EuroHosterService>()
             .AddTransient<OpenAiServiceCreator, ProxyApiService>()
-            //.AddTransient<OpenAiServiceCreator, PawanOsmanApiService>()
             .AddTransient<ContextWindow>()
             .AddTransient<MessageRepository>()
             .AddTransient<UserRepository>()
@@ -92,7 +87,8 @@ namespace GPTipsBot.Extensions
             botClient.SetMyCommandsAsync(botMenu.GetBotCommands(), languageCode: langCode);
             botClient.SetMyNameAsync(AppConfig.IsProduction ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
             botClient.SetMyDescriptionAsync(BotResponse.BotDescription, languageCode: langCode);
-            botClient.SetMyShortDescriptionAsync(AppConfig.IsProduction ? BotResponse.ShortDescription : BotResponse.ShortDevDescription, languageCode: langCode);
+            botClient.SetMyShortDescriptionAsync(AppConfig.IsProduction ? BotResponse.ShortDescription :
+                BotResponse.ShortDevDescription, languageCode: langCode);
         }
     }
 }

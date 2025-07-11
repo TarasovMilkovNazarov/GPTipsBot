@@ -27,7 +27,7 @@ using Range = Moq.Range;
 
 namespace GPTipsBotTests.Services
 {
-    public class MainHandlerTests
+    public partial class MainHandlerTests
     {
         private readonly Update startTelegramUpdate;
         private readonly IServiceCollection serviceCollection;
@@ -52,8 +52,10 @@ namespace GPTipsBotTests.Services
 
             _recognitionServiceMock = new Mock<ITextRecognizer>();
             _imageGeneratorMock = new Mock<IImageGenerator>();
-            _recognitionServiceMock.Setup(s => s.Recognize(It.IsAny<string>())).ReturnsAsync(TestConstants.ImageTextResponse);
-            _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>())).ReturnsAsync(TestConstants.GeneratedImage);
+            _recognitionServiceMock.Setup(s => s.Recognize(It.IsAny<string>()))
+                .ReturnsAsync(TestConstants.ImageTextResponse);
+            _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>()))
+                .ReturnsAsync(TestConstants.GeneratedImage);
             gptMock = GptApiMock.CreateGptMock();
 
             serviceCollection
@@ -81,7 +83,11 @@ namespace GPTipsBotTests.Services
             startTelegramUpdate = CreateTelegramUpdate(1234, 1234, BotMenu.StartCommand);
         }
 
-        private static Update CreateTelegramUpdate(int updateId, int messageId, string? text, long chatId = TestConstants.UserId)
+        private static Update CreateTelegramUpdate(
+            int updateId,
+            int messageId,
+            string? text,
+            long chatId = TestConstants.UserId)
         {
             return new Update
             {
@@ -167,7 +173,8 @@ namespace GPTipsBotTests.Services
 
             commands.Should().NotBeNull();
             commands.Count.Should().Be(commandSet.Count);
-            commands.Select(c => c.Type).Should().BeEquivalentTo(commandSet.Select(c => c.Type));;
+            commands.Select(c => c.Type).Should().BeEquivalentTo(commandSet.Select(c => c.Type));
+            ;
         }
 
 
@@ -222,7 +229,7 @@ namespace GPTipsBotTests.Services
             var gtpResponse = "Paris";
             var response = new ChatCompletionCreateResponse
             {
-                Choices = new() { new(){ Message = new("system", gtpResponse) } }
+                Choices = new() { new() { Message = new("system", gtpResponse) } }
             };
 
             gptMock.Setup(m => m.SendMessage(It.Is<UpdateDecorator>(arg =>
@@ -234,8 +241,8 @@ namespace GPTipsBotTests.Services
             await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
 
             gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
-                        arg.Message.Text.Equals(prompt)
-                    ),
+                    arg.Message.Text.Equals(prompt)
+                ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
             var message = messageRepository.GetAllUserMessages(userId)
@@ -279,7 +286,8 @@ namespace GPTipsBotTests.Services
             };
             gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
                     It.IsAny<CancellationToken>()))
-                .Returns(async (UpdateDecorator upd, CancellationToken token) => {
+                .Returns(async (UpdateDecorator upd, CancellationToken token) =>
+                {
                     // await Task.Delay(100, token);
                     return response;
                 });
@@ -360,7 +368,9 @@ namespace GPTipsBotTests.Services
 
             await _updateHandlerEntryPoint.HandleUpdateAsync(update);
             update = CreateTelegramUpdate(2, 2, null);
-            update.Message!.Photo = new[] { new PhotoSize
+            update.Message!.Photo = new[]
+            {
+                new PhotoSize
                 {
                     FileId = "test"
                 }
@@ -382,7 +392,9 @@ namespace GPTipsBotTests.Services
         public async Task RecognizeImageTextRequest_ImageFirst_ChooseCommandFirstResponse()
         {
             var update = CreateTelegramUpdate(2, 2, null);
-            update.Message!.Photo = new[] { new PhotoSize
+            update.Message!.Photo = new[]
+            {
+                new PhotoSize
                 {
                     FileId = "test"
                 }
@@ -426,10 +438,10 @@ namespace GPTipsBotTests.Services
             var userId = startTelegramUpdate.Message!.From.Id;
             var initialContextId = messageRepository.GetLastContext(userId, userId);
 
-            var firstMessageUpd = CreateTelegramUpdate(1,2, "first");
+            var firstMessageUpd = CreateTelegramUpdate(1, 2, "first");
             await _updateHandlerEntryPoint.HandleUpdateAsync(firstMessageUpd);
 
-            var secondMessageUpd = CreateTelegramUpdate(3,4, "second");
+            var secondMessageUpd = CreateTelegramUpdate(3, 4, "second");
             await _updateHandlerEntryPoint.HandleUpdateAsync(secondMessageUpd);
 
             var newContextId = messageRepository.GetLastContext(userId, userId);

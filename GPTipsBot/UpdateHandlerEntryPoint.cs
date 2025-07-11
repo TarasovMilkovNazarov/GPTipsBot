@@ -4,6 +4,7 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using System.Globalization;
+using GPTipsBot.Repositories;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -16,6 +17,7 @@ namespace GPTipsBot
         private readonly SpeechToTextService speechToTextService;
         private readonly TelejetAdClient telejetAdClient;
         private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
+        private readonly BotSettingsRepository botSettingsRepository;
         private readonly ITelegramBotClient botClient;
         private static object advertisementSyncObj = new object();
         private static readonly HashSet<long> HamsterSent = new();
@@ -27,6 +29,7 @@ namespace GPTipsBot
             SpeechToTextService speechToTextService,
             TelejetAdClient telejetAdClient,
             GramadsAdvertisementClient gramadsAdvertisementClient,
+            BotSettingsRepository botSettingsRepository,
             ITelegramBotClient botClient)
         {
             this.mainHandler = mainHandler;
@@ -34,22 +37,22 @@ namespace GPTipsBot
             this.speechToTextService = speechToTextService;
             this.telejetAdClient = telejetAdClient;
             _gramadsAdvertisementClient = gramadsAdvertisementClient;
+            this.botSettingsRepository = botSettingsRepository;
             Start = DateTime.UtcNow;
         }
 
         public async Task HandleUpdateAsync(Update update)
         {
-            //PrometheusMetrics.ProcessedItemsCounter.Inc();
-            //return;
-
             var needHandleUpd = await telejetAdClient.HandleUpdateAsync(update);
             if (!needHandleUpd)
             {
                 return;
             }
 
-            if (update.Validate())
+            if (update.Ignore())
+            {
                 return;
+            }
 
             var extendedUpd = new UpdateDecorator(update);
 

@@ -12,7 +12,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient _botClient;
         private readonly ILogger<ActionStatus> _logger;
         private int _serviceMessageId;
-        private Timer _timer;
+        private Timer? _timer;
 
         public ActionStatus(ITelegramBotClient botClient, ILogger<ActionStatus> logger)
         {
@@ -28,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
             _serviceMessageId = serviceMessage.MessageId;
 
             var tokenSource = new CancellationTokenSource();
-            MainHandler.UserState[userKey].messageIdToCancellation.Add(_serviceMessageId, tokenSource);
+            MainHandler.UserState[userKey].MessageIdToCancellation.Add(serviceMessage.MessageId, tokenSource);
 
             _timer = new Timer(_ =>
             {
@@ -60,7 +60,7 @@ namespace GPTipsBot.UpdateHandlers
                 await _botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId);
             }
 
-            MainHandler.UserState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
+            MainHandler.UserState[userKey].MessageIdToCancellation.Remove(_serviceMessageId);
 
             if (_timer != null)
             {
