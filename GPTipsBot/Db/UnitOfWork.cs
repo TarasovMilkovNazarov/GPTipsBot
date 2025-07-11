@@ -4,13 +4,13 @@ namespace GPTipsBot.Db
 {
     public class UnitOfWork : IDisposable
     {
-        private readonly ApplicationContext context;
+        private readonly ApplicationContext _context;
 
         public UnitOfWork(ApplicationContext context, BotSettingsRepository
             botSettingsRepository, MessageRepository messageRepository,
             OpenaiAccountsRepository openaiAccountsRepository, UserCommandRepository userCommandRepository)
         {
-            this.context = context;
+            _context = context;
             BotSettings = botSettingsRepository;
             Messages = messageRepository;
             OpenaiAccounts = openaiAccountsRepository;
@@ -27,20 +27,20 @@ namespace GPTipsBot.Db
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
  
-        private bool disposed = false;
+        private bool _disposed = false;
  
         public virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
-                    context.Dispose();
+                    _context.Dispose();
                 }
-                disposed = true;
+                _disposed = true;
             }
         }
  

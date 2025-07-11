@@ -6,43 +6,52 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
+using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
+using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
 {
     public class MainHandler : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
-        private readonly UserService userService;
-        private readonly UserCommandRepository userCommandRepository;
-        private readonly ImageTextRecognitionHandler imageTextRecognitionHandler;
-        private readonly ImageGeneratorHandler imageGeneratorHandler;
-        private readonly CommandHandler commandHandler;
-        private readonly UnitOfWork unitOfWork;
-        private readonly ILogger<MainHandler> logger;
+        private readonly UserService _userService;
+        private readonly UserCommandRepository _userCommandRepository;
+        private readonly ITelegramBotClient _botClient;
+        private readonly RecoveryNotificationHandler _recoveryNotificationHandler;
+        private readonly ImageTextRecognitionHandler _imageTextRecognitionHandler;
+        private readonly ImageGeneratorHandler _imageGeneratorHandler;
+        private readonly CommandHandler _commandHandler;
+        private readonly ChatGptHandler _chatGptHandler;
+        private readonly AdminCommandHandler _adminCommandHandler;
+        private readonly UnitOfWork _unitOfWork;
+        private readonly ILogger<MainHandler> _logger;
 
-        public MainHandler(RecoveryHandler recoveryHandler, ImageTextRecognitionHandler imageTextRecognitionHandler,
-            ImageGeneratorHandler imageGeneratorHandler, CommandHandler commandHandler, UnitOfWork unitOfWork,
+        public MainHandler(
+            ITelegramBotClient botClient,
+            RecoveryNotificationHandler recoveryNotificationHandler,
+            ImageTextRecognitionHandler imageTextRecognitionHandler,
+            ImageGeneratorHandler imageGeneratorHandler, CommandHandler commandHandler,
+            ChatGptHandler chatGptHandler,
+            AdminCommandHandler adminCommandHandler, UnitOfWork unitOfWork,
             ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository)
         {
-            this.imageTextRecognitionHandler = imageTextRecognitionHandler;
-            this.imageGeneratorHandler = imageGeneratorHandler;
-            this.commandHandler = commandHandler;
-            this.unitOfWork = unitOfWork;
-            this.logger = logger;
-            this.userService = userService;
-            this.userCommandRepository = userCommandRepository;
-            SetNextHandler(recoveryHandler);
+            _botClient = botClient;
+            _recoveryNotificationHandler = recoveryNotificationHandler;
+            _imageTextRecognitionHandler = imageTextRecognitionHandler;
+            _imageGeneratorHandler = imageGeneratorHandler;
+            _commandHandler = commandHandler;
+            _chatGptHandler = chatGptHandler;
+            _adminCommandHandler = adminCommandHandler;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+            _userService = userService;
+            _userCommandRepository = userCommandRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            if (update.IsRecovered)
-            {
-                return;
-            }
-
             var userKey = update.UserChatKey;
 
             if (!UserState.ContainsKey(userKey))
@@ -53,38 +62,49 @@ namespace GPTipsBot.UpdateHandlers
             var newUser = UserMapper.Map(update.User);
             try
             {
-                userService.CreateUpdateUser(newUser);
+                _userService.CreateUpdateUser(newUser);
             }
             catch (DbUpdateException ex)
             {
-                logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
+                _logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
             }
 
-            var language = unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
+            var language = _unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
 
-            var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
-            if (update.CallbackQuery != null || update.IsCommand)
+            var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
+            if (update.IsAdminCommand())
             {
-                SetNextHandler(commandHandler);
+                SetNextHandler(_adminCommandHandler);
+            }
+            else if (update.IsExpired())
+            {
+                SetNextHandler(_recoveryNotificationHandler);
+            }
+            else if (update.CallbackQuery != null || update.IsCommand)
+            {
+                SetNextHandler(_commandHandler);
             }
             else if (!string.IsNullOrEmpty(update.Message.Text) && lastCommand?.Type == CommandType.Image)
             {
-                SetNextHandler(imageGeneratorHandler);
+                SetNextHandler(_imageGeneratorHandler);
             }
             else if (!string.IsNullOrEmpty(update.FileId))
             {
-                SetNextHandler(imageTextRecognitionHandler);
+                SetNextHandler(_imageTextRecognitionHandler);
+            }
+            else
+            {
+                SetNextHandler(_chatGptHandler);
             }
 
-            // Call next handler
             try
             {
                 await base.HandleAsync(update);
             }
             finally
             {
-                unitOfWork.Save();
+                _unitOfWork.Save();
             }
         }
     }

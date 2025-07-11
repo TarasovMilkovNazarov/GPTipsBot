@@ -1,70 +1,70 @@
 ﻿namespace GPTipsBot.Services.YandexTextRecognition;
 public class Block
 {
-    public BoundingBox boundingBox { get; set; }
-    public List<Line> lines { get; set; }
-    public List<Language> languages { get; set; }
-    public List<TextSegment> textSegments { get; set; }
+    public BoundingBox BoundingBox { get; set; }
+    public List<Line> Lines { get; set; }
+    public List<Language> Languages { get; set; }
+    public List<TextSegment> TextSegments { get; set; }
 }
 
 public class BoundingBox
 {
-    public List<Vertex> vertices { get; set; }
+    public List<Vertex> Vertices { get; set; }
 }
 
 public class Language
 {
-    public string languageCode { get; set; }
+    public string LanguageCode { get; set; }
 }
 
 public class Line
 {
-    public BoundingBox boundingBox { get; set; }
-    public string text { get; set; }
-    public List<Word> words { get; set; }
-    public List<TextSegment> textSegments { get; set; }
-    public string orientation { get; set; }
+    public BoundingBox BoundingBox { get; set; }
+    public string Text { get; set; }
+    public List<Word> Words { get; set; }
+    public List<TextSegment> TextSegments { get; set; }
+    public string Orientation { get; set; }
 }
 
 public class Result
 {
-    public TextAnnotation textAnnotation { get; set; }
-    public string page { get; set; }
+    public TextAnnotation TextAnnotation { get; set; }
+    public string Page { get; set; }
 }
 
 public class Root
 {
-    public Result result { get; set; }
+    public Result Result { get; set; }
 }
 
 public class TextAnnotation
 {
-    public string width { get; set; }
-    public string height { get; set; }
-    public List<Block> blocks { get; set; }
-    public List<object> entities { get; set; }
-    public List<object> tables { get; set; }
-    public string fullText { get; set; }
-    public string rotate { get; set; }
+    public string Width { get; set; }
+    public string Height { get; set; }
+    public List<Block> Blocks { get; set; }
+    public List<object> Entities { get; set; }
+    public List<object> Tables { get; set; }
+    public string FullText { get; set; }
+    public string Rotate { get; set; }
 }
 
 public class TextSegment
 {
-    public string startIndex { get; set; }
-    public string length { get; set; }
+    public string StartIndex { get; set; }
+    public string Length { get; set; }
 }
 
 public class Vertex
 {
-    public string x { get; set; }
-    public string y { get; set; }
+    public string X { get; set; }
+    public string Y { get; set; }
 }
 
 public class Word
 {
-    public BoundingBox boundingBox { get; set; }
-    public string text { get; set; }
-    public string entityIndex { get; set; }
-    public List<TextSegment> textSegments { get; set; }
+    public BoundingBox BoundingBox { get; set; }
+    public string Text { get; set; }
+    public string EntityIndex { get; set; }
+    public List<TextSegment> TextSegments { get; set; }
 }
 

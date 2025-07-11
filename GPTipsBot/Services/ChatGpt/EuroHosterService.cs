@@ -6,11 +6,11 @@ namespace GPTipsBot.Services
 {
     public class EuroHosterService : OpenAiServiceCreator
     {
-        private readonly TokenQueue apiKeyQueue;
+        private readonly TokenQueue _apiKeyQueue;
 
         public EuroHosterService(TokenQueue tokenQueue)
         {
-            this.apiKeyQueue = tokenQueue;
+            _apiKeyQueue = tokenQueue;
         }
 
         public override OpenAIService Create(string token)
@@ -26,12 +26,12 @@ namespace GPTipsBot.Services
 
         public override async Task<string> GetApiKeyAsync()
         {
-            return await apiKeyQueue.GetTokenAsync();
+            return await _apiKeyQueue.GetTokenAsync();
         }
 
         public override void ReturnApiKey(string apiKey)
         {
-            apiKeyQueue.AddToken(apiKey);
+            _apiKeyQueue.AddToken(apiKey);
         }
     }
 }

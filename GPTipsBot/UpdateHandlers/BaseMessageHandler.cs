@@ -1,19 +1,21 @@
-﻿namespace GPTipsBot.UpdateHandlers
+﻿using GPTipsBot.Dtos;
+
+namespace GPTipsBot.UpdateHandlers
 {
     public abstract class BaseMessageHandler : IMessageHandler<UpdateDecorator>
     {
-        private BaseMessageHandler? nextHandler;
+        private BaseMessageHandler? _nextHandler;
 
         protected void SetNextHandler(BaseMessageHandler? handler)
         {
-            nextHandler = handler;
+            _nextHandler = handler;
         }
 
         public virtual async Task HandleAsync(UpdateDecorator update)
         {
-            if (nextHandler != null)
+            if (_nextHandler != null)
             {
-                await nextHandler.HandleAsync(update);
+                await _nextHandler.HandleAsync(update);
             }
         }
     }

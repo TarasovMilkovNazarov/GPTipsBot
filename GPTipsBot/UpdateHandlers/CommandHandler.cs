@@ -19,23 +19,23 @@ namespace GPTipsBot.UpdateHandlers
 
     public class CommandHandler : BaseMessageHandler
     {
-        private readonly ITelegramBotClient botClient;
-        private readonly UnitOfWork unitOfWork;
-        private readonly ILogger<CommandHandler> logger;
-        private readonly MessageRepository messageRepository;
-        private readonly UserCommandRepository userCommandRepository;
-        private readonly ImageGeneratorHandler imageGeneratorHandler;
+        private readonly ITelegramBotClient _botClient;
+        private readonly UnitOfWork _unitOfWork;
+        private readonly ILogger<CommandHandler> _logger;
+        private readonly MessageRepository _messageRepository;
+        private readonly UserCommandRepository _userCommandRepository;
+        private readonly ImageGeneratorHandler _imageGeneratorHandler;
 
         public CommandHandler(ITelegramBotClient botClient,
             UnitOfWork unitOfWork, ILogger<CommandHandler> logger, MessageRepository messageRepository,
             UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler)
         {
-            this.botClient = botClient;
-            this.unitOfWork = unitOfWork;
-            this.logger = logger;
-            this.messageRepository = messageRepository;
-            this.userCommandRepository = userCommandRepository;
-            this.imageGeneratorHandler = imageGeneratorHandler;
+            _botClient = botClient;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+            _messageRepository = messageRepository;
+            _userCommandRepository = userCommandRepository;
+            _imageGeneratorHandler = imageGeneratorHandler;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -50,8 +50,8 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             Guard.Against.Null(update.Command);
-            var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
-            await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
+            var previousCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
+            await _userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
 
             IReplyMarkup? replyMarkup = StartKeyboard;
             update.Message.ContextBound = false;
@@ -60,7 +60,7 @@ namespace GPTipsBot.UpdateHandlers
             switch (update!.Command.Command)
             {
                 case StartCommand:
-                    await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(),
+                    await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(),
                         BotCommandScope.Chat(update.UserChatKey.ChatId));
                     reply = BotResponse.Greeting;
                     break;
@@ -71,8 +71,8 @@ namespace GPTipsBot.UpdateHandlers
                     if (messageText.StartsWith("/image "))
                     {
                         update.Message.Text = messageText.Substring("/image ".Length);
-                        SetNextHandler(imageGeneratorHandler);
-                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(_imageGeneratorHandler);
+                        await _messageRepository.AddAsync(update.Message);
                         await base.HandleAsync(update);
                         return;
                     }
@@ -127,25 +127,25 @@ namespace GPTipsBot.UpdateHandlers
 
             Guard.Against.Null(reply);
 
-            await unitOfWork.Messages.AddAsync(update.Message);
-            await botClient.SendTextMessageAsync(chatId, reply, replyMarkup: replyMarkup);
+            await _unitOfWork.Messages.AddAsync(update.Message);
+            await _botClient.SendTextMessageAsync(chatId, reply, replyMarkup: replyMarkup);
             return;
 
             async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
 
-                await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
+                await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();
 
-                var settings = unitOfWork.BotSettings.Get(userKey.Id);
+                var settings = _unitOfWork.BotSettings.Get(userKey.Id);
                 if (settings == null)
                 {
-                    unitOfWork.BotSettings.Create(userKey.Id, langCode);
+                    _unitOfWork.BotSettings.Create(userKey.Id, langCode);
                 }
                 else
                 {
-                    unitOfWork.BotSettings.Update(userKey.Id, langCode);
+                    _unitOfWork.BotSettings.Update(userKey.Id, langCode);
                 }
 
                 return BotResponse.LanguageWasSetSuccessfully;

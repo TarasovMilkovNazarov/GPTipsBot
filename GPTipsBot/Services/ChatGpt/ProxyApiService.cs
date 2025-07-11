@@ -6,12 +6,12 @@ namespace GPTipsBot.Services
 {
     public class ProxyApiService : OpenAiServiceCreator
     {
-        private readonly ILogger<ProxyApiService> logger;
+        private readonly ILogger<ProxyApiService> _logger;
         private readonly string _token;
 
         public ProxyApiService(ILogger<ProxyApiService> logger)
         {
-            this.logger = logger;
+            _logger = logger;
             _token = AppConfig.ProxyApiApiKey;
         }
 

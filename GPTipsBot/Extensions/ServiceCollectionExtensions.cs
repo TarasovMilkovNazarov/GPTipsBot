@@ -28,29 +28,29 @@ namespace GPTipsBot.Extensions
                         return new TelegramBotClient(options);
                     });
 
-            services.AddScoped<UpdateHandlerEntryPoint>();
+            services.AddScoped<UpdateFirewall>();
             services.AddScoped<ReceiverService>();
             services.AddHostedService<PollingService>();
 
-            // Add your services with depedency injection.
             services
+            // handlers
+            .AddTransient<MainHandler>()
+            .AddTransient<RecoveryNotificationHandler>()
+            .AddTransient<AdminCommandHandler>()
+            .AddTransient<CommandHandler>()
+            .AddTransient<ImageGeneratorHandler>()
+            .AddTransient<ImageTextRecognitionHandler>()
+            .AddTransient<ChatGptHandler>()
+            // services
             .AddTransient<UserService>()
             .AddSingleton<TelejetAdClient>()
             .AddSingleton<GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
             .AddSingleton<IImageGenerator, YaCloudClient>()
             .AddSingleton<ITextRecognizer, YaCloudClient>()
+            .AddTransient<UserStatusActivator>()
             .AddSingleton<SpeechToTextService>()
-            .AddTransient<ActionStatus>()
-            .AddTransient<MainHandler>()
-            .AddTransient<RecoveryHandler>()
-            .AddTransient<OnAdminCommandHandler>()
-            .AddTransient<RateLimitingHandler>()
-            .AddTransient<CommandHandler>()
-            .AddTransient<ImageGeneratorHandler>()
-            .AddTransient<ImageTextRecognitionHandler>()
-            .AddTransient<ChatGptHandler>()
-            .AddSingleton<RateLimitCache>()
+            .AddTransient<RateLimiter>()
             .AddTransient<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()

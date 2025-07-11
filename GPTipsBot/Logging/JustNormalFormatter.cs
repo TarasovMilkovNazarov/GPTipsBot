@@ -9,27 +9,27 @@ namespace GPTipsBot.Logging;
 
 public class JustNormalFormatter : ConsoleFormatter, IDisposable
 {
-    private readonly ITelegramBotClient botClient;
-    private readonly IDisposable? optionsReloadToken;
-    private ConsoleFormatterOptions formatterOptions;
+    private readonly ITelegramBotClient _botClient;
+    private readonly IDisposable? _optionsReloadToken;
+    private ConsoleFormatterOptions _formatterOptions;
 
     public JustNormalFormatter(IOptionsMonitor<ConsoleFormatterOptions> options, ITelegramBotClient botClient)
         : base(nameof(JustNormalFormatter))
     {
-        this.botClient = botClient;
-        (optionsReloadToken, formatterOptions) =
+        _botClient = botClient;
+        (_optionsReloadToken, _formatterOptions) =
             (options.OnChange(ReloadLoggerOptions), options.CurrentValue);
     }
 
     private void ReloadLoggerOptions(ConsoleFormatterOptions options) =>
-        formatterOptions = options;
+        _formatterOptions = options;
 
     public override void Write<TState>(
         in LogEntry<TState> logEntry,
         IExternalScopeProvider? scopeProvider,
         TextWriter textWriter)
     {
-        var now = formatterOptions.UseUtcTimestamp
+        var now = _formatterOptions.UseUtcTimestamp
             ? DateTime.UtcNow
             : DateTime.Now;
 
@@ -59,7 +59,7 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
             foreach (var adminId in AppConfig.AdminIds)
             {
                 var text = $"{errorPrefix}{Environment.NewLine}{logText}";
-                botClient.SendMarkdown2MessageAsync(adminId, text).GetAwaiter().GetResult();
+                _botClient.SendMarkdown2MessageAsync(adminId, text).GetAwaiter().GetResult();
             }
         }
         catch (Exception e1)
@@ -75,7 +75,7 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
                     var text = $"{errorPrefix}{Environment.NewLine}" +
                                $"Не смогли отправить полное сообщение об ошибке в телегу, посмотри его срочно в логах. " +
                                $"Там же будет написано почему оно не попало в телегу";
-                    botClient.SendTextMessageAsync(adminId, text).GetAwaiter().GetResult();
+                    _botClient.SendTextMessageAsync(adminId, text).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e2)
@@ -97,5 +97,5 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
                 .ToUpperInvariant()
         };
 
-    public void Dispose() => optionsReloadToken?.Dispose();
+    public void Dispose() => _optionsReloadToken?.Dispose();
 }

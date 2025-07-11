@@ -10,7 +10,7 @@
         public static string TelegramToken => GetEnvStrict("TELEGRAM_TOKEN");
         public static string ProxyLogin => GetEnvStrict("PROXY_LOGIN");
         public static string ProxyPwd => GetEnvStrict("PROXY_PWD");
-        public static string ProxyIP => GetEnvStrict("PROXY_IP");
+        public static string ProxyIp => GetEnvStrict("PROXY_IP");
         public static string ProxyPort => GetEnvStrict("PROXY_PORT");
         public static string ConnectionString => GetEnvStrict("PG_CONNECTION_STRING");
         public static string Env => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";

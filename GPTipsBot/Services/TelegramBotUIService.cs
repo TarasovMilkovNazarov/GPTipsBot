@@ -24,6 +24,9 @@ namespace GPTipsBot.Services
         public const string StopRequestCommand = "/stopRequest";
         public const string ImageTextRecognizeCommand = "/get_image_text";
 
+        public const string FixCommand = "/fix";
+        public const string VersionCommand = "/version";
+
         public static CustomBotCommand Start => new() { Command = StartCommand, Description = BotUI.Start, Type = CommandType.Start};
         public static CustomBotCommand Image => new() { Command = ImageCommand, Description = BotUI.Image, Type = CommandType.Image };
         public static CustomBotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize, Type = CommandType.TextRecognition};
@@ -34,6 +37,9 @@ namespace GPTipsBot.Services
         public static CustomBotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang, Type = CommandType.SetEngLang };
         public static CustomBotCommand StopRequest => new() { Command = StopRequestCommand, Type = CommandType.StopRequest };
         public static CustomBotCommand Cancel => new() { Command = CancelCommand, Type = CommandType.CancelPreviousCommand };
+
+        public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
+        public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
 
         public BotMenu()
         {

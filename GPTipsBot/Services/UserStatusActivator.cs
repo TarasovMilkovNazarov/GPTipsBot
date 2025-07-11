@@ -1,20 +1,29 @@
 ﻿using GPTipsBot.Dtos;
 using GPTipsBot.Resources;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace GPTipsBot.UpdateHandlers
+namespace GPTipsBot.Services
 {
-    public class ActionStatus
+    /// <summary>
+    /// This service trigger status in header of bot
+    /// when doing long running actions(like "...Sending photo" or "...Typing")
+    /// </summary>
+    public class UserStatusActivator
     {
         private readonly ITelegramBotClient _botClient;
-        private readonly ILogger<ActionStatus> _logger;
+        private readonly ILogger<UserStatusActivator> _logger;
         private int _serviceMessageId;
+
+        /// <summary>
+        ///  For status persistence action till the end of processing or choosing inline /stop_requests buttons
+        /// </summary>
         private Timer? _timer;
 
-        public ActionStatus(ITelegramBotClient botClient, ILogger<ActionStatus> logger)
+        public UserStatusActivator(ITelegramBotClient botClient, ILogger<UserStatusActivator> logger)
         {
             _botClient = botClient;
             _logger = logger;

@@ -6,16 +6,16 @@ namespace GPTipsBot.Services
 {
     public class TokenQueue : IDisposable
     {
-        private readonly ILogger<TokenQueue> logger;
-        private readonly ConcurrentQueue<string> tokens;
-        private readonly SemaphoreSlim semaphore;
+        private readonly ILogger<TokenQueue> _logger;
+        private readonly ConcurrentQueue<string> _tokens;
+        private readonly SemaphoreSlim _semaphore;
 
         public TokenQueue(OpenaiAccountsRepository openaiAccountsRepository, ILogger<TokenQueue> logger)
         {
-            this.logger = logger;
+            _logger = logger;
             var initialTokens = openaiAccountsRepository.GetAllAvailable().Select(x => x.Token).ToList();
-            tokens = new ConcurrentQueue<string>(initialTokens);
-            semaphore = new SemaphoreSlim(initialTokens.Count);
+            _tokens = new ConcurrentQueue<string>(initialTokens);
+            _semaphore = new SemaphoreSlim(initialTokens.Count);
         }
 
         public async Task<string> GetTokenAsync()
@@ -23,12 +23,12 @@ namespace GPTipsBot.Services
             if (AppConfig.IsDevelopment && AppConfig.DebugOpenAiApiKey is not null)
                 return AppConfig.DebugOpenAiApiKey;
 
-            logger.LogInformation("Tokens count {tokensCount}", tokens.Count);
-            if (await semaphore.WaitAsync(TimeSpan.FromMinutes(3)))
+            _logger.LogInformation("Tokens count {tokensCount}", _tokens.Count);
+            if (await _semaphore.WaitAsync(TimeSpan.FromMinutes(3)))
             {
-                if (tokens.TryDequeue(out var token))
+                if (_tokens.TryDequeue(out var token))
                 {
-                    logger.LogInformation("Получили токен {Token}***", token[..10]);
+                    _logger.LogInformation("Получили токен {Token}***", token[..10]);
                     return token;
                 }
 
@@ -40,14 +40,14 @@ namespace GPTipsBot.Services
 
         public void AddToken(string token)
         {
-            tokens.Enqueue(token);
-            logger.LogInformation("Tokens count {tokensCount}", tokens.Count);
-            semaphore.Release();
+            _tokens.Enqueue(token);
+            _logger.LogInformation("Tokens count {tokensCount}", _tokens.Count);
+            _semaphore.Release();
         }
 
         public void Dispose()
         {
-            semaphore.Dispose();
+            _semaphore.Dispose();
         }
     }
 }

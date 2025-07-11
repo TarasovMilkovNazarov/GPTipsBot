@@ -13,26 +13,26 @@ namespace GPTipsBot.Services
 {
     public class ChatGptService : IGpt
     {
-        private readonly ILogger<ChatGptService> log;
-        private readonly OpenaiAccountsRepository openaiAccountsRepository;
-        private readonly TokenQueue tokenQueue;
-        private readonly OpenAiServiceCreator openAiServiceCreator;
-        private readonly ContextWindow contextWindow;
-        private Timer timer;
-        private readonly AsyncRetryPolicy policy;
+        private readonly ILogger<ChatGptService> _log;
+        private readonly OpenaiAccountsRepository _openaiAccountsRepository;
+        private readonly TokenQueue _tokenQueue;
+        private readonly OpenAiServiceCreator _openAiServiceCreator;
+        private readonly ContextWindow _contextWindow;
+        private Timer _timer;
+        private readonly AsyncRetryPolicy _policy;
 
         private const int MaxRetryCount = 4;
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
             TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow)
         {
-            this.log = log;
-            this.openaiAccountsRepository = openaiAccountsRepository;
-            this.tokenQueue = tokenQueue;
-            this.openAiServiceCreator = openAiServiceCreator;
-            this.contextWindow = contextWindow;
-            timer = setup_Timer(openaiAccountsRepository);
-            policy = Policy
+            _log = log;
+            _openaiAccountsRepository = openaiAccountsRepository;
+            _tokenQueue = tokenQueue;
+            _openAiServiceCreator = openAiServiceCreator;
+            _contextWindow = contextWindow;
+            _timer = setup_Timer(openaiAccountsRepository);
+            _policy = Policy
                 .Handle<ChatGptException>()
                 .WaitAndRetryAsync(MaxRetryCount, (retryAttempt) =>
                 {
@@ -51,7 +51,7 @@ namespace GPTipsBot.Services
             }
             else
             {
-                textWithContext = contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value);
+                textWithContext = _contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value);
             }
 
             return await SendMessageInternal(textWithContext, token);
@@ -59,14 +59,14 @@ namespace GPTipsBot.Services
 
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
         {
-            log.LogInformation("Send request to OpenAi service: {messages}", messages.Last().Content);
+            _log.LogInformation("Send request to OpenAi service: {messages}", messages.Last().Content);
 
             ChatCompletionCreateResponse? response = null;
 
-            await policy.ExecuteAsync(async (context, _) =>
+            await _policy.ExecuteAsync(async (context, _) =>
             {
-                var currentToken = await openAiServiceCreator.GetApiKeyAsync();
-                var openAiService = openAiServiceCreator.Create(currentToken);
+                var currentToken = await _openAiServiceCreator.GetApiKeyAsync();
+                var openAiService = _openAiServiceCreator.Create(currentToken);
 
                 var retryAttempt = context.TryGetValue("retryAttempt", out var value)
                     ? (int)value : 0;
@@ -78,13 +78,13 @@ namespace GPTipsBot.Services
 
                     if (response.Successful)
                     {
-                        openAiServiceCreator.ReturnApiKey(currentToken);
+                        _openAiServiceCreator.ReturnApiKey(currentToken);
                         return;
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    openAiServiceCreator.ReturnApiKey(currentToken);
+                    _openAiServiceCreator.ReturnApiKey(currentToken);
                     cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (Exception ex)
@@ -95,7 +95,7 @@ namespace GPTipsBot.Services
                 context["retryAttempt"] = retryAttempt + 1;
 
                 HandleResponseErrors(response, currentToken);
-                log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}",
+                _log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}",
                     retryAttempt, response?.Error?.Code, response?.Error?.Message);
                 throw new ChatGptException(retryAttempt);
             }, new Context(), cancellationToken);
@@ -107,32 +107,32 @@ namespace GPTipsBot.Services
         {
             if (response == null)
             {
-                openAiServiceCreator.ReturnApiKey(apiKey);
+                _openAiServiceCreator.ReturnApiKey(apiKey);
                 return;
             }
 
             if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
             {
-                openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.Deactivated);
+                _openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.Deactivated);
             }
             else if (response.Error?.Code == "insufficient_quota")
             {
-                openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.InsufficientQuota);
+                _openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.InsufficientQuota);
             }
             else if (response.Error?.Code == "rate_limit_exceeded" && response.Error.Message != null)
             {
                 if (response.Error.Message.Contains("on requests per day"))
                 {
-                    openaiAccountsRepository.FreezeApiKey(apiKey);
+                    _openaiAccountsRepository.FreezeApiKey(apiKey);
                 }
                 else if (response.Error.Message.Contains("on requests per min"))
                 {
-                    openAiServiceCreator.ReturnApiKey(apiKey);
+                    _openAiServiceCreator.ReturnApiKey(apiKey);
                 }
             }
             else
             {
-                openAiServiceCreator.ReturnApiKey(apiKey);
+                _openAiServiceCreator.ReturnApiKey(apiKey);
             }
         }
 
@@ -146,24 +146,24 @@ namespace GPTipsBot.Services
                 specificTime = specificTime.AddDays(1);
 
             double tickTime = (specificTime - nowTime).TotalMilliseconds;
-            timer = new Timer(tickTime);
-            timer.Elapsed += (s, e) => UnfreezeDayLimitedTokens(openaiAccountsRepository);
-            timer.Start();
+            _timer = new Timer(tickTime);
+            _timer.Elapsed += (s, e) => UnfreezeDayLimitedTokens(openaiAccountsRepository);
+            _timer.Start();
 
-            return timer;
+            return _timer;
         }
 
         private void UnfreezeDayLimitedTokens(OpenaiAccountsRepository openaiAccountsRepository)
         {
-            timer.Stop();
+            _timer.Stop();
 
             var unfreezed = openaiAccountsRepository.UnfreezeTokens();
             foreach (var item in unfreezed)
             {
-                tokenQueue.AddToken(item);
+                _tokenQueue.AddToken(item);
             }
 
-            timer = setup_Timer(openaiAccountsRepository);
+            _timer = setup_Timer(openaiAccountsRepository);
         }
     }
 

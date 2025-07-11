@@ -19,7 +19,8 @@ public enum CommandType
     SetRuLang,
     SetEngLang,
     StopRequest,
-    CancelPreviousCommand
+    CancelPreviousCommand,
+    Admin
 }
 
 public class Wallet: Entity

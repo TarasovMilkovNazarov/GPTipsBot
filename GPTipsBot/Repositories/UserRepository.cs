@@ -7,44 +7,44 @@ namespace GPTipsBot.Repositories
 {
     public class UserRepository
     {
-        private readonly ILogger<UserRepository> logger;
-        private readonly ApplicationContext context;
+        private readonly ILogger<UserRepository> _logger;
+        private readonly ApplicationContext _context;
         public Guid Guid { get; } = Guid.NewGuid();
 
         public UserRepository(ILogger<UserRepository> logger, ApplicationContext context)
         {
-            this.logger = logger;
-            this.context = context;
+            _logger = logger;
+            _context = context;
         }
         
         public bool Any(long id)
         {
-            return context.Users.Any(x => x.Id == id);
+            return _context.Users.Any(x => x.Id == id);
         }
 
         public User? Get(long id)
         {
-            return context.Users.FirstOrDefault(x => x.Id == id);
+            return _context.Users.FirstOrDefault(x => x.Id == id);
         }
 
         public void Delete(long id)
         {
-            var user = context.Users.FirstOrDefault(x => x.Id == id);
+            var user = _context.Users.FirstOrDefault(x => x.Id == id);
 
             if (user == null)
             {
                 throw new Exception($"User id={id} not found");
             }
 
-            context.Users.Remove(user);
+            _context.Users.Remove(user);
         }
 
         public long Create(User user)
         {
-            logger.LogInformation("CreateUser");
-            var entity = context.Users.Add(user).Entity;
+            _logger.LogInformation("CreateUser");
+            var entity = _context.Users.Add(user).Entity;
 
-            context.SaveChanges();
+            _context.SaveChanges();
 
             return user.Id;
         }
@@ -63,17 +63,17 @@ namespace GPTipsBot.Repositories
         
         public IEnumerable<User> GetAll()
         {
-            return context.Users.AsNoTracking().ToList();
+            return _context.Users.AsNoTracking().ToList();
         }
 
         public long GetActiveUsersCount()
         {
-            return context.Users.AsNoTracking().Where(x => x.IsActive).Count();
+            return _context.Users.AsNoTracking().Where(x => x.IsActive).Count();
         }
 
         public long SoftlyRemoveUser(long telegramId)
         {
-            return context.Users.Where(x => x.Id == telegramId).ExecuteUpdate(x => x.SetProperty(y => y.IsActive, false));
+            return _context.Users.Where(x => x.Id == telegramId).ExecuteUpdate(x => x.SetProperty(y => y.IsActive, false));
         }
     }
 }

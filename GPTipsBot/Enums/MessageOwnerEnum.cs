@@ -6,7 +6,7 @@
         System,
         Assistant,
         User,
-        BingAI,
+        BingAi,
         Ya
     }
 }

@@ -12,21 +12,21 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class ImageTextRecognitionHandler : BaseMessageHandler
     {
-        private readonly ITelegramBotClient botClient;
-        private readonly ILogger<ImageTextRecognitionHandler> logger;
-        private readonly ITextRecognizer yaCloudClient;
-        private readonly MessageRepository messageRepository;
-        private readonly UserCommandRepository userCommandRepository;
+        private readonly ITelegramBotClient _botClient;
+        private readonly ILogger<ImageTextRecognitionHandler> _logger;
+        private readonly ITextRecognizer _yaCloudClient;
+        private readonly MessageRepository _messageRepository;
+        private readonly UserCommandRepository _userCommandRepository;
         public const int ImagesPerDayLimit = 5;
 
         public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger,
             ITextRecognizer yaCloudClient, MessageRepository messageRepository, UserCommandRepository userCommandRepository)
         {
-            this.botClient = botClient;
-            this.logger = logger;
-            this.yaCloudClient = yaCloudClient;
-            this.messageRepository = messageRepository;
-            this.userCommandRepository = userCommandRepository;
+            _botClient = botClient;
+            _logger = logger;
+            _yaCloudClient = yaCloudClient;
+            _messageRepository = messageRepository;
+            _userCommandRepository = userCommandRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -36,35 +36,35 @@ namespace GPTipsBot.UpdateHandlers
             // return;
             var isAdmin = update.UserChatKey.IsAdmin();
 
-            var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+            var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
 
             if (!isAdmin && lastCommand?.Type != CommandType.TextRecognition)
             {
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
                     BotResponse.SendImageTextRecognitionCommandFirst,
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
 
                 return;
             }
 
-            if (messageRepository.GetTodayTextRecognitionCount(update.UserChatKey) > ImagesPerDayLimit)
+            if (_messageRepository.GetTodayTextRecognitionCount(update.UserChatKey) > ImagesPerDayLimit)
             {
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
                     string.Format(BotResponse.ImagesPerDayLimit, ImagesPerDayLimit),
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
                 return;
             }
 
-            var file = await botClient.GetFileAsync(update.FileId);
+            var file = await _botClient.GetFileAsync(update.FileId);
 
             Guard.Against.Null(file.FilePath);
 
             using var memoryStream = new MemoryStream();
-            await botClient.DownloadFileAsync(file.FilePath, memoryStream);
+            await _botClient.DownloadFileAsync(file.FilePath, memoryStream);
             memoryStream.Position = 0;
 
             var base64String = Convert.ToBase64String(memoryStream.ToArray());
-            var text = await yaCloudClient.Recognize(base64String);
+            var text = await _yaCloudClient.Recognize(base64String);
 
             var recognitionResultMessage = new MessageDto(update.UserChatKey)
             {
@@ -74,9 +74,9 @@ namespace GPTipsBot.UpdateHandlers
                 Role = MessageOwner.Ya,
             };
 
-            await messageRepository.AddAsync(recognitionResultMessage);
+            await _messageRepository.AddAsync(recognitionResultMessage);
 
-            await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+            await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, text, replyToMessageId: (int)update.Message.TelegramMessageId!);
         }
     }
 }

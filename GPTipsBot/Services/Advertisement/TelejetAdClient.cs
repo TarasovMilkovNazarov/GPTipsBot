@@ -9,9 +9,9 @@ namespace GPTipsBot.Services
     public class TelejetAdClient
     {
         private readonly string _apiKey = AppConfig.TelejetApiKey;
-        private static readonly string _bapPrefix = "/__bap";
-        private static readonly (string, int) _addr = ("api.production.bap.codd.io", 8080);
-        private static readonly int _apiVersion = 3;
+        private static readonly string BapPrefix = "/__bap";
+        private static readonly (string, int) Addr = ("api.production.bap.codd.io", 8080);
+        private static readonly int ApiVersion = 3;
         private readonly UdpClient _udpClient;
 
         public void SendAdvertisement(Update update)
@@ -41,7 +41,7 @@ namespace GPTipsBot.Services
                 var dto = new TelejetDto
                 {
                     ApiKey = _apiKey,
-                    Version = _apiVersion,
+                    Version = ApiVersion,
                     Update = update,
                     Method = method
                 };
@@ -74,12 +74,12 @@ namespace GPTipsBot.Services
         {
             var data = update.CallbackQuery?.Data;
 
-            return data != null && data.StartsWith(_bapPrefix);
+            return data != null && data.StartsWith(BapPrefix);
         }
 
         public TelejetAdClient()
         {
-            this._udpClient = new UdpClient(_addr.Item1, _addr.Item2);
+            _udpClient = new UdpClient(Addr.Item1, Addr.Item2);
         }
     }
 

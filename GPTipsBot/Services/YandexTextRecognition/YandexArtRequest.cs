@@ -3,25 +3,25 @@
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 public class AspectRatio
 {
-    public string widthRatio { get; set; }
-    public string heightRatio { get; set; }
+    public string WidthRatio { get; set; }
+    public string HeightRatio { get; set; }
 }
 
 public class GenerationOptions
 {
-    public string seed { get; set; }
-    public AspectRatio aspectRatio { get; set; }
+    public string Seed { get; set; }
+    public AspectRatio AspectRatio { get; set; }
 }
 
 public class Message
 {
-    public string weight { get; set; }
-    public string text { get; set; }
+    public string Weight { get; set; }
+    public string Text { get; set; }
 }
 
 public class YandexArtRequest
 {
-    public string modelUri { get; set; }
-    public GenerationOptions generationOptions { get; set; }
-    public List<Message> messages { get; set; }
+    public string ModelUri { get; set; }
+    public GenerationOptions GenerationOptions { get; set; }
+    public List<Message> Messages { get; set; }
 }

@@ -9,23 +9,23 @@ namespace GPTipsBot.Services
 {
     public class ImageCreatorService
     {
-        private readonly ILogger<ImageCreatorService> log;
-        private readonly TokenQueue tokensQueue;
-        private readonly OpenAiServiceCreator openAiServiceCreator;
+        private readonly ILogger<ImageCreatorService> _log;
+        private readonly TokenQueue _tokensQueue;
+        private readonly OpenAiServiceCreator _openAiServiceCreator;
 
         public ImageCreatorService(ILogger<ImageCreatorService> log, TokenQueue tokensQueue, 
             OpenAiServiceCreator openAiServiceCreator)
         {
-            this.log = log;
-            this.tokensQueue = tokensQueue;
-            this.openAiServiceCreator = openAiServiceCreator;
+            _log = log;
+            _tokensQueue = tokensQueue;
+            _openAiServiceCreator = openAiServiceCreator;
         }
 
         public async Task<List<string>> GenerateImage(string prompt)
         {
-            var apiKey = await tokensQueue.GetTokenAsync();
+            var apiKey = await _tokensQueue.GetTokenAsync();
 
-            var openAiService = openAiServiceCreator.Create(apiKey);
+            var openAiService = _openAiServiceCreator.Create(apiKey);
 
             ImageCreateResponse imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
             {
@@ -37,7 +37,7 @@ namespace GPTipsBot.Services
                 Model = "dall-e-2"
             });
 
-            tokensQueue.AddToken(apiKey);
+            _tokensQueue.AddToken(apiKey);
 
             if (imageResult.Successful)
             {
@@ -53,7 +53,7 @@ namespace GPTipsBot.Services
                 throw new ClientException(DalleResponse.RateLimit);
             }
 
-            log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}", imageResult.Error?.Code, imageResult.Error?.Message, apiKey[..10]);
+            _log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}", imageResult.Error?.Code, imageResult.Error?.Message, apiKey[..10]);
 
             throw new ClientException(BotResponse.SomethingWentWrongWithImageService);
         }

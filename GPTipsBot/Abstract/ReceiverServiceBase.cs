@@ -16,18 +16,18 @@ namespace Telegram.Bot.Abstract;
 /// <typeparam name="TUpdateHandler">Update Handler to use in Update Receiver</typeparam>
 public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 {
-    private readonly ITelegramBotClient botClient;
-    private readonly IServiceProvider serviceProvider;
-    private readonly ILogger<ReceiverServiceBase<TUpdateHandler>> log;
+    private readonly ITelegramBotClient _botClient;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<ReceiverServiceBase<TUpdateHandler>> _log;
 
     internal ReceiverServiceBase(
         ITelegramBotClient botClient,
         IServiceProvider serviceProvider,
         ILogger<ReceiverServiceBase<TUpdateHandler>> log)
     {
-        this.botClient = botClient;
-        this.serviceProvider = serviceProvider;
-        this.log = log;
+        _botClient = botClient;
+        _serviceProvider = serviceProvider;
+        _log = log;
     }
 
     /// <summary>
@@ -43,37 +43,37 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         try
         {
             // Start receiving updates
-            var updateReceiver = new QueuedUpdateReceiver(botClient, new ReceiverOptions(), PollingErrorHandler);
+            var updateReceiver = new QueuedUpdateReceiver(_botClient, new ReceiverOptions(), PollingErrorHandler);
             await foreach (var update in updateReceiver.WithCancellation(stoppingToken))
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    using var scope = serviceProvider.CreateScope();
-                    using (log.BeginScope(new [] {update.Id, update.Message?.From?.Id}))
+                    using var scope = _serviceProvider.CreateScope();
+                    using (_log.BeginScope(new [] {update.Id, update.Message?.From?.Id}))
                     {
-                        log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
+                        _log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
                             update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat.Id);
                         try
                         {
-                            var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
+                            var worker = scope.ServiceProvider.GetRequiredService<UpdateFirewall>();
                             await worker.HandleUpdateAsync(update);
                         }
                         catch (NotSupportedMessageException e)
                         {
-                            await botClient.SendTextMessageAsync(update.Message.Chat!.Id,
+                            await _botClient.SendTextMessageAsync(update.Message.Chat!.Id,
                                 BotResponse.OnlyMessagesAvailable, cancellationToken: stoppingToken);
                         }
                         catch (ApiRequestException e)
                         {
-                            log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
+                            _log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
                         }
                         catch (Exception e)
                         {
-                            log.LogError(e, "Unknown error while handling update");
+                            _log.LogError(e, "Unknown error while handling update");
                             if (update.Message == null)
                                 return;
 
-                            await botClient.SendTextMessageAsync(update.Message.Chat!.Id, BotResponse.SomethingWentWrong,
+                            await _botClient.SendTextMessageAsync(update.Message.Chat!.Id, BotResponse.SomethingWentWrong,
                                 cancellationToken: stoppingToken);
                         }
                     }
@@ -82,11 +82,11 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         }
         catch (OperationCanceledException)
         {
-            log.LogInformation("Update receiving operation was canceled");
+            _log.LogInformation("Update receiving operation was canceled");
         }
         catch (Exception e)
         {
-            log.LogCritical(e, "Пипец упалось всё! Получение сообщений от телеграмма остановленно. Завершаем работу приложения. " +
+            _log.LogCritical(e, "Пипец упалось всё! Получение сообщений от телеграмма остановленно. Завершаем работу приложения. " +
                                "Сюда мы не должны попадать! Такое исключение надо ловить и обрабатывать выше по стеку");
         }
         finally
@@ -97,10 +97,10 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
     private async Task Init(CancellationToken stoppingToken)
     {
-        var me = await botClient.GetMeAsync(stoppingToken);
+        var me = await _botClient.GetMeAsync(stoppingToken);
         AppConfig.BotName = me.Username ?? "GPTipsBot";
-        log.LogInformation("Bot running. {BotName} is ready to receive messages", AppConfig.BotName);
-        _ = botClient.SendBotVersionAsync(AppConfig.AdminIds);
+        _log.LogInformation("Bot running. {BotName} is ready to receive messages", AppConfig.BotName);
+        _ = _botClient.SendBotVersionAsync(AppConfig.AdminIds);
     }
 
     private async Task WaitForUnfinishedTasks(List<Task> tasks, TimeSpan timeout)
@@ -110,15 +110,15 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         if (!unfinished.Any())
             return;
 
-        log.LogInformation("Wait for {UnfinishedRequestCount} unfinished request from users", unfinished);
+        _log.LogInformation("Wait for {UnfinishedRequestCount} unfinished request from users", unfinished);
 
         var timeoutTask = TimeoutTask(timeout);
         var completedTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask);
 
         if (completedTask == timeoutTask)
-            log.LogWarning("Timeout has expired. Not all tasks have been completed.");
+            _log.LogWarning("Timeout has expired. Not all tasks have been completed.");
         else
-            log.LogInformation("All tasks have been completed.");
+            _log.LogInformation("All tasks have been completed.");
     }
 
     private static Task TimeoutTask(TimeSpan timeout)
@@ -132,7 +132,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
     private Task PollingErrorHandler(Exception e, CancellationToken arg2)
     {
-        log.LogError(e, "Update receiving operation has error");
+        _log.LogError(e, "Update receiving operation has error");
         return Task.CompletedTask;
     }
 }

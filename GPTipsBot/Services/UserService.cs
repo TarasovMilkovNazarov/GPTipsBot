@@ -7,17 +7,17 @@ namespace GPTipsBot.Services
 {
     public class UserService
     {
-        private readonly ITelegramBotClient botClient;
-        private readonly UserRepository userRepository;
+        private readonly ITelegramBotClient _botClient;
+        private readonly UserRepository _userRepository;
         private readonly IMemoryCache _memoryCache;
         private readonly MemoryCacheEntryOptions _cacheOptions;
         public event EventHandler<User> UserCreated;
-        public static long? activeUserCount;
+        public static long? ActiveUserCount;
 
         public UserService(ITelegramBotClient botClient, UserRepository userRepository, IMemoryCache memoryCache)
         {
-            this.botClient = botClient;
-            this.userRepository = userRepository;
+            _botClient = botClient;
+            _userRepository = userRepository;
             UserCreated += UserCreatedEventHandler;
 
             _memoryCache = memoryCache;
@@ -38,14 +38,14 @@ namespace GPTipsBot.Services
                 return;
             }
 
-            var isExists = userRepository.Any(user.Id);
+            var isExists = _userRepository.Any(user.Id);
             if (isExists)
             {
-                userRepository.Update(user);
+                _userRepository.Update(user);
             }
             else
             {
-                userRepository.Create(user);
+                _userRepository.Create(user);
                 UserCreated?.Invoke(this, user);
             }
 
@@ -57,21 +57,21 @@ namespace GPTipsBot.Services
             var fullName = user.FirstName;
             fullName += user.LastName == null ? "" : $" {user.LastName}";
 
-            if (activeUserCount == null)
+            if (ActiveUserCount == null)
             {
-                activeUserCount = userRepository.GetActiveUsersCount();
+                ActiveUserCount = _userRepository.GetActiveUsersCount();
             }
             else
             {
-                activeUserCount++;
+                ActiveUserCount++;
             }
 
             var message = "#newUser" + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
-            message += Environment.NewLine + $"Total count: {activeUserCount}";
+            message += Environment.NewLine + $"Total count: {ActiveUserCount}";
 
             foreach (var adminId in AppConfig.AdminIds)
             {
-                botClient.SendTextMessageAsync(adminId, message);   
+                _botClient.SendTextMessageAsync(adminId, message);   
             }
         }
     }

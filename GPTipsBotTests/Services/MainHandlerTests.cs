@@ -8,8 +8,6 @@ using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using System.Globalization;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AutoFixture;
 using FluentAssertions;
 using GPTipsBot;
@@ -23,32 +21,31 @@ using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using File = Telegram.Bot.Types.File;
-using Range = Moq.Range;
 
 namespace GPTipsBotTests.Services
 {
     public partial class MainHandlerTests
     {
-        private readonly Update startTelegramUpdate;
-        private readonly IServiceCollection serviceCollection;
-        private IServiceProvider services;
-        private readonly Mock<ITelegramBotClient> botClientMock = new();
-        private MessageRepository messageRepository;
-        private readonly Mock<IGpt> gptMock;
+        private readonly Update _startTelegramUpdate;
+        private readonly IServiceCollection _serviceCollection;
+        private IServiceProvider _services;
+        private readonly Mock<ITelegramBotClient> _botClientMock = new();
+        private MessageRepository _messageRepository;
+        private readonly Mock<IGpt> _gptMock;
         private readonly Mock<IImageGenerator> _imageGeneratorMock;
-        private UpdateHandlerEntryPoint _updateHandlerEntryPoint;
+        private UpdateFirewall _updateFirewall;
         private readonly Mock<ITextRecognizer> _recognitionServiceMock;
         private readonly Fixture _fixture;
         private IMemoryCache _memoryCache;
-        private UserCommandRepository userCommandRepository;
+        private UserCommandRepository _userCommandRepository;
 
-        private ITelegramBotClient BotClient => botClientMock.Object;
+        private ITelegramBotClient BotClient => _botClientMock.Object;
 
         public MainHandlerTests()
         {
             _fixture = new Fixture();
             DotEnv.Fluent().WithProbeForEnv(10).Load();
-            serviceCollection = new ServiceCollection().ConfigureServices();
+            _serviceCollection = new ServiceCollection().ConfigureServices();
 
             _recognitionServiceMock = new Mock<ITextRecognizer>();
             _imageGeneratorMock = new Mock<IImageGenerator>();
@@ -56,16 +53,16 @@ namespace GPTipsBotTests.Services
                 .ReturnsAsync(TestConstants.ImageTextResponse);
             _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>()))
                 .ReturnsAsync(TestConstants.GeneratedImage);
-            gptMock = GptApiMock.CreateGptMock();
+            _gptMock = GptApiMock.CreateGptMock();
 
-            serviceCollection
+            _serviceCollection
                 .AddSingleton(_recognitionServiceMock.Object)
                 .AddSingleton(_imageGeneratorMock.Object)
                 .AddSingleton(BotClient)
-                .AddSingleton<IGpt>(gptMock.Object)
+                .AddSingleton<IGpt>(_gptMock.Object)
                 .AddSingleton(new Mock<GramadsAdvertisementClient>().Object);
 
-            botClientMock.Setup(b => b.MakeRequestAsync(It.IsAny<GetFileRequest>(),
+            _botClientMock.Setup(b => b.MakeRequestAsync(It.IsAny<GetFileRequest>(),
                 It.IsAny<CancellationToken>())).ReturnsAsync(new File
             {
                 FileId = "test",
@@ -73,14 +70,14 @@ namespace GPTipsBotTests.Services
                 FilePath = "test.txt"
             });
 
-            botClientMock.Setup(b => b.MakeRequestAsync(
+            _botClientMock.Setup(b => b.MakeRequestAsync(
                 It.IsAny<SendMessageRequest>(),
                 It.IsAny<CancellationToken>())).ReturnsAsync(new Message
             {
                 MessageId = 123
             });
 
-            startTelegramUpdate = CreateTelegramUpdate(1234, 1234, BotMenu.StartCommand);
+            _startTelegramUpdate = CreateTelegramUpdate(1234, 1234, BotMenu.StartCommand);
         }
 
         private static Update CreateTelegramUpdate(
@@ -121,14 +118,14 @@ namespace GPTipsBotTests.Services
         [SetUp]
         public async Task Setup()
         {
-            services = serviceCollection.BuildServiceProvider();
+            _services = _serviceCollection.BuildServiceProvider();
             ResetRequestsRateLimit();
-            var appContext = services.GetRequiredService<ApplicationContext>();
+            var appContext = _services.GetRequiredService<ApplicationContext>();
             await ClearDatabase(appContext);
-            messageRepository = services.GetRequiredService<MessageRepository>();
-            userCommandRepository = services.GetRequiredService<UserCommandRepository>();
-            _updateHandlerEntryPoint = services.GetRequiredService<UpdateHandlerEntryPoint>();
-            _memoryCache = services.GetRequiredService<IMemoryCache>();
+            _messageRepository = _services.GetRequiredService<MessageRepository>();
+            _userCommandRepository = _services.GetRequiredService<UserCommandRepository>();
+            _updateFirewall = _services.GetRequiredService<UpdateFirewall>();
+            _memoryCache = _services.GetRequiredService<IMemoryCache>();
         }
 
         [OneTimeSetUp]
@@ -141,13 +138,13 @@ namespace GPTipsBotTests.Services
 
         private void ResetRequestsRateLimit()
         {
-            var descriptor = serviceCollection.FirstOrDefault(d => d.ServiceType == typeof(RateLimitCache));
+            var descriptor = _serviceCollection.FirstOrDefault(d => d.ServiceType == typeof(RateLimiter));
             if (descriptor != null)
             {
-                serviceCollection.Remove(descriptor);
+                _serviceCollection.Remove(descriptor);
             }
 
-            serviceCollection.AddSingleton<RateLimitCache>();
+            _serviceCollection.AddSingleton<RateLimiter>();
         }
 
         [Test]
@@ -164,12 +161,12 @@ namespace GPTipsBotTests.Services
             foreach (var command in commandSet)
             {
                 var update = CreateTelegramUpdate(1, 2, command.Command);
-                await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+                await _updateFirewall.HandleUpdateAsync(update);
             }
 
-            var commands = userCommandRepository.Get(c => true).ToList();
+            var commands = _userCommandRepository.Get(c => true).ToList();
 
-            await userCommandRepository.GetLastAsync(1234);
+            await _userCommandRepository.GetLastAsync(1234);
 
             commands.Should().NotBeNull();
             commands.Count.Should().Be(commandSet.Count);
@@ -190,7 +187,12 @@ namespace GPTipsBotTests.Services
                     {
                         Id = 1234,
                     },
-                    From = null,
+                    From = new User
+                    {
+                        Id = 1234,
+                        IsBot = false,
+                        FirstName = "Test",
+                    },
                     Date = default,
                     OldChatMember = new ChatMemberMember(),
                     NewChatMember = new ChatMemberBanned(),
@@ -199,7 +201,7 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            var updateHandlerFunc = async () => await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            var updateHandlerFunc = async () => await _updateFirewall.HandleUpdateAsync(update);
             await updateHandlerFunc.Should().NotThrowAsync("Kicked member just ignored");
         }
 
@@ -218,7 +220,7 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            var updateHandlerFunc = async () => await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            var updateHandlerFunc = async () => await _updateFirewall.HandleUpdateAsync(update);
             await updateHandlerFunc.Should().NotThrowAsync("Sticker message ignored");
         }
 
@@ -232,20 +234,20 @@ namespace GPTipsBotTests.Services
                 Choices = new() { new() { Message = new("system", gtpResponse) } }
             };
 
-            gptMock.Setup(m => m.SendMessage(It.Is<UpdateDecorator>(arg =>
+            _gptMock.Setup(m => m.SendMessage(It.Is<UpdateDecorator>(arg =>
                     arg.Message.Text.Equals(prompt)), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(response);
 
             var messageUpd = CreateTelegramUpdate(1, 2, prompt);
             var userId = messageUpd.Message.From.Id;
-            await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
+            await _updateFirewall.HandleUpdateAsync(messageUpd);
 
-            gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
                     arg.Message.Text.Equals(prompt)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
-            var message = messageRepository.GetAllUserMessages(userId)
+            var message = _messageRepository.GetAllUserMessages(userId)
                 .OrderByDescending(m => m.CreatedAt)
                 .First();
 
@@ -259,19 +261,19 @@ namespace GPTipsBotTests.Services
             var prompt = "How much it would be add 2 to previous result";
             var messageUpd = CreateTelegramUpdate(1, 2, prompt);
 
-            for (var i = 0; i < RateLimitCache.MaxMessagesCountPerMinute + 1; i++)
+            for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
             {
-                await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
+                await _updateFirewall.HandleUpdateAsync(messageUpd);
             }
 
-            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == messageUpd.Message.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
                 It.IsAny<CancellationToken>()), Times.Exactly(2));
 
-            gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
-                It.IsAny<CancellationToken>()), Times.Exactly(RateLimitCache.MaxMessagesCountPerMinute));
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+                It.IsAny<CancellationToken>()), Times.Exactly(RateLimiter.MaxMessagesCountPerMinute));
         }
 
         [Test]
@@ -284,7 +286,7 @@ namespace GPTipsBotTests.Services
             {
                 Choices = new() { new() { Message = new("system", "test") } }
             };
-            gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+            _gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
                     It.IsAny<CancellationToken>()))
                 .Returns(async (UpdateDecorator upd, CancellationToken token) =>
                 {
@@ -292,19 +294,19 @@ namespace GPTipsBotTests.Services
                     return response;
                 });
 
-            for (var i = 0; i < RateLimitCache.MaxMessagesCountPerMinute + 1; i++)
+            for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
             {
-                await _updateHandlerEntryPoint.HandleUpdateAsync(messageUpd);
+                await _updateFirewall.HandleUpdateAsync(messageUpd);
             }
 
-            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == messageUpd.Message!.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
-            gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
-                It.IsAny<CancellationToken>()), Times.Exactly(RateLimitCache.MaxMessagesCountPerMinute));
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+                It.IsAny<CancellationToken>()), Times.Exactly(RateLimiter.MaxMessagesCountPerMinute));
         }
 
         [Test]
@@ -313,9 +315,9 @@ namespace GPTipsBotTests.Services
             CultureInfo.CurrentUICulture = new CultureInfo("ru");
             var update = CreateTelegramUpdate(1, 2, BotMenu.ChooseLangCommand);
 
-            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            await _updateFirewall.HandleUpdateAsync(update);
 
-            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == update.Message!.Chat.Id &&
                     arg.Text == BotResponse.ChooseLanguagePlease
                 ),
@@ -329,16 +331,16 @@ namespace GPTipsBotTests.Services
 
             for (int i = 0; i < ImageGeneratorHandler.ImagesPerDayLimit + 1; i++)
             {
-                await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+                await _updateFirewall.HandleUpdateAsync(update);
             }
 
             var userId = update.Message!.From.Id;
 
-            var generatedImagesCount = messageRepository.GetTodayImagesCount(userId);
+            var generatedImagesCount = _messageRepository.GetTodayImagesCount(userId);
 
             generatedImagesCount.Should().Be(ImageGeneratorHandler.ImagesPerDayLimit);
 
-            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == String.Format(BotResponse.ImagesPerDayLimit, ImageGeneratorHandler.ImagesPerDayLimit)
                 ),
@@ -353,9 +355,9 @@ namespace GPTipsBotTests.Services
         {
             var imagePromptWithCommand = "/image кракозябра";
             var getImageUpdate = CreateTelegramUpdate(1, 2, imagePromptWithCommand);
-            await _updateHandlerEntryPoint.HandleUpdateAsync(getImageUpdate);
+            await _updateFirewall.HandleUpdateAsync(getImageUpdate);
 
-            var generatedImagesCount = messageRepository.GetTodayImagesCount(getImageUpdate.Message!.From.Id);
+            var generatedImagesCount = _messageRepository.GetTodayImagesCount(getImageUpdate.Message!.From.Id);
 
             generatedImagesCount.Should().Be(1);
         }
@@ -366,7 +368,7 @@ namespace GPTipsBotTests.Services
             var update = CreateTelegramUpdate(1, 2, BotMenu.ImageTextRecognizeCommand);
             var userId = update.Message!.From.Id;
 
-            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            await _updateFirewall.HandleUpdateAsync(update);
             update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[]
             {
@@ -376,9 +378,9 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            await _updateFirewall.HandleUpdateAsync(update);
 
-            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == BotResponse.SendTextRecognitionImage
                 ),
@@ -389,7 +391,7 @@ namespace GPTipsBotTests.Services
         }
 
         [Test]
-        public async Task RecognizeImageTextRequest_ImageFirst_ChooseCommandFirstResponse()
+        public async Task RecognizeImageTextRequest_ImageMessageWithoutCommandRequest_ChooseCommandFirstResponse()
         {
             var update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[]
@@ -401,7 +403,7 @@ namespace GPTipsBotTests.Services
             };
             var userId = update.Message!.From.Id;
 
-            await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            await _updateFirewall.HandleUpdateAsync(update);
 
             var sendMessageRequestExpected = new SendMessageRequest(userId,
                 BotResponse.SendImageTextRecognitionCommandFirst)
@@ -409,7 +411,7 @@ namespace GPTipsBotTests.Services
                 ReplyMarkup = TelegramBotUiService.CancelKeyboard
             };
 
-            botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == sendMessageRequestExpected.ChatId &&
                     arg.Text == BotResponse.SendImageTextRecognitionCommandFirst
                 ),
@@ -419,14 +421,14 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task ResetContext_OldContextExists_ReturnNewContextId()
         {
-            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
-            var userId = startTelegramUpdate.Message!.From.Id;
-            var initialContextId = messageRepository.GetLastContext(userId, userId);
+            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            var userId = _startTelegramUpdate.Message!.From.Id;
+            var initialContextId = _messageRepository.GetLastContext(userId, userId);
 
             var resetContextUpdDecorator = CreateTelegramUpdate(1, 2, BotMenu.ResetContextCommand);
-            await _updateHandlerEntryPoint.HandleUpdateAsync(resetContextUpdDecorator);
+            await _updateFirewall.HandleUpdateAsync(resetContextUpdDecorator);
 
-            var newContextId = messageRepository.GetLastContext(userId, userId);
+            var newContextId = _messageRepository.GetLastContext(userId, userId);
 
             newContextId.Should().NotBe(initialContextId);
         }
@@ -434,17 +436,17 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task SendMessage_ContextExists_SameContext()
         {
-            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
-            var userId = startTelegramUpdate.Message!.From.Id;
-            var initialContextId = messageRepository.GetLastContext(userId, userId);
+            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            var userId = _startTelegramUpdate.Message!.From.Id;
+            var initialContextId = _messageRepository.GetLastContext(userId, userId);
 
             var firstMessageUpd = CreateTelegramUpdate(1, 2, "first");
-            await _updateHandlerEntryPoint.HandleUpdateAsync(firstMessageUpd);
+            await _updateFirewall.HandleUpdateAsync(firstMessageUpd);
 
             var secondMessageUpd = CreateTelegramUpdate(3, 4, "second");
-            await _updateHandlerEntryPoint.HandleUpdateAsync(secondMessageUpd);
+            await _updateFirewall.HandleUpdateAsync(secondMessageUpd);
 
-            var newContextId = messageRepository.GetLastContext(userId, userId);
+            var newContextId = _messageRepository.GetLastContext(userId, userId);
 
             newContextId.Should().Be(initialContextId);
         }
@@ -452,9 +454,9 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task StartCommand_UserNotExists_NewUserAdded()
         {
-            var userRepository = services.GetRequiredService<UserRepository>();
+            var userRepository = _services.GetRequiredService<UserRepository>();
 
-            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
+            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
 
@@ -464,13 +466,13 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task TextMessage_TwoTimes_UserCached()
         {
-            var userRepository = services.GetRequiredService<UserRepository>();
+            var userRepository = _services.GetRequiredService<UserRepository>();
 
-            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
-            await _updateHandlerEntryPoint.HandleUpdateAsync(startTelegramUpdate);
+            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
-            var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + startTelegramUpdate.Message.From.Id);
+            var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + _startTelegramUpdate.Message.From.Id);
             cached.Should().BeEquivalentTo(newUser);
         }
 

@@ -7,26 +7,26 @@ namespace Telegram.Bot.Abstract;
 public abstract class PollingServiceBase<TReceiverService> : BackgroundService
     where TReceiverService : IReceiverService
 {
-    private readonly IServiceProvider serviceProvider;
-    private readonly ILogger log;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger _log;
 
     internal PollingServiceBase(
         IServiceProvider serviceProvider,
         ILogger log)
     {
-        this.serviceProvider = serviceProvider;
-        this.log = log;
+        _serviceProvider = serviceProvider;
+        _log = log;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        log.LogInformation("Starting polling service");
+        _log.LogInformation("Starting polling service");
         await DoWork(stoppingToken);
     }
 
     private async Task DoWork(CancellationToken stoppingToken)
     {
-        var receiver = serviceProvider.GetRequiredService<TReceiverService>();
+        var receiver = _serviceProvider.GetRequiredService<TReceiverService>();
         await receiver.ReceiveAsync(stoppingToken);
     }
 }

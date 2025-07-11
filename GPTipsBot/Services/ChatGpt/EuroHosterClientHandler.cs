@@ -9,7 +9,7 @@ namespace GPTipsBot.Services
     {
         public EuroHosterClientHandler()
         {
-            Proxy = new WebProxy(AppConfig.ProxyIP, int.Parse(AppConfig.ProxyPort)) 
+            Proxy = new WebProxy(AppConfig.ProxyIp, int.Parse(AppConfig.ProxyPort)) 
             {
                 Credentials = new NetworkCredential(AppConfig.ProxyLogin, AppConfig.ProxyPwd)
             };

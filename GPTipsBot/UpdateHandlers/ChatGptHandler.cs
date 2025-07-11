@@ -14,24 +14,24 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class ChatGptHandler : BaseMessageHandler
     {
-        private readonly MessageRepository messageRepository;
-        private readonly IGpt gptService;
-        private readonly ActionStatus typingStatus;
-        private readonly ILogger<ChatGptHandler> log;
-        private readonly ITelegramBotClient botClient;
+        private readonly MessageRepository _messageRepository;
+        private readonly IGpt _gptService;
+        private readonly UserStatusActivator _typingStatus;
+        private readonly ILogger<ChatGptHandler> _log;
+        private readonly ITelegramBotClient _botClient;
 
         public ChatGptHandler(
             MessageRepository messageRepository,
             IGpt gptService,
-            ActionStatus typingStatus,
+            UserStatusActivator typingStatus,
             ILogger<ChatGptHandler> log,
             ITelegramBotClient botClient)
         {
-            this.messageRepository = messageRepository;
-            this.gptService = gptService;
-            this.typingStatus = typingStatus;
-            this.log = log;
-            this.botClient = botClient;
+            _messageRepository = messageRepository;
+            _gptService = gptService;
+            _typingStatus = typingStatus;
+            _log = log;
+            _botClient = botClient;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -40,8 +40,8 @@ namespace GPTipsBot.UpdateHandlers
             MessageDto gtpResponse = null;
             try
             {
-                await messageRepository.AddAsync(update.Message);
-                var serviceMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
+                await _messageRepository.AddAsync(update.Message);
+                var serviceMessageId = await _typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
                 var sw = Stopwatch.StartNew();
                 var token = MainHandler.UserState[update.UserChatKey].MessageIdToCancellation[serviceMessageId].Token;
@@ -50,17 +50,17 @@ namespace GPTipsBot.UpdateHandlers
 
                 try
                 {
-                    response = await gptService.SendMessage(update, token);
+                    response = await _gptService.SendMessage(update, token);
                 }
                 catch (OperationCanceledException)
                 {
-                    log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
+                    _log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
                     return;
                 }
                 catch (ChatGptException ex)
                 {
-                    log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                    await botClient.SendTextMessageAsync(
+                    _log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
+                    await _botClient.SendTextMessageAsync(
                         update.UserChatKey.ChatId,
                         BotResponse.SomethingWentWrong,
                         (int)update.Message.TelegramMessageId!, cancellationToken: token
@@ -73,7 +73,7 @@ namespace GPTipsBot.UpdateHandlers
                     sw.Stop();
                 }
 
-                log.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
+                _log.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
 
                 gtpResponse = new MessageDto(update.UserChatKey)
                 {
@@ -82,26 +82,26 @@ namespace GPTipsBot.UpdateHandlers
                     ContextBound = true,
                 };
 
-                await messageRepository.AddAsync(gtpResponse, update.Message.Id);
-                await botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, gtpResponse.Text, (int)update.Message.TelegramMessageId!);
+                await _messageRepository.AddAsync(gtpResponse, update.Message.Id);
+                await _botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, gtpResponse.Text, (int)update.Message.TelegramMessageId!);
             }
             catch (ClientException ex)
             {
-                log.LogInformation(ex, shortMessage);
-                await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                _log.LogInformation(ex, shortMessage);
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             catch (ApiRequestException ex)
             when (ex.Message.Contains("can't parse entities"))
             {
                 var shortReply = gtpResponse!.Text.Truncate(30) + "...";
-                log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
-                await botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, gtpResponse!.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                _log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
+                await _botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, gtpResponse!.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             finally
             {
-                await typingStatus.Stop(update.UserChatKey);
+                await _typingStatus.Stop(update.UserChatKey);
             }
 
             await base.HandleAsync(update);

@@ -22,14 +22,14 @@ namespace GPTipsBot.Services
 
     public class YaCloudClient : ITextRecognizer, IImageGenerator
     {
-        private readonly ILogger<YaCloudClient> logger;
+        private readonly ILogger<YaCloudClient> _logger;
         private readonly HttpClient _httpClient;
         private readonly string _token;
         private readonly string _folderId;
 
         public YaCloudClient(ILogger<YaCloudClient> logger, HttpClient httpClient)
         {
-            this.logger = logger;
+            _logger = logger;
             _httpClient = httpClient;
             _token = AppConfig.YandexCloudApiKey;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Api-Key", AppConfig.YandexCloudApiKey);
@@ -53,7 +53,7 @@ namespace GPTipsBot.Services
 
             var result = JsonSerializer.Deserialize<Root>(contentResult);
 
-            return !string.IsNullOrWhiteSpace(result?.result?.textAnnotation?.fullText) ? result.result.textAnnotation.fullText : BotResponse.CantRecognizeText;
+            return !string.IsNullOrWhiteSpace(result?.Result?.TextAnnotation?.FullText) ? result.Result.TextAnnotation.FullText : BotResponse.CantRecognizeText;
         }
 
         public async Task<string> GenerateImage(string prompt)
@@ -61,22 +61,22 @@ namespace GPTipsBot.Services
             var request = new HttpRequestMessage(HttpMethod.Post, "https://llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync");
             var body = new YandexArtRequest
             {
-                modelUri = $"art://{_folderId}/yandex-art/latest",
-                generationOptions = new GenerationOptions
+                ModelUri = $"art://{_folderId}/yandex-art/latest",
+                GenerationOptions = new GenerationOptions
                 {
-                    seed = "1863",
-                    aspectRatio = new AspectRatio
+                    Seed = "1863",
+                    AspectRatio = new AspectRatio
                     {
-                        widthRatio = "2",
-                        heightRatio = "1"
+                        WidthRatio = "2",
+                        HeightRatio = "1"
                     }
                 },
-                messages = new List<Message>()
+                Messages = new List<Message>()
                 {
                     new()
                     {
-                        weight = "1",
-                        text = prompt
+                        Weight = "1",
+                        Text = prompt
                     }
                 }
             };
@@ -91,17 +91,17 @@ namespace GPTipsBot.Services
             while (true)
             {
                 await Task.Delay(3000);
-                var getResultResponse = await _httpClient.GetAsync($"https://llm.api.cloud.yandex.net:443/operations/{result.id}");
+                var getResultResponse = await _httpClient.GetAsync($"https://llm.api.cloud.yandex.net:443/operations/{result.Id}");
 
                 result = JsonSerializer.Deserialize<YandexArtResponse>(await getResultResponse.Content.ReadAsStringAsync());
 
-                if (result?.done == true)
+                if (result?.Done == true)
                 {
                     break;
                 }
             }
 
-            return result?.response?.image ?? throw new Exception();
+            return result?.Response?.Image ?? throw new Exception();
         }
     }
 }
