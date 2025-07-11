@@ -7,14 +7,12 @@ using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.Payments;
 
 namespace GPTipsBot
 {
     public class UpdateHandlerEntryPoint
     {
         private readonly MainHandler mainHandler;
-        private readonly ITelegramBotClient telegramBotClient;
         private readonly SpeechToTextService speechToTextService;
         private readonly TelejetAdClient telejetAdClient;
         private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
@@ -26,18 +24,16 @@ namespace GPTipsBot
 
         public UpdateHandlerEntryPoint(
             MainHandler mainHandler,
-            ITelegramBotClient telegramBotClient,
             SpeechToTextService speechToTextService,
             TelejetAdClient telejetAdClient,
             GramadsAdvertisementClient gramadsAdvertisementClient,
             ITelegramBotClient botClient)
         {
             this.mainHandler = mainHandler;
-            this.telegramBotClient = telegramBotClient;
+            this.botClient = botClient;
             this.speechToTextService = speechToTextService;
             this.telejetAdClient = telejetAdClient;
             _gramadsAdvertisementClient = gramadsAdvertisementClient;
-            this.botClient = botClient;
             Start = DateTime.UtcNow;
         }
 
@@ -52,7 +48,7 @@ namespace GPTipsBot
                 return;
             }
 
-            if (update.Ignore())
+            if (update.Validate())
                 return;
 
             var extendedUpd = new UpdateDecorator(update);
@@ -79,7 +75,7 @@ namespace GPTipsBot
             {
                 if (HamsterSent.Add(chatId))
                 {
-                    telegramBotClient.SendTextMessageAsync(chatId, BotResponse.Hamster, null, ParseMode.MarkdownV2).GetAwaiter().GetResult();
+                    botClient.SendTextMessageAsync(chatId, BotResponse.Hamster, null, ParseMode.MarkdownV2).GetAwaiter().GetResult();
                 }
             }
         }

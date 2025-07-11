@@ -18,7 +18,7 @@ namespace GPTipsBot.Repositories
             this.context = context;
         }
 
-        public long? AddMessage(MessageDto messageDto, long? replyToId = null)
+        public async Task<long?> AddAsync(MessageDto messageDto, long? replyToId = null)
         {
             var contextId = messageDto is { ContextBound: true, NewContext: false } ?
                 GetLastContext(messageDto.UserId, messageDto.ChatId) : null;
@@ -38,7 +38,7 @@ namespace GPTipsBot.Repositories
             };
 
             context.Messages.Add(newMessage);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             messageDto.Id = newMessage.Id;
             messageDto.ContextId = newMessage.ContextId;

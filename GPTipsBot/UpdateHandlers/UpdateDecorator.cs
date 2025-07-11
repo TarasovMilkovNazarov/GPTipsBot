@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
+using GPTipsBot.Mappers;
 using GPTipsBot.Services;
 using Newtonsoft.Json;
 using Telegram.Bot.Types;
@@ -54,18 +55,6 @@ namespace GPTipsBot.UpdateHandlers
 
             UserChatKey ??= new(ChatId, ChatId);
 
-            ServiceMessage = new MessageDto
-            {
-                UserId = UserChatKey.Id,
-                ChatId = UserChatKey.ChatId,
-            };
-
-            Reply = new MessageDto
-            {
-                UserId = UserChatKey.Id,
-                ChatId = UserChatKey.ChatId,
-            };
-
             var groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             IsGroupOrChannel = groupChatTypes.Contains(Message?.ChatType);
 
@@ -79,7 +68,7 @@ namespace GPTipsBot.UpdateHandlers
             Command = command;
         }
 
-        public BotCommand? Command { get; set; }
+        public CustomBotCommand? Command { get; set; }
 
         public string FileId { get; set; }
 
@@ -87,12 +76,10 @@ namespace GPTipsBot.UpdateHandlers
 
         public long ChatId { get; }
 
-        public UserChatKey UserChatKey { get; internal set; }
+        public UserChatKey UserChatKey { get; }
         public UserDto User { get; set; }
 
         public MessageDto Message { get; set; }
-        public MessageDto Reply { get; set; }
-        public MessageDto ServiceMessage { get; set; }
 
         public ChatMemberStatus? ChatMemberStatus => _update.MyChatMember?.NewChatMember.Status;
         public bool IsRecovered { get; }
@@ -106,9 +93,9 @@ namespace GPTipsBot.UpdateHandlers
 
         string GetUserLanguage()
         {
-            if (MainHandler.userState.ContainsKey(UserChatKey) && MainHandler.userState[UserChatKey].LanguageCode != null)
+            if (MainHandler.UserState.ContainsKey(UserChatKey) && MainHandler.UserState[UserChatKey].LanguageCode != null)
             {
-                return MainHandler.userState[UserChatKey].LanguageCode;
+                return MainHandler.UserState[UserChatKey].LanguageCode;
             }
 
             return Message?.LanguageCode ?? "ru";
@@ -121,7 +108,7 @@ namespace GPTipsBot.UpdateHandlers
             return serialized;
         }
 
-        private bool TryGetCommand(string message, out BotCommand? command)
+        private bool TryGetCommand(string message, out CustomBotCommand? command)
         {
             command = null;
             if (string.IsNullOrWhiteSpace(message))
@@ -133,11 +120,11 @@ namespace GPTipsBot.UpdateHandlers
 
             var classType = typeof(BotMenu);
             var properties = classType.GetProperties(BindingFlags.Static | BindingFlags.Public)
-                .Where(p => p.PropertyType == typeof(BotCommand));
+                .Where(p => p.PropertyType == typeof(CustomBotCommand));
 
             foreach (var property in properties)
             {
-                if (property.GetValue(null) is not BotCommand botCommand) continue;
+                if (property.GetValue(null) is not CustomBotCommand botCommand) continue;
 
                 var slashCommandValue = botCommand.Command;
 
@@ -147,13 +134,6 @@ namespace GPTipsBot.UpdateHandlers
                 command = botCommand;
                 return true;
             }
-
-            if (message is "/version" or "/fix")
-            {
-
-            }
-
-            command = null;
 
             return false;
         }

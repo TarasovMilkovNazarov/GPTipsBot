@@ -48,8 +48,9 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text.Length > ImageTextDescriptionLimit)
             {
-                await botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit), replyMarkup: TelegramBotUiService.CancelKeyboard);
-                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
+                await botClient.SendTextMessageAsync(userKey.ChatId,
+                    String.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
+                    replyMarkup: TelegramBotUiService.CancelKeyboard);
                 return;
             }
 
@@ -58,32 +59,26 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendTextMessageAsync(userKey.ChatId,
                     String.Format(BotResponse.ImagesPerDayLimit, ImagesPerDayLimit),
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
-                MainHandler.userState[userKey].CurrentState = Enums.UserStateEnum.None;
                 return;
             }
 
-            update.ServiceMessage.TelegramMessageId = await sendImageStatus
+            var serviceMessageId = await sendImageStatus
                 .Start(userKey, Telegram.Bot.Types.Enums.ChatAction.UploadPhoto);
             try
             {
                 var sw = Stopwatch.StartNew();
-                var token = MainHandler.userState[update.UserChatKey]
-                    .messageIdToCancellation[update.ServiceMessage.TelegramMessageId ?? 
-                        throw new InvalidOperationException()].Token;
+                var token = MainHandler.UserState[update.UserChatKey]
+                    .messageIdToCancellation[serviceMessageId].Token;
 
                 var response = await ya.GenerateImage(update.Message.Text);
                 var replyMarkup = TelegramBotUiService.CancelKeyboard;
 
                 using var imageStream = new MemoryStream(Convert.FromBase64String(response));
-                messageRepository.AddMessage(new MessageDto
+                await messageRepository.AddAsync(new MessageDto(update.UserChatKey)
                 {
                     TelegramId = update.UserChatKey.Id,
-                    ChatId = update.UserChatKey.ChatId,
                     Role = MessageOwner.Ya,
-                    UserId = update.UserChatKey.Id,
                     BotMessageType = BotMessageType.ImageGenerated,
-                    ContextBound = false,
-                    NewContext = false
                 });
                 await botClient.SendPhotoAsync(userKey.ChatId, InputFile.FromStream(imageStream), cancellationToken: token);
 

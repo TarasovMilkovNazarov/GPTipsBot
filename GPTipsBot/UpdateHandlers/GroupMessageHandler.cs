@@ -1,13 +1,19 @@
 ﻿using System.Text.RegularExpressions;
+using Ardalis.GuardClauses;
+using GPTipsBot.Models;
+using GPTipsBot.Repositories;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
     public class GroupMessageHandler : BaseMessageHandler
     {
-        public GroupMessageHandler(MessageHandlerFactory messageHandlerFactory)
+        private readonly UserCommandRepository userCommandRepository;
+
+        public GroupMessageHandler(CommandHandler commandHandler, UserCommandRepository userCommandRepository)
         {
-            SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
+            this.userCommandRepository = userCommandRepository;
+            SetNextHandler(commandHandler);
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -38,23 +44,20 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (message == null)
-            {
-                await base.HandleAsync(update);
-                return;
-            }
-
             var botMentionedEntity = message?.EntityValues?.FirstOrDefault(ev => ev.Contains(AppConfig.BotName));
             var isBotMentioned = message?.Entities?.FirstOrDefault()?.Type == MessageEntityType.Mention && botMentionedEntity != null;
             var isReplyToBotMessage = message?.ReplyToMessage?.From?.IsBot ?? false;
-            var isUserWaitingResponse = MainHandler.userState[update.UserChatKey].CurrentState != Enums.UserStateEnum.None;
+
+            var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+            var isUserWaitingResponse = previousCommand?.Type is CommandType.TextRecognition or CommandType.Image;
 
             switch (isBotMentioned)
             {
                 case false when !isReplyToBotMessage && update.IsGroupOrChannel && !isUserWaitingResponse:
                     return;
                 case true:
-                    update.Message.Text = update.Message.Text.Substring(botMentionedEntity.Length).Trim();
+                    Guard.Against.Null(botMentionedEntity, nameof(botMentionedEntity));
+                    update.Message.Text = update.Message.Text[botMentionedEntity.Length..].Trim();
                     break;
             }
 

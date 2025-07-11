@@ -10,6 +10,8 @@ namespace GPTipsBot.Db
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<BotSettings> BotSettings { get; set; } = null!;
         public DbSet<OpenaiAccount> OpenaiAccounts { get; set; } = null!;
+        public DbSet<UserCommand> UserCommands { get; set; } = null!;
+        public DbSet<Wallet> Wallets { get; set; } = null!;
 
         public ApplicationContext()
         {

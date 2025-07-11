@@ -6,6 +6,12 @@ namespace GPTipsBot.Dtos
 {
     public class MessageDto
     {
+        public MessageDto(UserChatKey userChatKey)
+        {
+            UserId = userChatKey.Id;
+            ChatId = userChatKey.ChatId;
+        }
+
         public long Id { get; set; }
         public long? ContextId { get; set; }
         public string Text { get; set; }

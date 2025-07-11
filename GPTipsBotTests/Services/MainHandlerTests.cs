@@ -13,6 +13,7 @@ using System.Text.Json.Serialization;
 using AutoFixture;
 using FluentAssertions;
 using GPTipsBot;
+using GPTipsBot.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
@@ -39,6 +40,7 @@ namespace GPTipsBotTests.Services
         private readonly Mock<ITextRecognizer> _recognitionServiceMock;
         private readonly Fixture _fixture;
         private IMemoryCache _memoryCache;
+        private UserCommandRepository userCommandRepository;
 
         private ITelegramBotClient BotClient => botClientMock.Object;
 
@@ -118,6 +120,7 @@ namespace GPTipsBotTests.Services
             var appContext = services.GetRequiredService<ApplicationContext>();
             await ClearDatabase(appContext);
             messageRepository = services.GetRequiredService<MessageRepository>();
+            userCommandRepository = services.GetRequiredService<UserCommandRepository>();
             _updateHandlerEntryPoint = services.GetRequiredService<UpdateHandlerEntryPoint>();
             _memoryCache = services.GetRequiredService<IMemoryCache>();
         }
@@ -139,6 +142,32 @@ namespace GPTipsBotTests.Services
             }
 
             serviceCollection.AddSingleton<RateLimitCache>();
+        }
+
+        [Test]
+        public async Task UpdateHandler_BotMenuNavigation_UserCommandsSaved()
+        {
+            var commandSet = new List<CustomBotCommand>()
+            {
+                BotMenu.Start,
+                BotMenu.ChooseLang,
+                BotMenu.SetRuLang,
+                BotMenu.Cancel
+            };
+
+            foreach (var command in commandSet)
+            {
+                var update = CreateTelegramUpdate(1, 2, command.Command);
+                await _updateHandlerEntryPoint.HandleUpdateAsync(update);
+            }
+
+            var commands = userCommandRepository.Get(c => true).ToList();
+
+            await userCommandRepository.GetLastAsync(1234);
+
+            commands.Should().NotBeNull();
+            commands.Count.Should().Be(commandSet.Count);
+            commands.Select(c => c.Type).Should().BeEquivalentTo(commandSet.Select(c => c.Type));;
         }
 
 

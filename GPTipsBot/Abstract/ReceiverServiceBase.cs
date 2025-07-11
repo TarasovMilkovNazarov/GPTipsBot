@@ -1,4 +1,5 @@
 ﻿using GPTipsBot;
+using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,6 +57,11 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         {
                             var worker = scope.ServiceProvider.GetRequiredService<UpdateHandlerEntryPoint>();
                             await worker.HandleUpdateAsync(update);
+                        }
+                        catch (NotSupportedMessageException e)
+                        {
+                            await botClient.SendTextMessageAsync(update.Message.Chat!.Id,
+                                BotResponse.OnlyMessagesAvailable, cancellationToken: stoppingToken);
                         }
                         catch (ApiRequestException e)
                         {

@@ -11,7 +11,7 @@ namespace GPTipsBot.UpdateHandlers
             _serviceProvider = serviceProvider;
         }
 
-        public BaseMessageHandler Create<T>() where T : BaseMessageHandler
+        public BaseMessageHandler GetRequiredService<T>() where T : BaseMessageHandler
         {
             return _serviceProvider.GetRequiredService(typeof(T)) as T ?? throw new InvalidOperationException();
         }

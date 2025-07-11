@@ -14,5 +14,7 @@ namespace GPTipsBot.Models
 
         [ForeignKey("BotSettings")]
         public long? BotSettingsId { get; set; }
+
+        public List<UserCommand> Commands { get; set; }
     }
 }

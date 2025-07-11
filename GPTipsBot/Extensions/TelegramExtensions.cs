@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using GPTipsBot.Exceptions;
+using GPTipsBot.UpdateHandlers;
+using Newtonsoft.Json;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -11,7 +13,7 @@ namespace GPTipsBot.Extensions
             return JsonConvert.SerializeObject(update, Formatting.Indented);
         }
 
-        public static bool Ignore(this Update update)
+        public static bool Validate(this Update update)
         {
             if (update.EditedMessage != null)
             {
@@ -27,6 +29,8 @@ namespace GPTipsBot.Extensions
                 case MessageType.Voice:
                 case MessageType.Photo:
                     return false;
+                case MessageType.Video:
+                    throw new NotSupportedMessageException(update.Message.Type.ToString());
                 default:
                     return true;
             }

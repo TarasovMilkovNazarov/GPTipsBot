@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace GPTipsBot.Models;
+namespace GPTipsBot.Dtos;
 
 public class YandexRecognitionRequest
 {

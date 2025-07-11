@@ -28,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
             _serviceMessageId = serviceMessage.MessageId;
 
             var tokenSource = new CancellationTokenSource();
-            MainHandler.userState[userKey].messageIdToCancellation.Add(_serviceMessageId, tokenSource);
+            MainHandler.UserState[userKey].messageIdToCancellation.Add(_serviceMessageId, tokenSource);
 
             _timer = new Timer(_ =>
             {
@@ -60,7 +60,7 @@ namespace GPTipsBot.UpdateHandlers
                 await _botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId);
             }
 
-            MainHandler.userState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
+            MainHandler.UserState[userKey].messageIdToCancellation.Remove(_serviceMessageId);
 
             if (_timer != null)
             {

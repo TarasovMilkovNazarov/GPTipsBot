@@ -11,7 +11,6 @@ namespace GPTipsBot.Services
 
         public const int MaxMessagesCountPerMinute = 5;
         public const int MaxMessageCountPerDay = 30;
-        public const int ConsiderTelegramPerMinuteLimit = 2;
 
         private TimeSpan MinuteResetInterval { get; } = TimeSpan.FromSeconds(60);
         private TimeSpan DayResetInterval { get; } = TimeSpan.FromDays(1);

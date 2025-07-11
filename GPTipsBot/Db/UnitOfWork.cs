@@ -5,22 +5,26 @@ namespace GPTipsBot.Db
     public class UnitOfWork : IDisposable
     {
         private readonly ApplicationContext context;
-        private readonly BotSettingsRepository botSettingsRepository;
-        private readonly MessageRepository messageRepository;
-        private readonly OpenaiAccountsRepository openaiAccountsRepository;
 
-        public UnitOfWork(ApplicationContext context, BotSettingsRepository botSettingsRepository, MessageRepository messageRepository, OpenaiAccountsRepository openaiAccountsRepository)
+        public UnitOfWork(ApplicationContext context, BotSettingsRepository
+            botSettingsRepository, MessageRepository messageRepository,
+            OpenaiAccountsRepository openaiAccountsRepository, UserCommandRepository userCommandRepository)
         {
             this.context = context;
-            this.botSettingsRepository = botSettingsRepository;
-            this.messageRepository = messageRepository;
-            this.openaiAccountsRepository = openaiAccountsRepository;
+            BotSettings = botSettingsRepository;
+            Messages = messageRepository;
+            OpenaiAccounts = openaiAccountsRepository;
+            UserCommandRepository = userCommandRepository;
         }
 
-        public BotSettingsRepository BotSettings => botSettingsRepository;
-        public MessageRepository Messages => messageRepository;
-        public OpenaiAccountsRepository OpenaiAccounts => openaiAccountsRepository;
- 
+        public BotSettingsRepository BotSettings { get; }
+
+        public MessageRepository Messages { get; }
+
+        public OpenaiAccountsRepository OpenaiAccounts { get; }
+
+        public UserCommandRepository UserCommandRepository { get; }
+
         public void Save()
         {
             context.SaveChanges();
@@ -30,13 +34,13 @@ namespace GPTipsBot.Db
  
         public virtual void Dispose(bool disposing)
         {
-            if (!this.disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
                     context.Dispose();
                 }
-                this.disposed = true;
+                disposed = true;
             }
         }
  

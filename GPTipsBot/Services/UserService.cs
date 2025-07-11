@@ -22,7 +22,6 @@ namespace GPTipsBot.Services
 
             _memoryCache = memoryCache;
 
-            // Cache for 1 day (adjust as needed)
             _cacheOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),

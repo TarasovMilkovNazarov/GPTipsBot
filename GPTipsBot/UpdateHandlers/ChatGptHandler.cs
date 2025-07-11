@@ -2,6 +2,7 @@
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using GPTipsBot.Dtos;
 using Telegram.Bot;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Services;
@@ -36,12 +37,14 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateDecorator update)
         {
             var shortMessage = update.Message.Text.Truncate(30) + "...";
+            MessageDto gtpResponse = null;
             try
             {
-                update.ServiceMessage.TelegramMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
+                await messageRepository.AddAsync(update.Message);
+                var serviceMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
                 var sw = Stopwatch.StartNew();
-                var token = MainHandler.userState[update.UserChatKey].messageIdToCancellation[update.ServiceMessage.TelegramMessageId.Value].Token;
+                var token = MainHandler.UserState[update.UserChatKey].messageIdToCancellation[serviceMessageId].Token;
 
                 ChatCompletionCreateResponse? response = null;
 
@@ -67,17 +70,20 @@ namespace GPTipsBot.UpdateHandlers
                 }
                 finally
                 {
-                    // !response.Successful decrement
                     sw.Stop();
                 }
 
                 log.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
 
-                update.Reply.Text = response.Choices.FirstOrDefault()?.Message.Content ?? "";
-                update.Reply.Role = Enums.MessageOwner.Assistant;
-                update.Reply.ContextBound = true;
-                messageRepository.AddMessage(update.Reply, update.Message.Id);
-                await botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, update.Reply.Text, (int)update.Message.TelegramMessageId!);
+                gtpResponse = new MessageDto(update.UserChatKey)
+                {
+                    Text = response.Choices.FirstOrDefault()?.Message.Content ?? "",
+                    Role = Enums.MessageOwner.Assistant,
+                    ContextBound = true,
+                };
+
+                await messageRepository.AddAsync(gtpResponse, update.Message.Id);
+                await botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, gtpResponse.Text, (int)update.Message.TelegramMessageId!);
             }
             catch (ClientException ex)
             {
@@ -88,9 +94,9 @@ namespace GPTipsBot.UpdateHandlers
             catch (ApiRequestException ex)
             when (ex.Message.Contains("can't parse entities"))
             {
-                var shortReply = update.Reply.Text.Truncate(30) + "...";
+                var shortReply = gtpResponse!.Text.Truncate(30) + "...";
                 log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
-                await botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, update.Reply.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                await botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, gtpResponse!.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             finally
@@ -98,7 +104,6 @@ namespace GPTipsBot.UpdateHandlers
                 await typingStatus.Stop(update.UserChatKey);
             }
 
-            // Call next handler
             await base.HandleAsync(update);
         }
     }

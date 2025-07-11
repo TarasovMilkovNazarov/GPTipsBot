@@ -3,19 +3,19 @@ using GPTipsBot.Enums;
 using GPTipsBot.Localization;
 using Tmessage = Telegram.Bot.Types.Message;
 
-namespace GPTipsBot.Mapper
+namespace GPTipsBot.Mappers
 {
     public static class MessageMapper
     {
         public static MessageDto Map(Tmessage tMessage, long chatId, MessageOwner role)
         {
-            MessageDto message = new()
+            UserChatKey chatKey = new UserChatKey(tMessage.From.Id, chatId);
+
+            MessageDto message = new(chatKey)
             {
                 TelegramMessageId = tMessage.MessageId,
-                ChatId = chatId,
                 Text = tMessage.Text,
                 Type = tMessage.Type,
-                UserId = tMessage.From.Id,
                 CreatedAt = tMessage.Date,
                 Role = role,
                 EntityValues = tMessage.EntityValues,

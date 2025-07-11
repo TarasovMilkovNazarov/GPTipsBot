@@ -13,7 +13,7 @@ namespace GPTipsBot.UpdateHandlers
             ITelegramBotClient botClient)
         {
             this.botClient = botClient;
-            SetNextHandler(messageHandlerFactory.Create<RateLimitingHandler>());
+            SetNextHandler(messageHandlerFactory.GetRequiredService<RateLimitingHandler>());
         }
 
         public override async Task HandleAsync(UpdateDecorator update)

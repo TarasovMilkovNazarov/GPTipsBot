@@ -3,6 +3,8 @@ using GPTipsBot.Resources;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Globalization;
+using GPTipsBot.Dtos;
+using GPTipsBot.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -14,7 +16,6 @@ namespace GPTipsBot.Services
         public const string StartCommand = "/start";
         public const string ImageCommand = "/image";
         public const string ResetContextCommand = "/reset_context";
-        public const string FeedbackCommand = "/feedback";
         public const string HelpCommand = "/help";
         public const string ChooseLangCommand = "/setLang";
         public const string SetRuLangCommand = "/setRuLang";
@@ -23,17 +24,16 @@ namespace GPTipsBot.Services
         public const string StopRequestCommand = "/stopRequest";
         public const string ImageTextRecognizeCommand = "/get_image_text";
 
-        public static BotCommand Start => new() { Command = StartCommand, Description = BotUI.Start };
-        public static BotCommand Image => new() { Command = ImageCommand, Description = BotUI.Image };
-        public static BotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize };
-        public static BotCommand ResetContext => new() { Command = ResetContextCommand, Description = BotUI.ResetContext };
-        public static BotCommand Feedback => new() { Command = FeedbackCommand, Description = BotUI.Feedback };
-        public static BotCommand Help => new() { Command = HelpCommand, Description = BotUI.Help };
-        public static BotCommand ChooseLang => new() { Command = ChooseLangCommand, Description = BotUI.SetLang };
-        public static BotCommand SetRuLang => new() { Command = SetRuLangCommand, Description = BotUI.SetRuLang };
-        public static BotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang };
-        public static BotCommand StopRequest => new() { Command = StopRequestCommand };
-        public static BotCommand Cancel => new() { Command = CancelCommand };
+        public static CustomBotCommand Start => new() { Command = StartCommand, Description = BotUI.Start, Type = CommandType.Start};
+        public static CustomBotCommand Image => new() { Command = ImageCommand, Description = BotUI.Image, Type = CommandType.Image };
+        public static CustomBotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize, Type = CommandType.TextRecognition};
+        public static CustomBotCommand ResetContext => new() { Command = ResetContextCommand, Description = BotUI.ResetContext, Type = CommandType.ResetContext};
+        public static CustomBotCommand Help => new() { Command = HelpCommand, Description = BotUI.Help, Type = CommandType.Help};
+        public static CustomBotCommand ChooseLang => new() { Command = ChooseLangCommand, Description = BotUI.SetLang, Type = CommandType.ChooseLanguage};
+        public static CustomBotCommand SetRuLang => new() { Command = SetRuLangCommand, Description = BotUI.SetRuLang, Type = CommandType.SetRuLang };
+        public static CustomBotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang, Type = CommandType.SetEngLang };
+        public static CustomBotCommand StopRequest => new() { Command = StopRequestCommand, Type = CommandType.StopRequest };
+        public static CustomBotCommand Cancel => new() { Command = CancelCommand, Type = CommandType.CancelPreviousCommand };
 
         public BotMenu()
         {
@@ -82,7 +82,6 @@ namespace GPTipsBot.Services
                 { BotMenu.ImageCommand, new() },
                 { BotMenu.ResetContextCommand, new() },
                 { BotMenu.HelpCommand, new() },
-                { BotMenu.FeedbackCommand, new() },
                 { BotMenu.CancelCommand, new() },
                 { BotMenu.ChooseLangCommand, new() },
                 { BotMenu.SetRuLangCommand, new() },
@@ -99,7 +98,6 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ImageCommand].Add(BotUI.ImageButton);
                 ButtonToLocalizations[BotMenu.ResetContextCommand].Add(BotUI.ResetContextButton);
                 ButtonToLocalizations[BotMenu.HelpCommand].Add(BotUI.HelpButton);
-                ButtonToLocalizations[BotMenu.FeedbackCommand].Add(BotUI.FeedbackButton);
                 ButtonToLocalizations[BotMenu.CancelCommand].Add(BotUI.CancelButton);
                 ButtonToLocalizations[BotMenu.ChooseLangCommand].Add(BotUI.LangButton);
                 ButtonToLocalizations[BotMenu.SetRuLangCommand].Add(BotUI.RussianButton);

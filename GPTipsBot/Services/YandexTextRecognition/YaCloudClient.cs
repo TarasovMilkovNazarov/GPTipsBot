@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using GPTipsBot.Dtos;
 using GPTipsBot.Models;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.YandexTextRecognition;

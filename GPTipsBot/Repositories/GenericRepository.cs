@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Db;
+﻿using System.Linq.Expressions;
+using GPTipsBot.Db;
 using Microsoft.EntityFrameworkCore;
 
 namespace GPTipsBot.Repositories
@@ -19,7 +20,7 @@ namespace GPTipsBot.Repositories
             return _dbSet.AsNoTracking().ToList();
         }
          
-        public IEnumerable<TEntity> Get(Func<TEntity, bool> predicate)
+        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> predicate)
         {
             return _dbSet.AsNoTracking().Where(predicate).ToList();
         }

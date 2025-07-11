@@ -11,7 +11,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly RateLimitCache rateLimitCache;
 
         public RateLimitingHandler(
-            MessageHandlerFactory messageHandlerFactory,
+            ChatGptHandler chatGptHandler,
             ITelegramBotClient botClient,
             ILogger<RateLimitingHandler> logger,
             RateLimitCache rateLimitCache)
@@ -19,8 +19,7 @@ namespace GPTipsBot.UpdateHandlers
             this.botClient = botClient;
             this.logger = logger;
             this.rateLimitCache = rateLimitCache;
-
-            SetNextHandler(messageHandlerFactory.Create<MessageTypeHandler>());
+            SetNextHandler(chatGptHandler);
         }
 
         public override async Task HandleAsync(UpdateDecorator update)

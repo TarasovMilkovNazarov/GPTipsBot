@@ -15,7 +15,7 @@ namespace GPTipsBot.UpdateHandlers
         {
             this.botClient = botClient;
             this.messageRepository = messageRepository;
-            SetNextHandler(messageHandlerFactory.Create<OnAdminCommandHandler>());
+            SetNextHandler(messageHandlerFactory.GetRequiredService<OnAdminCommandHandler>());
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -35,7 +35,7 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
-                messageRepository.AddMessage(update.Message);
+                await messageRepository.AddAsync(update.Message);
 
                 if (ChatToInformAboutRecovery.TryGetValue(chatId, out var value))
                     value.Enqueue(update);

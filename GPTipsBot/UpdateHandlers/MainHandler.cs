@@ -6,29 +6,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
+using GPTipsBot.Models;
 using GPTipsBot.Repositories;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
     public class MainHandler : BaseMessageHandler
     {
-        public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> userState = new ();
-        private readonly MessageHandlerFactory messageHandlerFactory;
+        public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
         private readonly UserService userService;
-        private readonly UserRepository userRepository;
+        private readonly UserCommandRepository userCommandRepository;
+        private readonly ImageTextRecognitionHandler imageTextRecognitionHandler;
+        private readonly ImageGeneratorHandler imageGeneratorHandler;
+        private readonly CommandHandler commandHandler;
         private readonly UnitOfWork unitOfWork;
         private readonly ILogger<MainHandler> logger;
 
-        public MainHandler(MessageHandlerFactory messageHandlerFactory, UnitOfWork unitOfWork, 
-            ILogger<MainHandler> logger, UserService userService, UserRepository userRepository)
+        public MainHandler(RecoveryHandler recoveryHandler, ImageTextRecognitionHandler imageTextRecognitionHandler,
+            ImageGeneratorHandler imageGeneratorHandler, CommandHandler commandHandler, UnitOfWork unitOfWork,
+            ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository)
         {
-            this.messageHandlerFactory = messageHandlerFactory;
+            this.imageTextRecognitionHandler = imageTextRecognitionHandler;
+            this.imageGeneratorHandler = imageGeneratorHandler;
+            this.commandHandler = commandHandler;
             this.unitOfWork = unitOfWork;
             this.logger = logger;
             this.userService = userService;
-            this.userRepository = userRepository;
-            SetNextHandler(messageHandlerFactory.Create<RecoveryHandler>());
+            this.userCommandRepository = userCommandRepository;
+            SetNextHandler(recoveryHandler);
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -38,18 +43,11 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.CallbackQuery != null)
-            {
-                SetNextHandler(messageHandlerFactory.Create<CommandHandler>());
-                await base.HandleAsync(update);
-                return;
-            }
-
             var userKey = update.UserChatKey;
 
-            if (!userState.ContainsKey(userKey))
+            if (!UserState.ContainsKey(userKey))
             {
-                userState.TryAdd(userKey, new UserStateDto(userKey));
+                UserState.TryAdd(userKey, new UserStateDto(userKey));
             }
 
             var newUser = UserMapper.Map(update.User);
@@ -64,7 +62,21 @@ namespace GPTipsBot.UpdateHandlers
 
             var language = unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
-            userState[userKey].LanguageCode = language;
+            UserState[userKey].LanguageCode = language;
+
+            var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+            if (update.CallbackQuery != null || update.IsCommand)
+            {
+                SetNextHandler(commandHandler);
+            }
+            else if (!string.IsNullOrEmpty(update.Message.Text) && lastCommand?.Type == CommandType.Image)
+            {
+                SetNextHandler(imageGeneratorHandler);
+            }
+            else if (!string.IsNullOrEmpty(update.FileId))
+            {
+                SetNextHandler(imageTextRecognitionHandler);
+            }
 
             // Call next handler
             try

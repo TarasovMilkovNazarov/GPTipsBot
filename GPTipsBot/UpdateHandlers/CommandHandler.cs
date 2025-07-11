@@ -5,7 +5,9 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
-using System.Reflection;
+using Ardalis.GuardClauses;
+using GPTipsBot.Models;
+using GPTipsBot.Repositories;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -21,15 +23,21 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITelegramBotClient botClient;
         private readonly UnitOfWork unitOfWork;
         private readonly ILogger<CommandHandler> logger;
+        private readonly MessageRepository messageRepository;
+        private readonly UserCommandRepository userCommandRepository;
+        private readonly ImageGeneratorHandler imageGeneratorHandler;
 
         public CommandHandler(MessageHandlerFactory messageHandlerFactory, ITelegramBotClient botClient, 
-            UnitOfWork unitOfWork, ILogger<CommandHandler> logger)
+            UnitOfWork unitOfWork, ILogger<CommandHandler> logger, MessageRepository messageRepository,
+            UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler)
         {
             this.messageHandlerFactory = messageHandlerFactory;
             this.botClient = botClient;
             this.unitOfWork = unitOfWork;
             this.logger = logger;
-            SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+            this.messageRepository = messageRepository;
+            this.userCommandRepository = userCommandRepository;
+            this.imageGeneratorHandler = imageGeneratorHandler;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -43,98 +51,95 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            Guard.Against.Null(update.Command);
+            var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+            await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
+
             IReplyMarkup? replyMarkup = StartKeyboard;
             update.Message.ContextBound = false;
+            string? reply = null;
 
             switch (update!.Command.Command)
             {
                 case StartCommand:
-                    await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    update.Reply.Text = BotResponse.Greeting;
+                    await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(),
+                        BotCommandScope.Chat(update.UserChatKey.ChatId));
+                    reply = BotResponse.Greeting;
                     break;
                 case HelpCommand:
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    update.Reply.Text = BotResponse.BotDescription;
+                    reply = BotResponse.BotDescription;
                     break;
                 case ImageCommand:
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingImage;
                     if (messageText.StartsWith("/image "))
                     {
                         update.Message.Text = messageText.Substring("/image ".Length);
-                        SetNextHandler(messageHandlerFactory.Create<CrudHandler>());
+                        SetNextHandler(imageGeneratorHandler);
+                        await messageRepository.AddAsync(update.Message);
                         await base.HandleAsync(update);
                         return;
                     }
-                    update.Reply.Text = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
+                    reply = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
                     replyMarkup = CancelKeyboard;
                     break;
                 case ImageTextRecognizeCommand:
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingTextRecognitionImage;
-                    update.Reply.Text = BotResponse.SendTextRecognitionImage;
+                    reply = BotResponse.SendTextRecognitionImage;
                     replyMarkup = CancelKeyboard;
                     break;
                 case ResetContextCommand:
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
-                    update.Reply.Text = BotResponse.ContextUpdated;
+                    reply = BotResponse.ContextUpdated;
                     update.Message.NewContext = true;
                     break;
-                case FeedbackCommand:
-                    update.Reply.Text = BotResponse.SendFeedback;
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.SendingFeedback;
-                    replyMarkup = CancelKeyboard;
-                    break;
                 case ChooseLangCommand:
-                    update.Reply.Text = BotResponse.ChooseLanguagePlease;
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.AwaitingLanguage;
+                    reply = BotResponse.ChooseLanguagePlease;
                     replyMarkup = ChooseLangKeyboard;
                     break;
                 case SetEngLangCommand:
-                    await UpdateLanguage(update.UserChatKey, "en");
+                    reply = await UpdateLanguage(update.UserChatKey, "en");
                     break;
                 case SetRuLangCommand:
-                    await UpdateLanguage(update.UserChatKey, "ru");
+                    reply = await UpdateLanguage(update.UserChatKey, "ru");
                     break;
                 case CancelCommand:
-                    update.Reply.Text = BotResponse.Cancel;
-                    MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
+                    reply = BotResponse.Cancel;
                     break;
                 case StopRequestCommand:
-                    update.Reply.Text = BotResponse.Cancel;
-                    if (MainHandler.userState.TryGetValue(update.UserChatKey, out var state))
+                    reply = BotResponse.Cancel;
+                    if (!MainHandler.UserState.TryGetValue(update.UserChatKey, out var state))
                     {
-                        if (state.CurrentState == UserStateEnum.None)
-                        {
-                            replyMarkup = new ReplyKeyboardRemove();
-                        }
-                        else
-                        {
-                            replyMarkup = CancelKeyboard;
-                        }
-
-                        if (update.Message.TelegramMessageId.HasValue && state.messageIdToCancellation.ContainsKey(update.Message.TelegramMessageId.Value))
-                        {
-                            state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
-                        }
+                        break;
                     }
+
+                    if (previousCommand?.Type is CommandType.Image or CommandType.TextRecognition)
+                    {
+                        replyMarkup = CancelKeyboard;
+                    }
+                    else
+                    {
+                        replyMarkup = new ReplyKeyboardRemove();
+                    }
+
+                    if (update.Message.TelegramMessageId.HasValue && state.messageIdToCancellation
+                            .ContainsKey(update.Message.TelegramMessageId.Value))
+                    {
+                        state.messageIdToCancellation[update.Message.TelegramMessageId.Value].Cancel();
+                    }
+
                     break;
             }
 
-            if (!string.IsNullOrEmpty(update.Reply.Text))
-            {
-                unitOfWork.Messages.AddMessage(update.Message);
-                await botClient.SendTextMessageAsync(chatId, update.Reply.Text, replyMarkup: replyMarkup);
-            }
+            Guard.Against.Null(reply);
 
-            async Task UpdateLanguage(UserChatKey userKey, string langCode)
+            await unitOfWork.Messages.AddAsync(update.Message);
+            await botClient.SendTextMessageAsync(chatId, reply, replyMarkup: replyMarkup);
+            return;
+
+            async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
-                MainHandler.userState[userKey].LanguageCode = langCode;
+                MainHandler.UserState[userKey].LanguageCode = langCode;
 
-                update.Reply.Text = BotResponse.LanguageWasSetSuccessfully;
                 await botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();
-                MainHandler.userState[update.UserChatKey].CurrentState = UserStateEnum.None;
 
                 var settings = unitOfWork.BotSettings.Get(userKey.Id);
                 if (settings == null)
@@ -145,6 +150,8 @@ namespace GPTipsBot.UpdateHandlers
                 {
                     unitOfWork.BotSettings.Update(userKey.Id, langCode);
                 }
+
+                return BotResponse.LanguageWasSetSuccessfully;;
             }
         }
     }
