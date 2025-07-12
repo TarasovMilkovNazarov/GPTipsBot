@@ -12,6 +12,7 @@ using AutoFixture;
 using FluentAssertions;
 using GPTipsBot;
 using GPTipsBot.Dtos;
+using GPTipsBot.Services.YandexCloud;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
@@ -21,6 +22,7 @@ using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using File = Telegram.Bot.Types.File;
+using Message = Telegram.Bot.Types.Message;
 
 namespace GPTipsBotTests.Services
 {

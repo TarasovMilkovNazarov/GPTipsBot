@@ -6,6 +6,7 @@ using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
+using GPTipsBot.Services.YandexCloud;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 namespace GPTipsBot.UpdateHandlers

@@ -8,6 +8,7 @@ using System.Globalization;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
+using GPTipsBot.Services.YandexCloud;
 
 namespace GPTipsBot.Extensions
 {

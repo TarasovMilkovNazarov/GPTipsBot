@@ -1,14 +1,11 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using GPTipsBot.Dtos;
-using GPTipsBot.Models;
 using GPTipsBot.Resources;
-using GPTipsBot.Services.YandexTextRecognition;
 using Microsoft.Extensions.Logging;
 using HttpRequestMessage = System.Net.Http.HttpRequestMessage;
-using Message = GPTipsBot.Services.YandexTextRecognition.Message;
 
-namespace GPTipsBot.Services
+namespace GPTipsBot.Services.YandexCloud
 {
     public interface ITextRecognizer
     {

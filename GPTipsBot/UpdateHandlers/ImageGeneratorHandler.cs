@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Services.YandexCloud;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
