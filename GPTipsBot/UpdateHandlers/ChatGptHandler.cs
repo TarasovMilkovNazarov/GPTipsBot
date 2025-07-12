@@ -19,19 +19,22 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserStatusActivator _typingStatus;
         private readonly ILogger<ChatGptHandler> _log;
         private readonly ITelegramBotClient _botClient;
+        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
 
         public ChatGptHandler(
             MessageRepository messageRepository,
             IGpt gptService,
             UserStatusActivator typingStatus,
             ILogger<ChatGptHandler> log,
-            ITelegramBotClient botClient)
+            ITelegramBotClient botClient,
+            GramadsAdvertisementClient gramadsAdvertisementClient)
         {
             _messageRepository = messageRepository;
             _gptService = gptService;
             _typingStatus = typingStatus;
             _log = log;
             _botClient = botClient;
+            _gramadsAdvertisementClient = gramadsAdvertisementClient;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -102,6 +105,15 @@ namespace GPTipsBot.UpdateHandlers
             finally
             {
                 await _typingStatus.Stop(update.UserChatKey);
+            }
+
+            try
+            {
+                await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            }
+            catch (Exception e)
+            {
+                // ignore
             }
 
             await base.HandleAsync(update);

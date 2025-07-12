@@ -24,11 +24,13 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserStatusActivator _sendImageStatus;
         private readonly ImageCreatorService _imageCreatorService;
         private readonly MessageRepository _messageRepository;
+        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
         public const int ImageTextDescriptionLimit = 1000;
         public const int ImagesPerDayLimit = 5;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger, IImageGenerator ya,
-            UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService, MessageRepository messageRepository)
+            UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService,
+            MessageRepository messageRepository, GramadsAdvertisementClient gramadsAdvertisementClient)
         {
             _botClient = botClient;
             _logger = logger;
@@ -36,6 +38,7 @@ namespace GPTipsBot.UpdateHandlers
             _sendImageStatus = sendImagestatus;
             _imageCreatorService = imageCreatorService;
             _messageRepository = messageRepository;
+            _gramadsAdvertisementClient = gramadsAdvertisementClient;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -115,8 +118,14 @@ namespace GPTipsBot.UpdateHandlers
                 await _sendImageStatus.Stop(userKey);
             }
 
-            // Call next handler
-            await base.HandleAsync(update);
+            try
+            {
+                await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            }
+            catch (Exception e)
+            {
+                // ignore
+            }
         }
     }
 }

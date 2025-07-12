@@ -71,8 +71,6 @@ namespace GPTipsBot
                 return;
             }
 
-            await _gramadsAdvertisementClient.SendPostToChat(extendedUpd.UserChatKey.ChatId);
-
             if (update.Message?.Voice != null)
             {
                 extendedUpd.Message.Text = await _speechToTextService.RecognizeVoice(update.Message.Voice.FileId);

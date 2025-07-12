@@ -17,16 +17,19 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITextRecognizer _yaCloudClient;
         private readonly MessageRepository _messageRepository;
         private readonly UserCommandRepository _userCommandRepository;
+        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
         public const int ImagesPerDayLimit = 5;
 
         public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger,
-            ITextRecognizer yaCloudClient, MessageRepository messageRepository, UserCommandRepository userCommandRepository)
+            ITextRecognizer yaCloudClient, MessageRepository messageRepository, UserCommandRepository userCommandRepository,
+            GramadsAdvertisementClient gramadsAdvertisementClient)
         {
             _botClient = botClient;
             _logger = logger;
             _yaCloudClient = yaCloudClient;
             _messageRepository = messageRepository;
             _userCommandRepository = userCommandRepository;
+            _gramadsAdvertisementClient = gramadsAdvertisementClient;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -76,7 +79,17 @@ namespace GPTipsBot.UpdateHandlers
 
             await _messageRepository.AddAsync(recognitionResultMessage);
 
-            await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+            await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+
+            try
+            {
+                await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            }
+            catch (Exception e)
+            {
+                // ignore
+            }
         }
     }
 }
