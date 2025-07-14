@@ -6,7 +6,7 @@ public class Invoice: Entity
     public long Amount { get; set; }
     public string Currency { get; set; }
     public InvoiceStatus Status { get; set; }
-    public long TelegramPaymentId { get; set; }
+    public long TelegramInvoiceId { get; set; }
 }
 
 public enum InvoiceStatus

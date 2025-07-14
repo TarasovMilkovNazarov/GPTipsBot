@@ -98,7 +98,7 @@ namespace GPTipsBot.UpdateHandlers
                         Amount = invoiceMessage.Invoice.TotalAmount,
                         Currency = invoiceMessage.Invoice.Currency,
                         Status = InvoiceStatus.Created,
-                        TelegramPaymentId = invoiceMessage.MessageId,
+                        TelegramInvoiceId = invoiceMessage.MessageId,
                     });
                     return;
                 case HelpCommand:

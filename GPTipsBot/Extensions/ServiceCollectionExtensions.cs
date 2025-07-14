@@ -51,7 +51,7 @@ namespace GPTipsBot.Extensions
             .AddSingleton<ITextRecognizer, YaCloudClient>()
             .AddScoped<UserStatusActivator>()
             .AddSingleton<SpeechToTextService>()
-            .AddScoped<RateLimiter>()
+            .AddSingleton<RateLimiter>()
             .AddScoped<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()

@@ -23,12 +23,10 @@ public class MoneyService
         _context = context;
     }
 
-    public async Task AddMoneyAsync(long userId, int amount, string currency, CancellationToken cancellationToken)
+    public async Task AddMoneyAsync(long userId, int amount, string currency,  CancellationToken cancellationToken)
     {
         var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted,
-            cancellationToken);
         if (wallet == null)
         {
             var user = _userRepository.Get(userId);
@@ -52,6 +50,5 @@ public class MoneyService
             Amount = amount
         });
         await _walletRepository.UpdateAmountAsync(wallet.Id, amount);
-        await transaction.CommitAsync(cancellationToken);
     }
 }
