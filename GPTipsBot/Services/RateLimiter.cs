@@ -24,16 +24,21 @@ namespace GPTipsBot.Services
         public RateLimiter(ITelegramBotClient botClient)
         {
             _botClient = botClient;
+
+            _resetMessageCountsPerMinuteTimer = new Timer(ResetMessageCountsPerMinute, null, TimeSpan.Zero,
+                MinuteResetInterval);
+            _resetMessageCountsPerDayTimer =
+                new Timer(ResetMessageCountsPerDay, null, TimeSpan.Zero, DayResetInterval);
         }
 
         public bool IsAllowed(UpdateDecorator update)
         {
             var chatId = update.UserChatKey.ChatId;
 
-            return update.IsCommand || TryIncrementMessageCount(_botClient, chatId);
+            return update.IsCommand || TryIncrementMessageCount(chatId);
         }
 
-        private bool IsMinuteLimitOk(long chatId, ITelegramBotClient botClient)
+        private bool IsMinuteLimitOk(long chatId)
         {
             var value = UserToMinuteMessageCount.GetOrAdd(chatId, 0);
 
@@ -42,13 +47,13 @@ namespace GPTipsBot.Services
             var telegramSpamLimitPass = diff < 2;
             if (isBlockingRequest && telegramSpamLimitPass)
             {
-                botClient.SendTextMessageAsync(chatId, BotResponse.TooManyRequests);
+                _botClient.SendTextMessageAsync(chatId, BotResponse.TooManyRequests);
             }
 
             return !isBlockingRequest;
         }
 
-        private bool IsDailyLimitOk(long chatId, ITelegramBotClient botClient)
+        private bool IsDailyLimitOk(long chatId)
         {
             var value = UserToDayMessageCount.GetOrAdd(chatId, 0);
             var diff = value - MaxMessageCountPerDay;
@@ -56,18 +61,10 @@ namespace GPTipsBot.Services
             if (isBlockingRequest && diff < 2)
             {
                 var text = string.Format(BotResponse.DailyLimitViolation, MaxMessageCountPerDay);
-                botClient.SendTextMessageAsync(chatId, text);
+                _botClient.SendTextMessageAsync(chatId, text);
             }
             
             return !isBlockingRequest;
-        }
-
-        public RateLimiter()
-        {
-            _resetMessageCountsPerMinuteTimer = new Timer(ResetMessageCountsPerMinute, null, TimeSpan.Zero,
-                MinuteResetInterval);
-            _resetMessageCountsPerDayTimer =
-                new Timer(ResetMessageCountsPerDay, null, TimeSpan.Zero, DayResetInterval);
         }
 
         private void ResetMessageCountsPerMinute(object? o)
@@ -80,12 +77,12 @@ namespace GPTipsBot.Services
             UserToDayMessageCount.Clear();
         }
 
-        public bool TryIncrementMessageCount(ITelegramBotClient botClient, long chatId)
+        public bool TryIncrementMessageCount(long chatId)
         {
             lock (_sync)
             {
                 IncrementMinuteMessageCount(chatId);
-                var isAllLimitsOk = IsMinuteLimitOk(chatId, botClient) && IsDailyLimitOk(chatId, botClient);
+                var isAllLimitsOk = IsMinuteLimitOk(chatId) && IsDailyLimitOk(chatId);
                 if (!isAllLimitsOk) return false;
                 IncrementDailyMessageCount(chatId);
                 

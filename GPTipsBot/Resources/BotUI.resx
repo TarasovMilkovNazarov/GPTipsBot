@@ -195,4 +195,10 @@
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>Текс на картинке</value>
   </data>
+  <data name="DepositButton" xml:space="preserve">
+    <value>Пополнить баланс</value>
+  </data>
+  <data name="ProfileButton" xml:space="preserve">
+    <value>Личный кабинет</value>
+  </data>
 </root>

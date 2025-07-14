@@ -23,6 +23,8 @@ namespace GPTipsBot.Services
         public const string CancelCommand = "/cancel";
         public const string StopRequestCommand = "/stopRequest";
         public const string ImageTextRecognizeCommand = "/get_image_text";
+        public const string DepositCommand = "/deposit";
+        public const string GetProfileCommand = "/profile";
 
         public const string FixCommand = "/fix";
         public const string VersionCommand = "/version";
@@ -37,6 +39,8 @@ namespace GPTipsBot.Services
         public static CustomBotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang, Type = CommandType.SetEngLang };
         public static CustomBotCommand StopRequest => new() { Command = StopRequestCommand, Type = CommandType.StopRequest };
         public static CustomBotCommand Cancel => new() { Command = CancelCommand, Type = CommandType.CancelPreviousCommand };
+        public static CustomBotCommand Deposit => new() { Command = DepositCommand, Type = CommandType.Deposit };
+        public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Type = CommandType.GetProfile };
 
         public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
         public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
@@ -54,6 +58,8 @@ namespace GPTipsBot.Services
                 ImageRecText,
                 ResetContext,
                 Help,
+                Deposit,
+                Profile
             };
         }
     }
@@ -72,6 +78,8 @@ namespace GPTipsBot.Services
         private static KeyboardButton LangButton => new(BotUI.LangButton);
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
+        private static KeyboardButton DepositButton => new(BotUI.DepositButton);
+        private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -93,6 +101,8 @@ namespace GPTipsBot.Services
                 { BotMenu.SetRuLangCommand, new() },
                 { BotMenu.SetEngLangCommand, new() },
                 { BotMenu.ImageTextRecognizeCommand, new() },
+                { BotMenu.DepositCommand, new() },
+                { BotMenu.GetProfileCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -109,6 +119,8 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.SetRuLangCommand].Add(BotUI.RussianButton);
                 ButtonToLocalizations[BotMenu.SetEngLangCommand].Add(BotUI.EnglishButton);
                 ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
+                ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
+                ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -132,6 +144,10 @@ namespace GPTipsBot.Services
                 {
                     LangButton,
                     HelpButton
+                },
+                new[]
+                {
+                    ProfileButton
                 }
             });
 

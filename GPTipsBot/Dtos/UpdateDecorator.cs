@@ -10,6 +10,7 @@ using GPTipsBot.Services;
 using Newtonsoft.Json;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.Payments;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -24,6 +25,11 @@ namespace GPTipsBot.UpdateHandlers
 
             switch (update.Type)
             {
+                case UpdateType.PreCheckoutQuery:
+                    Guard.Against.Null(update.PreCheckoutQuery);
+                    UserChatKey = update.PreCheckoutQuery.From.Id;
+                    User = UserMapper.Map(update.PreCheckoutQuery.From);
+                    break;
                 case UpdateType.Message when update.Message?.Chat.Type == ChatType.Private:
                     Guard.Against.Null(update.Message);
                     Guard.Against.Null(update.Message.From);
@@ -40,6 +46,8 @@ namespace GPTipsBot.UpdateHandlers
                         Guard.Against.Null(update.Message.Photo);
                         FileId = update.Message.Photo[^1].FileId;
                     }
+
+                    Message.SuccessfulPayment = update.Message.SuccessfulPayment;
                     break;
                 case UpdateType.CallbackQuery:
                     Guard.Against.Null(update.CallbackQuery);
@@ -89,6 +97,7 @@ namespace GPTipsBot.UpdateHandlers
         public bool IsGroupOrChannel { get; }
 
         public CallbackQuery? CallbackQuery => _update.CallbackQuery;
+        public PreCheckoutQuery? PreCheckoutQuery => _update.PreCheckoutQuery;
 
         public string Language { get; }
 

@@ -11,6 +11,8 @@ namespace GPTipsBot.Db
         public DbSet<BotSettings> BotSettings { get; set; } = null!;
         public DbSet<OpenaiAccount> OpenaiAccounts { get; set; } = null!;
         public DbSet<UserCommand> UserCommands { get; set; } = null!;
+        public DbSet<Transaction> Transactions { get; set; } = null!;
+        public DbSet<Invoice> Invoices { get; set; } = null!;
         public DbSet<Wallet> Wallets { get; set; } = null!;
 
         public ApplicationContext()
@@ -23,12 +25,18 @@ namespace GPTipsBot.Db
             optionsBuilder.UseNpgsql(AppConfig.ConnectionString);
         }
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<User>()
-        //        .HasOne(m => m.BotSettings)
-        //        .WithOne("BotSettingsId")
-        //        .OnDelete(DeleteBehavior.Cascade);
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Wallet)
+                .WithOne(w => w.User)
+                .HasForeignKey<Wallet>(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Wallet>()
+                .HasOne(m => m.User)
+                .WithOne(u => u.Wallet)
+                .HasForeignKey<Wallet>(m => m.UserId);
+        }
     }
 }

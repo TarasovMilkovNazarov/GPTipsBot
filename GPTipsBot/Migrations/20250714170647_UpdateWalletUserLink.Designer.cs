@@ -3,6 +3,7 @@ using System;
 using GPTipsBot.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GPTipsBot.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250714170647_UpdateWalletUserLink")]
+    partial class UpdateWalletUserLink
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,6 +228,9 @@ namespace GPTipsBot.Migrations
 
                     b.HasIndex("BotSettingsId");
 
+                    b.HasIndex("WalletId")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -281,9 +287,6 @@ namespace GPTipsBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("Wallets");
                 });
 
@@ -302,7 +305,13 @@ namespace GPTipsBot.Migrations
                         .WithMany()
                         .HasForeignKey("BotSettingsId");
 
+                    b.HasOne("GPTipsBot.Models.Wallet", "Wallet")
+                        .WithOne("User")
+                        .HasForeignKey("GPTipsBot.Models.User", "WalletId");
+
                     b.Navigation("BotSettings");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.UserCommand", b =>
@@ -314,22 +323,15 @@ namespace GPTipsBot.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GPTipsBot.Models.Wallet", b =>
-                {
-                    b.HasOne("GPTipsBot.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("GPTipsBot.Models.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("GPTipsBot.Models.User", b =>
                 {
                     b.Navigation("Commands");
+                });
 
-                    b.Navigation("Wallet");
+            modelBuilder.Entity("GPTipsBot.Models.Wallet", b =>
+                {
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

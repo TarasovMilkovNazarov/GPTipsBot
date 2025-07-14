@@ -14,6 +14,7 @@ using Telegram.Bot.Types;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Services.YandexCloud;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -26,12 +27,14 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ImageCreatorService _imageCreatorService;
         private readonly MessageRepository _messageRepository;
         private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
+        private readonly UserService _userService;
         public const int ImageTextDescriptionLimit = 1000;
         public const int ImagesPerDayLimit = 5;
 
-        public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger, IImageGenerator ya,
-            UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService,
-            MessageRepository messageRepository, GramadsAdvertisementClient gramadsAdvertisementClient)
+        public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
+            IImageGenerator ya, UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService,
+            MessageRepository messageRepository, GramadsAdvertisementClient gramadsAdvertisementClient,
+            UserService userService)
         {
             _botClient = botClient;
             _logger = logger;
@@ -40,6 +43,7 @@ namespace GPTipsBot.UpdateHandlers
             _imageCreatorService = imageCreatorService;
             _messageRepository = messageRepository;
             _gramadsAdvertisementClient = gramadsAdvertisementClient;
+            _userService = userService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -66,6 +70,17 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+
+            if (profile is { Images: <= 0, Stars: <= 0 })
+            {
+                var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton
+                    .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
+                    replyMarkup: inlineKeyboard);
+                return;
+            }
+
             var serviceMessageId = await _sendImageStatus
                 .Start(userKey, ChatAction.UploadPhoto);
             try
@@ -88,6 +103,8 @@ namespace GPTipsBot.UpdateHandlers
 
                 await _botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.InputImageDescriptionText,
                     ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
+
+                await _userService.DecreaseFreeImageGenerationsAsync(update.UserChatKey.Id);
 
                 sw.Stop();
             }

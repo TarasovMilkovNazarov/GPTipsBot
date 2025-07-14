@@ -96,6 +96,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Пополнить баланс.
+        /// </summary>
+        internal static string DepositButton {
+            get {
+                return ResourceManager.GetString("DepositButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Эмодзи ребус.
         /// </summary>
         internal static string EmojiTranslationButton {
@@ -209,6 +218,15 @@ namespace GPTipsBot.Resources {
         internal static string LangButton {
             get {
                 return ResourceManager.GetString("LangButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Личный кабинет.
+        /// </summary>
+        internal static string ProfileButton {
+            get {
+                return ResourceManager.GetString("ProfileButton", resourceCulture);
             }
         }
         

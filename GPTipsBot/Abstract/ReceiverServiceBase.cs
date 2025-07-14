@@ -58,6 +58,10 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             var worker = scope.ServiceProvider.GetRequiredService<UpdateFirewall>();
                             await worker.HandleUpdateAsync(update);
                         }
+                        catch (IgnoreMessageTypeException e)
+                        {
+                            // ignore
+                        }
                         catch (NotSupportedMessageException e)
                         {
                             await _botClient.SendTextMessageAsync(update.Message.Chat!.Id,

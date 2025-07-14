@@ -18,6 +18,7 @@ namespace GPTipsBot.UpdateHandlers
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
         private readonly UserService _userService;
         private readonly UserCommandRepository _userCommandRepository;
+        private readonly MoneyService _moneyService;
         private readonly ITelegramBotClient _botClient;
         private readonly RecoveryNotificationHandler _recoveryNotificationHandler;
         private readonly ImageTextRecognitionHandler _imageTextRecognitionHandler;
@@ -35,7 +36,8 @@ namespace GPTipsBot.UpdateHandlers
             ImageGeneratorHandler imageGeneratorHandler, CommandHandler commandHandler,
             ChatGptHandler chatGptHandler,
             AdminCommandHandler adminCommandHandler, UnitOfWork unitOfWork,
-            ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository)
+            ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository,
+            MoneyService moneyService)
         {
             _botClient = botClient;
             _recoveryNotificationHandler = recoveryNotificationHandler;
@@ -48,6 +50,7 @@ namespace GPTipsBot.UpdateHandlers
             _logger = logger;
             _userService = userService;
             _userCommandRepository = userCommandRepository;
+            _moneyService = moneyService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -71,6 +74,22 @@ namespace GPTipsBot.UpdateHandlers
 
             var language = _unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
+
+            if (update.PreCheckoutQuery != null)
+            {
+                await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
+                    "TRX", CancellationToken.None);
+                return;
+                await _botClient.AnswerPreCheckoutQueryAsync(
+                    preCheckoutQueryId: update.PreCheckoutQuery.Id);
+            }
+
+            if (update.Message?.SuccessfulPayment != null)
+            {
+                await _botClient.SendTextMessageAsync(
+                    chatId: update.UserChatKey.ChatId,
+                    text: "Thank you for your payment! Your premium access has been activated.");
+            }
 
             var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
             if (update.IsAdminCommand())

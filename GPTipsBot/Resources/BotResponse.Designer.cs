@@ -60,6 +60,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Пополнить баланс.
+        /// </summary>
+        public static string AddMoneyResponse {
+            get {
+                return ResourceManager.GetString("AddMoneyResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 🤖 Добро пожаловать в бот ChatGPT! 🚀
         ///
         ///Задавайте вопросы ChatGPT - искусственному интеллекту на основе архитектуры GPT-3.5, разработанному OpenAI. 💬
@@ -246,6 +255,22 @@ namespace GPTipsBot.Resources {
         public static string PleaseWaitMsg {
             get {
                 return ResourceManager.GetString("PleaseWaitMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 👤 Профиль: {0} {1}
+        ///
+        ///
+        ///💵 Баланс: {2} Stars 💵
+        ///Количество бесплатных запросов:
+        /// -- генераций изображений: {3}
+        /// -- распознаваний текста: {4}
+        ///.
+        /// </summary>
+        public static string ProfileResponse {
+            get {
+                return ResourceManager.GetString("ProfileResponse", resourceCulture);
             }
         }
         

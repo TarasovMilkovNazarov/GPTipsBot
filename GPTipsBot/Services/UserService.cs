@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Models;
+﻿using Ardalis.GuardClauses;
+using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
@@ -27,6 +28,45 @@ namespace GPTipsBot.Services
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
                 SlidingExpiration = TimeSpan.FromMinutes(20),
             };
+        }
+
+        public async Task<UserProfileDto> GetUserProfile(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            Guard.Against.Null(user);
+
+            var profile = new UserProfileDto()
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Stars = user.Wallet?.Amount ?? 0,
+                Images = user.FreeImageGenerations,
+                ImageTexts = user.FreeImageTextRecognitions,
+            };
+
+            return profile;
+        }
+
+        public async Task<bool> DecreaseFreeImageGenerationsAsync(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            Guard.Against.Null(user);
+
+            user.FreeImageGenerations -= 1;
+            _userRepository.Update(user);
+
+            return true;
+        }
+
+        public async Task<bool> DecreaseFreeImageRecognitionsAsync(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            Guard.Against.Null(user);
+
+            user.FreeImageTextRecognitions -= 1;
+            _userRepository.Update(user);
+
+            return true;
         }
 
         public void CreateUpdateUser(User user)

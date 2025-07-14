@@ -226,4 +226,17 @@
   <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
     <value>Для распознавания текста на изображении сначала выберите команду из меню</value>
   </data>
+  <data name="ProfileResponse" xml:space="preserve">
+    <value>👤 Профиль: {0} {1}
+
+
+💵 Баланс: {2} Stars 💵
+Количество бесплатных запросов:
+ -- генераций изображений: {3}
+ -- распознаваний текста: {4}
+</value>
+  </data>
+  <data name="AddMoneyResponse" xml:space="preserve">
+    <value>Пополнить баланс</value>
+  </data>
 </root>

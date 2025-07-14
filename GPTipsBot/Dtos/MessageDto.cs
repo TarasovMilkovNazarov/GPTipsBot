@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Enums;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.Payments;
 
 namespace GPTipsBot.Dtos
 {
@@ -31,5 +32,6 @@ namespace GPTipsBot.Dtos
         public bool NewContext { get; internal set; }
         public long ReplyToId { get; internal set; }
         public string? LanguageCode { get; internal set; }
+        public  SuccessfulPayment? SuccessfulPayment { get; internal set; }
     }
 }

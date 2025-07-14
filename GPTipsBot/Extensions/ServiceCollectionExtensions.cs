@@ -57,11 +57,8 @@ namespace GPTipsBot.Extensions
             .AddScoped<ChatGptService>()
             .AddTransient<OpenAiServiceCreator, ProxyApiService>()
             .AddTransient<ContextWindow>()
-            .AddTransient<MessageRepository>()
-            .AddTransient<UserRepository>()
-            .AddTransient<UserCommandRepository>()
-            .AddTransient<BotSettingsRepository>()
-            .AddTransient<OpenaiAccountsRepository>()
+            .AddRepositories()
+            .AddTransient<MoneyService>()
             .AddTransient<UnitOfWork>()
             .AddSingleton<ITelegramBotClient>(x =>
             {
@@ -80,6 +77,18 @@ namespace GPTipsBot.Extensions
             services.AddDbContext<ApplicationContext>();
 
             return services;
+        }
+
+        private static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            return services.AddTransient<MessageRepository>()
+                .AddTransient<UserRepository>()
+                .AddTransient<UserCommandRepository>()
+                .AddTransient<BotSettingsRepository>()
+                .AddTransient<OpenaiAccountsRepository>()
+                .AddTransient<WalletRepository>()
+                .AddTransient<TransactionRepository>()
+                .AddTransient<InvoiceRepository>();
         }
 
         static void InitializeBot(ITelegramBotClient botClient, string? langCode = null)

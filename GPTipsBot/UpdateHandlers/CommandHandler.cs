@@ -10,7 +10,9 @@ using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
+using Invoice = GPTipsBot.Models.Invoice;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -25,10 +27,13 @@ namespace GPTipsBot.UpdateHandlers
         private readonly MessageRepository _messageRepository;
         private readonly UserCommandRepository _userCommandRepository;
         private readonly ImageGeneratorHandler _imageGeneratorHandler;
+        private readonly InvoiceRepository _invoiceRepository;
+        private readonly UserService _userService;
 
         public CommandHandler(ITelegramBotClient botClient,
             UnitOfWork unitOfWork, ILogger<CommandHandler> logger, MessageRepository messageRepository,
-            UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler)
+            UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler,
+            InvoiceRepository invoiceRepository, UserService userService)
         {
             _botClient = botClient;
             _unitOfWork = unitOfWork;
@@ -36,6 +41,8 @@ namespace GPTipsBot.UpdateHandlers
             _messageRepository = messageRepository;
             _userCommandRepository = userCommandRepository;
             _imageGeneratorHandler = imageGeneratorHandler;
+            _invoiceRepository = invoiceRepository;
+            _userService = userService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -64,6 +71,34 @@ namespace GPTipsBot.UpdateHandlers
                         BotCommandScope.Chat(update.UserChatKey.ChatId));
                     reply = BotResponse.Greeting;
                     break;
+                case GetProfileCommand:
+                    var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+                    reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
+                        profile.LastName, profile.Stars, profile.Images, profile.ImageTexts);
+                    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
+                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+                    break;
+                case DepositCommand:
+                    var invoiceMessage = await _botClient.SendInvoiceAsync(
+                        chatId: chatId,
+                        title: "Premium Content",
+                        description: "Access to premium features for 1 month",
+                        payload: "premium_monthly_subscription",
+                        providerToken: "",
+                        currency: Currency.Stars, // XTR is the currency code for Telegram Stars
+                        prices: new[] { new LabeledPrice("Premium Access", 1) }, // 1000 Stars = 10 USD
+                        startParameter: "premium_subscription");
+                    Guard.Against.Null(invoiceMessage.Invoice);
+                    _invoiceRepository.Create(new Invoice
+                    {
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = update.UserChatKey.Id,
+                        Amount = invoiceMessage.Invoice.TotalAmount,
+                        Currency = invoiceMessage.Invoice.Currency,
+                        Status = InvoiceStatus.Created,
+                        TelegramPaymentId = invoiceMessage.MessageId,
+                    });
+                    return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;
                     break;

@@ -3,6 +3,7 @@ using System;
 using GPTipsBot.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GPTipsBot.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250714142114_AddStarsPayment")]
+    partial class AddStarsPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,38 +40,6 @@ namespace GPTipsBot.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BotSettings");
-                });
-
-            modelBuilder.Entity("GPTipsBot.Models.Invoice", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("Amount")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("TelegramPaymentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("GPTipsBot.Models.Message", b =>
@@ -160,28 +131,6 @@ namespace GPTipsBot.Migrations
                     b.ToTable("OpenaiAccounts");
                 });
 
-            modelBuilder.Entity("GPTipsBot.Models.Transaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("Amount")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("WalletId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Transactions");
-                });
-
             modelBuilder.Entity("GPTipsBot.Models.User", b =>
                 {
                     b.Property<long>("Id")
@@ -203,12 +152,6 @@ namespace GPTipsBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("FreeImageGenerations")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("FreeImageTextRecognitions")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -217,9 +160,6 @@ namespace GPTipsBot.Migrations
 
                     b.Property<string>("Source")
                         .HasColumnType("text");
-
-                    b.Property<long?>("WalletId")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -281,9 +221,6 @@ namespace GPTipsBot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("Wallets");
                 });
 
@@ -314,22 +251,9 @@ namespace GPTipsBot.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GPTipsBot.Models.Wallet", b =>
-                {
-                    b.HasOne("GPTipsBot.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("GPTipsBot.Models.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("GPTipsBot.Models.User", b =>
                 {
                     b.Navigation("Commands");
-
-                    b.Navigation("Wallet");
                 });
 #pragma warning restore 612, 618
         }

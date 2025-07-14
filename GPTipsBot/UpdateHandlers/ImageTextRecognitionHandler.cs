@@ -19,11 +19,12 @@ namespace GPTipsBot.UpdateHandlers
         private readonly MessageRepository _messageRepository;
         private readonly UserCommandRepository _userCommandRepository;
         private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
+        private readonly UserService _userService;
         public const int ImagesPerDayLimit = 5;
 
         public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger,
             ITextRecognizer yaCloudClient, MessageRepository messageRepository, UserCommandRepository userCommandRepository,
-            GramadsAdvertisementClient gramadsAdvertisementClient)
+            GramadsAdvertisementClient gramadsAdvertisementClient, UserService userService)
         {
             _botClient = botClient;
             _logger = logger;
@@ -31,6 +32,7 @@ namespace GPTipsBot.UpdateHandlers
             _messageRepository = messageRepository;
             _userCommandRepository = userCommandRepository;
             _gramadsAdvertisementClient = gramadsAdvertisementClient;
+            _userService = userService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -82,6 +84,8 @@ namespace GPTipsBot.UpdateHandlers
 
             await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
                 text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+
+            await _userService.DecreaseFreeImageRecognitionsAsync(update.UserChatKey.ChatId);
 
             try
             {

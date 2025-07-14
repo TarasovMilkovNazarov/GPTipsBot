@@ -10,6 +10,9 @@ public class NotSupportedMessageException : Exception
     }
 }
 
+/// <summary>
+/// Exception used for ignoring unsupported updates like post reactions, gifs etc
+/// </summary>
 public class IgnoreMessageTypeException : Exception
 {
     public IgnoreMessageTypeException(UpdateType updateType) :

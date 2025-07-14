@@ -195,4 +195,7 @@
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>Get text on image</value>
   </data>
+  <data name="DepositButton" xml:space="preserve">
+    <value>Add funds</value>
+  </data>
 </root>

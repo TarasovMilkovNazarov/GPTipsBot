@@ -20,17 +20,21 @@ public enum CommandType
     SetEngLang,
     StopRequest,
     CancelPreviousCommand,
-    Admin
+    Admin,
+    Deposit,
+    GetProfile
 }
 
 public class Wallet: Entity
 {
+    public long UserId { get; set; }
+    public User User { get; set; }
     public long Amount { get; set; }
     public string Currency { get; set; }
     public DateTime DepositDate { get; set; }
 }
 
-public class FinancialTransaction: Entity
+public class Transaction: Entity
 {
     public long WalletId { get; set; }
     public long Amount { get; set; }
