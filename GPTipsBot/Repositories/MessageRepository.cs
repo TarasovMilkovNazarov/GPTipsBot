@@ -18,7 +18,7 @@ namespace GPTipsBot.Repositories
             _context = context;
         }
 
-        public async Task<long?> AddAsync(MessageDto messageDto, long? replyToId = null)
+        public async Task<Message> AddAsync(MessageDto messageDto, Message? replyTo = null)
         {
             var contextId = messageDto is { ContextBound: true, NewContext: false } ?
                 GetLastContext(messageDto.UserId, messageDto.ChatId) : null;
@@ -32,18 +32,17 @@ namespace GPTipsBot.Repositories
                 ContextId = contextId,
                 ContextBound = messageDto.ContextBound,
                 TelegramMessageId = messageDto.TelegramMessageId,
-                ReplyToId = replyToId,
+                ReplyTo = replyTo,
                 CreatedAt = DateTime.UtcNow,
                 Type = messageDto.BotMessageType
             };
 
             _context.Messages.Add(newMessage);
-            await _context.SaveChangesAsync();
 
             messageDto.Id = newMessage.Id;
             messageDto.ContextId = newMessage.ContextId;
 
-            return messageDto.ContextId;
+            return newMessage;
         }
 
         public IEnumerable<Message> GetAllUserMessages(long telegramId)

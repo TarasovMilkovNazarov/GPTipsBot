@@ -24,7 +24,9 @@ namespace GPTipsBot.Repositories
 
         public User? Get(long id)
         {
-            return _context.Users.AsNoTracking().Include(u => u.Wallet).FirstOrDefault(x => x.Id == id);
+            return _context.Users
+                // .AsNoTracking()
+                .Find(id);
         }
 
         public void Delete(long id)
@@ -43,8 +45,6 @@ namespace GPTipsBot.Repositories
         {
             _logger.LogInformation("CreateUser");
             var entity = _context.Users.Add(user).Entity;
-
-            _context.SaveChanges();
 
             return user.Id;
         }

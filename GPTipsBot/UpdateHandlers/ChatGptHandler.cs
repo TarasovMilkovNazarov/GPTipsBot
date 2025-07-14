@@ -43,7 +43,7 @@ namespace GPTipsBot.UpdateHandlers
             MessageDto gtpResponse = null;
             try
             {
-                await _messageRepository.AddAsync(update.Message);
+                var request = await _messageRepository.AddAsync(update.Message);
                 var serviceMessageId = await _typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
                 var sw = Stopwatch.StartNew();
@@ -85,7 +85,7 @@ namespace GPTipsBot.UpdateHandlers
                     ContextBound = true,
                 };
 
-                await _messageRepository.AddAsync(gtpResponse, update.Message.Id);
+                await _messageRepository.AddAsync(gtpResponse, request);
                 await _botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, gtpResponse.Text, (int)update.Message.TelegramMessageId!);
             }
             catch (ClientException ex)

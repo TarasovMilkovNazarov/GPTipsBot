@@ -23,7 +23,6 @@ public class WalletRepository: GenericRepository<Wallet>
 
         wallet.Amount += delta;
         _context.Wallets.Update(wallet);
-        await _context.SaveChangesAsync();
 
         return true;
     }

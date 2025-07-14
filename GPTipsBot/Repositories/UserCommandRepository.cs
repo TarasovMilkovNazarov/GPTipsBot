@@ -39,7 +39,6 @@ namespace GPTipsBot.Repositories
                 CreatedAt = DateTime.UtcNow
             };
             _context.UserCommands.Add(entity);
-            await _context.SaveChangesAsync();
 
             var cacheKey = string.Format(CacheKeyPrefix, entity.UserId, entity.ChatId);
             _memoryCache.Set(cacheKey, entity, _cacheOptions);

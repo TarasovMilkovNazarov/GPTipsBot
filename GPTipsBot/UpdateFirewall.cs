@@ -4,6 +4,7 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using System.Globalization;
+using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -19,6 +20,7 @@ namespace GPTipsBot
         private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
         private readonly RateLimiter _rateLimiter;
         private readonly ITelegramBotClient _botClient;
+        private readonly ApplicationContext _context;
         private static readonly object advertisementSyncObj = new();
         private static readonly HashSet<long> HamsterSent = new();
 
@@ -30,10 +32,12 @@ namespace GPTipsBot
             TelejetAdClient telejetAdClient,
             GramadsAdvertisementClient gramadsAdvertisementClient,
             RateLimiter rateLimiter,
-            ITelegramBotClient botClient)
+            ITelegramBotClient botClient,
+            ApplicationContext context)
         {
             _mainHandler = mainHandler;
             _botClient = botClient;
+            _context = context;
             _speechToTextService = speechToTextService;
             _telejetAdClient = telejetAdClient;
             _gramadsAdvertisementClient = gramadsAdvertisementClient;
@@ -80,7 +84,15 @@ namespace GPTipsBot
 
             SendHamsterAdvertisement(extendedUpd);
 
-            await _mainHandler.HandleAsync(extendedUpd);
+            try
+            {
+                await _mainHandler.HandleAsync(extendedUpd);
+            }
+            finally
+            {
+                await _context.SaveChangesAsync();
+            }
+
         }
 
         private void SendHamsterAdvertisement(UpdateDecorator extendedUpd)

@@ -40,10 +40,9 @@ public class MoneyService
                 UserId = userId,
                 Currency = currency
             };
-            _walletRepository.Create(wallet);
+            await _context.Wallets.AddAsync(wallet, cancellationToken);
             user.Wallet = wallet;
-            _userRepository.Update(user);
-            await _context.SaveChangesAsync(cancellationToken);
+            _context.Users.Update(user);
         }
 
         await _transactionRepository.AddAsync(new Transaction

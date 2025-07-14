@@ -22,27 +22,29 @@ namespace GPTipsBot.UpdateHandlers
     public class CommandHandler : BaseMessageHandler
     {
         private readonly ITelegramBotClient _botClient;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly ApplicationContext _context;
         private readonly ILogger<CommandHandler> _logger;
         private readonly MessageRepository _messageRepository;
         private readonly UserCommandRepository _userCommandRepository;
         private readonly ImageGeneratorHandler _imageGeneratorHandler;
         private readonly InvoiceRepository _invoiceRepository;
         private readonly UserService _userService;
+        private readonly BotSettingsRepository _botSettingsRepository;
 
         public CommandHandler(ITelegramBotClient botClient,
-            UnitOfWork unitOfWork, ILogger<CommandHandler> logger, MessageRepository messageRepository,
+            ApplicationContext context, ILogger<CommandHandler> logger, MessageRepository messageRepository,
             UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler,
-            InvoiceRepository invoiceRepository, UserService userService)
+            InvoiceRepository invoiceRepository, UserService userService, BotSettingsRepository botSettingsRepository)
         {
             _botClient = botClient;
-            _unitOfWork = unitOfWork;
+            _context = context;
             _logger = logger;
             _messageRepository = messageRepository;
             _userCommandRepository = userCommandRepository;
             _imageGeneratorHandler = imageGeneratorHandler;
             _invoiceRepository = invoiceRepository;
             _userService = userService;
+            _botSettingsRepository = botSettingsRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -162,7 +164,7 @@ namespace GPTipsBot.UpdateHandlers
 
             Guard.Against.Null(reply);
 
-            await _unitOfWork.Messages.AddAsync(update.Message);
+            await _messageRepository.AddAsync(update.Message);
             await _botClient.SendTextMessageAsync(chatId, reply, replyMarkup: replyMarkup);
             return;
 
@@ -173,14 +175,14 @@ namespace GPTipsBot.UpdateHandlers
                 await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
                 replyMarkup = new ReplyKeyboardRemove();
 
-                var settings = _unitOfWork.BotSettings.Get(userKey.Id);
+                var settings = _botSettingsRepository.Get(userKey.Id);
                 if (settings == null)
                 {
-                    _unitOfWork.BotSettings.Create(userKey.Id, langCode);
+                    _botSettingsRepository.Create(userKey.Id, langCode);
                 }
                 else
                 {
-                    _unitOfWork.BotSettings.Update(userKey.Id, langCode);
+                    _botSettingsRepository.Update(userKey.Id, langCode);
                 }
 
                 return BotResponse.LanguageWasSetSuccessfully;

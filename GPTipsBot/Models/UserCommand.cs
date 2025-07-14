@@ -1,4 +1,6 @@
-﻿namespace GPTipsBot.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace GPTipsBot.Models;
 
 public class UserCommand: Entity
 {
@@ -27,6 +29,7 @@ public enum CommandType
 
 public class Wallet: Entity
 {
+    [ForeignKey("User")]
     public long UserId { get; set; }
     public User User { get; set; }
     public long Amount { get; set; }

@@ -35,31 +35,30 @@ namespace GPTipsBot.Extensions
 
             services
             // handlers
-            .AddTransient<MainHandler>()
-            .AddTransient<RecoveryNotificationHandler>()
-            .AddTransient<AdminCommandHandler>()
-            .AddTransient<CommandHandler>()
-            .AddTransient<ImageGeneratorHandler>()
-            .AddTransient<ImageTextRecognitionHandler>()
-            .AddTransient<ChatGptHandler>()
+            .AddScoped<MainHandler>()
+            .AddScoped<RecoveryNotificationHandler>()
+            .AddScoped<AdminCommandHandler>()
+            .AddScoped<CommandHandler>()
+            .AddScoped<ImageGeneratorHandler>()
+            .AddScoped<ImageTextRecognitionHandler>()
+            .AddScoped<ChatGptHandler>()
             // services
-            .AddTransient<UserService>()
+            .AddScoped<UserService>()
             .AddSingleton<TelejetAdClient>()
             .AddSingleton<GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
             .AddSingleton<IImageGenerator, YaCloudClient>()
             .AddSingleton<ITextRecognizer, YaCloudClient>()
-            .AddTransient<UserStatusActivator>()
+            .AddScoped<UserStatusActivator>()
             .AddSingleton<SpeechToTextService>()
-            .AddTransient<RateLimiter>()
-            .AddTransient<IGpt, ChatGptService>()
+            .AddScoped<RateLimiter>()
+            .AddScoped<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddScoped<ChatGptService>()
-            .AddTransient<OpenAiServiceCreator, ProxyApiService>()
-            .AddTransient<ContextWindow>()
+            .AddScoped<OpenAiServiceCreator, ProxyApiService>()
+            .AddScoped<ContextWindow>()
             .AddRepositories()
-            .AddTransient<MoneyService>()
-            .AddTransient<UnitOfWork>()
+            .AddScoped<MoneyService>()
             .AddSingleton<ITelegramBotClient>(x =>
             {
                 var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
@@ -82,13 +81,13 @@ namespace GPTipsBot.Extensions
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             return services.AddTransient<MessageRepository>()
-                .AddTransient<UserRepository>()
-                .AddTransient<UserCommandRepository>()
-                .AddTransient<BotSettingsRepository>()
-                .AddTransient<OpenaiAccountsRepository>()
-                .AddTransient<WalletRepository>()
-                .AddTransient<TransactionRepository>()
-                .AddTransient<InvoiceRepository>();
+                .AddScoped<UserRepository>()
+                .AddScoped<UserCommandRepository>()
+                .AddScoped<BotSettingsRepository>()
+                .AddScoped<OpenaiAccountsRepository>()
+                .AddScoped<WalletRepository>()
+                .AddScoped<TransactionRepository>()
+                .AddScoped<InvoiceRepository>();
         }
 
         static void InitializeBot(ITelegramBotClient botClient, string? langCode = null)

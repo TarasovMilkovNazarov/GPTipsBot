@@ -5,7 +5,7 @@ namespace GPTipsBot.Db
 {
     public sealed class ApplicationContext : DbContext
     {
-        public Guid Guid { get; } = Guid.NewGuid();
+        public Guid Guid { get; }
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<BotSettings> BotSettings { get; set; } = null!;
@@ -18,6 +18,7 @@ namespace GPTipsBot.Db
         public ApplicationContext()
         {
             Database.EnsureCreated();
+            Guid = Guid.NewGuid();
         }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -27,16 +28,16 @@ namespace GPTipsBot.Db
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Wallet)
-                .WithOne(w => w.User)
-                .HasForeignKey<Wallet>(w => w.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Wallet>()
-                .HasOne(m => m.User)
-                .WithOne(u => u.Wallet)
-                .HasForeignKey<Wallet>(m => m.UserId);
+            // modelBuilder.Entity<User>()
+            //     .HasOne(u => u.Wallet)
+            //     .WithOne(w => w.User)
+            //     .HasForeignKey<Wallet>(w => w.UserId)
+            //     .OnDelete(DeleteBehavior.Cascade);
+            //
+            // modelBuilder.Entity<Wallet>()
+            //     .HasOne(m => m.User)
+            //     .WithOne(u => u.Wallet)
+            //     .HasForeignKey<User>(m => m.WalletId);
         }
     }
 }

@@ -19,6 +19,8 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserService _userService;
         private readonly UserCommandRepository _userCommandRepository;
         private readonly MoneyService _moneyService;
+        private readonly ApplicationContext _context;
+        private readonly BotSettingsRepository _botSettingsRepository;
         private readonly ITelegramBotClient _botClient;
         private readonly RecoveryNotificationHandler _recoveryNotificationHandler;
         private readonly ImageTextRecognitionHandler _imageTextRecognitionHandler;
@@ -26,18 +28,14 @@ namespace GPTipsBot.UpdateHandlers
         private readonly CommandHandler _commandHandler;
         private readonly ChatGptHandler _chatGptHandler;
         private readonly AdminCommandHandler _adminCommandHandler;
-        private readonly UnitOfWork _unitOfWork;
         private readonly ILogger<MainHandler> _logger;
 
         public MainHandler(
-            ITelegramBotClient botClient,
-            RecoveryNotificationHandler recoveryNotificationHandler,
-            ImageTextRecognitionHandler imageTextRecognitionHandler,
-            ImageGeneratorHandler imageGeneratorHandler, CommandHandler commandHandler,
-            ChatGptHandler chatGptHandler,
-            AdminCommandHandler adminCommandHandler, UnitOfWork unitOfWork,
+            ITelegramBotClient botClient, RecoveryNotificationHandler recoveryNotificationHandler,
+            ImageTextRecognitionHandler imageTextRecognitionHandler, ImageGeneratorHandler imageGeneratorHandler,
+            CommandHandler commandHandler, ChatGptHandler chatGptHandler, AdminCommandHandler adminCommandHandler,
             ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository,
-            MoneyService moneyService)
+            MoneyService moneyService, ApplicationContext context, BotSettingsRepository botSettingsRepository)
         {
             _botClient = botClient;
             _recoveryNotificationHandler = recoveryNotificationHandler;
@@ -46,11 +44,12 @@ namespace GPTipsBot.UpdateHandlers
             _commandHandler = commandHandler;
             _chatGptHandler = chatGptHandler;
             _adminCommandHandler = adminCommandHandler;
-            _unitOfWork = unitOfWork;
             _logger = logger;
             _userService = userService;
             _userCommandRepository = userCommandRepository;
             _moneyService = moneyService;
+            _context = context;
+            _botSettingsRepository = botSettingsRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -72,7 +71,7 @@ namespace GPTipsBot.UpdateHandlers
                 _logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
             }
 
-            var language = _unitOfWork.BotSettings.Get(userKey.Id)?.Language ?? update.Language;
+            var language = _botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
 
             if (update.PreCheckoutQuery != null)
@@ -117,14 +116,7 @@ namespace GPTipsBot.UpdateHandlers
                 SetNextHandler(_chatGptHandler);
             }
 
-            try
-            {
-                await base.HandleAsync(update);
-            }
-            finally
-            {
-                _unitOfWork.Save();
-            }
+            await base.HandleAsync(update);
         }
     }
 }

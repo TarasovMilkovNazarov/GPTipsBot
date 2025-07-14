@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Caching.Memory;
@@ -11,17 +12,20 @@ namespace GPTipsBot.Services
         private readonly ITelegramBotClient _botClient;
         private readonly UserRepository _userRepository;
         private readonly IMemoryCache _memoryCache;
+        private readonly ApplicationContext _context;
         private readonly MemoryCacheEntryOptions _cacheOptions;
         public event EventHandler<User> UserCreated;
         public static long? ActiveUserCount;
 
-        public UserService(ITelegramBotClient botClient, UserRepository userRepository, IMemoryCache memoryCache)
+        public UserService(ITelegramBotClient botClient, UserRepository userRepository, IMemoryCache memoryCache,
+            ApplicationContext context)
         {
             _botClient = botClient;
             _userRepository = userRepository;
             UserCreated += UserCreatedEventHandler;
 
             _memoryCache = memoryCache;
+            _context = context;
 
             _cacheOptions = new MemoryCacheEntryOptions
             {

@@ -15,6 +15,5 @@ public class TransactionRepository
     public async Task AddAsync(Transaction transaction)
     {
         await _context.Transactions.AddAsync(transaction);
-        await _context.SaveChangesAsync();
     }
 }
