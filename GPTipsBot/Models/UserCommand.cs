@@ -32,7 +32,7 @@ public class Wallet: Entity
     [ForeignKey("User")]
     public long UserId { get; set; }
     public User User { get; set; }
-    public long Amount { get; set; }
+    public double Balance { get; set; }
     public string Currency { get; set; }
 }
 

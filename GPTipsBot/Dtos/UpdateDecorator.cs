@@ -69,6 +69,7 @@ namespace GPTipsBot.UpdateHandlers
                     {
                         User = UserMapper.Map(update.MyChatMember.From);
                         IsRecovered = true;
+                        UserChatKey = new UserChatKey(update.MyChatMember.From.Id, update.MyChatMember.Chat.Id);
                     }
                     break;
                 default:

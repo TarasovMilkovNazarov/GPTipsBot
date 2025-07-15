@@ -111,7 +111,7 @@ public class MoneyService
 
     private void UserBalanceChangedHandler(object? sender, Wallet wallet)
     {
-        var message = "#deposit" + Environment.NewLine + $"{wallet.UserId} balance: {wallet.Amount} stars";
+        var message = "#deposit" + Environment.NewLine + $"{wallet.UserId} balance: {wallet.Balance} stars";
 
         _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
     }

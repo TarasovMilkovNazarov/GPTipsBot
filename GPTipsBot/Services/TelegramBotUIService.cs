@@ -39,8 +39,8 @@ namespace GPTipsBot.Services
         public static CustomBotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang, Type = CommandType.SetEngLang };
         public static CustomBotCommand StopRequest => new() { Command = StopRequestCommand, Type = CommandType.StopRequest };
         public static CustomBotCommand Cancel => new() { Command = CancelCommand, Type = CommandType.CancelPreviousCommand };
-        public static CustomBotCommand Deposit => new() { Command = DepositCommand, Type = CommandType.Deposit };
-        public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Type = CommandType.GetProfile };
+        public static CustomBotCommand Deposit => new() { Command = DepositCommand, Description = BotUI.DepositButton, Type = CommandType.Deposit };
+        public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
 
         public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
         public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };

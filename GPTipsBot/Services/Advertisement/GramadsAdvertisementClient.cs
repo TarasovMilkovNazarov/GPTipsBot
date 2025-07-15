@@ -4,7 +4,12 @@ using Newtonsoft.Json;
 
 namespace GPTipsBot.Services;
 
-public class GramadsAdvertisementClient
+public interface IAdvertisementClient
+{
+    Task SendPostToChat(long chatId);
+}
+
+public class GramadsAdvertisementClient : IAdvertisementClient
 {
     public async Task SendPostToChat(long chatId)
     {

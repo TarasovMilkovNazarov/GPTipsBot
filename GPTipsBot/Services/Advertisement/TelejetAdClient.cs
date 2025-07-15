@@ -14,14 +14,6 @@ namespace GPTipsBot.Services
         private static readonly int ApiVersion = 3;
         private readonly UdpClient _udpClient;
 
-        public void SendAdvertisement(Update update)
-        {
-            if (IsBapUpdate(update))
-                return;
-
-            SendToBapAsync(update, "advertisement");
-        }
-
         /// <summary>
         /// If this method returns true then update should be processed by bot otherwise ignore it
         /// </summary>
@@ -46,9 +38,9 @@ namespace GPTipsBot.Services
                     Method = method
                 };
 
-                string json = Serialize(dto);
-                byte[] data = Encoding.UTF8.GetBytes(json);
-                var result = await _udpClient.SendAsync(data, data.Length);
+                var json = Serialize(dto);
+                var data = Encoding.UTF8.GetBytes(json);
+                await _udpClient.SendAsync(data, data.Length);
             }
             catch (Exception ex)
             {
@@ -70,7 +62,7 @@ namespace GPTipsBot.Services
             return json;
         }
 
-        public bool IsBapUpdate(Update update)
+        private bool IsBapUpdate(Update update)
         {
             var data = update.CallbackQuery?.Data;
 

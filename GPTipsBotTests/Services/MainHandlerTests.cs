@@ -56,13 +56,14 @@ namespace GPTipsBotTests.Services
             _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>()))
                 .ReturnsAsync(TestConstants.GeneratedImage);
             _gptMock = GptApiMock.CreateGptMock();
+            var gramadsMockClient = new Mock<IAdvertisementClient>();
 
             _serviceCollection
                 .AddSingleton(_recognitionServiceMock.Object)
                 .AddSingleton(_imageGeneratorMock.Object)
                 .AddSingleton(BotClient)
                 .AddSingleton<IGpt>(_gptMock.Object)
-                .AddSingleton(new Mock<GramadsAdvertisementClient>().Object);
+                .AddSingleton(gramadsMockClient.Object);
 
             _botClientMock.Setup(b => b.MakeRequestAsync(It.IsAny<GetFileRequest>(),
                 It.IsAny<CancellationToken>())).ReturnsAsync(new File

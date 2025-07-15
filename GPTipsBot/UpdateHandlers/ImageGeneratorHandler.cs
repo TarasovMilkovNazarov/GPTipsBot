@@ -4,6 +4,7 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Logging;
@@ -26,15 +27,16 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserStatusActivator _sendImageStatus;
         private readonly ImageCreatorService _imageCreatorService;
         private readonly MessageRepository _messageRepository;
-        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
+        private readonly IAdvertisementClient _advertisementClient;
         private readonly UserService _userService;
+        private readonly ApplicationContext _context;
         public const int ImageTextDescriptionLimit = 1000;
         public const int ImagesPerDayLimit = 5;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             IImageGenerator ya, UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService,
-            MessageRepository messageRepository, GramadsAdvertisementClient gramadsAdvertisementClient,
-            UserService userService)
+            MessageRepository messageRepository, IAdvertisementClient gramadsAdvertisementClient,
+            UserService userService, ApplicationContext context)
         {
             _botClient = botClient;
             _logger = logger;
@@ -42,8 +44,9 @@ namespace GPTipsBot.UpdateHandlers
             _sendImageStatus = sendImagestatus;
             _imageCreatorService = imageCreatorService;
             _messageRepository = messageRepository;
-            _gramadsAdvertisementClient = gramadsAdvertisementClient;
+            _advertisementClient = gramadsAdvertisementClient;
             _userService = userService;
+            _context = context;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -64,8 +67,12 @@ namespace GPTipsBot.UpdateHandlers
 
             var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
 
+            await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+            await _userService.PayForImageAsync(update.UserChatKey.Id);
+
             if (profile is { Images: <= 0, Stars: <= 0 })
             {
+                await dbTransaction.RollbackAsync();
                 await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
                     replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
@@ -106,19 +113,8 @@ namespace GPTipsBot.UpdateHandlers
                         cancellationToken: token);
                 }
 
-                await _userService.PayForImageAsync(update.UserChatKey.Id);
-
-                if (profile is { Images: <= 0, Stars: <= 0 })
-                {
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
-                        replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
-                    return;
-                }
-                else
-                {
-                    await _botClient.SendTextMessageAsync(userKey.ChatId, string.Format(BotResponse.InputImageDescriptionText,
-                        ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
-                }
+                await _botClient.SendTextMessageAsync(userKey.ChatId, string.Format(BotResponse.InputImageDescriptionText,
+                    ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
 
                 sw.Stop();
             }
@@ -150,7 +146,9 @@ namespace GPTipsBot.UpdateHandlers
                 await _sendImageStatus.Stop(userKey);
             }
 
-            await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            await dbTransaction.CommitAsync();
+
+            await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
         }
     }
 }

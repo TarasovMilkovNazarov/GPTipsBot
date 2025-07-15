@@ -60,15 +60,10 @@ namespace GPTipsBot.Repositories
             dbUser.IsActive = newUser.IsActive;
             dbUser.Source = newUser.Source ?? dbUser.Source;
         }
-        
-        public IEnumerable<User> GetAll()
-        {
-            return _context.Users.AsNoTracking().ToList();
-        }
 
         public long GetActiveUsersCount()
         {
-            return _context.Users.AsNoTracking().Where(x => x.IsActive).Count();
+            return _context.Users.AsNoTracking().Count(x => x.IsActive);
         }
 
         public long SoftlyRemoveUser(long telegramId)

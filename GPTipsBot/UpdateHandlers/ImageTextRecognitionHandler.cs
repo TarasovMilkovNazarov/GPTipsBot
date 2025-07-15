@@ -20,20 +20,20 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ITextRecognizer _yaCloudClient;
         private readonly MessageRepository _messageRepository;
         private readonly UserCommandRepository _userCommandRepository;
-        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
+        private readonly IAdvertisementClient _advertisementClient;
         private readonly UserService _userService;
         public const int ImagesPerDayLimit = 5;
 
         public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger,
             ITextRecognizer yaCloudClient, MessageRepository messageRepository, UserCommandRepository userCommandRepository,
-            GramadsAdvertisementClient gramadsAdvertisementClient, UserService userService)
+            IAdvertisementClient gramadsAdvertisementClient, UserService userService)
         {
             _botClient = botClient;
             _logger = logger;
             _yaCloudClient = yaCloudClient;
             _messageRepository = messageRepository;
             _userCommandRepository = userCommandRepository;
-            _gramadsAdvertisementClient = gramadsAdvertisementClient;
+            _advertisementClient = gramadsAdvertisementClient;
             _userService = userService;
         }
 
@@ -90,7 +90,7 @@ namespace GPTipsBot.UpdateHandlers
 
             await _userService.PayForTextRecognitions(update.UserChatKey.ChatId);
 
-            await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
         }
     }
 }

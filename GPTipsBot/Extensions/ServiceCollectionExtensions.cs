@@ -45,7 +45,7 @@ namespace GPTipsBot.Extensions
             // services
             .AddScoped<UserService>()
             .AddSingleton<TelejetAdClient>()
-            .AddSingleton<GramadsAdvertisementClient>()
+            .AddSingleton<IAdvertisementClient, GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
             .AddSingleton<IImageGenerator, YaCloudClient>()
             .AddSingleton<ITextRecognizer, YaCloudClient>()
