@@ -5,4 +5,5 @@
     public long Stars { get; set; }
     public long Images { get; set; }
     public long ImageTexts { get; set; }
+    public long GptRequests { get; set; }
 }

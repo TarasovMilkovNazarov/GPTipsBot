@@ -16,9 +16,8 @@ public class WalletRepository: GenericRepository<Wallet>
         _context = context;
     }
 
-    public async Task<bool> UpdateAmountAsync(long id, long delta)
+    public async Task<bool> UpdateAmountAsync(Wallet wallet, long delta)
     {
-        var wallet = await _context.Wallets.FindAsync(id);
         Guard.Against.Null(wallet);
 
         wallet.Amount += delta;

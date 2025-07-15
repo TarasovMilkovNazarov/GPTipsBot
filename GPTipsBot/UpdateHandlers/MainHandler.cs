@@ -6,10 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
+using Ardalis.GuardClauses;
 using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Telegram.Bot;
+using Telegram.Bot.Types.Payments;
+using Invoice = GPTipsBot.Models.Invoice;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -21,6 +24,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly MoneyService _moneyService;
         private readonly ApplicationContext _context;
         private readonly BotSettingsRepository _botSettingsRepository;
+        private readonly InvoiceRepository _invoiceRepository;
         private readonly ITelegramBotClient _botClient;
         private readonly RecoveryNotificationHandler _recoveryNotificationHandler;
         private readonly ImageTextRecognitionHandler _imageTextRecognitionHandler;
@@ -35,7 +39,8 @@ namespace GPTipsBot.UpdateHandlers
             ImageTextRecognitionHandler imageTextRecognitionHandler, ImageGeneratorHandler imageGeneratorHandler,
             CommandHandler commandHandler, ChatGptHandler chatGptHandler, AdminCommandHandler adminCommandHandler,
             ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository,
-            MoneyService moneyService, ApplicationContext context, BotSettingsRepository botSettingsRepository)
+            MoneyService moneyService, ApplicationContext context, BotSettingsRepository botSettingsRepository,
+            InvoiceRepository invoiceRepository)
         {
             _botClient = botClient;
             _recoveryNotificationHandler = recoveryNotificationHandler;
@@ -50,6 +55,7 @@ namespace GPTipsBot.UpdateHandlers
             _moneyService = moneyService;
             _context = context;
             _botSettingsRepository = botSettingsRepository;
+            _invoiceRepository = invoiceRepository;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -91,6 +97,8 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
+
+
             if (update.IsAdminCommand())
             {
                 SetNextHandler(_adminCommandHandler);
@@ -103,13 +111,24 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(_commandHandler);
             }
-            else if (!string.IsNullOrEmpty(update.Message.Text) && lastCommand?.Type == CommandType.Image)
+            else if (!string.IsNullOrEmpty(update.Message?.Text) && lastCommand?.Type == CommandType.Image)
             {
                 SetNextHandler(_imageGeneratorHandler);
             }
             else if (!string.IsNullOrEmpty(update.FileId))
             {
                 SetNextHandler(_imageTextRecognitionHandler);
+            }
+            else if (lastCommand?.Type == CommandType.Deposit)
+            {
+                if (!int.TryParse(update.Message?.Text, out var starsCount))
+                {
+                    throw new Exception("Invalid amount of stars");
+                }
+
+                await _moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
+
+                return;
             }
             else
             {

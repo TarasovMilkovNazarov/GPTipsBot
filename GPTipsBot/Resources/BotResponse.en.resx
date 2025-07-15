@@ -149,7 +149,7 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="Greeting" xml:space="preserve">
     <value>Hello! How can I help you?</value>
   </data>
-  <data name="Hamster" xml:space="preserve">
+  <data name="AdvertisementText" xml:space="preserve">
     <value>[VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
 
 🎁 Первые 2 дня бесплатно
@@ -222,5 +222,8 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   </data>
   <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
     <value>For image text recognition choose command from bot menu first</value>
+  </data>
+  <data name="DepositTitle" xml:space="preserve">
+    <value>Add stars to account</value>
   </data>
 </root>

@@ -11,17 +11,19 @@ namespace GPTipsBot.Services
     {
         private readonly ITelegramBotClient _botClient;
         private readonly UserRepository _userRepository;
+        private readonly WalletRepository _walletRepository;
         private readonly IMemoryCache _memoryCache;
         private readonly ApplicationContext _context;
         private readonly MemoryCacheEntryOptions _cacheOptions;
-        public event EventHandler<User> UserCreated;
-        public static long? ActiveUserCount;
+        private event EventHandler<User> UserCreated;
+        private static long? activeUserCount;
 
-        public UserService(ITelegramBotClient botClient, UserRepository userRepository, IMemoryCache memoryCache,
-            ApplicationContext context)
+        public UserService(ITelegramBotClient botClient, UserRepository userRepository,
+            WalletRepository walletRepository, IMemoryCache memoryCache, ApplicationContext context)
         {
             _botClient = botClient;
             _userRepository = userRepository;
+            _walletRepository = walletRepository;
             UserCreated += UserCreatedEventHandler;
 
             _memoryCache = memoryCache;
@@ -43,32 +45,115 @@ namespace GPTipsBot.Services
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Stars = user.Wallet?.Amount ?? 0,
+                Stars = user.Wallet?.Balance ?? 0.0,
                 Images = user.FreeImageGenerations,
                 ImageTexts = user.FreeImageTextRecognitions,
+                GptRequests = user.FreeGptRequests
             };
 
             return profile;
         }
 
-        public async Task<bool> DecreaseFreeImageGenerationsAsync(long userId)
+        public async Task<bool> PayForGpt(long userId)
         {
+            const double payment = 0.05;
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
-            user.FreeImageGenerations -= 1;
-            _userRepository.Update(user);
+            if (user is { FreeGptRequests: <= 0, Wallet: { Balance: <= 0 } })
+            {
+                throw new Exception("Out of gpt requests and balance");
+            }
+
+            if (user.FreeGptRequests > 0)
+            {
+                user.FreeGptRequests -= 1;
+                _userRepository.Update(user);
+
+                return true;
+            }
+
+            var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
+
+            if (wallet is null)
+            {
+                return false;
+            }
+
+            if(wallet.Balance > 0)
+            {
+                wallet.Balance -= payment;
+            }
 
             return true;
         }
 
-        public async Task<bool> DecreaseFreeImageRecognitionsAsync(long userId)
+        public async Task<bool> PayForImageAsync(long userId)
         {
+            const int payment = 1;
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
-            user.FreeImageTextRecognitions -= 1;
-            _userRepository.Update(user);
+            if (user is { FreeImageGenerations: <= 0, Wallet: { Balance: <= 0 } })
+            {
+                throw new Exception("No image generations and out of balance");
+            }
+
+            if (user.FreeImageGenerations > 0)
+            {
+                user.FreeImageGenerations -= 1;
+                _userRepository.Update(user);
+
+                return true;
+            }
+
+            var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
+
+            if (wallet is null)
+            {
+                return true;
+            }
+
+
+            if(wallet.Balance > 0)
+            {
+                wallet.Balance -= payment;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> PayForTextRecognitions(long userId)
+        {
+            const double payment = 0.5;
+            var user = _userRepository.Get(userId);
+            Guard.Against.Null(user);
+
+            if (user is { FreeImageGenerations: <= 0, Wallet: { Balance: <= 0 } })
+            {
+                throw new Exception("No image generations and out of balance");
+            }
+
+            if (user.FreeImageTextRecognitions > 0)
+            {
+                user.FreeImageGenerations -= 1;
+                _userRepository.Update(user);
+
+                return true;
+            }
+
+            var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
+
+            if (wallet is null)
+            {
+                return true;
+            }
+
+
+            if(wallet.Balance > 0)
+            {
+                wallet.Balance -= payment;
+            }
 
             return true;
         }
@@ -96,22 +181,17 @@ namespace GPTipsBot.Services
             _memoryCache.Set(cacheKey, user, _cacheOptions);
         }
 
-        public void UserCreatedEventHandler(object sender, User user)
+        private void UserCreatedEventHandler(object? sender, User user)
         {
             var fullName = user.FirstName;
             fullName += user.LastName == null ? "" : $" {user.LastName}";
 
-            if (ActiveUserCount == null)
-            {
-                ActiveUserCount = _userRepository.GetActiveUsersCount();
-            }
-            else
-            {
-                ActiveUserCount++;
-            }
+            activeUserCount ??= _userRepository.GetActiveUsersCount();
+
+            activeUserCount++;
 
             var message = "#newUser" + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
-            message += Environment.NewLine + $"Total count: {ActiveUserCount}";
+            message += Environment.NewLine + $"Total count: {activeUserCount}";
 
             foreach (var adminId in AppConfig.AdminIds)
             {

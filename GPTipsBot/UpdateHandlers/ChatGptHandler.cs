@@ -19,7 +19,8 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserStatusActivator _typingStatus;
         private readonly ILogger<ChatGptHandler> _log;
         private readonly ITelegramBotClient _botClient;
-        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
+        private readonly IAdvertisementClient _advertisementClient;
+        private readonly UserService _userService;
 
         public ChatGptHandler(
             MessageRepository messageRepository,
@@ -27,14 +28,16 @@ namespace GPTipsBot.UpdateHandlers
             UserStatusActivator typingStatus,
             ILogger<ChatGptHandler> log,
             ITelegramBotClient botClient,
-            GramadsAdvertisementClient gramadsAdvertisementClient)
+            IAdvertisementClient gramadsAdvertisementClient,
+            UserService userService)
         {
             _messageRepository = messageRepository;
             _gptService = gptService;
             _typingStatus = typingStatus;
             _log = log;
             _botClient = botClient;
-            _gramadsAdvertisementClient = gramadsAdvertisementClient;
+            _advertisementClient = gramadsAdvertisementClient;
+            _userService = userService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -43,6 +46,15 @@ namespace GPTipsBot.UpdateHandlers
             MessageDto gtpResponse = null;
             try
             {
+                var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+
+                if (profile is { GptRequests: <= 0, Stars: <= 0 })
+                {
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
+                        replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                    return;
+                }
+
                 var request = await _messageRepository.AddAsync(update.Message);
                 var serviceMessageId = await _typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
@@ -87,19 +99,31 @@ namespace GPTipsBot.UpdateHandlers
 
                 await _messageRepository.AddAsync(gtpResponse, request);
                 await _botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, gtpResponse.Text, (int)update.Message.TelegramMessageId!);
+
+                await _userService.PayForGpt(update.UserChatKey.Id);
+
+                if (profile is { GptRequests: <= 0, Stars: <= 0 })
+                {
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
+                        replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                    return;
+                }
             }
             catch (ClientException ex)
             {
                 _log.LogInformation(ex, shortMessage);
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message,
+                    replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             catch (ApiRequestException ex)
             when (ex.Message.Contains("can't parse entities"))
             {
                 var shortReply = gtpResponse!.Text.Truncate(30) + "...";
-                _log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown", shortReply);
-                await _botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId, gtpResponse!.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                _log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown",
+                    shortReply);
+                await _botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId,
+                    gtpResponse!.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             finally
@@ -107,14 +131,7 @@ namespace GPTipsBot.UpdateHandlers
                 await _typingStatus.Stop(update.UserChatKey);
             }
 
-            try
-            {
-                await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
-            }
-            catch (Exception e)
-            {
-                // ignore
-            }
+            await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
 
             await base.HandleAsync(update);
         }

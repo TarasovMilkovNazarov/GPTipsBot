@@ -16,9 +16,9 @@ namespace GPTipsBot.Models
         public long? BotSettingsId { get; set; }
 
         public List<UserCommand> Commands { get; set; }
-        public long Balance { get; set; }
         public int FreeImageGenerations { get; set; } = 5;
         public int FreeImageTextRecognitions { get; set; } = 5;
+        public int FreeGptRequests { get; set; } = 10;
         public Wallet? Wallet { get; set; }
         [ForeignKey("Wallet")]
         public long? WalletId { get; set; }

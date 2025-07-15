@@ -9,6 +9,8 @@ using GPTipsBot.Services;
 using GPTipsBot.Services.YandexCloud;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
+using Telegram.Bot.Types.ReplyMarkups;
+
 namespace GPTipsBot.UpdateHandlers
 {
     public class ImageTextRecognitionHandler : BaseMessageHandler
@@ -53,11 +55,12 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (_messageRepository.GetTodayTextRecognitionCount(update.UserChatKey) > ImagesPerDayLimit)
+            var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+
+            if (profile is { ImageTexts: <= 0, Stars: <= 0 })
             {
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
-                    string.Format(BotResponse.ImagesPerDayLimit, ImagesPerDayLimit),
-                    replyMarkup: TelegramBotUiService.CancelKeyboard);
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
+                    replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
 
@@ -85,16 +88,9 @@ namespace GPTipsBot.UpdateHandlers
             await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
                 text, replyToMessageId: (int)update.Message.TelegramMessageId!);
 
-            await _userService.DecreaseFreeImageRecognitionsAsync(update.UserChatKey.ChatId);
+            await _userService.PayForTextRecognitions(update.UserChatKey.ChatId);
 
-            try
-            {
-                await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
-            }
-            catch (Exception e)
-            {
-                // ignore
-            }
+            await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
         }
     }
 }

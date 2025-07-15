@@ -1,4 +1,6 @@
-﻿namespace GPTipsBot
+﻿using Ardalis.GuardClauses;
+
+namespace GPTipsBot
 {
     public static class AppConfig
     {
@@ -17,19 +19,19 @@
         public static string? Version => Environment.GetEnvironmentVariable("GPTIPSBOT_VERSION");
         public static string? CommitHash => Environment.GetEnvironmentVariable("GPTIPSBOT_COMMITHASH");
         public static string? DebugOpenAiApiKey => Environment.GetEnvironmentVariable("DEBUG_OPENAI_TOKEN");
-        public static string YandexCloudApiKey => Environment.GetEnvironmentVariable("YC_API_KEY");
+        public static string YandexCloudApiKey => GetEnvStrict("YC_API_KEY");
         public static string YandexIamToken => Environment.GetEnvironmentVariable("YC_IAM_TOKEN");
-        public static string YandexCloudFolderId => Environment.GetEnvironmentVariable("YC_FOLDER_ID");
-        public static string TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
+        public static string YandexCloudFolderId => GetEnvStrict("YC_FOLDER_ID");
+        public static string? TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
         public static string ProxyApiApiKey => Environment.GetEnvironmentVariable("WWW_PROXY_API_API_KEY");
         public static string PawanOsmanApiKey => Environment.GetEnvironmentVariable("PAWAN_OSMAN_API_KEY");
-        public static string GramadsBearerToken => Environment.GetEnvironmentVariable("GRAMADS_BEARER");
+        public static string? GramadsBearerToken => Environment.GetEnvironmentVariable("GRAMADS_BEARER");
 
         private static string GetEnvStrict(string name)
         {
             var env = Environment.GetEnvironmentVariable(name);
-            if (env is null or "")
-                throw new ArgumentNullException(name);
+
+            Guard.Against.NullOrEmpty(env, nameof(env));
 
             return env;
         }

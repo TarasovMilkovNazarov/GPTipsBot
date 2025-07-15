@@ -17,12 +17,9 @@ namespace GPTipsBot
         private readonly MainHandler _mainHandler;
         private readonly SpeechToTextService _speechToTextService;
         private readonly TelejetAdClient _telejetAdClient;
-        private readonly GramadsAdvertisementClient _gramadsAdvertisementClient;
         private readonly RateLimiter _rateLimiter;
         private readonly ITelegramBotClient _botClient;
         private readonly ApplicationContext _context;
-        private static readonly object advertisementSyncObj = new();
-        private static readonly HashSet<long> HamsterSent = new();
 
         public static DateTime Start { get; private set; }
 
@@ -30,7 +27,6 @@ namespace GPTipsBot
             MainHandler mainHandler,
             SpeechToTextService speechToTextService,
             TelejetAdClient telejetAdClient,
-            GramadsAdvertisementClient gramadsAdvertisementClient,
             RateLimiter rateLimiter,
             ITelegramBotClient botClient,
             ApplicationContext context)
@@ -40,7 +36,6 @@ namespace GPTipsBot
             _context = context;
             _speechToTextService = speechToTextService;
             _telejetAdClient = telejetAdClient;
-            _gramadsAdvertisementClient = gramadsAdvertisementClient;
             _rateLimiter = rateLimiter;
             Start = DateTime.UtcNow;
         }
@@ -82,8 +77,6 @@ namespace GPTipsBot
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
 
-            SendHamsterAdvertisement(extendedUpd);
-
             try
             {
                 await _mainHandler.HandleAsync(extendedUpd);
@@ -91,20 +84,6 @@ namespace GPTipsBot
             finally
             {
                 await _context.SaveChangesAsync();
-            }
-
-        }
-
-        private void SendHamsterAdvertisement(UpdateDecorator extendedUpd)
-        {
-            var chatId = extendedUpd.UserChatKey.ChatId;
-
-            lock (advertisementSyncObj)
-            {
-                if (HamsterSent.Add(chatId))
-                {
-                    _botClient.SendTextMessageAsync(chatId, BotResponse.Hamster, null, ParseMode.MarkdownV2).GetAwaiter().GetResult();
-                }
             }
         }
     }

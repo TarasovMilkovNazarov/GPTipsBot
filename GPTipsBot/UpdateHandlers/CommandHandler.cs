@@ -30,11 +30,13 @@ namespace GPTipsBot.UpdateHandlers
         private readonly InvoiceRepository _invoiceRepository;
         private readonly UserService _userService;
         private readonly BotSettingsRepository _botSettingsRepository;
+        private readonly MoneyService _moneyService;
 
         public CommandHandler(ITelegramBotClient botClient,
             ApplicationContext context, ILogger<CommandHandler> logger, MessageRepository messageRepository,
             UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler,
-            InvoiceRepository invoiceRepository, UserService userService, BotSettingsRepository botSettingsRepository)
+            InvoiceRepository invoiceRepository, UserService userService, BotSettingsRepository botSettingsRepository,
+            MoneyService moneyService)
         {
             _botClient = botClient;
             _context = context;
@@ -45,6 +47,7 @@ namespace GPTipsBot.UpdateHandlers
             _invoiceRepository = invoiceRepository;
             _userService = userService;
             _botSettingsRepository = botSettingsRepository;
+            _moneyService = moneyService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -62,6 +65,8 @@ namespace GPTipsBot.UpdateHandlers
             var previousCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
             await _userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
 
+            var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+
             IReplyMarkup? replyMarkup = StartKeyboard;
             update.Message.ContextBound = false;
             string? reply = null;
@@ -74,32 +79,13 @@ namespace GPTipsBot.UpdateHandlers
                     reply = BotResponse.Greeting;
                     break;
                 case GetProfileCommand:
-                    var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
                     reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.Images, profile.ImageTexts);
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
                     break;
                 case DepositCommand:
-                    var invoiceMessage = await _botClient.SendInvoiceAsync(
-                        chatId: chatId,
-                        title: "Premium Content",
-                        description: "Access to premium features for 1 month",
-                        payload: "premium_monthly_subscription",
-                        providerToken: "",
-                        currency: Currency.Stars, // XTR is the currency code for Telegram Stars
-                        prices: new[] { new LabeledPrice("Premium Access", 1) }, // 1000 Stars = 10 USD
-                        startParameter: "premium_subscription");
-                    Guard.Against.Null(invoiceMessage.Invoice);
-                    _invoiceRepository.Create(new Invoice
-                    {
-                        CreatedAt = DateTime.UtcNow,
-                        UserId = update.UserChatKey.Id,
-                        Amount = invoiceMessage.Invoice.TotalAmount,
-                        Currency = invoiceMessage.Invoice.Currency,
-                        Status = InvoiceStatus.Created,
-                        TelegramInvoiceId = invoiceMessage.MessageId,
-                    });
+                    await _moneyService.SendInvoice(update.UserChatKey.ChatId);
                     return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;
@@ -113,10 +99,25 @@ namespace GPTipsBot.UpdateHandlers
                         await base.HandleAsync(update);
                         return;
                     }
+
+                    if (profile is { Images: <= 0, Stars: <= 0 })
+                    {
+                        await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
+                            replyMarkup: DepositInlineKeyboard);
+                        return;
+                    }
+
                     reply = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
                     replyMarkup = CancelKeyboard;
                     break;
                 case ImageTextRecognizeCommand:
+                    if (profile is { ImageTexts: <= 0, Stars: <= 0 })
+                    {
+                        await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
+                            replyMarkup: DepositInlineKeyboard);
+                        return;
+                    }
+
                     reply = BotResponse.SendTextRecognitionImage;
                     replyMarkup = CancelKeyboard;
                     break;

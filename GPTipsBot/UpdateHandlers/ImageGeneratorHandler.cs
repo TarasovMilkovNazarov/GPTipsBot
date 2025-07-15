@@ -57,15 +57,7 @@ namespace GPTipsBot.UpdateHandlers
             if (update.Message.Text.Length > ImageTextDescriptionLimit)
             {
                 await _botClient.SendTextMessageAsync(userKey.ChatId,
-                    String.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
-                    replyMarkup: TelegramBotUiService.CancelKeyboard);
-                return;
-            }
-
-            if (_messageRepository.GetTodayImagesCount(userKey) >= ImagesPerDayLimit)
-            {
-                await _botClient.SendTextMessageAsync(userKey.ChatId,
-                    String.Format(BotResponse.ImagesPerDayLimit, ImagesPerDayLimit),
+                    string.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
                 return;
             }
@@ -74,10 +66,8 @@ namespace GPTipsBot.UpdateHandlers
 
             if (profile is { Images: <= 0, Stars: <= 0 })
             {
-                var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton
-                    .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
-                    replyMarkup: inlineKeyboard);
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
+                    replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
 
@@ -88,23 +78,47 @@ namespace GPTipsBot.UpdateHandlers
                 var sw = Stopwatch.StartNew();
                 var token = MainHandler.UserState[update.UserChatKey]
                     .MessageIdToCancellation[serviceMessageId].Token;
-
-                var response = await _ya.GenerateImage(update.Message.Text);
                 var replyMarkup = TelegramBotUiService.CancelKeyboard;
 
-                using var imageStream = new MemoryStream(Convert.FromBase64String(response));
-                await _messageRepository.AddAsync(new MessageDto(update.UserChatKey)
+                if (AppConfig.IsProduction)
                 {
-                    TelegramId = update.UserChatKey.Id,
-                    Role = MessageOwner.Ya,
-                    BotMessageType = BotMessageType.ImageGenerated,
-                });
-                await _botClient.SendPhotoAsync(userKey.ChatId, InputFile.FromStream(imageStream), cancellationToken: token);
+                    var response = await _ya.GenerateImage(update.Message.Text);
 
-                await _botClient.SendTextMessageAsync(userKey.ChatId, String.Format(BotResponse.InputImageDescriptionText,
-                    ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
+                    using var imageStream = new MemoryStream(Convert.FromBase64String(response));
+                    await _messageRepository.AddAsync(new MessageDto(update.UserChatKey)
+                    {
+                        TelegramId = update.UserChatKey.Id,
+                        Role = MessageOwner.Ya,
+                        BotMessageType = BotMessageType.ImageGenerated,
+                    });
+                    await _botClient.SendPhotoAsync(userKey.ChatId, InputFile.FromStream(imageStream), cancellationToken: token);
+                }
+                else
+                {
+                    await _messageRepository.AddAsync(new MessageDto(update.UserChatKey)
+                    {
+                        TelegramId = update.UserChatKey.Id,
+                        Role = MessageOwner.Ya,
+                        BotMessageType = BotMessageType.ImageGenerated,
+                    });
+                    await _botClient.SendPhotoAsync(userKey.ChatId, InputFile
+                        .FromUri("https://www.kasandbox.org/programming-images/avatars/leaf-blue.png"),
+                        cancellationToken: token);
+                }
 
-                await _userService.DecreaseFreeImageGenerationsAsync(update.UserChatKey.Id);
+                await _userService.PayForImageAsync(update.UserChatKey.Id);
+
+                if (profile is { Images: <= 0, Stars: <= 0 })
+                {
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
+                        replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                    return;
+                }
+                else
+                {
+                    await _botClient.SendTextMessageAsync(userKey.ChatId, string.Format(BotResponse.InputImageDescriptionText,
+                        ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
+                }
 
                 sw.Stop();
             }
@@ -136,14 +150,7 @@ namespace GPTipsBot.UpdateHandlers
                 await _sendImageStatus.Stop(userKey);
             }
 
-            try
-            {
-                await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
-            }
-            catch (Exception e)
-            {
-                // ignore
-            }
+            await _gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
         }
     }
 }

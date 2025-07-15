@@ -21,3 +21,12 @@ public class IgnoreMessageTypeException : Exception
 
     }
 }
+
+
+public class InvalidDepositInputException : Exception
+{
+    public InvalidDepositInputException(string message) : base(message)
+    {
+
+    }
+}

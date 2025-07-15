@@ -34,7 +34,6 @@ public class Wallet: Entity
     public User User { get; set; }
     public long Amount { get; set; }
     public string Currency { get; set; }
-    public DateTime DepositDate { get; set; }
 }
 
 public class Transaction: Entity

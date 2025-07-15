@@ -69,6 +69,20 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
+        ///
+        ///🎁 Первые 2 дня бесплатно
+        ///🚀 Высокая скорость
+        ///▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
+        ///📱💻 Для телефонов, компьютеров и планшетов.
+        /// </summary>
+        public static string AdvertisementText {
+            get {
+                return ResourceManager.GetString("AdvertisementText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 🤖 Добро пожаловать в бот ChatGPT! 🚀
         ///
         ///Задавайте вопросы ChatGPT - искусственному интеллекту на основе архитектуры GPT-3.5, разработанному OpenAI. 💬
@@ -155,6 +169,26 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 1 stars  = 10 запросов к ChatGpt или 2 генерации изображения
+        ///
+        ///Введите целое число или выберите количество stars для пополнения баланса.
+        /// </summary>
+        public static string DepositResponse {
+            get {
+                return ResourceManager.GetString("DepositResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Пополнить баланс.
+        /// </summary>
+        public static string DepositTitle {
+            get {
+                return ResourceManager.GetString("DepositTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GPTipDev.
         /// </summary>
         public static string DevBotName {
@@ -169,20 +203,6 @@ namespace GPTipsBot.Resources {
         public static string Greeting {
             get {
                 return ResourceManager.GetString("Greeting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
-        ///
-        ///🎁 Первые 2 дня бесплатно
-        ///🚀 Высокая скорость
-        ///▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
-        ///📱💻 Для телефонов, компьютеров и планшетов.
-        /// </summary>
-        public static string Hamster {
-            get {
-                return ResourceManager.GetString("Hamster", resourceCulture);
             }
         }
         
@@ -219,6 +239,18 @@ namespace GPTipsBot.Resources {
         public static string LanguageWasSetSuccessfully {
             get {
                 return ResourceManager.GetString("LanguageWasSetSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Закончился лимит бесплатных запросов
+        ///Пополните баланс для продолжения
+        ///
+        ///1 Stars = 10 запросам к ChatGpt или 2 генерации изображения.
+        /// </summary>
+        public static string NoFreeRequests {
+            get {
+                return ResourceManager.GetString("NoFreeRequests", resourceCulture);
             }
         }
         

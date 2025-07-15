@@ -15,14 +15,20 @@ public class GramadsAdvertisementClient
         var json = JsonConvert.SerializeObject(sendPostDto);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await client.PostAsync("https://api.gramads.net/ad/SendPost", content);
 
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            return;
+            var response = await client.PostAsync("https://api.gramads.net/ad/SendPost", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            // ignore
         }
 
-        // var result = await response.Content.ReadAsStringAsync();
-        // Console.WriteLine("Gramads: " + result);
     }
 }
