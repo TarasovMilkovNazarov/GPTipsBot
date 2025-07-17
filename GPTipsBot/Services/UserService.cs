@@ -158,7 +158,8 @@ namespace GPTipsBot.Services
 
             activeUserCount++;
 
-            var message = "#newUser" + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
+            var message = $"#newUser_{DateTime.UtcNow.ToShortDateString().Replace('.', '_')}"
+                          + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
             message += Environment.NewLine + $"Total count: {activeUserCount}";
 
             foreach (var adminId in AppConfig.AdminIds)

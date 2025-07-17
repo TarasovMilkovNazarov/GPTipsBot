@@ -37,6 +37,7 @@ public class SchedulerService : ISchedulerService
         var trigger = TriggerBuilder.Create()
             .WithIdentity(triggerKey)
             .StartAt(DateBuilder.TodayAt(23, 59, 0))
+            // .StartNow()
             .WithSimpleSchedule(x => x.WithInterval(interval)
                 .RepeatForever())
             .Build();

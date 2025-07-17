@@ -7,7 +7,6 @@ public class UserCommand: Entity
     public long UserId { get; set; }
     public long ChatId { get; set; }
     public CommandType Type { get; set; }
-    // public string Text { get; set; }
 }
 
 public enum CommandType
