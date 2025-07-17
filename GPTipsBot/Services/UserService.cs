@@ -82,7 +82,7 @@ namespace GPTipsBot.Services
 
         public async Task<bool> PayForImageAsync(long userId)
         {
-            const int payment = 1;
+            const double payment = 0.5;
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
