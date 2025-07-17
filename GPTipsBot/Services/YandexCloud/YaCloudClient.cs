@@ -42,13 +42,18 @@ namespace GPTipsBot.Services.YandexCloud
             {
                 Content = base64String
             };
-            request.Content = new StringContent(JsonSerializer.Serialize(body), null, "application/json");
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            request.Content = new StringContent(JsonSerializer.Serialize(body, options), null, "application/json");
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var contentResult = await response.Content.ReadAsStringAsync();
 
-            var result = JsonSerializer.Deserialize<Root>(contentResult);
+            var result = JsonSerializer.Deserialize<Root>(contentResult, options);
 
             return !string.IsNullOrWhiteSpace(result?.Result?.TextAnnotation?.FullText) ? result.Result.TextAnnotation.FullText : BotResponse.CantRecognizeText;
         }

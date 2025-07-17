@@ -1,4 +1,6 @@
-﻿namespace GPTipsBot.Services.YandexCloud;
+﻿using System.Text.Json.Serialization;
+
+namespace GPTipsBot.Services.YandexCloud;
 public class Block
 {
     public BoundingBox BoundingBox { get; set; }

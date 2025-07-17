@@ -158,7 +158,8 @@ namespace GPTipsBot.Services
             activeUserCount ??= _userRepository.GetActiveUsersCount();
 
             activeUserCount++;
-            var todayStr = DigitsOnlyRegex().Replace(DateTime.UtcNow.ToShortDateString(), "_");
+            var utcNow = DateTime.UtcNow;
+            var todayStr = $"{utcNow.Day}_{utcNow.Month}_{utcNow.Year}";
 
             var message = $"#newUser_{todayStr}"
                           + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
@@ -169,8 +170,5 @@ namespace GPTipsBot.Services
                 _botClient.SendTextMessageAsync(adminId, message);
             }
         }
-
-        [GeneratedRegex("[^0-9]")]
-        private static partial Regex DigitsOnlyRegex();
     }
 }

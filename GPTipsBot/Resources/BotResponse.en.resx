@@ -123,16 +123,15 @@
 Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture developed by OpenAI. 💬
 
 - To ask a question to the bot, simply send a text message
-- To generate an image, enter the command /image, or use the menu button</value>
+- To generate an image, enter the command /image, or use the menu button
+
+Note, that free requests amount is limited. Requests balance you can see in /profile</value>
   </data>
   <data name="BotName" xml:space="preserve">
     <value>ChatGPT + DALL-E | FREE | Sora</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Operation canceled</value>
-  </data>
-  <data name="ChooseGame" xml:space="preserve">
-    <value>Выберите игру</value>
   </data>
   <data name="ChooseLanguagePlease" xml:space="preserve">
     <value>Choose user interface language please</value>
@@ -245,7 +244,7 @@ Free requests:
   </data>
   <data name="NoFreeRequests" xml:space="preserve">
     <value>The limit for free requests has expired.  
-Please top up your balance to continue.  
+Please top up your balance to continue or come tomorrow when limit will be renewed
 
 1 Star = 10 requests to ChatGPT or 2 image generations.</value>
   </data>
