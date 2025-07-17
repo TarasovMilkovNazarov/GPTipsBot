@@ -1,4 +1,5 @@
-﻿using Ardalis.GuardClauses;
+﻿using System.Text.RegularExpressions;
+using Ardalis.GuardClauses;
 using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
@@ -7,7 +8,7 @@ using Telegram.Bot;
 
 namespace GPTipsBot.Services
 {
-    public class UserService
+    public partial class UserService
     {
         private readonly ITelegramBotClient _botClient;
         private readonly UserRepository _userRepository;
@@ -157,15 +158,19 @@ namespace GPTipsBot.Services
             activeUserCount ??= _userRepository.GetActiveUsersCount();
 
             activeUserCount++;
+            var todayStr = DigitsOnlyRegex().Replace(DateTime.UtcNow.ToShortDateString(), "_");
 
-            var message = $"#newUser_{DateTime.UtcNow.ToShortDateString().Replace('.', '_')}"
+            var message = $"#newUser_{todayStr}"
                           + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
             message += Environment.NewLine + $"Total count: {activeUserCount}";
 
             foreach (var adminId in AppConfig.AdminIds)
             {
-                _botClient.SendTextMessageAsync(adminId, message);   
+                _botClient.SendTextMessageAsync(adminId, message);
             }
         }
+
+        [GeneratedRegex("[^0-9]")]
+        private static partial Regex DigitsOnlyRegex();
     }
 }
