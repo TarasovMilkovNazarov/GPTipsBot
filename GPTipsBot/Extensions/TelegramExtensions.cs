@@ -37,7 +37,7 @@ namespace GPTipsBot.Extensions
                 case MessageType.Photo:
                     return false;
                 case MessageType.Video:
-                    throw new NotSupportedMessageException(update.Message.Type.ToString());
+                    throw new NotSupportedMessageException(update.Message.Chat.Id, update.Message.Type.ToString());
                 default:
                     return true;
             }

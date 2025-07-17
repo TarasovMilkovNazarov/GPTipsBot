@@ -87,10 +87,10 @@ namespace GPTipsBot.Services
         {
             if (request.Content != null)
             {
-                string requestBody = await request.Content.ReadAsStringAsync(cancellationToken);
+                var requestBody = await request.Content.ReadAsStringAsync(cancellationToken);
             }
 
-            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, cancellationToken);
 
             return response;
         }

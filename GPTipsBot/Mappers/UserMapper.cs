@@ -7,7 +7,7 @@ namespace GPTipsBot.Mapper
     {
         public static User Map(UserDto userDto)
         {
-            User user = new User()
+            var user = new User()
             {
                 Id = userDto.Id,
                 FirstName = userDto.FirstName,
@@ -22,7 +22,7 @@ namespace GPTipsBot.Mapper
 
         public static UserDto Map(Telegram.Bot.Types.User? telegramUser)
         {
-            UserDto user = new UserDto()
+            var user = new UserDto()
             {
                 Id = telegramUser.Id,
                 FirstName = telegramUser.FirstName,

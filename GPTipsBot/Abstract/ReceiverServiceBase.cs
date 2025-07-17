@@ -51,8 +51,9 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                     using var scope = _serviceProvider.CreateScope();
                     using (_log.BeginScope(new [] {update.Id, update.Message?.From?.Id}))
                     {
+                        var chatId = update.Message?.Chat.Id;
                         _log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-                            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, update.Message?.Chat.Id);
+                            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, chatId);
                         try
                         {
                             var worker = scope.ServiceProvider.GetRequiredService<UpdateFirewall>();
@@ -62,9 +63,14 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         {
                             // ignore
                         }
-                        catch (NotSupportedMessageException e)
+                        catch (ClientException clientEx)
                         {
-                            await _botClient.SendTextMessageAsync(update.Message.Chat!.Id,
+                            await _botClient.SendTextMessageAsync(clientEx.ChatId, clientEx.Message,
+                                cancellationToken: stoppingToken);
+                        }
+                        catch (NotSupportedMessageException notSupportedMessageEx)
+                        {
+                            await _botClient.SendTextMessageAsync(notSupportedMessageEx.ChatId,
                                 BotResponse.OnlyMessagesAvailable, cancellationToken: stoppingToken);
                         }
                         catch (ApiRequestException e)
@@ -77,7 +83,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             if (update.Message == null)
                                 return;
 
-                            await _botClient.SendTextMessageAsync(update.Message.Chat!.Id, BotResponse.SomethingWentWrong,
+                            await _botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong,
                                 cancellationToken: stoppingToken);
                         }
                     }

@@ -9,7 +9,7 @@ namespace GPTipsBot.Mappers
     {
         public static MessageDto Map(Tmessage tMessage, long chatId, MessageOwner role)
         {
-            UserChatKey chatKey = new UserChatKey(tMessage.From.Id, chatId);
+            var chatKey = new UserChatKey(tMessage.From.Id, chatId);
 
             MessageDto message = new(chatKey)
             {

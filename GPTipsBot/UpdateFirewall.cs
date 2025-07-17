@@ -5,10 +5,8 @@ using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using System.Globalization;
 using GPTipsBot.Db;
-using GPTipsBot.Dtos;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot
 {

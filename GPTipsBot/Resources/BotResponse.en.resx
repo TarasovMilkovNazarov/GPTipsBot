@@ -226,4 +226,35 @@ Ask ChatGPT - an artificial intelligence based on the GPT-3.5 architecture devel
   <data name="DepositTitle" xml:space="preserve">
     <value>Add stars to account</value>
   </data>
+  <data name="InvalidDepositAmountResponse" xml:space="preserve">
+    <value>Invalid input for amount of stars, should be a number grater than 0. Try again please:</value>
+  </data>
+  <data name="ProfileResponse" xml:space="preserve">
+    <value>👤 Profile: {0} {1}
+
+
+💵 Balance: {2} Stars 💵
+Free requests:
+ -- ChatGpt: {3}
+ -- image generations: {4}
+ -- image text recognitions: {5}
+</value>
+  </data>
+  <data name="InvoiceText" xml:space="preserve">
+    <value>1 stars  = 20 ChatGpt requests or 2 image generations</value>
+  </data>
+  <data name="NoFreeRequests" xml:space="preserve">
+    <value>The limit for free requests has expired.  
+Please top up your balance to continue.  
+
+1 Star = 10 requests to ChatGPT or 2 image generations.</value>
+  </data>
+  <data name="DepositResponse" xml:space="preserve">
+    <value>1 star = 20 requests to ChatGPT or 2 image generations.
+
+Enter an integer number of stars to top up your balance:</value>
+  </data>
+  <data name="AddMoneyResponse" xml:space="preserve">
+    <value>Top up your balance</value>
+  </data>
 </root>

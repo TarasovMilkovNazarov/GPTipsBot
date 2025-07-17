@@ -198,4 +198,9 @@
   <data name="DepositButton" xml:space="preserve">
     <value>Add funds</value>
   </data>
+  <data name="DonateButton" xml:space="preserve">
+    <value>🌟 Support our project! 💪
+
+💖 Every donation helps us develop and improve the service. 🤝 We appreciate your support and are working to make our product even better. 🚀💡</value>
+  </data>
 </root>

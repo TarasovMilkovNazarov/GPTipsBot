@@ -201,4 +201,9 @@
   <data name="ProfileButton" xml:space="preserve">
     <value>Личный кабинет</value>
   </data>
+  <data name="DonateButton" xml:space="preserve">
+    <value>🌟 Поддержите наш проект! 💪
+
+💖 Каждый донат помогает развивать и улучшать сервис. 🤝 Мы ценим вашу поддержку и работаем над тем, чтобы сделать наш продукт еще лучше. 🚀💡</value>
+  </data>
 </root>

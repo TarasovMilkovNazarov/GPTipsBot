@@ -60,11 +60,6 @@ namespace GPTipsBot.Services
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
-            if (user is { FreeGptRequests: <= 0, Wallet: { Balance: <= 0 } })
-            {
-                throw new Exception("Out of gpt requests and balance");
-            }
-
             if (user.FreeGptRequests > 0)
             {
                 user.FreeGptRequests -= 1;
@@ -73,18 +68,14 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
+            var wallet = user.Wallet;
 
-            if (wallet is null)
+            if (wallet is null || wallet.Balance < payment)
             {
                 return false;
             }
 
-            if(wallet.Balance > 0)
-            {
-                wallet.Balance -= payment;
-            }
-
+            user.Wallet!.Balance -= payment;
             return true;
         }
 
@@ -94,11 +85,6 @@ namespace GPTipsBot.Services
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
-            if (user is { FreeImageGenerations: <= 0, Wallet: { Balance: <= 0 } })
-            {
-                throw new Exception("No image generations and out of balance");
-            }
-
             if (user.FreeImageGenerations > 0)
             {
                 user.FreeImageGenerations -= 1;
@@ -107,18 +93,12 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
-
-            if (wallet is null)
+            if (user.Wallet == null || user.Wallet?.Balance < payment)
             {
-                return true;
+                return false;
             }
 
-
-            if(wallet.Balance > 0)
-            {
-                wallet.Balance -= payment;
-            }
+            user.Wallet!.Balance -= payment;
 
             return true;
         }
@@ -129,11 +109,6 @@ namespace GPTipsBot.Services
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
-            if (user is { FreeImageGenerations: <= 0, Wallet: { Balance: <= 0 } })
-            {
-                throw new Exception("No image generations and out of balance");
-            }
-
             if (user.FreeImageTextRecognitions > 0)
             {
                 user.FreeImageGenerations -= 1;
@@ -142,25 +117,18 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
-
-            if (wallet is null)
+            if (user.Wallet == null || user.Wallet?.Balance < payment)
             {
-                return true;
+                return false;
             }
 
-
-            if(wallet.Balance > 0)
-            {
-                wallet.Balance -= payment;
-            }
-
+            user.Wallet!.Balance -= payment;
             return true;
         }
 
-        public void CreateUpdateUser(User user)
+        public async Task CreateUpdateUser(User user)
         {
-            string cacheKey = $"User_{user.Id}";
+            var cacheKey = $"User_{user.Id}";
 
             if (_memoryCache.TryGetValue(cacheKey, out User _))
             {
@@ -174,7 +142,7 @@ namespace GPTipsBot.Services
             }
             else
             {
-                _userRepository.Create(user);
+                await _userRepository.Create(user);
                 UserCreated?.Invoke(this, user);
             }
 

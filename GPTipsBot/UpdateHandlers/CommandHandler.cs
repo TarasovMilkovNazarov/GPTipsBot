@@ -1,6 +1,5 @@
 ﻿using GPTipsBot.Db;
 using GPTipsBot.Dtos;
-using GPTipsBot.Enums;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -10,9 +9,7 @@ using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
-using Invoice = GPTipsBot.Models.Invoice;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -80,12 +77,13 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case GetProfileCommand:
                     reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
-                        profile.LastName, profile.Stars, profile.Images, profile.ImageTexts);
+                        profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
                     break;
                 case DepositCommand:
-                    await _moneyService.SendInvoice(update.UserChatKey.ChatId);
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.DepositResponse,
+                        replyMarkup: null);
                     return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;

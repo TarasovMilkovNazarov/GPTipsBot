@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels;
-using OpenAI.ObjectModels.ResponseModels.ImageResponseModel;
 using GPTipsBot.Exceptions;
 
 namespace GPTipsBot.Services
@@ -21,13 +20,13 @@ namespace GPTipsBot.Services
             _openAiServiceCreator = openAiServiceCreator;
         }
 
-        public async Task<List<string>> GenerateImage(string prompt)
+        public async Task<List<string>> GenerateImage(string prompt, long chatId)
         {
             var apiKey = await _tokensQueue.GetTokenAsync();
 
             var openAiService = _openAiServiceCreator.Create(apiKey);
 
-            ImageCreateResponse imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
+            var imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
             {
                 Prompt = prompt,
                 N = 2,
@@ -46,16 +45,17 @@ namespace GPTipsBot.Services
 
             if (imageResult.Error?.Code == "content_policy_violation")
             {
-                throw new ClientException(DalleResponse.BlockedPromptError);
+                throw new ClientException(chatId, DalleResponse.BlockedPromptError);
             }
             if (imageResult.Error?.Code == "rate_limit_exceeded")
             {
-                throw new ClientException(DalleResponse.RateLimit);
+                throw new ClientException(chatId, DalleResponse.RateLimit);
             }
 
-            _log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}", imageResult.Error?.Code, imageResult.Error?.Message, apiKey[..10]);
+            _log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}",
+                imageResult.Error?.Code, imageResult.Error?.Message, apiKey[..10]);
 
-            throw new ClientException(BotResponse.SomethingWentWrongWithImageService);
+            throw new ClientException(chatId, BotResponse.SomethingWentWrongWithImageService);
         }
     }
 }

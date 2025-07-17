@@ -1,6 +1,5 @@
 ﻿using GPTipsBot.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
-using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.Models
 {

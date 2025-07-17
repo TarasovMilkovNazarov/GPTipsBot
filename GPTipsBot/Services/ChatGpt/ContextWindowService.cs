@@ -59,7 +59,7 @@ namespace GPTipsBot.Services
                 if (TokensCount == 0)
                 {
                     //todo reset context or suggest user to reset: send inline command with reset
-                    throw new ClientException(string.Format(BotResponse.TokensLimitExceeded, TokensLimit, messageTokensCount));
+                    throw new ClientException(userKey.ChatId, string.Format(BotResponse.TokensLimitExceeded, TokensLimit, messageTokensCount));
                 }
 
                 break;
@@ -70,7 +70,7 @@ namespace GPTipsBot.Services
 
         public static long CountTokens(string message)
         {
-            TikToken tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
+            var tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
             var i = tikToken.Encode(message); //[15339, 1917]
 
             return i.Count;

@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Extensions;
@@ -9,7 +10,6 @@ using GPTipsBot.Services;
 using GPTipsBot.Services.YandexCloud;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -22,11 +22,13 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserCommandRepository _userCommandRepository;
         private readonly IAdvertisementClient _advertisementClient;
         private readonly UserService _userService;
-        public const int ImagesPerDayLimit = 5;
+        private readonly ApplicationContext _context;
+        private readonly TelejetAdClient _telejetAdClient;
 
         public ImageTextRecognitionHandler(ITelegramBotClient botClient, ILogger<ImageTextRecognitionHandler> logger,
             ITextRecognizer yaCloudClient, MessageRepository messageRepository, UserCommandRepository userCommandRepository,
-            IAdvertisementClient gramadsAdvertisementClient, UserService userService)
+            IAdvertisementClient gramadsAdvertisementClient, UserService userService, ApplicationContext context,
+            TelejetAdClient telejetAdClient)
         {
             _botClient = botClient;
             _logger = logger;
@@ -35,13 +37,12 @@ namespace GPTipsBot.UpdateHandlers
             _userCommandRepository = userCommandRepository;
             _advertisementClient = gramadsAdvertisementClient;
             _userService = userService;
+            _context = context;
+            _telejetAdClient = telejetAdClient;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            // await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
-            //
-            // return;
             var isAdmin = update.UserChatKey.IsAdmin();
 
             var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
@@ -55,14 +56,18 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
-
-            if (profile is { ImageTexts: <= 0, Stars: <= 0 })
+            await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+            var isSuccessPayment = await _userService.PayForTextRecognitions(update.UserChatKey.ChatId);
+            if (!isSuccessPayment)
             {
+                await dbTransaction.RollbackAsync();
+                _context.ChangeTracker.Clear();
                 await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
                     replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
+
+            Guard.Against.Null(update.FileId);
 
             var file = await _botClient.GetFileAsync(update.FileId);
 
@@ -84,13 +89,13 @@ namespace GPTipsBot.UpdateHandlers
             };
 
             await _messageRepository.AddAsync(recognitionResultMessage);
+            await dbTransaction.CommitAsync();
 
             await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
                 text, replyToMessageId: (int)update.Message.TelegramMessageId!);
 
-            await _userService.PayForTextRecognitions(update.UserChatKey.ChatId);
-
             await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            await _telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
         }
     }
 }

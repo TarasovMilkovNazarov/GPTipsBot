@@ -1,6 +1,8 @@
 ﻿using GPTipsBot.Services;
 using GPTipsBot.Utilities;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.Extensions
@@ -26,12 +28,12 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
         }
 
         public static async Task SendMarkdown2MessageAsync(
-            this ITelegramBotClient botClient, 
-            long chatId, 
-            string text, 
+            this ITelegramBotClient botClient,
+            long chatId,
+            string text,
             int? replyToMessageId = null,
             int partsLimit = -1
-            )
+        )
         {
             var textParts = SplitIfTooLong(text);
             var partsCount = partsLimit == -1 || partsLimit > textParts.Count ? textParts.Count : partsLimit;
@@ -41,6 +43,33 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
                 var escapedText = StringUtilities.EscapeTextForMarkdown2(part)!;
                 await botClient.SendTextMessageAsync(chatId, escapedText, null, ParseMode.MarkdownV2, replyToMessageId: replyToMessageId);
             }
+        }
+
+        public static async Task<bool> TrySendMarkdown2MessageAsync(
+            this ITelegramBotClient botClient,
+            long chatId,
+            string text,
+            int? replyToMessageId = null,
+            int partsLimit = -1,
+            ILogger? logger = null
+        )
+        {
+            try
+            {
+                await SendMarkdown2MessageAsync(botClient, chatId, text, replyToMessageId);
+                return true;
+            }
+            catch (ApiRequestException ex)
+                when (ex.Message.Contains("can't parse entities"))
+            {
+                var shortReply = text.Truncate(30) + "...";
+                logger?.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown",
+                    shortReply);
+                await botClient.SendSplittedTextMessageAsync(chatId,
+                    text, replyToMessageId:replyToMessageId);
+            }
+
+            return false;
         }
 
         public static async Task SendSplittedTextMessageAsync(

@@ -140,12 +140,12 @@ namespace GPTipsBot.Services
         {
             var delay = TimeSpan.FromMinutes(1).TotalMinutes;
 
-            DateTime nowTime = DateTime.Now;
-            DateTime specificTime = nowTime.Date.AddDays(1).AddMinutes(delay);
+            var nowTime = DateTime.Now;
+            var specificTime = nowTime.Date.AddDays(1).AddMinutes(delay);
             if (nowTime > specificTime)
                 specificTime = specificTime.AddDays(1);
 
-            double tickTime = (specificTime - nowTime).TotalMilliseconds;
+            var tickTime = (specificTime - nowTime).TotalMilliseconds;
             _timer = new Timer(tickTime);
             _timer.Elapsed += (s, e) => UnfreezeDayLimitedTokens(openaiAccountsRepository);
             _timer.Start();

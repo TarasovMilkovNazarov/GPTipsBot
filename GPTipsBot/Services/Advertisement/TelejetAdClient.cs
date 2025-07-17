@@ -9,9 +9,9 @@ namespace GPTipsBot.Services
     public class TelejetAdClient
     {
         private readonly string _apiKey = AppConfig.TelejetApiKey;
-        private static readonly string BapPrefix = "/__bap";
+        private const string BapPrefix = "/__bap";
         private static readonly (string, int) Addr = ("api.production.bap.codd.io", 8080);
-        private static readonly int ApiVersion = 3;
+        private const int ApiVersion = 3;
         private readonly UdpClient _udpClient;
 
         /// <summary>
@@ -21,12 +21,10 @@ namespace GPTipsBot.Services
         /// <returns></returns>
         public async Task<bool> HandleUpdateAsync(Update update)
         {
-            await SendToBapAsync(update, "activity");
-
             return !IsBapUpdate(update);
         }
 
-        private async Task SendToBapAsync(Update update, string method)
+        public async Task SendToBapAsync(Update update, string method)
         {
             try
             {
@@ -57,7 +55,7 @@ namespace GPTipsBot.Services
                     NamingStrategy = new SnakeCaseNamingStrategy()
                 }
             };
-            string json = JsonConvert.SerializeObject(dto, settings);
+            var json = JsonConvert.SerializeObject(dto, settings);
 
             return json;
         }

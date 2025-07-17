@@ -24,7 +24,8 @@ public enum CommandType
     CancelPreviousCommand,
     Admin,
     Deposit,
-    GetProfile
+    GetProfile,
+    Donate
 }
 
 public class Wallet: Entity

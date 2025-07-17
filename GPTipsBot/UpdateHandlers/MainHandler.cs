@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
-using Ardalis.GuardClauses;
+using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using Telegram.Bot;
-using Telegram.Bot.Types.Payments;
-using Invoice = GPTipsBot.Models.Invoice;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -70,7 +70,7 @@ namespace GPTipsBot.UpdateHandlers
             var newUser = UserMapper.Map(update.User);
             try
             {
-                _userService.CreateUpdateUser(newUser);
+                await _userService.CreateUpdateUser(newUser);
             }
             catch (DbUpdateException ex)
             {
@@ -84,20 +84,19 @@ namespace GPTipsBot.UpdateHandlers
             {
                 await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
                     "TRX", CancellationToken.None);
-                return;
+                var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+                var reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
+                    profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
+                var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
+                    .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+
                 await _botClient.AnswerPreCheckoutQueryAsync(
                     preCheckoutQueryId: update.PreCheckoutQuery.Id);
-            }
-
-            if (update.Message?.SuccessfulPayment != null)
-            {
-                await _botClient.SendTextMessageAsync(
-                    chatId: update.UserChatKey.ChatId,
-                    text: "Thank you for your payment! Your premium access has been activated.");
+                await _botClient.SendTextMessageAsync(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
+                return;
             }
 
             var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
-
 
             if (update.IsAdminCommand())
             {
@@ -121,9 +120,9 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
-                if (!int.TryParse(update.Message?.Text, out var starsCount))
+                if (!int.TryParse(update.Message?.Text, out var starsCount) && starsCount <= 0)
                 {
-                    throw new Exception("Invalid amount of stars");
+                    throw new ClientException(update.UserChatKey.ChatId, BotResponse.InvalidDepositAmountResponse);
                 }
 
                 await _moneyService.SendInvoice(update.UserChatKey.Id, starsCount);

@@ -1,10 +1,8 @@
-﻿using System.Data;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
-using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;

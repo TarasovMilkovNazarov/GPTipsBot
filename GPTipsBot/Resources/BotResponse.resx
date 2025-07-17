@@ -131,9 +131,6 @@
   <data name="Cancel" xml:space="preserve">
     <value>Операция отменена</value>
   </data>
-  <data name="ChooseGame" xml:space="preserve">
-    <value>Пожалуйста выберите игру</value>
-  </data>
   <data name="ChooseLanguagePlease" xml:space="preserve">
     <value>Пожалуйста выберите язык интерфейса</value>
   </data>
@@ -199,9 +196,6 @@
   <data name="SwitchProxy" xml:space="preserve">
     <value>Использовать бесплатное прокси: {0}</value>
   </data>
-  <data name="Test" xml:space="preserve">
-    <value>Test</value>
-  </data>
   <data name="Thanks" xml:space="preserve">
     <value>Ваш отзыв отправлен автору. Спасибо, что делаете бота лучше!</value>
   </data>
@@ -232,8 +226,9 @@
 
 💵 Баланс: {2} Stars 💵
 Количество бесплатных запросов:
- -- генераций изображений: {3}
- -- распознаваний текста: {4}
+ -- запросов к ChatGpt: {3}
+ -- генераций изображений: {4}
+ -- распознаваний текста: {5}
 </value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
@@ -246,11 +241,18 @@
 1 Stars = 10 запросам к ChatGpt или 2 генерации изображения</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1 stars  = 10 запросов к ChatGpt или 2 генерации изображения
+    <value>1 star  = 20 запросов к ChatGpt или 2 генерации изображения
 
-Введите целое число или выберите количество stars для пополнения баланса</value>
+Введите целое количество stars для пополнения баланса:</value>
   </data>
   <data name="DepositTitle" xml:space="preserve">
     <value>Пополнить баланс</value>
+  </data>
+  <data name="InvoiceText" xml:space="preserve">
+    <value>1 stars  = 20 запросов к ChatGpt или 2 генерации изображения</value>
+  </data>
+  <data name="InvalidDepositAmountResponse" xml:space="preserve">
+    <value>Неправильный ввод количества старсов. Должно быть целое число больше нуля.
+Введите число еще раз:</value>
   </data>
 </root>

@@ -105,6 +105,17 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 🌟 Поддержите наш проект! 💪
+        ///
+        ///💖 Каждый донат помогает развивать и улучшать сервис. 🤝 Мы ценим вашу поддержку и работаем над тем, чтобы сделать наш продукт еще лучше. 🚀💡.
+        /// </summary>
+        internal static string DonateButton {
+            get {
+                return ResourceManager.GetString("DonateButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Эмодзи ребус.
         /// </summary>
         internal static string EmojiTranslationButton {

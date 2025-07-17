@@ -19,9 +19,7 @@ public class WalletRepository: GenericRepository<Wallet>
     public async Task<bool> UpdateAmountAsync(Wallet wallet, long delta)
     {
         Guard.Against.Null(wallet);
-
         wallet.Balance += delta;
-        _context.Wallets.Update(wallet);
 
         return true;
     }

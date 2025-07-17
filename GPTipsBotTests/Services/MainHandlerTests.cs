@@ -332,7 +332,7 @@ namespace GPTipsBotTests.Services
         {
             var update = CreateTelegramUpdate(1, 2, "/image гора");
 
-            for (int i = 0; i < ImageGeneratorHandler.ImagesPerDayLimit + 1; i++)
+            for (var i = 0; i < ImageGeneratorHandler.ImagesPerDayLimit + 1; i++)
             {
                 await _updateFirewall.HandleUpdateAsync(update);
             }

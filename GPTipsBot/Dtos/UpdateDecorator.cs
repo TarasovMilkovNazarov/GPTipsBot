@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Text.RegularExpressions;
 using Ardalis.GuardClauses;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
@@ -16,67 +15,67 @@ namespace GPTipsBot.UpdateHandlers
 {
     public class UpdateDecorator
     {
-        private Update _update;
+        public Update TelegramUpdate { get; }
 
-        public UpdateDecorator(Update update)
+        public UpdateDecorator(Update telegramUpdate)
         {
-            _update = update;
+            TelegramUpdate = telegramUpdate;
             long chatId;
 
-            switch (update.Type)
+            switch (telegramUpdate.Type)
             {
                 case UpdateType.PreCheckoutQuery:
-                    Guard.Against.Null(update.PreCheckoutQuery);
-                    UserChatKey = update.PreCheckoutQuery.From.Id;
-                    User = UserMapper.Map(update.PreCheckoutQuery.From);
+                    Guard.Against.Null(telegramUpdate.PreCheckoutQuery);
+                    UserChatKey = telegramUpdate.PreCheckoutQuery.From.Id;
+                    User = UserMapper.Map(telegramUpdate.PreCheckoutQuery.From);
                     break;
-                case UpdateType.Message when update.Message?.Chat.Type == ChatType.Private:
-                    Guard.Against.Null(update.Message);
-                    Guard.Against.Null(update.Message.From);
+                case UpdateType.Message when telegramUpdate.Message?.Chat.Type == ChatType.Private:
+                    Guard.Against.Null(telegramUpdate.Message);
+                    Guard.Against.Null(telegramUpdate.Message.From);
 
-                    chatId = update.Message.Chat.Id;
+                    chatId = telegramUpdate.Message.Chat.Id;
 
-                    User = UserMapper.Map(update.Message.From);
-                    User.Source = TelegramService.GetSource(update.Message.Text);
-                    Message = MessageMapper.Map(update.Message, chatId, Enums.MessageOwner.User);
-                    UserChatKey = new UserChatKey(update.Message.From.Id, chatId);
+                    User = UserMapper.Map(telegramUpdate.Message.From);
+                    User.Source = TelegramService.GetSource(telegramUpdate.Message.Text);
+                    Message = MessageMapper.Map(telegramUpdate.Message, chatId, Enums.MessageOwner.User);
+                    UserChatKey = new UserChatKey(telegramUpdate.Message.From.Id, chatId);
 
-                    if (update.Message.Type == MessageType.Photo)
+                    if (telegramUpdate.Message.Type == MessageType.Photo)
                     {
-                        Guard.Against.Null(update.Message.Photo);
-                        FileId = update.Message.Photo[^1].FileId;
+                        Guard.Against.Null(telegramUpdate.Message.Photo);
+                        FileId = telegramUpdate.Message.Photo[^1].FileId;
                     }
 
-                    Message.SuccessfulPayment = update.Message.SuccessfulPayment;
+                    Message.SuccessfulPayment = telegramUpdate.Message.SuccessfulPayment;
                     break;
                 case UpdateType.CallbackQuery:
-                    Guard.Against.Null(update.CallbackQuery);
-                    Guard.Against.Null(update.CallbackQuery.Message);
-                    Guard.Against.Null(update.CallbackQuery.Data);
-                    chatId = update.CallbackQuery.Message.Chat.Id;
-                    Message = MessageMapper.Map(update.CallbackQuery.Message, chatId, Enums.MessageOwner.User);
-                    Message.UserId = update.CallbackQuery.From.Id;
-                    User = UserMapper.Map(update.CallbackQuery.From);
-                    UserChatKey = new UserChatKey(update.CallbackQuery.From.Id, chatId);
-                    Message.Text = update.CallbackQuery.Data;
+                    Guard.Against.Null(telegramUpdate.CallbackQuery);
+                    Guard.Against.Null(telegramUpdate.CallbackQuery.Message);
+                    Guard.Against.Null(telegramUpdate.CallbackQuery.Data);
+                    chatId = telegramUpdate.CallbackQuery.Message.Chat.Id;
+                    Message = MessageMapper.Map(telegramUpdate.CallbackQuery.Message, chatId, Enums.MessageOwner.User);
+                    Message.UserId = telegramUpdate.CallbackQuery.From.Id;
+                    User = UserMapper.Map(telegramUpdate.CallbackQuery.From);
+                    UserChatKey = new UserChatKey(telegramUpdate.CallbackQuery.From.Id, chatId);
+                    Message.Text = telegramUpdate.CallbackQuery.Data;
                     break;
                 case UpdateType.MyChatMember:
-                    Guard.Against.Null(update.MyChatMember);
-                    var oldChatMemberStatus = update.MyChatMember.OldChatMember.Status;
-                    var newChatMemberStatus = update.MyChatMember.NewChatMember.Status;
+                    Guard.Against.Null(telegramUpdate.MyChatMember);
+                    var oldChatMemberStatus = telegramUpdate.MyChatMember.OldChatMember.Status;
+                    var newChatMemberStatus = telegramUpdate.MyChatMember.NewChatMember.Status;
                     if (oldChatMemberStatus == ChatMemberStatus.Kicked &&
                         newChatMemberStatus == ChatMemberStatus.Member)
                     {
-                        User = UserMapper.Map(update.MyChatMember.From);
+                        User = UserMapper.Map(telegramUpdate.MyChatMember.From);
                         IsRecovered = true;
-                        UserChatKey = new UserChatKey(update.MyChatMember.From.Id, update.MyChatMember.Chat.Id);
+                        UserChatKey = new UserChatKey(telegramUpdate.MyChatMember.From.Id, telegramUpdate.MyChatMember.Chat.Id);
                     }
                     break;
                 default:
-                    throw new IgnoreMessageTypeException(update.Type);
+                    throw new IgnoreMessageTypeException(telegramUpdate.Type);
             }
 
-            Language = update.GetLanguageOrDefault();
+            Language = telegramUpdate.GetLanguageOrDefault();
 
             var groupChatTypes = new ChatType?[] { ChatType.Supergroup, ChatType.Group, ChatType.Channel };
             IsGroupOrChannel = groupChatTypes.Contains(Message?.ChatType);
@@ -97,14 +96,14 @@ namespace GPTipsBot.UpdateHandlers
         public bool IsCommand => Command != null;
         public bool IsGroupOrChannel { get; }
 
-        public CallbackQuery? CallbackQuery => _update.CallbackQuery;
-        public PreCheckoutQuery? PreCheckoutQuery => _update.PreCheckoutQuery;
+        public CallbackQuery? CallbackQuery => TelegramUpdate.CallbackQuery;
+        public PreCheckoutQuery? PreCheckoutQuery => TelegramUpdate.PreCheckoutQuery;
 
         public string Language { get; }
 
         public override string ToString()
         {
-            var serialized = JsonConvert.SerializeObject(_update, Formatting.Indented);
+            var serialized = JsonConvert.SerializeObject(TelegramUpdate, Formatting.Indented);
 
             return serialized;
         }

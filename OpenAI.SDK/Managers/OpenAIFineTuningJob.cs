@@ -1,5 +1,4 @@
-﻿using System.Net;
-using OpenAI.Extensions;
+﻿using OpenAI.Extensions;
 using OpenAI.Interfaces;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels.FineTuningJobResponseModels;

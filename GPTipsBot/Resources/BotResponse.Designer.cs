@@ -124,15 +124,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Пожалуйста выберите игру.
-        /// </summary>
-        public static string ChooseGame {
-            get {
-                return ResourceManager.GetString("ChooseGame", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Пожалуйста выберите язык интерфейса.
         /// </summary>
         public static string ChooseLanguagePlease {
@@ -169,9 +160,9 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1 stars  = 10 запросов к ChatGpt или 2 генерации изображения
+        ///   Looks up a localized string similar to 1 star  = 20 запросов к ChatGpt или 2 генерации изображения
         ///
-        ///Введите целое число или выберите количество stars для пополнения баланса.
+        ///Введите целое количество stars для пополнения баланса:.
         /// </summary>
         public static string DepositResponse {
             get {
@@ -230,6 +221,25 @@ namespace GPTipsBot.Resources {
         public static string InputImageDescriptionText {
             get {
                 return ResourceManager.GetString("InputImageDescriptionText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Неправильный ввод количества старсов. Должно быть целое число больше нуля.
+        ///Введите число еще раз:.
+        /// </summary>
+        public static string InvalidDepositAmountResponse {
+            get {
+                return ResourceManager.GetString("InvalidDepositAmountResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1 stars  = 20 запросов к ChatGpt или 2 генерации изображения.
+        /// </summary>
+        public static string InvoiceText {
+            get {
+                return ResourceManager.GetString("InvoiceText", resourceCulture);
             }
         }
         
@@ -296,8 +306,9 @@ namespace GPTipsBot.Resources {
         ///
         ///💵 Баланс: {2} Stars 💵
         ///Количество бесплатных запросов:
-        /// -- генераций изображений: {3}
-        /// -- распознаваний текста: {4}
+        /// -- запросов к ChatGpt: {3}
+        /// -- генераций изображений: {4}
+        /// -- распознаваний текста: {5}
         ///.
         /// </summary>
         public static string ProfileResponse {
@@ -384,15 +395,6 @@ namespace GPTipsBot.Resources {
         public static string SwitchProxy {
             get {
                 return ResourceManager.GetString("SwitchProxy", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Test.
-        /// </summary>
-        public static string Test {
-            get {
-                return ResourceManager.GetString("Test", resourceCulture);
             }
         }
         

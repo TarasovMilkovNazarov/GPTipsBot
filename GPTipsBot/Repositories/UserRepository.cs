@@ -25,8 +25,10 @@ namespace GPTipsBot.Repositories
         public User? Get(long id)
         {
             return _context.Users
+                .Include(u => u.Wallet)
+                .SingleOrDefault(x => x.Id == id);
                 // .AsNoTracking()
-                .Find(id);
+                // .Find(id);
         }
 
         public void Delete(long id)
@@ -41,10 +43,11 @@ namespace GPTipsBot.Repositories
             _context.Users.Remove(user);
         }
 
-        public long Create(User user)
+        public async Task<long> Create(User user)
         {
             _logger.LogInformation("CreateUser");
             var entity = _context.Users.Add(user).Entity;
+            await _context.SaveChangesAsync();
 
             return user.Id;
         }

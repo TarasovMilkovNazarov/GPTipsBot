@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Extensions;
-using GPTipsBot.Repositories;
+﻿using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
@@ -8,14 +7,11 @@ using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Logging;
-using GPTipsBot.Utilities;
-using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Services.YandexCloud;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -30,13 +26,14 @@ namespace GPTipsBot.UpdateHandlers
         private readonly IAdvertisementClient _advertisementClient;
         private readonly UserService _userService;
         private readonly ApplicationContext _context;
+        private readonly TelejetAdClient _telejetAdClient;
         public const int ImageTextDescriptionLimit = 1000;
         public const int ImagesPerDayLimit = 5;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             IImageGenerator ya, UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService,
             MessageRepository messageRepository, IAdvertisementClient gramadsAdvertisementClient,
-            UserService userService, ApplicationContext context)
+            UserService userService, ApplicationContext context, TelejetAdClient telejetAdClient)
         {
             _botClient = botClient;
             _logger = logger;
@@ -47,6 +44,7 @@ namespace GPTipsBot.UpdateHandlers
             _advertisementClient = gramadsAdvertisementClient;
             _userService = userService;
             _context = context;
+            _telejetAdClient = telejetAdClient;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -65,14 +63,12 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
-
             await using var dbTransaction = await _context.Database.BeginTransactionAsync();
-            await _userService.PayForImageAsync(update.UserChatKey.Id);
-
-            if (profile is { Images: <= 0, Stars: <= 0 })
+            var successPayment = await _userService.PayForImageAsync(update.UserChatKey.Id);
+            if (!successPayment)
             {
                 await dbTransaction.RollbackAsync();
+                _context.ChangeTracker.Clear();
                 await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
                     replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
@@ -149,6 +145,7 @@ namespace GPTipsBot.UpdateHandlers
             await dbTransaction.CommitAsync();
 
             await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            await _telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
         }
     }
 }

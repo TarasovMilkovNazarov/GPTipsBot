@@ -5,9 +5,11 @@
     /// </summary>
     public class ClientException : Exception
     {
-        public ClientException(string error) : base(error)
-        {
+        public long ChatId { get; }
 
+        public ClientException(long chatId, string error) : base(error)
+        {
+            ChatId = chatId;
         }
     }
 }

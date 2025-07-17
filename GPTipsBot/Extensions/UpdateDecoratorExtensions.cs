@@ -1,7 +1,5 @@
-﻿using GPTipsBot.Dtos;
-using GPTipsBot.Models;
+﻿using GPTipsBot.Models;
 using GPTipsBot.UpdateHandlers;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.Extensions;
 

@@ -13,6 +13,9 @@ public class GramadsAdvertisementClient : IAdvertisementClient
 {
     public async Task SendPostToChat(long chatId)
     {
+        if (AppConfig.IsDevelopment)
+            return;
+
         using var client = new HttpClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", AppConfig.GramadsBearerToken);
 

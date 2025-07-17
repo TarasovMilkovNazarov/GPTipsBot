@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Dtos;
-using GPTipsBot.Services;
+﻿using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Moq;
 using OpenAI.ObjectModels.ResponseModels;

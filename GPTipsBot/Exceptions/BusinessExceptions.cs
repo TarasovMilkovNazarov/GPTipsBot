@@ -4,9 +4,11 @@ namespace GPTipsBot.Exceptions;
 
 public class NotSupportedMessageException : Exception
 {
-    public NotSupportedMessageException(string message) : base($"Unsupported message type '{message}'.")
-    {
+    public long ChatId { get; }
 
+    public NotSupportedMessageException(long chatId, string message) : base($"Unsupported message type '{message}'.")
+    {
+        ChatId = chatId;
     }
 }
 

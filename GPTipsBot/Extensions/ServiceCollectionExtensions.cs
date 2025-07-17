@@ -9,6 +9,7 @@ using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.YandexCloud;
+using Quartz;
 
 namespace GPTipsBot.Extensions
 {
@@ -16,6 +17,11 @@ namespace GPTipsBot.Extensions
     {
         public static IServiceCollection ConfigureServices(this IServiceCollection services)
         {
+            services.AddSingleton<ISchedulerService, SchedulerService>();
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+            });
             services.AddMemoryCache();
             services.AddLocalization(options =>
             {

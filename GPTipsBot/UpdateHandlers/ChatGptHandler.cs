@@ -2,6 +2,7 @@
 using GPTipsBot.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Ardalis.GuardClauses;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using Telegram.Bot;
@@ -9,7 +10,6 @@ using GPTipsBot.Exceptions;
 using GPTipsBot.Services;
 using GPTipsBot.Resources;
 using OpenAI.ObjectModels.ResponseModels;
-using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -21,6 +21,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ILogger<ChatGptHandler> _log;
         private readonly ITelegramBotClient _botClient;
         private readonly IAdvertisementClient _advertisementClient;
+        private readonly TelejetAdClient _telejetAdClient;
         private readonly UserService _userService;
         private readonly ApplicationContext _context;
 
@@ -31,6 +32,7 @@ namespace GPTipsBot.UpdateHandlers
             ILogger<ChatGptHandler> log,
             ITelegramBotClient botClient,
             IAdvertisementClient gramadsAdvertisementClient,
+            TelejetAdClient telejetAdClient,
             UserService userService,
             ApplicationContext context)
         {
@@ -40,6 +42,7 @@ namespace GPTipsBot.UpdateHandlers
             _log = log;
             _botClient = botClient;
             _advertisementClient = gramadsAdvertisementClient;
+            _telejetAdClient = telejetAdClient;
             _userService = userService;
             _context = context;
         }
@@ -47,18 +50,16 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateDecorator update)
         {
             var shortMessage = update.Message.Text.Truncate(30) + "...";
-            MessageDto gtpResponse = null;
+            MessageDto? gptResponse = null;
 
             await using var dbTransaction = await _context.Database.BeginTransactionAsync();
-            var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
-
             var request = await _messageRepository.AddAsync(update.Message);
+            var successPayment = await _userService.PayForGpt(update.UserChatKey.Id);
 
-            await _userService.PayForGpt(update.UserChatKey.Id);
-
-            if (profile is { GptRequests: <= 0, Stars: <= 0 })
+            if (!successPayment)
             {
                 await dbTransaction.RollbackAsync();
+                _context.ChangeTracker.Clear();
                 await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
                     replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
@@ -98,33 +99,25 @@ namespace GPTipsBot.UpdateHandlers
                     sw.Stop();
                 }
 
-                _log.LogInformation("Get response to promt '{promt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
+                _log.LogInformation("Get response to prompt '{prompt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
 
-                gtpResponse = new MessageDto(update.UserChatKey)
+                gptResponse = new MessageDto(update.UserChatKey)
                 {
                     Text = response.Choices.FirstOrDefault()?.Message.Content ?? "",
                     Role = Enums.MessageOwner.Assistant,
                     ContextBound = true,
                 };
 
-                await _messageRepository.AddAsync(gtpResponse, request);
-                await _botClient.SendMarkdown2MessageAsync(update.UserChatKey.ChatId, gtpResponse.Text, (int)update.Message.TelegramMessageId!);
+                Guard.Against.Null(gptResponse);
+
+                await _messageRepository.AddAsync(gptResponse, request);
+                await _botClient.TrySendMarkdown2MessageAsync(update.UserChatKey.ChatId, gptResponse.Text, (int)update.Message.TelegramMessageId!);
             }
             catch (ClientException ex)
             {
                 _log.LogInformation(ex, shortMessage);
                 await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, ex.Message,
                     replyToMessageId: (int)update.Message.TelegramMessageId!);
-                return;
-            }
-            catch (ApiRequestException ex)
-            when (ex.Message.Contains("can't parse entities"))
-            {
-                var shortReply = gtpResponse!.Text.Truncate(30) + "...";
-                _log.LogInformation(ex, "Telegram returns error while parsing markdown in message: {Reply}. Trying to resend without markdown",
-                    shortReply);
-                await _botClient.SendSplittedTextMessageAsync(update.UserChatKey.ChatId,
-                    gtpResponse!.Text, replyToMessageId: (int)update.Message.TelegramMessageId!);
                 return;
             }
             finally
@@ -134,8 +127,7 @@ namespace GPTipsBot.UpdateHandlers
 
             await dbTransaction.CommitAsync();
             await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
-
-            await base.HandleAsync(update);
+            await _telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
         }
     }
 }
