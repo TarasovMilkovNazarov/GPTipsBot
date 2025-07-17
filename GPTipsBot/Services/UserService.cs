@@ -112,7 +112,7 @@ namespace GPTipsBot.Services
 
             if (user.FreeImageTextRecognitions > 0)
             {
-                user.FreeImageGenerations -= 1;
+                user.FreeImageTextRecognitions -= 1;
                 _userRepository.Update(user);
 
                 return true;
