@@ -12,6 +12,6 @@ public static class UpdateDecoratorExtensions
 
     public static bool IsExpired(this UpdateDecorator update)
     {
-        return update.Message.CreatedAt <= UpdateFirewall.Start - TimeSpan.FromMinutes(2);
+        return update.Message.CreatedAt <= FirstUpdateHandler.Start - TimeSpan.FromMinutes(2);
     }
 }

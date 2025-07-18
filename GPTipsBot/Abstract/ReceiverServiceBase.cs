@@ -56,7 +56,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, chatId);
                         try
                         {
-                            var worker = scope.ServiceProvider.GetRequiredService<UpdateFirewall>();
+                            var worker = scope.ServiceProvider.GetRequiredService<FirstUpdateHandler>();
                             await worker.HandleUpdateAsync(update);
                         }
                         catch (IgnoreMessageTypeException e)

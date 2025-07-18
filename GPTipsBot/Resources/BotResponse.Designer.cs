@@ -90,7 +90,7 @@ namespace GPTipsBot.Resources {
         ///- чтобы задать вопрос боту, просто отправьте текст
         ///- для генерации изображения введите команду /image, либо воспользуйтесь кнопкой меню
         ///
-        ///Внимание, число бесплатных запросов ограничено. Лимиты можно увидеть в личном кабинете /profile.
+        ///Внимание, число бесплатных запросов ограничено. Команда для просмотра лимитов: /profile.
         /// </summary>
         public static string BotDescription {
             get {
@@ -256,7 +256,7 @@ namespace GPTipsBot.Resources {
         
         /// <summary>
         ///   Looks up a localized string similar to Закончился лимит бесплатных запросов на сегодня.
-        ///Пополните баланс для продолжения либо приходите завтра, лимит обновляется каждый день
+        ///Пополните баланс для продолжения или приходите завтра, лимиты обновляются каждый день
         ///
         ///1 Stars = 10 запросам к ChatGpt или 2 генерации изображения.
         /// </summary>
@@ -356,7 +356,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Бот с интеграцией GPT-3.5 + DALL-E. Поможет ответить на вопросы и создать изображение по тексту 🤖👋 (Автор @alanextar).
+        ///   Looks up a localized string similar to Бот отвечает на вопросы и создает изображения🤖👋 (@my_super_ultra_smart_bot).
         /// </summary>
         public static string ShortDescription {
             get {

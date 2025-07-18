@@ -10,7 +10,7 @@ using Telegram.Bot.Types;
 
 namespace GPTipsBot
 {
-    public class UpdateFirewall
+    public class FirstUpdateHandler
     {
         private readonly MainHandler _mainHandler;
         private readonly SpeechToTextService _speechToTextService;
@@ -21,7 +21,7 @@ namespace GPTipsBot
 
         public static DateTime Start { get; private set; }
 
-        public UpdateFirewall(
+        public FirstUpdateHandler(
             MainHandler mainHandler,
             SpeechToTextService speechToTextService,
             TelejetAdClient telejetAdClient,
@@ -61,6 +61,7 @@ namespace GPTipsBot
             if (AppConfig.IsOnMaintenance)
             {
                 await _botClient.SendTextMessageAsync(extendedUpd.UserChatKey.ChatId, BotResponse.OnMaintenance);
+                return;
             }
 
             if (extendedUpd.IsRecovered)

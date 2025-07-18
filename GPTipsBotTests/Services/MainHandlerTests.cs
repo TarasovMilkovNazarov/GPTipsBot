@@ -35,7 +35,7 @@ namespace GPTipsBotTests.Services
         private MessageRepository _messageRepository;
         private readonly Mock<IGpt> _gptMock;
         private readonly Mock<IImageGenerator> _imageGeneratorMock;
-        private UpdateFirewall _updateFirewall;
+        private FirstUpdateHandler _firstUpdateHandler;
         private readonly Mock<ITextRecognizer> _recognitionServiceMock;
         private readonly Fixture _fixture;
         private IMemoryCache _memoryCache;
@@ -127,7 +127,7 @@ namespace GPTipsBotTests.Services
             await ClearDatabase(appContext);
             _messageRepository = _services.GetRequiredService<MessageRepository>();
             _userCommandRepository = _services.GetRequiredService<UserCommandRepository>();
-            _updateFirewall = _services.GetRequiredService<UpdateFirewall>();
+            _firstUpdateHandler = _services.GetRequiredService<FirstUpdateHandler>();
             _memoryCache = _services.GetRequiredService<IMemoryCache>();
         }
 
@@ -164,7 +164,7 @@ namespace GPTipsBotTests.Services
             foreach (var command in commandSet)
             {
                 var update = CreateTelegramUpdate(1, 2, command.Command);
-                await _updateFirewall.HandleUpdateAsync(update);
+                await _firstUpdateHandler.HandleUpdateAsync(update);
             }
 
             var commands = _userCommandRepository.Get(c => true).ToList();
@@ -204,7 +204,7 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            var updateHandlerFunc = async () => await _updateFirewall.HandleUpdateAsync(update);
+            var updateHandlerFunc = async () => await _firstUpdateHandler.HandleUpdateAsync(update);
             await updateHandlerFunc.Should().NotThrowAsync("Kicked member just ignored");
         }
 
@@ -223,7 +223,7 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            var updateHandlerFunc = async () => await _updateFirewall.HandleUpdateAsync(update);
+            var updateHandlerFunc = async () => await _firstUpdateHandler.HandleUpdateAsync(update);
             await updateHandlerFunc.Should().NotThrowAsync("Sticker message ignored");
         }
 
@@ -243,7 +243,7 @@ namespace GPTipsBotTests.Services
 
             var messageUpd = CreateTelegramUpdate(1, 2, prompt);
             var userId = messageUpd.Message.From.Id;
-            await _updateFirewall.HandleUpdateAsync(messageUpd);
+            await _firstUpdateHandler.HandleUpdateAsync(messageUpd);
 
             _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
                     arg.Message.Text.Equals(prompt)
@@ -266,7 +266,7 @@ namespace GPTipsBotTests.Services
 
             for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
             {
-                await _updateFirewall.HandleUpdateAsync(messageUpd);
+                await _firstUpdateHandler.HandleUpdateAsync(messageUpd);
             }
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
@@ -299,7 +299,7 @@ namespace GPTipsBotTests.Services
 
             for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
             {
-                await _updateFirewall.HandleUpdateAsync(messageUpd);
+                await _firstUpdateHandler.HandleUpdateAsync(messageUpd);
             }
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
@@ -318,7 +318,7 @@ namespace GPTipsBotTests.Services
             CultureInfo.CurrentUICulture = new CultureInfo("ru");
             var update = CreateTelegramUpdate(1, 2, BotMenu.ChooseLangCommand);
 
-            await _updateFirewall.HandleUpdateAsync(update);
+            await _firstUpdateHandler.HandleUpdateAsync(update);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == update.Message!.Chat.Id &&
@@ -334,7 +334,7 @@ namespace GPTipsBotTests.Services
 
             for (var i = 0; i < ImageGeneratorHandler.ImagesPerDayLimit + 1; i++)
             {
-                await _updateFirewall.HandleUpdateAsync(update);
+                await _firstUpdateHandler.HandleUpdateAsync(update);
             }
 
             var userId = update.Message!.From.Id;
@@ -358,7 +358,7 @@ namespace GPTipsBotTests.Services
         {
             var imagePromptWithCommand = "/image кракозябра";
             var getImageUpdate = CreateTelegramUpdate(1, 2, imagePromptWithCommand);
-            await _updateFirewall.HandleUpdateAsync(getImageUpdate);
+            await _firstUpdateHandler.HandleUpdateAsync(getImageUpdate);
 
             var generatedImagesCount = _messageRepository.GetTodayImagesCount(getImageUpdate.Message!.From.Id);
 
@@ -371,7 +371,7 @@ namespace GPTipsBotTests.Services
             var update = CreateTelegramUpdate(1, 2, BotMenu.ImageTextRecognizeCommand);
             var userId = update.Message!.From.Id;
 
-            await _updateFirewall.HandleUpdateAsync(update);
+            await _firstUpdateHandler.HandleUpdateAsync(update);
             update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[]
             {
@@ -381,7 +381,7 @@ namespace GPTipsBotTests.Services
                 }
             };
 
-            await _updateFirewall.HandleUpdateAsync(update);
+            await _firstUpdateHandler.HandleUpdateAsync(update);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
@@ -406,7 +406,7 @@ namespace GPTipsBotTests.Services
             };
             var userId = update.Message!.From.Id;
 
-            await _updateFirewall.HandleUpdateAsync(update);
+            await _firstUpdateHandler.HandleUpdateAsync(update);
 
             var sendMessageRequestExpected = new SendMessageRequest(userId,
                 BotResponse.SendImageTextRecognitionCommandFirst)
@@ -424,12 +424,12 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task ResetContext_OldContextExists_ReturnNewContextId()
         {
-            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
             var userId = _startTelegramUpdate.Message!.From.Id;
             var initialContextId = _messageRepository.GetLastContext(userId, userId);
 
             var resetContextUpdDecorator = CreateTelegramUpdate(1, 2, BotMenu.ResetContextCommand);
-            await _updateFirewall.HandleUpdateAsync(resetContextUpdDecorator);
+            await _firstUpdateHandler.HandleUpdateAsync(resetContextUpdDecorator);
 
             var newContextId = _messageRepository.GetLastContext(userId, userId);
 
@@ -439,15 +439,15 @@ namespace GPTipsBotTests.Services
         [Test]
         public async Task SendMessage_ContextExists_SameContext()
         {
-            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
             var userId = _startTelegramUpdate.Message!.From.Id;
             var initialContextId = _messageRepository.GetLastContext(userId, userId);
 
             var firstMessageUpd = CreateTelegramUpdate(1, 2, "first");
-            await _updateFirewall.HandleUpdateAsync(firstMessageUpd);
+            await _firstUpdateHandler.HandleUpdateAsync(firstMessageUpd);
 
             var secondMessageUpd = CreateTelegramUpdate(3, 4, "second");
-            await _updateFirewall.HandleUpdateAsync(secondMessageUpd);
+            await _firstUpdateHandler.HandleUpdateAsync(secondMessageUpd);
 
             var newContextId = _messageRepository.GetLastContext(userId, userId);
 
@@ -459,7 +459,7 @@ namespace GPTipsBotTests.Services
         {
             var userRepository = _services.GetRequiredService<UserRepository>();
 
-            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
 
@@ -471,8 +471,8 @@ namespace GPTipsBotTests.Services
         {
             var userRepository = _services.GetRequiredService<UserRepository>();
 
-            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
-            await _updateFirewall.HandleUpdateAsync(_startTelegramUpdate);
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
             var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + _startTelegramUpdate.Message.From.Id);

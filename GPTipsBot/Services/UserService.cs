@@ -156,12 +156,9 @@ namespace GPTipsBot.Services
             fullName += user.LastName == null ? "" : $" {user.LastName}";
 
             activeUserCount ??= _userRepository.GetActiveUsersCount();
-
             activeUserCount++;
-            var utcNow = DateTime.UtcNow;
-            var todayStr = $"{utcNow.Day}_{utcNow.Month}_{utcNow.Year}";
 
-            var message = $"#newUser_{todayStr}"
+            var message = $"#newUser_{DateTime.UtcNow:dd_MM_yyyy}"
                           + Environment.NewLine + $"{fullName} with telegramId={user.Id} created";
             message += Environment.NewLine + $"Total count: {activeUserCount}";
 

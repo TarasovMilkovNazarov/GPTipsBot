@@ -187,7 +187,7 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>Enter your message below. We appreciate any feedback.</value>
   </data>
   <data name="ShortDescription" xml:space="preserve">
-    <value>A bot integrated with GPT-3.5 + DALL-E. Helps to answer questions and create images based on text 🤖👋 (Author @alanextar)</value>
+    <value>A bot answers to your questions and creates images 🤖👋 (Support @my_super_ultra_smart_bot)</value>
   </data>
   <data name="ShortDevDescription" xml:space="preserve">
     <value>It's for debugging purpose of the main bot(@GPTipsBot)</value>

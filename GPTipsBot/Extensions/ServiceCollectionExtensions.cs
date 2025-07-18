@@ -35,7 +35,7 @@ namespace GPTipsBot.Extensions
                         return new TelegramBotClient(options);
                     });
 
-            services.AddScoped<UpdateFirewall>();
+            services.AddScoped<FirstUpdateHandler>();
             services.AddScoped<ReceiverService>();
             services.AddHostedService<PollingService>();
 

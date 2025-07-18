@@ -184,7 +184,7 @@
     <value>Введите сообщение ниже. Будем рады любой обратной связи.</value>
   </data>
   <data name="ShortDescription" xml:space="preserve">
-    <value>Бот с интеграцией GPT-3.5 + DALL-E. Поможет ответить на вопросы и создать изображение по тексту 🤖👋 (Автор @alanextar)</value>
+    <value>Бот отвечает на вопросы и создает изображения🤖👋 (@my_super_ultra_smart_bot)</value>
   </data>
   <data name="ShortDevDescription" xml:space="preserve">
     <value>Служебный бот для разработки, добавляйте @GPTipsBot</value>

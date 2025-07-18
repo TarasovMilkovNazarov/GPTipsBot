@@ -29,25 +29,44 @@ public class DailyJob : IJob
         var today = DateTime.UtcNow.Date;
 
         var newUsersCount = await _context.Users.CountAsync(u => u.CreatedAt > today);
-        var imagesGeneratedCount = await _context.Messages.CountAsync(m =>
-            m.Type == BotMessageType.ImageGenerated && m.CreatedAt > today);
-        var chatGptMessagesCount = await _context.Messages.CountAsync(m =>
-            m.Role == MessageOwner.Assistant && m.CreatedAt > today);
+
+        var counts = await _context.Messages
+            .Where(m => m.CreatedAt > today)
+            .GroupBy(m => m.CreatedAt.Date)
+            .Select(g => new StatisticsDto
+            {
+                ImagesCount = g.Count(m => m.Type == BotMessageType.ImageGenerated),
+                RecognitionsCount = g.Count(m => m.Type == BotMessageType.RecognizeText),
+                GptResponses = g.Count(m => m.Role == MessageOwner.Assistant)
+            })
+            .FirstOrDefaultAsync() ?? new();
 
         var message = "#statistics" + Environment.NewLine +
-                      $"New users created: {newUsersCount} for {today.ToShortDateString()}";
-        message += Environment.NewLine + $"Images generated: {imagesGeneratedCount}";
-        message += Environment.NewLine + $"Gpt requests: {chatGptMessagesCount}";
+                      $"New users created: {newUsersCount} for {today:dd.MM.yyyy}" + Environment.NewLine;
+        message += Environment.NewLine + $"Images generated: {counts.ImagesCount}";
+        message += Environment.NewLine + $"Text recognitions: {counts.RecognitionsCount}";
+        message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
 
         await _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
     }
 
     private async Task RemoveOldMessages()
     {
+        const int batchSize = 1000;
+
         var cutoffDate = DateTime.UtcNow.AddDays(-30);
-        await _context.Messages
-            .Where(m => m.CreatedAt < cutoffDate)
-            .ExecuteDeleteAsync();
+
+        while (true)
+        {
+            var deleteCount = await _context.Messages
+                .Where(m => m.CreatedAt < cutoffDate)
+                .Take(batchSize)
+                .ExecuteDeleteAsync();
+
+            if (deleteCount == 0) break;
+
+            await Task.Delay(100);
+        }
     }
 
     private async Task UpdateUserDailyLimits()
