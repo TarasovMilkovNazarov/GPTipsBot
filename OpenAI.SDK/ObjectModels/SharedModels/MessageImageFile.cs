@@ -1,2 +1,0 @@
-﻿namespace OpenAI.ObjectModels.SharedModels;
-

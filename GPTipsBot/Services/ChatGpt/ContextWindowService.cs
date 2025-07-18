@@ -1,8 +1,10 @@
-﻿using GPTipsBot.Dtos;
+﻿using Ardalis.GuardClauses;
+using GPTipsBot.Dtos;
+using GPTipsBot.Enums;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
-using OpenAI.ObjectModels.RequestModels;
+using OpenAI.Chat;
 using TiktokenSharp;
 
 namespace GPTipsBot.Services
@@ -22,7 +24,7 @@ namespace GPTipsBot.Services
             _messageRepository = messageRepository;
         }
 
-        public bool TryToAddMessage(string message, string role, out long messageTokensCount)
+        public bool TryToAddMessage(string message, MessageOwner role, out long messageTokensCount)
         {
             messageTokensCount = 0;
 
@@ -38,19 +40,41 @@ namespace GPTipsBot.Services
             }
 
             TokensCount += messageTokensCount;
-            _chatMessages.AddFirst(new ChatMessage(role, message));
+
+            ChatMessage chatMessage = null;
+            switch (role)
+            {
+                case MessageOwner.User:
+                    chatMessage = ChatMessage.CreateUserMessage(message);
+                    break;
+                case MessageOwner.Assistant:
+                    chatMessage = ChatMessage.CreateAssistantMessage(message);
+                    break;
+                case MessageOwner.System:
+                    chatMessage = ChatMessage.CreateSystemMessage(message);
+                    break;
+            };
+
+            Guard.Against.Null(chatMessage);
+
+            _chatMessages.AddFirst(chatMessage);
 
             return true;
         }
 
-        public ChatMessage[] GetContext(UserChatKey userKey, long contextId)
+        public ChatMessage[] GetContext(UserChatKey userKey, long? contextId)
         {
+            if (contextId == null)
+            {
+                return new ChatMessage[]{};
+            }
+
             var messages = _messageRepository
-                .GetRecentContextMessages(userKey, contextId).Where(x => !string.IsNullOrEmpty(x.Text));
+                .GetRecentContextMessages(userKey, contextId.Value).Where(x => !string.IsNullOrEmpty(x.Text));
 
             foreach (var item in messages)
             {
-                var isMessageAddedToContext = TryToAddMessage(item.Text, item.Role.ToString().ToLower(), out var messageTokensCount);
+                var isMessageAddedToContext = TryToAddMessage(item.Text, item.Role, out var messageTokensCount);
                 if (isMessageAddedToContext)
                 {
                     continue;

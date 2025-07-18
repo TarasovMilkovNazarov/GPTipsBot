@@ -1,7 +1,9 @@
-﻿using GPTipsBot.Services;
+﻿using System.ClientModel;
+using System.ClientModel.Primitives;
+using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Moq;
-using OpenAI.ObjectModels.ResponseModels;
+using OpenAI.Chat;
 
 namespace GPTipsBotTests.Services
 {
@@ -10,13 +12,14 @@ namespace GPTipsBotTests.Services
         public static Mock<IGpt> CreateGptMock()
         {
             var mock = new Mock<IGpt>();
-            var response = new ChatCompletionCreateResponse
-            {
-                Choices = new() { new(){ Message = new("system", "test") } }
-            };
+            var response = new SystemChatMessage("test");
+            Mock<ClientResult<ChatCompletion>> mockResult = new(null, Mock.Of<PipelineResponse>());
+            mockResult
+                .SetupGet(result => result.Value)
+                .Returns(ChatCompletion);
 
             mock.Setup(m => m.SendMessage(It.IsAny<UpdateDecorator>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(response);
+                .ReturnsAsync(mockResult.Object);
 
             return mock;
         }

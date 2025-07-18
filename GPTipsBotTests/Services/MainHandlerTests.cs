@@ -16,7 +16,7 @@ using GPTipsBot.Services.YandexCloud;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using OpenAI.ObjectModels.ResponseModels;
+using OpenAI.Chat;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
@@ -232,10 +232,7 @@ namespace GPTipsBotTests.Services
         {
             var prompt = "What is the capital city of France?";
             var gtpResponse = "Paris";
-            var response = new ChatCompletionCreateResponse
-            {
-                Choices = new() { new() { Message = new("system", gtpResponse) } }
-            };
+            var response = new AssistantChatMessage(gtpResponse);
 
             _gptMock.Setup(m => m.SendMessage(It.Is<UpdateDecorator>(arg =>
                     arg.Message.Text.Equals(prompt)), It.IsAny<CancellationToken>()))
@@ -285,10 +282,7 @@ namespace GPTipsBotTests.Services
             var prompt = "SendTextMessage_ManyParallelRequestsPerMinute_LimitExceeded";
             var messageUpd = CreateTelegramUpdate(1, 2, prompt);
 
-            var response = new ChatCompletionCreateResponse
-            {
-                Choices = new() { new() { Message = new("system", "test") } }
-            };
+            var response = new SystemChatMessage("test");
             _gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
                     It.IsAny<CancellationToken>()))
                 .Returns(async (UpdateDecorator upd, CancellationToken token) =>

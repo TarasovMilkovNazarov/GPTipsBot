@@ -1,13 +1,15 @@
-﻿using GPTipsBot.UpdateHandlers;
+﻿using System.ClientModel;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
-using OpenAI.ObjectModels.RequestModels;
-using OpenAI.ObjectModels.ResponseModels;
 using Timer = System.Timers.Timer;
 using GPTipsBot.Repositories;
 using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
 using Polly.Retry;
+using OpenAI;
+using OpenAI.Audio;
+using OpenAI.Chat;
 
 namespace GPTipsBot.Services
 {
@@ -20,6 +22,7 @@ namespace GPTipsBot.Services
         private readonly ContextWindow _contextWindow;
         private Timer _timer;
         private readonly AsyncRetryPolicy _policy;
+        private readonly OpenAIClient _openAiClient;
 
         private const int MaxRetryCount = 4;
 
@@ -39,52 +42,62 @@ namespace GPTipsBot.Services
                     var delay = TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
                     return delay;
                 });
+
+            _openAiClient = _openAiServiceCreator.Create(AppConfig.ProxyApiApiKey);
         }
 
-        public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
+        public async Task GenerateAudio(string text, CancellationToken cancellationToken)
+        {
+            var audioClient = _openAiClient.GetAudioClient("tts-1");
+
+            var result = await audioClient.GenerateSpeechAsync(text, GeneratedSpeechVoice.Nova,
+                new SpeechGenerationOptions
+                {
+                    SpeedRatio = 1.0f,
+                    ResponseFormat = GeneratedSpeechFormat.Wav
+                },
+                cancellationToken: cancellationToken);
+        }
+
+        public async Task<ClientResult<ChatCompletion>?> SendMessage(UpdateDecorator update, CancellationToken token)
         {
             ChatMessage[] textWithContext;
 
             if (update.Message.NewContext)
             {
-                textWithContext = new[] { new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text) };
+                textWithContext = new ChatMessage[] { new UserChatMessage(update.Message.Text) };
             }
             else
             {
-                textWithContext = _contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value);
+                textWithContext = _contextWindow.GetContext(update.UserChatKey, update.Message.ContextId);
             }
 
             return await SendMessageInternal(textWithContext, token);
         }
 
-        private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
+        private async Task<ClientResult<ChatCompletion>?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
         {
             _log.LogInformation("Send request to OpenAi service: {messages}", messages.Last().Content);
 
-            ChatCompletionCreateResponse? response = null;
+            ClientResult<ChatCompletion>? response = null;
 
             await _policy.ExecuteAsync(async (context, _) =>
             {
-                var currentToken = await _openAiServiceCreator.GetApiKeyAsync();
-                var openAiService = _openAiServiceCreator.Create(currentToken);
-
                 var retryAttempt = context.TryGetValue("retryAttempt", out var value)
                     ? (int)value : 0;
 
                 try
                 {
-                    response = await openAiService.ChatCompletion.CreateCompletion(
-                        new ChatCompletionCreateRequest { Messages = messages }, cancellationToken: cancellationToken);
+                    response = await _openAiClient.GetChatClient("openai/gpt-3.5-turbo")
+                        .CompleteChatAsync(messages, cancellationToken: cancellationToken);
 
-                    if (response.Successful)
+                    if (response.Value.Content != null)
                     {
-                        _openAiServiceCreator.ReturnApiKey(currentToken);
                         return;
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    _openAiServiceCreator.ReturnApiKey(currentToken);
                     cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (Exception ex)
@@ -94,47 +107,46 @@ namespace GPTipsBot.Services
 
                 context["retryAttempt"] = retryAttempt + 1;
 
-                HandleResponseErrors(response, currentToken);
-                _log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}",
-                    retryAttempt, response?.Error?.Code, response?.Error?.Message);
+                // _log.LogInformation("Failed request #{retryAttempt} to OpenAi service: [{Code}] {Message}",
+                //     retryAttempt, response?.Error?.Code, response?.Error?.Message);
                 throw new ChatGptException(retryAttempt);
             }, new Context(), cancellationToken);
 
             return response;
         }
 
-        private void HandleResponseErrors(ChatCompletionCreateResponse? response, string apiKey)
-        {
-            if (response == null)
-            {
-                _openAiServiceCreator.ReturnApiKey(apiKey);
-                return;
-            }
-
-            if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
-            {
-                _openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.Deactivated);
-            }
-            else if (response.Error?.Code == "insufficient_quota")
-            {
-                _openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.InsufficientQuota);
-            }
-            else if (response.Error?.Code == "rate_limit_exceeded" && response.Error.Message != null)
-            {
-                if (response.Error.Message.Contains("on requests per day"))
-                {
-                    _openaiAccountsRepository.FreezeApiKey(apiKey);
-                }
-                else if (response.Error.Message.Contains("on requests per min"))
-                {
-                    _openAiServiceCreator.ReturnApiKey(apiKey);
-                }
-            }
-            else
-            {
-                _openAiServiceCreator.ReturnApiKey(apiKey);
-            }
-        }
+        // private void HandleResponseErrors(ClientResult<ChatCompletion>? response, string apiKey)
+        // {
+        //     if (response == null)
+        //     {
+        //         _openAiServiceCreator.ReturnApiKey(apiKey);
+        //         return;
+        //     }
+        //
+        //     if (response.Error?.Message != null && response.Error.Message.Contains("deactivated"))
+        //     {
+        //         _openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.Deactivated);
+        //     }
+        //     else if (response.Error?.Code == "insufficient_quota")
+        //     {
+        //         _openaiAccountsRepository.RemoveApiKey(apiKey, DeletionReason.InsufficientQuota);
+        //     }
+        //     else if (response.Error?.Code == "rate_limit_exceeded" && response.Error.Message != null)
+        //     {
+        //         if (response.Error.Message.Contains("on requests per day"))
+        //         {
+        //             _openaiAccountsRepository.FreezeApiKey(apiKey);
+        //         }
+        //         else if (response.Error.Message.Contains("on requests per min"))
+        //         {
+        //             _openAiServiceCreator.ReturnApiKey(apiKey);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         _openAiServiceCreator.ReturnApiKey(apiKey);
+        //     }
+        // }
 
         private Timer setup_Timer(OpenaiAccountsRepository openaiAccountsRepository)
         {
@@ -169,6 +181,6 @@ namespace GPTipsBot.Services
 
     public interface IGpt
     {
-        Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
+        Task<ClientResult<ChatCompletion>?> SendMessage(UpdateDecorator update, CancellationToken token);
     }
 }

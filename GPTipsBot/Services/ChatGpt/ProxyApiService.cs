@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.ClientModel;
+using Microsoft.Extensions.Logging;
 using OpenAI;
-using OpenAI.Managers;
 
 namespace GPTipsBot.Services
 {
@@ -15,26 +15,16 @@ namespace GPTipsBot.Services
             _token = AppConfig.ProxyApiApiKey;
         }
 
-        public override OpenAIService Create(string token)
+        public override OpenAIClient Create(string token)
         {
-            var clientHandler = new HttpClientHandler()
-            {
-                // ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true,
-            };
-            var loggingHandler = new LoggingHandler()
-            {
-                InnerHandler = clientHandler
-            };
 
-            var httpClient = new HttpClient(loggingHandler);
-            // httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json; charset=utf-8");
-
-            var openAiService = new OpenAIService(new OpenAiOptions()
+            var openAiService = new OpenAIClient(new ApiKeyCredential(AppConfig.ProxyApiApiKey), new OpenAIClientOptions()
             {
-                BaseDomain = "https://api.vsegpt.ru/v1",
-                ApiKey = token,
-                DefaultModelId = "openai/gpt-3.5-turbo",
-            }, httpClient);
+                Endpoint = new Uri("https://api.vsegpt.ru/v1"),
+
+            });
+
+
 
             return openAiService;
         }
