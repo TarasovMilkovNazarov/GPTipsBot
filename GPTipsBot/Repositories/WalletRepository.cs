@@ -20,6 +20,7 @@ public class WalletRepository: GenericRepository<Wallet>
     {
         Guard.Against.Null(wallet);
         wallet.Balance += delta;
+        Update(wallet);
 
         return true;
     }
