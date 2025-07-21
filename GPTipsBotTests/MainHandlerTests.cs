@@ -1,30 +1,35 @@
-﻿using dotenv.net;
+﻿using System.Globalization;
+using AutoFixture;
+using dotenv.net;
+using FluentAssertions;
+using GPTipsBot;
 using GPTipsBot.Db;
+using GPTipsBot.Dtos;
+using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
+using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
-using GPTipsBot.UpdateHandlers;
-using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
-using System.Globalization;
-using AutoFixture;
-using FluentAssertions;
-using GPTipsBot;
-using GPTipsBot.Dtos;
 using GPTipsBot.Services.YandexCloud;
+using GPTipsBot.UpdateHandlers;
+using GPTipsBotTests.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using NUnit.Framework;
 using OpenAI.ObjectModels.ResponseModels;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.Payments;
 using File = Telegram.Bot.Types.File;
 using Message = Telegram.Bot.Types.Message;
+using User = Telegram.Bot.Types.User;
 
-namespace GPTipsBotTests.Services
+namespace GPTipsBotTests
 {
     public partial class MainHandlerTests
     {
@@ -341,16 +346,16 @@ namespace GPTipsBotTests.Services
 
             var generatedImagesCount = _messageRepository.GetTodayImagesCount(userId);
 
-            generatedImagesCount.Should().Be(ImageGeneratorHandler.ImagesPerDayLimit);
+            generatedImagesCount.Should().Be(AppConfig.FreeImageGenerationsCount);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
-                    arg.Text == String.Format(BotResponse.ImagesPerDayLimit, ImageGeneratorHandler.ImagesPerDayLimit)
+                    arg.Text == String.Format(BotResponse.ImagesPerDayLimit, AppConfig.FreeImageGenerationsCount)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
             _imageGeneratorMock.Verify(g => g.GenerateImage("гора"),
-                Times.Exactly(ImageGeneratorHandler.ImagesPerDayLimit));
+                Times.Exactly(AppConfig.FreeImageGenerationsCount));
         }
 
         [Test]
@@ -477,6 +482,131 @@ namespace GPTipsBotTests.Services
             var newUser = userRepository.Get(TestConstants.UserId);
             var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + _startTelegramUpdate.Message.From.Id);
             cached.Should().BeEquivalentTo(newUser);
+        }
+
+        [Test]
+        public async Task DepositCommand_WalletNotExists_BalanceChanged()
+        {
+            var walletRepository = _services.GetRequiredService<WalletRepository>();
+
+            var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault()?.Balance ?? 0;
+
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            var starsToAdd = 10;
+
+            var paymentUpdate = new Update
+            {
+                PreCheckoutQuery = new PreCheckoutQuery
+                {
+                    From = new User
+                    {
+                        Id = TestConstants.UserId
+                    },
+                    Currency = "XTR",
+                    TotalAmount = starsToAdd
+                },
+            };
+            await _firstUpdateHandler.HandleUpdateAsync(paymentUpdate);
+
+            var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
+
+            walletUpdated.Should().NotBeNull();
+            walletUpdated.Balance.Should().Be(balanceBefore + starsToAdd);
+        }
+
+        [Test]
+        [TestCase("10", true)]
+        [TestCase("-10", false)]
+        [TestCase("some random text", false)]
+        public async Task DepositCommand_UserInput_BalanceChanged(string input, bool isValid)
+        {
+            var walletRepository = _services.GetRequiredService<WalletRepository>();
+
+            var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault()?.Balance ?? 0;
+
+            await _firstUpdateHandler.HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, BotMenu.DepositCommand));
+
+            var starsInputUpdateFunc = async () => await _firstUpdateHandler
+                .HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, input));
+
+            if (!isValid)
+            {
+                await starsInputUpdateFunc.Should().ThrowExactlyAsync<ClientException>();
+                return;
+            }
+            else
+            {
+                await starsInputUpdateFunc();
+            }
+
+            var paymentUpdate = new Update
+            {
+                PreCheckoutQuery = new PreCheckoutQuery
+                {
+                    From = new User
+                    {
+                        Id = TestConstants.UserId
+                    },
+                    Currency = "XTR",
+                    TotalAmount = int.Parse(input)
+                },
+            };
+            await _firstUpdateHandler.HandleUpdateAsync(paymentUpdate);
+
+            var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
+
+            walletUpdated.Should().NotBeNull();
+            walletUpdated.Balance.Should().Be(balanceBefore + int.Parse(input));
+        }
+
+        [Test]
+        public async Task DepositCommand_WalletExists_BalanceChanged()
+        {
+            await using var scope = _services.CreateAsyncScope();
+            var walletRepository = scope.ServiceProvider.GetRequiredService<WalletRepository>();
+            var userRepository = scope.ServiceProvider.GetRequiredService<UserRepository>();
+
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+
+            var user = new GPTipsBot.Models.User()
+            {
+                Id = TestConstants.UserId,
+                FirstName = "Test"
+            };
+            await userRepository.Create(user);
+            walletRepository.Create(new Wallet
+            {
+                CreatedAt = DateTime.UtcNow,
+                User = user,
+                Balance = 10,
+                Currency = "XTR"
+            });
+
+            await context.SaveChangesAsync();
+
+            var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).First().Balance;
+
+            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            var starsToAdd = 10;
+
+            var paymentUpdate = new Update
+            {
+                PreCheckoutQuery = new PreCheckoutQuery
+                {
+                    From = new User
+                    {
+                        Id = TestConstants.UserId
+                    },
+                    Currency = "XTR",
+                    TotalAmount = starsToAdd
+                },
+            };
+            await _firstUpdateHandler.HandleUpdateAsync(paymentUpdate);
+
+            var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
+
+            walletUpdated.Should().NotBeNull();
+            walletUpdated.Balance.Should().Be(balanceBefore + starsToAdd);
         }
 
         private async Task ClearDatabase(ApplicationContext context)
