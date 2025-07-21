@@ -52,7 +52,7 @@ public class DailyJob : IJob
 
     private async Task RemoveOldMessages()
     {
-        const int batchSize = 1000;
+        const int batchSize = 100;
 
         var cutoffDate = DateTime.UtcNow.AddDays(-30);
 

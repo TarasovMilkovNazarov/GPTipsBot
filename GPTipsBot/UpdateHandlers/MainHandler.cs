@@ -88,7 +88,7 @@ namespace GPTipsBot.UpdateHandlers
                 await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
                     "TRX", CancellationToken.None);
                 var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
-                var reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
+                var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                     profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
                 var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                     .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
@@ -134,7 +134,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Music)
             {
-                var isSuccessPayment = await _moneyService.PayForMusic(update.UserChatKey.Id);
+                var isSuccessPayment = await _moneyService.PayForMusic(update.UserChatKey.Id, 10);
                 if (!isSuccessPayment)
                 {
                     return;
@@ -142,6 +142,18 @@ namespace GPTipsBot.UpdateHandlers
 
                 var audio = await _gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
                 await _botClient.SendAudioAsync(update.UserChatKey.Id, InputFile.FromStream(audio));
+                return;
+            }
+            else if (lastCommand?.Type == CommandType.Song)
+            {
+                var isSuccessPayment = await _moneyService.PayForMusic(update.UserChatKey.Id, 20);
+                if (!isSuccessPayment)
+                {
+                    return;
+                }
+
+                var audio = await _gptService.GenerateSongByText(update.Message!.Text, CancellationToken.None);
+                await _botClient.SendAudioAsync(update.UserChatKey.Id, InputFile.FromUri(audio));
                 return;
             }
             else

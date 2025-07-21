@@ -5,6 +5,7 @@ using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
+using System.Net.Http.Headers;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
@@ -80,6 +81,13 @@ namespace GPTipsBot.Extensions
             ;
 
             services.AddDbContext<ApplicationContext>();
+
+            services.AddHttpClient<IGpt, ChatGptService>(b =>
+            {
+                b.BaseAddress = new Uri("https://api.vsegpt.ru/v1/");
+                b.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", AppConfig.ProxyApiApiKey);
+            });
 
             return services;
         }

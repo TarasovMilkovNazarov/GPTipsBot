@@ -26,6 +26,7 @@ public enum CommandType
     GetProfile,
     Donate,
     Music,
+    Song
 }
 
 public class Wallet: Entity

@@ -268,4 +268,7 @@ The bot will send a 30-second audio file. Generation cost: 10 stars.</value>
 
 After adding stars, run the /music command again.</value>
   </data>
+  <data name="SongResponse" xml:space="preserve">
+    <value>Input the text of a song. Generation cost: 20 stars.</value>
+  </data>
 </root>

@@ -415,6 +415,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Введите текст песни. Стоимость генерации 20 stars.
+        /// </summary>
+        public static string SongResponse {
+            get {
+                return ResourceManager.GetString("SongResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Использовать бесплатное прокси: {0}.
         /// </summary>
         public static string SwitchProxy {

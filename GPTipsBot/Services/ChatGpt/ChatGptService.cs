@@ -1,4 +1,9 @@
-﻿using GPTipsBot.UpdateHandlers;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using GPTipsBot.Dtos;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
@@ -7,6 +12,7 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Resources;
 using Polly.Retry;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -21,13 +27,15 @@ namespace GPTipsBot.Services
         private readonly OpenAiServiceCreator _openAiServiceCreator;
         private readonly ContextWindow _contextWindow;
         private readonly ITelegramBotClient _botClient;
+        private readonly HttpClient _httpClient;
         private Timer _timer;
         private readonly AsyncRetryPolicy _policy;
 
         private const int MaxRetryCount = 4;
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
-            TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow, ITelegramBotClient botClient)
+            TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow,
+            ITelegramBotClient botClient, HttpClient httpClient)
         {
             _log = log;
             _openaiAccountsRepository = openaiAccountsRepository;
@@ -35,6 +43,7 @@ namespace GPTipsBot.Services
             _openAiServiceCreator = openAiServiceCreator;
             _contextWindow = contextWindow;
             _botClient = botClient;
+            _httpClient = httpClient;
             _timer = setup_Timer(openaiAccountsRepository);
             _policy = Policy
                 .Handle<ChatGptException>()
@@ -79,6 +88,42 @@ namespace GPTipsBot.Services
             }, cancellationToken);
 
             return audio.Data;
+        }
+
+        public async Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken)
+        {
+            var model = "txt2sng-minimax/music";
+
+            var jsonContent = JsonSerializer.Serialize(new GenerateRequest
+            {
+                Model = model,
+                Action = "generate",
+                Prompt = text
+            });
+            var generateResponse = await _httpClient.PostAsync("audio/generate",
+                new StringContent(jsonContent, Encoding.UTF8), cancellationToken);
+
+            var isGenerated = false;
+            while (!isGenerated)
+            {
+                var response = await _httpClient.GetAsync("status?request_id={request_id}", cancellationToken);
+
+                var generateData = await response.Content.ReadFromJsonAsync<GenerateResponse>
+                    (cancellationToken: cancellationToken);
+
+                if (generateData.Status == "COMPLETED")
+                {
+                    isGenerated = true;
+                }
+                else if (generateData.Status == "FAILED")
+                {
+                    throw new Exception("Failed to generate song");
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+            }
+
+            return _httpClient.BaseAddress;
         }
 
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
@@ -195,5 +240,6 @@ namespace GPTipsBot.Services
     {
         Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
         Task<Stream> GenerateMusicByText(string text, CancellationToken cancellationToken);
+        Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken);
     }
 }

@@ -35,15 +35,15 @@ public class MoneyService
         UserBalanceChanged += UserBalanceChangedHandler;
     }
 
-    public async Task<bool> PayForMusic(long userId)
+    public async Task<bool> PayForMusic(long userId, int amount)
     {
         var wallet = _walletRepository.Get(w => w.UserId == userId).FirstOrDefault();
-        if (wallet == null || wallet.Balance < 10)
+        if (wallet == null || wallet.Balance < amount)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-            string response = string.Format(BotResponse.InsufficientBalanceForMusic, 10);
+            var response = string.Format(BotResponse.InsufficientBalanceForMusic, amount);
 
             await _botClient.SendTextMessageAsync(userId, response,
                 replyMarkup: inlineKeyboard);

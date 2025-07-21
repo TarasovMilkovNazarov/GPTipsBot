@@ -268,4 +268,7 @@
 
 После пополнения введите команду /music заново</value>
   </data>
+  <data name="SongResponse" xml:space="preserve">
+    <value>Введите текст песни. Стоимость генерации 20 stars</value>
+  </data>
 </root>
