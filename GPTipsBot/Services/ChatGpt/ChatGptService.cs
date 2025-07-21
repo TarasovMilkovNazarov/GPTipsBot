@@ -8,6 +8,8 @@ using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
 using Polly.Retry;
+using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace GPTipsBot.Services
 {
@@ -18,19 +20,21 @@ namespace GPTipsBot.Services
         private readonly TokenQueue _tokenQueue;
         private readonly OpenAiServiceCreator _openAiServiceCreator;
         private readonly ContextWindow _contextWindow;
+        private readonly ITelegramBotClient _botClient;
         private Timer _timer;
         private readonly AsyncRetryPolicy _policy;
 
         private const int MaxRetryCount = 4;
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
-            TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow)
+            TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow, ITelegramBotClient botClient)
         {
             _log = log;
             _openaiAccountsRepository = openaiAccountsRepository;
             _tokenQueue = tokenQueue;
             _openAiServiceCreator = openAiServiceCreator;
             _contextWindow = contextWindow;
+            _botClient = botClient;
             _timer = setup_Timer(openaiAccountsRepository);
             _policy = Policy
                 .Handle<ChatGptException>()
@@ -55,6 +59,26 @@ namespace GPTipsBot.Services
             }
 
             return await SendMessageInternal(textWithContext, token);
+        }
+
+        public async Task<Stream> GenerateMusicByText(string text, CancellationToken cancellationToken)
+        {
+            var currentToken = await _openAiServiceCreator.GetApiKeyAsync();
+            var openAiService = _openAiServiceCreator.Create(currentToken);
+            var audio = await openAiService.Audio.CreateSpeech<Stream>(new AudioCreateSpeechRequest
+            {
+                Model = "tta-stable/stable-audio",
+                Input = text,
+                Voice = "nova",
+                ResponseFormat = "wav",
+                Speed = 1.0f,
+                ExtraBody = new ExtraBody
+                {
+                    SecondsTotal = 10
+                }
+            }, cancellationToken);
+
+            return audio.Data;
         }
 
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(ChatMessage[] messages, CancellationToken cancellationToken)
@@ -170,5 +194,6 @@ namespace GPTipsBot.Services
     public interface IGpt
     {
         Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
+        Task<Stream> GenerateMusicByText(string text, CancellationToken cancellationToken);
     }
 }

@@ -233,6 +233,24 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Создать музыку.
+        /// </summary>
+        internal static string MusicButton {
+            get {
+                return ResourceManager.GetString("MusicButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string MusicResponse {
+            get {
+                return ResourceManager.GetString("MusicResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Личный кабинет.
         /// </summary>
         internal static string ProfileButton {

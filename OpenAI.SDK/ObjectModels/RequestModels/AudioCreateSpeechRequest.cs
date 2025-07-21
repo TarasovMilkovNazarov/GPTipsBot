@@ -36,4 +36,13 @@ public record AudioCreateSpeechRequest : IOpenAiModels.IModel
     /// </summary>
     [JsonPropertyName("speed")]
     public float? Speed { get; set; }
+
+    [JsonPropertyName("extra_body")]
+    public ExtraBody ExtraBody { get; set; }
+}
+
+public class ExtraBody
+{
+    [JsonPropertyName("seconds_total")]
+    public int SecondsTotal { get; set; }
 }

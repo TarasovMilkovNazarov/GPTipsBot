@@ -26,6 +26,7 @@ namespace GPTipsBot.Services
         public const string DepositCommand = "/deposit";
         public const string GetProfileCommand = "/profile";
         public const string DonateCommand = "/donate";
+        public const string MusicCommand = "/music";
 
         public const string FixCommand = "/fix";
         public const string VersionCommand = "/version";
@@ -43,6 +44,7 @@ namespace GPTipsBot.Services
         public static CustomBotCommand Deposit => new() { Command = DepositCommand, Description = BotUI.DepositButton, Type = CommandType.Deposit };
         public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
         public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
+        public static CustomBotCommand Music => new() { Command = MusicCommand, Description = BotUI.MusicButton, Type = CommandType.Music };
 
         public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
         public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
@@ -63,6 +65,7 @@ namespace GPTipsBot.Services
                 Deposit,
                 Profile,
                 Donate,
+                Music
             };
         }
     }
@@ -84,6 +87,7 @@ namespace GPTipsBot.Services
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
         private static KeyboardButton DepositButton => new(BotUI.DepositButton);
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
+        private static KeyboardButton MusicButton => new(BotUI.MusicButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -107,6 +111,7 @@ namespace GPTipsBot.Services
                 { BotMenu.ImageTextRecognizeCommand, new() },
                 { BotMenu.DepositCommand, new() },
                 { BotMenu.GetProfileCommand, new() },
+                { BotMenu.MusicCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -125,6 +130,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
                 ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
                 ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
+                ButtonToLocalizations[BotMenu.MusicCommand].Add(BotUI.MusicButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -143,6 +149,10 @@ namespace GPTipsBot.Services
                 {
                     ImageButton,
                     ImageRecognizeTextButton
+                },
+                new[]
+                {
+                    MusicButton
                 },
                 new[]
                 {

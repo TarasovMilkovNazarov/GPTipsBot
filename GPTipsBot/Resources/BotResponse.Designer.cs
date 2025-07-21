@@ -227,6 +227,17 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Необходимо иметь {0} stars для выполнения операции
+        ///
+        ///После пополнения введите команду /music заново.
+        /// </summary>
+        public static string InsufficientBalanceForMusic {
+            get {
+                return ResourceManager.GetString("InsufficientBalanceForMusic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Неправильный ввод количества старсов. Должно быть целое число больше нуля.
         ///Введите число еще раз:.
         /// </summary>
@@ -251,6 +262,18 @@ namespace GPTipsBot.Resources {
         public static string LanguageWasSetSuccessfully {
             get {
                 return ResourceManager.GetString("LanguageWasSetSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Пример запроса для создания музыки:
+        ///&quot;Напиши расслабленный лоу-фай бит с джазовыми аккордами на пианино, винтажным виниловым шумом, мягким кик-барабаном и щелчками на 2 и 4. Темп: 85 BPM. Добавь немного джазовой бас-линии и случайные звуки (скрип двери, голоса в фоне).&quot;
+        ///
+        ///Бот отправит звуковой файл длительностью до 30 секунд. Стоимость генерации 10 stars.
+        /// </summary>
+        public static string MusicResponse {
+            get {
+                return ResourceManager.GetString("MusicResponse", resourceCulture);
             }
         }
         

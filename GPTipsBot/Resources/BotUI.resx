@@ -206,4 +206,10 @@
 
 💖 Каждый донат помогает развивать и улучшать сервис. 🤝 Мы ценим вашу поддержку и работаем над тем, чтобы сделать наш продукт еще лучше. 🚀💡</value>
   </data>
+  <data name="MusicButton" xml:space="preserve">
+    <value>Создать музыку</value>
+  </data>
+  <data name="MusicResponse" xml:space="preserve">
+    <value />
+  </data>
 </root>

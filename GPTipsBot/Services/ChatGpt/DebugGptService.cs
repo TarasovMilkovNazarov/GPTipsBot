@@ -9,4 +9,9 @@ public class DebugGptService: IGpt
     {
         throw new NotImplementedException();
     }
+
+    public Task<Stream> GenerateMusicByText(string text, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

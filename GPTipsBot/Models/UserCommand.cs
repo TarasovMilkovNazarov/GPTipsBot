@@ -24,7 +24,8 @@ public enum CommandType
     Admin,
     Deposit,
     GetProfile,
-    Donate
+    Donate,
+    Music,
 }
 
 public class Wallet: Entity

@@ -256,4 +256,16 @@ Enter an integer number of stars to top up your balance:</value>
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>Top up your balance</value>
   </data>
+  <data name="MusicResponse" xml:space="preserve">
+    <value>Example Music Generation Prompt:
+
+"Create a chill lo-fi beat with jazzy piano chords, vintage vinyl crackle, a soft kick drum, and snappy snares on the 2 and 4. Tempo: 85 BPM. Add a smooth jazz bassline and some random ambient sounds (door creak, background voices)."
+
+The bot will send a 30-second audio file. Generation cost: 10 stars.</value>
+  </data>
+  <data name="InsufficientBalanceForMusic" xml:space="preserve">
+    <value>You should have {0} stars  for this operation
+
+After adding stars, run the /music command again.</value>
+  </data>
 </root>

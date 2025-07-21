@@ -35,18 +35,25 @@ public class MoneyService
         UserBalanceChanged += UserBalanceChangedHandler;
     }
 
-    public async Task SendOutOfRequestsMessage(long userId)
+    public async Task<bool> PayForMusic(long userId)
     {
-        var profile = await _userService.GetUserProfile(userId);
-
-        if (profile is { Images: <= 0, Stars: <= 0 })
+        var wallet = _walletRepository.Get(w => w.UserId == userId).FirstOrDefault();
+        if (wallet == null || wallet.Balance < 10)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-            await _botClient.SendTextMessageAsync(userId, BotResponse.NoFreeRequests,
+            string response = string.Format(BotResponse.InsufficientBalanceForMusic, 10);
+
+            await _botClient.SendTextMessageAsync(userId, response,
                 replyMarkup: inlineKeyboard);
+            return false;
         }
+
+        wallet.Balance -= 10;
+        _walletRepository.Update(wallet);
+
+        return true;
     }
 
     public async Task SendInvoice(long userId, int starsCount = 100)

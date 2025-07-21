@@ -12,6 +12,7 @@ using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
@@ -25,6 +26,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly ApplicationContext _context;
         private readonly BotSettingsRepository _botSettingsRepository;
         private readonly InvoiceRepository _invoiceRepository;
+        private readonly IGpt _gptService;
         private readonly ITelegramBotClient _botClient;
         private readonly RecoveryNotificationHandler _recoveryNotificationHandler;
         private readonly ImageTextRecognitionHandler _imageTextRecognitionHandler;
@@ -40,7 +42,7 @@ namespace GPTipsBot.UpdateHandlers
             CommandHandler commandHandler, ChatGptHandler chatGptHandler, AdminCommandHandler adminCommandHandler,
             ILogger<MainHandler> logger, UserService userService, UserCommandRepository userCommandRepository,
             MoneyService moneyService, ApplicationContext context, BotSettingsRepository botSettingsRepository,
-            InvoiceRepository invoiceRepository)
+            InvoiceRepository invoiceRepository, IGpt gptService)
         {
             _botClient = botClient;
             _recoveryNotificationHandler = recoveryNotificationHandler;
@@ -56,6 +58,7 @@ namespace GPTipsBot.UpdateHandlers
             _context = context;
             _botSettingsRepository = botSettingsRepository;
             _invoiceRepository = invoiceRepository;
+            _gptService = gptService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -127,6 +130,18 @@ namespace GPTipsBot.UpdateHandlers
 
                 await _moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
 
+                return;
+            }
+            else if (lastCommand?.Type == CommandType.Music)
+            {
+                var isSuccessPayment = await _moneyService.PayForMusic(update.UserChatKey.Id);
+                if (!isSuccessPayment)
+                {
+                    return;
+                }
+
+                var audio = await _gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
+                await _botClient.SendAudioAsync(update.UserChatKey.Id, InputFile.FromStream(audio));
                 return;
             }
             else

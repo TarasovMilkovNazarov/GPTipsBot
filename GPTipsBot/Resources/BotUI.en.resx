@@ -203,4 +203,7 @@
 
 💖 Every donation helps us develop and improve the service. 🤝 We appreciate your support and are working to make our product even better. 🚀💡</value>
   </data>
+  <data name="MusicButton" xml:space="preserve">
+    <value>Create music</value>
+  </data>
 </root>
