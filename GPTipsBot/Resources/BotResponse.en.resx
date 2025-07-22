@@ -226,7 +226,8 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>Add stars to account</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>Invalid input for amount of stars, should be a number grater than 0. Try again please:</value>
+    <value>Invalid number of stars entered. Must be a whole number greater than zero.
+Please enter the number again:</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Profile: {0} {1}
@@ -240,7 +241,7 @@ Free requests:
 </value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>1 stars  = 20 ChatGpt requests or 2 image generations</value>
+    <value>1 star = 20 ChatGPT requests OR 2 image generations</value>
   </data>
   <data name="NoFreeRequests" xml:space="preserve">
     <value>The limit for free requests has expired.  
@@ -264,11 +265,22 @@ Enter an integer number of stars to top up your balance:</value>
 The bot will send a 30-second audio file. Generation cost: 10 stars.</value>
   </data>
   <data name="InsufficientBalanceForMusic" xml:space="preserve">
-    <value>You should have {0} stars  for this operation
+    <value>You need to have {0} stars to perform this operation.
 
-After adding stars, run the /music command again.</value>
+After topping up, enter the /music command again.</value>
   </data>
   <data name="SongResponse" xml:space="preserve">
     <value>Input the text of a song. Generation cost: 20 stars.</value>
+  </data>
+  <data name="VideoInstructions" xml:space="preserve">
+    <value>Submit a photo with a caption. The bot can animate objects in it — like making cars move or people smile
+You’ll get a GIF (up to 5 seconds). The operation usually takes from 5 to 10 minutes
+Note: This is a beta feature and may behave unpredictably
+Cost: {0} stars</value>
+  </data>
+  <data name="InsufficientBalanceForVideo" xml:space="preserve">
+    <value>You need to have {0} stars to perform this operation.
+
+After topping up, enter the /video command again.</value>
   </data>
 </root>

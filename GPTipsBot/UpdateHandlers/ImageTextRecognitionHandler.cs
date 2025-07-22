@@ -67,17 +67,7 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            Guard.Against.Null(update.FileId);
-
-            var file = await _botClient.GetFileAsync(update.FileId);
-
-            Guard.Against.Null(file.FilePath);
-
-            using var memoryStream = new MemoryStream();
-            await _botClient.DownloadFileAsync(file.FilePath, memoryStream);
-            memoryStream.Position = 0;
-
-            var base64String = Convert.ToBase64String(memoryStream.ToArray());
+            var base64String = await update.GetPhotoAsync(_botClient);
             var text = await _yaCloudClient.Recognize(base64String);
 
             var recognitionResultMessage = new MessageDto(update.UserChatKey)

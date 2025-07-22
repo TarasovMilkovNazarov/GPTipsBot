@@ -207,6 +207,12 @@
     <value>🎸 Create music</value>
   </data>
   <data name="SongButton" xml:space="preserve">
-    <value>Song</value>
+    <value>🎧 Song</value>
+  </data>
+  <data name="VideoButton" xml:space="preserve">
+    <value>📹 Video</value>
+  </data>
+  <data name="ProfileButton" xml:space="preserve">
+    <value>👤 Personal Account</value>
   </data>
 </root>

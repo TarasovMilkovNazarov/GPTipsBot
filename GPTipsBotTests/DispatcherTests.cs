@@ -31,7 +31,7 @@ using User = Telegram.Bot.Types.User;
 
 namespace GPTipsBotTests
 {
-    public partial class MainHandlerTests
+    public partial class DispatcherTests
     {
         private readonly Update _startTelegramUpdate;
         private readonly IServiceCollection _serviceCollection;
@@ -48,7 +48,7 @@ namespace GPTipsBotTests
 
         private ITelegramBotClient BotClient => _botClientMock.Object;
 
-        public MainHandlerTests()
+        public DispatcherTests()
         {
             _fixture = new Fixture();
             DotEnv.Fluent().WithProbeForEnv(10).Load();

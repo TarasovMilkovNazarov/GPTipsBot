@@ -14,7 +14,7 @@ namespace GPTipsBot.Mappers
             MessageDto message = new(chatKey)
             {
                 TelegramMessageId = tMessage.MessageId,
-                Text = tMessage.Text,
+                Text = tMessage.Text ?? tMessage.Caption,
                 Type = tMessage.Type,
                 CreatedAt = tMessage.Date,
                 Role = role,

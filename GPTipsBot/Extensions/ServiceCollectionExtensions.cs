@@ -42,7 +42,7 @@ namespace GPTipsBot.Extensions
 
             services
             // handlers
-            .AddScoped<MainHandler>()
+            .AddScoped<Dispatcher>()
             .AddScoped<RecoveryNotificationHandler>()
             .AddScoped<AdminCommandHandler>()
             .AddScoped<CommandHandler>()

@@ -198,9 +198,6 @@
   <data name="SwitchProxy" xml:space="preserve">
     <value>Использовать бесплатное прокси: {0}</value>
   </data>
-  <data name="Thanks" xml:space="preserve">
-    <value>Ваш отзыв отправлен автору. Спасибо, что делаете бота лучше!</value>
-  </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>Количество токенов в вашем сообщении {1} превышает лимит в {0} токенов. Сократите своё сообщение. Считайте, что в одном слове содержится примерно 1 токен</value>
   </data>
@@ -268,7 +265,20 @@
 
 После пополнения введите команду /music заново</value>
   </data>
+  <data name="InsufficientBalanceForVideo" xml:space="preserve">
+    <value>Необходимо иметь {0} stars для выполнения операции
+
+После пополнения введите команду /video заново</value>
+  </data>
   <data name="SongResponse" xml:space="preserve">
     <value>Введите текст песни. Стоимость генерации 20 stars</value>
+  </data>
+  <data name="VideoInstructions" xml:space="preserve">
+    <value>
+Отправьте фото с описанием (заголовком). Бот добавит анимацию к объектам на фото: машина едет, люди улыбаются и тд
+Результат: gif файл длительностью до 5 секунд, время генерации от 5 до 10 минут
+Это бета-версия функционала, может работать не стабильно
+Стоимость генерации {0} stars
+    </value>
   </data>
 </root>

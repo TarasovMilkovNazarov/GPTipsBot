@@ -4,9 +4,14 @@ namespace GPTipsBot.Dtos;
 
 public class GenerateRequest
 {
+    [JsonPropertyName("model")]
     public string Model { get; set; }
+    [JsonPropertyName("action")]
     public string Action { get; set; }
+    [JsonPropertyName("prompt")]
     public string Prompt { get; set; }
-    [JsonPropertyName("aspect_ration")]
-    public string AspectRation { get; set; }
+    [JsonPropertyName("aspect_ratio")]
+    public string AspectRatio { get; set; }
+
+    [JsonPropertyName("image_url")] public string Image { get; set; } = "data:image/jpeg;base64,{0}";
 }

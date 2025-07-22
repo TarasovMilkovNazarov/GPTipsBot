@@ -36,8 +36,8 @@ public class SchedulerService : ISchedulerService
 
         var trigger = TriggerBuilder.Create()
             .WithIdentity(triggerKey)
-            // .StartAt(DateBuilder.TodayAt(23, 59, 0))
-            .StartNow()
+            .StartAt(DateBuilder.TodayAt(23, 59, 0))
+            // .StartNow()
             .Build();
 
         await scheduler.ScheduleJob(job, trigger, cancellationToken);

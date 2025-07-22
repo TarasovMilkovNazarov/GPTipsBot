@@ -120,32 +120,14 @@
   <data name="AdventureButton" xml:space="preserve">
     <value>Приключение</value>
   </data>
-  <data name="BookDivinationButton" xml:space="preserve">
-    <value>Гадание по книгам</value>
-  </data>
   <data name="CancelButton" xml:space="preserve">
     <value>Отмена</value>
   </data>
   <data name="ContinueButton" xml:space="preserve">
     <value>Продолжить</value>
   </data>
-  <data name="EmojiTranslationButton" xml:space="preserve">
-    <value>Эмодзи ребус</value>
-  </data>
   <data name="EnglishButton" xml:space="preserve">
     <value>English</value>
-  </data>
-  <data name="Feedback" xml:space="preserve">
-    <value>Оставить отзыв</value>
-  </data>
-  <data name="FeedbackButton" xml:space="preserve">
-    <value>Оставить отзыв</value>
-  </data>
-  <data name="GamesButton" xml:space="preserve">
-    <value>Игры</value>
-  </data>
-  <data name="GuessWhoButton" xml:space="preserve">
-    <value>Отгадай кто</value>
   </data>
   <data name="Help" xml:space="preserve">
     <value>Инструкция по применению</value>
@@ -186,9 +168,6 @@
   <data name="StopRequestButton" xml:space="preserve">
     <value>отменить запрос</value>
   </data>
-  <data name="TickTackToeButton" xml:space="preserve">
-    <value>Крестики нолики</value>
-  </data>
   <data name="ImageTextRecognizeButton" xml:space="preserve">
     <value>Распознать текст на изображении</value>
   </data>
@@ -199,7 +178,7 @@
     <value>Пополнить баланс</value>
   </data>
   <data name="ProfileButton" xml:space="preserve">
-    <value>Личный кабинет</value>
+    <value>👤 Личный кабинет</value>
   </data>
   <data name="DonateButton" xml:space="preserve">
     <value>🌟 Поддержите наш проект! 💪
@@ -210,6 +189,9 @@
     <value>🎸 Создать музыку</value>
   </data>
   <data name="SongButton" xml:space="preserve">
-    <value>Песня</value>
+    <value>🎧 Песня</value>
+  </data>
+  <data name="VideoButton" xml:space="preserve">
+    <value>📹 Видео</value>
   </data>
 </root>

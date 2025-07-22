@@ -57,7 +57,6 @@ namespace GPTipsBot.Services
 
         public async Task<bool> PayForGpt(long userId)
         {
-            const double payment = 0.05;
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
@@ -71,18 +70,17 @@ namespace GPTipsBot.Services
 
             var wallet = user.Wallet;
 
-            if (wallet is null || wallet.Balance < payment)
+            if (wallet is null || wallet.Balance < PaymentConstants.Gpt)
             {
                 return false;
             }
 
-            user.Wallet!.Balance -= payment;
+            user.Wallet!.Balance -= PaymentConstants.Gpt;
             return true;
         }
 
         public async Task<bool> PayForImageAsync(long userId)
         {
-            const double payment = 0.5;
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
@@ -94,19 +92,18 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            if (user.Wallet == null || user.Wallet?.Balance < payment)
+            if (user.Wallet == null || user.Wallet?.Balance < PaymentConstants.Image)
             {
                 return false;
             }
 
-            user.Wallet!.Balance -= payment;
+            user.Wallet!.Balance -= PaymentConstants.Image;
 
             return true;
         }
 
         public async Task<bool> PayForTextRecognitions(long userId)
         {
-            const double payment = 0.5;
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
@@ -118,12 +115,12 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            if (user.Wallet == null || user.Wallet?.Balance < payment)
+            if (user.Wallet == null || user.Wallet?.Balance < PaymentConstants.Image)
             {
                 return false;
             }
 
-            user.Wallet!.Balance -= payment;
+            user.Wallet!.Balance -= PaymentConstants.Image;
             return true;
         }
 

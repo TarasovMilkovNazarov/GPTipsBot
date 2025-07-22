@@ -238,6 +238,17 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Необходимо иметь {0} stars для выполнения операции
+        ///
+        ///После пополнения введите команду /video заново.
+        /// </summary>
+        public static string InsufficientBalanceForVideo {
+            get {
+                return ResourceManager.GetString("InsufficientBalanceForVideo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Неправильный ввод количества старсов. Должно быть целое число больше нуля.
         ///Введите число еще раз:.
         /// </summary>
@@ -433,15 +444,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ваш отзыв отправлен автору. Спасибо, что делаете бота лучше!.
-        /// </summary>
-        public static string Thanks {
-            get {
-                return ResourceManager.GetString("Thanks", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Количество токенов в вашем сообщении {1} превышает лимит в {0} токенов. Сократите своё сообщение. Считайте, что в одном слове содержится примерно 1 токен.
         /// </summary>
         public static string TokensLimitExceeded {
@@ -456,6 +458,20 @@ namespace GPTipsBot.Resources {
         public static string TooManyRequests {
             get {
                 return ResourceManager.GetString("TooManyRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Отправьте фото с описанием (заголовком). Бот добавит анимацию к объектам на фото: машина едет, люди улыбаются и тд
+        ///Результат: gif файл длительностью до 5 секунд, время генерации от 5 до 10 минут
+        ///Это бета-версия функционала, может работать не стабильно
+        ///Стоимость генерации {0} stars
+        ///    .
+        /// </summary>
+        public static string VideoInstructions {
+            get {
+                return ResourceManager.GetString("VideoInstructions", resourceCulture);
             }
         }
     }

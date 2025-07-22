@@ -92,9 +92,19 @@ namespace GPTipsBot.UpdateHandlers
                         replyMarkup: replyMarkup);
                     return;
                 case SongCommand:
+                    if (update.Command.IsDisabled)
+                    {
+                        return;
+                    }
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
                     await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.SongResponse,
+                        replyMarkup: replyMarkup);
+                    return;
+                case VideoCommand:
+                    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
+                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, string.Format(BotResponse.VideoInstructions, 60),
                         replyMarkup: replyMarkup);
                     return;
                 case HelpCommand:
@@ -150,7 +160,7 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case StopRequestCommand:
                     reply = BotResponse.Cancel;
-                    if (!MainHandler.UserState.TryGetValue(update.UserChatKey, out var state))
+                    if (!Dispatcher.UserState.TryGetValue(update.UserChatKey, out var state))
                     {
                         break;
                     }

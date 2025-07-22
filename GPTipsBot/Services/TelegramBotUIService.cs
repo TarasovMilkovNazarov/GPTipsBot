@@ -28,6 +28,7 @@ namespace GPTipsBot.Services
         public const string DonateCommand = "/donate";
         public const string MusicCommand = "/music";
         public const string SongCommand = "/song";
+        public const string VideoCommand = "/video";
 
         public const string FixCommand = "/fix";
         public const string VersionCommand = "/version";
@@ -46,7 +47,8 @@ namespace GPTipsBot.Services
         public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
         public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
         public static CustomBotCommand Music => new() { Command = MusicCommand, Description = BotUI.MusicButton, Type = CommandType.Music };
-        public static CustomBotCommand Song => new() { Command = SongCommand, Description = BotUI.SongButton, Type = CommandType.Song };
+        public static CustomBotCommand Song => new() { Command = SongCommand, Description = BotUI.SongButton, Type = CommandType.Song, IsDisabled = true };
+        public static CustomBotCommand Video => new() { Command = VideoCommand, Description = BotUI.SongButton, Type = CommandType.Video };
 
         public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
         public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
@@ -68,7 +70,8 @@ namespace GPTipsBot.Services
                 Profile,
                 Donate,
                 Music,
-                Song,
+                // Song,
+                Video
             };
         }
     }
@@ -92,6 +95,7 @@ namespace GPTipsBot.Services
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
         private static KeyboardButton MusicButton => new(BotUI.MusicButton);
         private static KeyboardButton SongButton => new(BotUI.SongButton);
+        private static KeyboardButton VideoButton => new(BotUI.VideoButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -117,6 +121,7 @@ namespace GPTipsBot.Services
                 { BotMenu.GetProfileCommand, new() },
                 { BotMenu.MusicCommand, new() },
                 { BotMenu.SongCommand, new() },
+                { BotMenu.VideoCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -137,6 +142,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
                 ButtonToLocalizations[BotMenu.MusicCommand].Add(BotUI.MusicButton);
                 ButtonToLocalizations[BotMenu.SongCommand].Add(BotUI.SongButton);
+                ButtonToLocalizations[BotMenu.VideoCommand].Add(BotUI.VideoButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -158,7 +164,7 @@ namespace GPTipsBot.Services
                 },
                 new[]
                 {
-                    SongButton,
+                    VideoButton,
                     MusicButton
                 },
                 new[]

@@ -15,6 +15,11 @@ public class DebugGptService: IGpt
         throw new NotImplementedException();
     }
 
+    public Task<Uri> GenerateVideoByText(string text, string? imageFileId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();

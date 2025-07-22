@@ -27,8 +27,7 @@ var host = Host.CreateDefaultBuilder(args)
 var schedulerFactory = host.Services.GetRequiredService<ISchedulerFactory>();
 var scheduler = await schedulerFactory.GetScheduler();
 var schedulerService = host.Services.GetRequiredService<ISchedulerService>();
-// await schedulerService.ScheduleJob<DailyJob>(scheduler, TimeSpan.FromDays(1),  CancellationToken.None);
-// await schedulerService.ScheduleJob<BotUpdateInformerJob>(scheduler, TimeSpan.FromDays(1),  CancellationToken.None);
+await schedulerService.ScheduleJob<DailyJob>(scheduler, TimeSpan.FromDays(1),  CancellationToken.None);
 await scheduler.Start();
 
 await host.RunAsync();

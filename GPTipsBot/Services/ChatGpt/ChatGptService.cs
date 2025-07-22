@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using Ardalis.GuardClauses;
 using GPTipsBot.Dtos;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using Polly.Retry;
 using Telegram.Bot;
@@ -90,6 +92,84 @@ namespace GPTipsBot.Services
             return audio.Data;
         }
 
+        public async Task<Uri> GenerateVideoByText(string text, string? imageFileId = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var model = imageFileId != null ? "img2vid-kling/standart16" : "txt2vid-kling/standart";
+            var aspectRatio = "16:9";
+
+            var generateRequestDto = new GenerateRequest
+            {
+                Model = model,
+                Action = "generate",
+                Prompt = text,
+                AspectRatio = aspectRatio,
+            };
+            if (imageFileId != null)
+            {
+                var base64Image = await imageFileId.GetPhotoAsync(_botClient);
+                generateRequestDto.Image = string.Format(generateRequestDto.Image, base64Image);
+            }
+
+            var jsonContent = JsonSerializer.Serialize(generateRequestDto);
+
+            var request = new HttpRequestMessage
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8),
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(_httpClient.BaseAddress, "video/generate"),
+                Headers =
+                {
+                    {"Accept", "application/json"},
+                    {"Authorization", $"Bearer {AppConfig.ProxyApiApiKey}"},
+                }
+            };
+            var generateResponse = await _httpClient.SendAsync(request, cancellationToken);
+            var triggerGeenrationResult = await generateResponse.Content.ReadFromJsonAsync<GenerateResponse>
+                (cancellationToken: cancellationToken);
+
+            Guard.Against.Null(triggerGeenrationResult);
+            Guard.Against.Null(triggerGeenrationResult.RequestId);
+
+            var requestId = triggerGeenrationResult.RequestId;
+
+            var isGenerated = false;
+            string? url = null;
+
+            while (!isGenerated)
+            {
+                var getStatusRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(_httpClient.BaseAddress, $"video/status?request_id={requestId}"))
+                {
+                    Headers =
+                    {
+                        {"Authorization", $"Key {AppConfig.ProxyApiApiKey}"},
+                    }
+                };
+                var response = await _httpClient.SendAsync(getStatusRequest, cancellationToken);
+
+                var generateResult = await response.Content.ReadFromJsonAsync<GenerateResponse>
+                    (cancellationToken: cancellationToken);
+
+                isGenerated = generateResult?.Status switch
+                {
+                    "COMPLETED" => true,
+                    "FAILED" => throw new Exception("Failed to generate video"),
+                    _ => isGenerated
+                };
+
+                if (isGenerated)
+                {
+                    url = generateResult?.Url;
+                    break;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(120), cancellationToken);
+            }
+
+            Guard.Against.Null(url);
+
+            return new Uri(url);
+        }
+
         public async Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken)
         {
             var model = "txt2sng-minimax/music";
@@ -100,6 +180,7 @@ namespace GPTipsBot.Services
                 Action = "generate",
                 Prompt = text
             });
+
             var generateResponse = await _httpClient.PostAsync("audio/generate",
                 new StringContent(jsonContent, Encoding.UTF8), cancellationToken);
 
@@ -240,6 +321,7 @@ namespace GPTipsBot.Services
     {
         Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
         Task<Stream> GenerateMusicByText(string text, CancellationToken cancellationToken);
+        Task<Uri> GenerateVideoByText(string text, string? imageFileId, CancellationToken cancellationToken);
         Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken);
     }
 }
