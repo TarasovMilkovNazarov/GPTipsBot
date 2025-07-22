@@ -123,7 +123,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
-                if (!int.TryParse(update.Message?.Text, out var starsCount) && starsCount <= 0)
+                if (!int.TryParse(update.Message?.Text, out var starsCount) || starsCount <= 0)
                 {
                     throw new ClientException(update.UserChatKey.ChatId, BotResponse.InvalidDepositAmountResponse);
                 }

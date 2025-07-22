@@ -3,17 +3,12 @@ using GPTipsBot.Models;
 
 namespace GPTipsBot.Repositories;
 
-public class TransactionRepository
+public class TransactionRepository: GenericRepository<Transaction>
 {
     private readonly ApplicationContext _context;
 
-    public TransactionRepository(ApplicationContext context)
+    public TransactionRepository(ApplicationContext context):base(context)
     {
         _context = context;
-    }
-
-    public async Task AddAsync(Transaction transaction)
-    {
-        await _context.Transactions.AddAsync(transaction);
     }
 }

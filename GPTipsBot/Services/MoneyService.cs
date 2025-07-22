@@ -99,12 +99,13 @@ public class MoneyService
                 UserId = userId,
                 Currency = currency
             };
-            await _context.Wallets.AddAsync(wallet, cancellationToken);
+            _walletRepository.Create(wallet);
+            await _context.SaveChangesAsync(cancellationToken);
             user.Wallet = wallet;
             _context.Users.Update(user);
         }
 
-        await _transactionRepository.AddAsync(new Transaction
+        _transactionRepository.Create(new Transaction
         {
             CreatedAt = DateTime.UtcNow,
             WalletId = wallet.Id,

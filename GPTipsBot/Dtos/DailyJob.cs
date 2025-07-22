@@ -64,8 +64,6 @@ public class DailyJob : IJob
                 .ExecuteDeleteAsync();
 
             if (deleteCount == 0) break;
-
-            await Task.Delay(100);
         }
     }
 

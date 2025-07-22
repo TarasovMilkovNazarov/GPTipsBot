@@ -40,6 +40,8 @@ public class Wallet: Entity
 
 public class Transaction: Entity
 {
+    [ForeignKey("Wallet")]
     public long WalletId { get; set; }
     public long Amount { get; set; }
+    public Wallet Wallet { get; set; }
 }
