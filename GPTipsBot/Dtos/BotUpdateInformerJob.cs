@@ -20,7 +20,7 @@ public class BotUpdateInformerJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var botClient = new TelegramBotClient("6272630353:AAG6zDC3BTBQ0dt09nHE6_mN4RpDRUEjPDM");
+        var botClient = new TelegramBotClient("");
 
         var message =
             "🎵 Новый крутой функционал в боте! 🎧\n\nТеперь вы можете создавать уникальную музыку просто из текста! 🎶✨\n\n" +
