@@ -337,6 +337,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ⌛️ Генерация видео занимает в срднем от 5 до 10 минут. Подождите, подготавливаю ответ....
+        /// </summary>
+        public static string PleaseWaitVideoMsg {
+            get {
+                return ResourceManager.GetString("PleaseWaitVideoMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 👤 Профиль: {0} {1}
         ///
         ///

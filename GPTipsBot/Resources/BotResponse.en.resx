@@ -283,4 +283,7 @@ Cost: {0} stars</value>
 
 After topping up, enter the /video command again.</value>
   </data>
+  <data name="PleaseWaitVideoMsg" xml:space="preserve">
+    <value>⌛️ Video generation typically takes between 5 to 10 minutes. Please wait, preparing the response...</value>
+  </data>
 </root>

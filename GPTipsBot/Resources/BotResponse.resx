@@ -177,6 +177,9 @@
   <data name="PleaseWaitMsg" xml:space="preserve">
     <value>⌛️ Подождите, подготавливаю ответ...</value>
   </data>
+  <data name="PleaseWaitVideoMsg" xml:space="preserve">
+    <value>⌛️ Генерация видео занимает в срднем от 5 до 10 минут. Подождите, подготавливаю ответ...</value>
+  </data>
   <data name="Recovered" xml:space="preserve">
     <value>Простите, я отутствовал какое-то время, но сейчас снова в строю.</value>
   </data>

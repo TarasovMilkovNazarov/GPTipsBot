@@ -125,6 +125,8 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitVideoMsg,
+                    replyMarkup: null);
                 var video = await _gptService.GenerateVideoByText(update.Message!.Text, update.FileId, CancellationToken.None);
                 await _botClient.SendVideoAsync(update.UserChatKey.Id, InputFile.FromUri(video));
                 return;
