@@ -333,11 +333,11 @@ namespace GPTipsBotTests
         }
 
         [Test]
-        public async Task GenerateImageRequest_ManyRequests_ImagesPerDayLimitResponse()
+        public async Task GenerateImageRequest_OutOfFreeRequests_TopUpBalanceMessage()
         {
             var update = CreateTelegramUpdate(1, 2, "/image гора");
 
-            for (var i = 0; i < ImageGeneratorHandler.ImagesPerDayLimit + 1; i++)
+            for (var i = 0; i < PaymentConstants.FreeImageGenerationsCount + 1; i++)
             {
                 await _firstUpdateHandler.HandleUpdateAsync(update);
             }
@@ -346,16 +346,16 @@ namespace GPTipsBotTests
 
             var generatedImagesCount = _messageRepository.GetTodayImagesCount(userId);
 
-            generatedImagesCount.Should().Be(AppConfig.FreeImageGenerationsCount);
+            generatedImagesCount.Should().Be(PaymentConstants.FreeImageGenerationsCount);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
-                    arg.Text == String.Format(BotResponse.ImagesPerDayLimit, AppConfig.FreeImageGenerationsCount)
+                    arg.Text == BotResponse.NoFreeRequests
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
             _imageGeneratorMock.Verify(g => g.GenerateImage("гора"),
-                Times.Exactly(AppConfig.FreeImageGenerationsCount));
+                Times.Exactly(PaymentConstants.FreeImageGenerationsCount));
         }
 
         [Test]
@@ -409,21 +409,10 @@ namespace GPTipsBotTests
                     FileId = "test"
                 }
             };
-            var userId = update.Message!.From.Id;
 
-            await _firstUpdateHandler.HandleUpdateAsync(update);
+            var imageUpdateFunc = async() => await _firstUpdateHandler.HandleUpdateAsync(update);
 
-            var sendMessageRequestExpected = new SendMessageRequest(userId,
-                BotResponse.SendImageTextRecognitionCommandFirst)
-            {
-                ReplyMarkup = TelegramBotUiService.CancelKeyboard
-            };
-
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
-                    arg.ChatId == sendMessageRequestExpected.ChatId &&
-                    arg.Text == BotResponse.SendImageTextRecognitionCommandFirst
-                ),
-                It.IsAny<CancellationToken>()), Times.Once);
+            await imageUpdateFunc.Should().ThrowExactlyAsync<NotSupportedMessageException>();
         }
 
         [Test]

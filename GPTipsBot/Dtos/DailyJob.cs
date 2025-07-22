@@ -71,9 +71,9 @@ public class DailyJob : IJob
     {
         await _context.Users
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.FreeImageGenerations, AppConfig.FreeImageGenerationsCount)
-                .SetProperty(u => u.FreeImageTextRecognitions, AppConfig.FreeImageGenerationsCount)
-                .SetProperty(u => u.FreeGptRequests, AppConfig.FreeChatGptRequests)
+                .SetProperty(u => u.FreeImageGenerations, PaymentConstants.FreeImageGenerationsCount)
+                .SetProperty(u => u.FreeImageTextRecognitions, PaymentConstants.FreeImageGenerationsCount)
+                .SetProperty(u => u.FreeGptRequests, PaymentConstants.FreeChatGptRequests)
             );
     }
 }

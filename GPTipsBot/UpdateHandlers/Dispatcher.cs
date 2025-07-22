@@ -156,6 +156,10 @@ namespace GPTipsBot.UpdateHandlers
                 await _botClient.SendAudioAsync(update.UserChatKey.Id, InputFile.FromStream(audio));
                 return;
             }
+            else if (update.FileId != null)
+            {
+                throw new NotSupportedMessageException(update.UserChatKey.ChatId, "Photo");
+            }
             else
             {
                 SetNextHandler(_chatGptHandler);
