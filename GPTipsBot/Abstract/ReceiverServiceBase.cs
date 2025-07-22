@@ -1,9 +1,13 @@
-﻿using GPTipsBot;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using GPTipsBot;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 
@@ -79,7 +83,17 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         }
                         catch (Exception e)
                         {
-                            _log.LogError(e, "Unknown error while handling update");
+                            var updateStr = System.Text.Json.JsonSerializer.Serialize(update,
+                                new JsonSerializerOptions
+                                {
+                                    WriteIndented = true,
+                                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                                });
+
+                            _log.LogError(e, "Unknown error while handling update" +
+                                             Environment.NewLine + "{update}", updateStr);
                             if (update.Message == null)
                                 return;
 
