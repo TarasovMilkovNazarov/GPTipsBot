@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories
 {
-    public class BotSettingsRepository : GenericRepository<BotSettingsRepository>
+    public class BotSettingsRepository : GenericRepository<BotSettings>
     {
         private readonly ApplicationContext _context;
         private readonly ILogger<BotSettingsRepository> _logger;

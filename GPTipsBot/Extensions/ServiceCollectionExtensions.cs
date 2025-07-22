@@ -6,6 +6,7 @@ using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using System.Net.Http.Headers;
+using GPTipsBot.Models;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
@@ -97,6 +98,7 @@ namespace GPTipsBot.Extensions
             return services.AddTransient<MessageRepository>()
                 .AddScoped<UserRepository>()
                 .AddScoped<UserCommandRepository>()
+                .AddScoped<IGenericRepository<PendingOperation>>()
                 .AddScoped<BotSettingsRepository>()
                 .AddScoped<OpenaiAccountsRepository>()
                 .AddScoped<WalletRepository>()

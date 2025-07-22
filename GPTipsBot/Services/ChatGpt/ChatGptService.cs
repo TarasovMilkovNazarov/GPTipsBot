@@ -30,6 +30,7 @@ namespace GPTipsBot.Services
         private readonly ContextWindow _contextWindow;
         private readonly ITelegramBotClient _botClient;
         private readonly HttpClient _httpClient;
+        private readonly IGenericRepository<PendingOperation> _pendingOperationRepository;
         private Timer _timer;
         private readonly AsyncRetryPolicy _policy;
 
@@ -37,7 +38,7 @@ namespace GPTipsBot.Services
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
             TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow,
-            ITelegramBotClient botClient, HttpClient httpClient)
+            ITelegramBotClient botClient, HttpClient httpClient, IGenericRepository<PendingOperation> pendingOperationRepository)
         {
             _log = log;
             _openaiAccountsRepository = openaiAccountsRepository;
@@ -46,6 +47,7 @@ namespace GPTipsBot.Services
             _contextWindow = contextWindow;
             _botClient = botClient;
             _httpClient = httpClient;
+            _pendingOperationRepository = pendingOperationRepository;
             _timer = setup_Timer(openaiAccountsRepository);
             _policy = Policy
                 .Handle<ChatGptException>()
@@ -124,13 +126,20 @@ namespace GPTipsBot.Services
                 }
             };
             var generateResponse = await _httpClient.SendAsync(request, cancellationToken);
-            var triggerGeenrationResult = await generateResponse.Content.ReadFromJsonAsync<GenerateResponse>
+            var getRequestIdResult = await generateResponse.Content.ReadFromJsonAsync<GenerateResponse>
                 (cancellationToken: cancellationToken);
 
-            Guard.Against.Null(triggerGeenrationResult);
-            Guard.Against.Null(triggerGeenrationResult.RequestId);
+            Guard.Against.Null(getRequestIdResult);
+            Guard.Against.Null(getRequestIdResult.RequestId);
 
-            var requestId = triggerGeenrationResult.RequestId;
+            var requestId = getRequestIdResult.RequestId;
+
+            var pendingOperation = new PendingOperation(1234, OperationType.Video)
+            {
+                CreatedAt = DateTime.UtcNow,
+                Data = requestId,
+            };
+            _pendingOperationRepository.Create(pendingOperation);
 
             var isGenerated = false;
             string? url = null;
