@@ -287,7 +287,7 @@ Top up your balance or wait for the free limits to reset.
   </data>
   <data name="TimeNoFreeRequests" xml:space="preserve">
     <value>❗️You've used all your free requests for today.
-Either add funds now or wait {0:hh} h {0:mm} min for your free limits to refresh.
+Either add funds now or wait {0:%d} d {0:%h} h {0:%m} min for your free requests to refresh.
 
 1⭐ = 10 ChatGPT queries or 2 AI images</value>
   </data>

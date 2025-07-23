@@ -102,8 +102,7 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
                 return;
             }
 
-            var timeTillRefresh =
-                TimeSpan.FromMinutes((nextRefreshExecution - DateTimeOffset.UtcNow).Value.TotalMinutes);
+            var timeTillRefresh = nextRefreshExecution.Value - DateTimeOffset.UtcNow;
             var message = string.Format(BotResponse.TimeNoFreeRequests, timeTillRefresh);
 
             await botClient.SendTextMessageAsync(chatId, message,
