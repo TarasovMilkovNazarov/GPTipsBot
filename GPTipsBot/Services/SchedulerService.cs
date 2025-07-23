@@ -4,7 +4,8 @@ namespace GPTipsBot.Services;
 
 public interface ISchedulerService
 {
-    Task ScheduleJob<T>(IScheduler scheduler, TimeSpan interval, CancellationToken cancellationToken)
+    Task ScheduleJob<T>(IScheduler scheduler, DateTimeOffset startAt,
+        TimeSpan interval, CancellationToken cancellationToken)
         where T : IJob;
 }
 
@@ -17,8 +18,8 @@ public class SchedulerService : ISchedulerService
         _serviceProvider = serviceProvider;
     }
 
-
-    public async Task ScheduleJob<T>(IScheduler scheduler, TimeSpan interval, CancellationToken cancellationToken)
+    public async Task ScheduleJob<T>(IScheduler scheduler, DateTimeOffset startAt,
+        TimeSpan interval, CancellationToken cancellationToken)
         where T : IJob
     {
         var jobKey = new JobKey(typeof(T).FullName);
@@ -36,7 +37,9 @@ public class SchedulerService : ISchedulerService
 
         var trigger = TriggerBuilder.Create()
             .WithIdentity(triggerKey)
-            .StartAt(DateBuilder.TodayAt(23, 59, 0))
+            .StartAt(startAt)
+            .WithSimpleSchedule(x => x.WithInterval(interval)
+                .RepeatForever())
             // .StartNow()
             .Build();
 

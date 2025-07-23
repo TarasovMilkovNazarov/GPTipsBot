@@ -2,6 +2,7 @@
 using dotenv.net;
 using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
+using GPTipsBot.Jobs;
 using GPTipsBot.Logging;
 using GPTipsBot.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +28,12 @@ var host = Host.CreateDefaultBuilder(args)
 var schedulerFactory = host.Services.GetRequiredService<ISchedulerFactory>();
 var scheduler = await schedulerFactory.GetScheduler();
 var schedulerService = host.Services.GetRequiredService<ISchedulerService>();
-await schedulerService.ScheduleJob<DailyJob>(scheduler, TimeSpan.FromDays(1),  CancellationToken.None);
+await schedulerService.ScheduleJob<DailyStatisticsJob>(scheduler, DateBuilder.TodayAt(23, 55, 0),
+    TimeSpan.FromDays(1),  CancellationToken.None);
+await schedulerService.ScheduleJob<RefreshFreeLimitsJob>(scheduler, DateBuilder.TomorrowAt(23, 59, 0),
+    TimeSpan.FromDays(2),  CancellationToken.None);
+await schedulerService.ScheduleJob<RemoveOldRecordsJob>(scheduler, DateBuilder.TodayAt(23, 30, 0),
+    TimeSpan.FromDays(3),  CancellationToken.None);
 await scheduler.Start();
 
 await host.RunAsync();

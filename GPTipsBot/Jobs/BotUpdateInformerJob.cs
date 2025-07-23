@@ -1,11 +1,9 @@
 using GPTipsBot.Db;
-using GPTipsBot.Enums;
-using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 
-namespace GPTipsBot.Dtos;
+namespace GPTipsBot.Jobs;
 
 public class BotUpdateInformerJob : IJob
 {

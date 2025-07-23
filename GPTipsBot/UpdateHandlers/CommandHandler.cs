@@ -5,6 +5,8 @@ using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Ardalis.GuardClauses;
+using GPTipsBot.Extensions;
+using GPTipsBot.Jobs;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Telegram.Bot;
@@ -28,12 +30,13 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserService _userService;
         private readonly BotSettingsRepository _botSettingsRepository;
         private readonly MoneyService _moneyService;
+        private readonly IJobService _jobService;
 
         public CommandHandler(ITelegramBotClient botClient,
             ApplicationContext context, ILogger<CommandHandler> logger, MessageRepository messageRepository,
             UserCommandRepository userCommandRepository, ImageGeneratorHandler imageGeneratorHandler,
             InvoiceRepository invoiceRepository, UserService userService, BotSettingsRepository botSettingsRepository,
-            MoneyService moneyService)
+            MoneyService moneyService, IJobService jobService)
         {
             _botClient = botClient;
             _context = context;
@@ -45,6 +48,7 @@ namespace GPTipsBot.UpdateHandlers
             _userService = userService;
             _botSettingsRepository = botSettingsRepository;
             _moneyService = moneyService;
+            _jobService = jobService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -72,22 +76,23 @@ namespace GPTipsBot.UpdateHandlers
             {
                 case StartCommand:
                     await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(),
-                        BotCommandScope.Chat(update.UserChatKey.ChatId));
+                        BotCommandScope.Chat(chatId));
                     reply = BotResponse.Greeting;
                     break;
                 case GetProfileCommand:
-                    reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
+                    reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
                     break;
                 case DepositCommand:
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.DepositResponse,
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                        string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
                         replyMarkup: null);
                     return;
                 case MusicCommand:
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
                     await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.MusicResponse,
                         replyMarkup: replyMarkup);
                     return;
@@ -97,20 +102,26 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.SongResponse,
+                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
+                    await _botClient.SendTextMessageAsync(chatId, BotResponse.SongResponse,
                         replyMarkup: replyMarkup);
                     return;
                 case VideoCommand:
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, string.Format(BotResponse.VideoInstructions, 60),
+                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
+                    await _botClient.SendTextMessageAsync(chatId, string.Format(BotResponse.VideoInstructions, 60),
                         replyMarkup: replyMarkup);
                     return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;
                     break;
                 case ImageCommand:
+                    if (profile is { Images: <= 0, Stars: <= 0 })
+                    {
+                        await SendNoFreeRequestsMessage(chatId);
+                        return;
+                    }
+
                     if (messageText.StartsWith("/image "))
                     {
                         update.Message.Text = messageText.Substring("/image ".Length);
@@ -120,21 +131,13 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    if (profile is { Images: <= 0, Stars: <= 0 })
-                    {
-                        await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
-                            replyMarkup: DepositInlineKeyboard);
-                        return;
-                    }
-
-                    reply = String.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
+                    reply = string.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
                     replyMarkup = CancelKeyboard;
                     break;
                 case ImageTextRecognizeCommand:
                     if (profile is { ImageTexts: <= 0, Stars: <= 0 })
                     {
-                        await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
-                            replyMarkup: DepositInlineKeyboard);
+                        await SendNoFreeRequestsMessage(chatId);
                         return;
                     }
 
@@ -193,7 +196,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
 
-                await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(update.UserChatKey.ChatId));
+                await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(chatId));
                 replyMarkup = new ReplyKeyboardRemove();
 
                 var settings = _botSettingsRepository.Get(userKey.Id);
@@ -208,6 +211,12 @@ namespace GPTipsBot.UpdateHandlers
 
                 return BotResponse.LanguageWasSetSuccessfully;
             }
+        }
+
+        private async Task SendNoFreeRequestsMessage(long chatId)
+        {
+            var nextRefreshLimitExec = await _jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
+            await _botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextRefreshLimitExec);
         }
     }
 }

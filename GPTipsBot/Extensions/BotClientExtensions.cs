@@ -1,4 +1,6 @@
-﻿using GPTipsBot.Services;
+﻿using GPTipsBot.Jobs;
+using GPTipsBot.Resources;
+using GPTipsBot.Services;
 using GPTipsBot.Utilities;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -87,6 +89,25 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             {
                 await botClient.SendTextMessageAsync(chatId, part, null, replyToMessageId: replyToMessageId);
             }
+        }
+
+        public static async Task SendOutOfFreeRequestsMessageAsync(this ITelegramBotClient botClient, long chatId,
+            DateTimeOffset? nextRefreshExecution)
+        {
+            if (!nextRefreshExecution.HasValue || nextRefreshExecution.Value < DateTimeOffset.UtcNow)
+            {
+                await botClient.SendTextMessageAsync(chatId, BotResponse.SimpleNoFreeRequests,
+                    replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+
+                return;
+            }
+
+            var timeTillRefresh =
+                TimeSpan.FromMinutes((nextRefreshExecution - DateTimeOffset.UtcNow).Value.TotalMinutes);
+            var message = string.Format(BotResponse.TimeNoFreeRequests, timeTillRefresh);
+
+            await botClient.SendTextMessageAsync(chatId, message,
+                replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
         }
 
         private static List<string> SplitIfTooLong(string input)

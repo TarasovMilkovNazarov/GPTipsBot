@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
@@ -70,12 +69,12 @@ namespace GPTipsBot.Services
 
             var wallet = user.Wallet;
 
-            if (wallet is null || wallet.Balance < PaymentConstants.Gpt)
+            if (wallet is null || wallet.Balance < PaymentConfig.Gpt)
             {
                 return false;
             }
 
-            user.Wallet!.Balance -= PaymentConstants.Gpt;
+            user.Wallet!.Balance -= PaymentConfig.Gpt;
             return true;
         }
 
@@ -92,12 +91,12 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            if (user.Wallet == null || user.Wallet?.Balance < PaymentConstants.Image)
+            if (user.Wallet == null || user.Wallet?.Balance < PaymentConfig.Image)
             {
                 return false;
             }
 
-            user.Wallet!.Balance -= PaymentConstants.Image;
+            user.Wallet!.Balance -= PaymentConfig.Image;
 
             return true;
         }
@@ -115,12 +114,12 @@ namespace GPTipsBot.Services
                 return true;
             }
 
-            if (user.Wallet == null || user.Wallet?.Balance < PaymentConstants.Image)
+            if (user.Wallet == null || user.Wallet?.Balance < PaymentConfig.Image)
             {
                 return false;
             }
 
-            user.Wallet!.Balance -= PaymentConstants.Image;
+            user.Wallet!.Balance -= PaymentConfig.Image;
             return true;
         }
 

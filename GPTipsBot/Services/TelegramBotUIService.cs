@@ -155,7 +155,7 @@ namespace GPTipsBot.Services
                 new[]
                 {
                     ResetContextButton,
-
+                    ProfileButton
                 },
                 new[]
                 {
@@ -172,10 +172,6 @@ namespace GPTipsBot.Services
                     LangButton,
                     HelpButton
                 },
-                new[]
-                {
-                    ProfileButton
-                }
             });
 
             keyboardMarkup.ResizeKeyboard = true;

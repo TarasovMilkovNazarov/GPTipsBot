@@ -32,7 +32,7 @@ using User = Telegram.Bot.Types.User;
 
 namespace GPTipsBotTests
 {
-    public partial class DispatcherTests
+    public class DispatcherTests
     {
         private readonly Update _startTelegramUpdate;
         private readonly IServiceCollection _serviceCollection;
@@ -334,11 +334,11 @@ namespace GPTipsBotTests
         }
 
         [Test]
-        public async Task GenerateImageRequest_OutOfFreeRequests_TopUpBalanceMessage()
+        public async Task GenerateImageRequest_NewbieSpentFreeRequests_TopUpBalanceMessage()
         {
             var update = CreateTelegramUpdate(1, 2, "/image гора");
 
-            for (var i = 0; i < PaymentConstants.FreeImageGenerationsCount + 1; i++)
+            for (var i = 0; i < PaymentConfig.NewbieFreeImageGenerations + 1; i++)
             {
                 await _mainHandler.HandleUpdateAsync(update);
             }
@@ -347,16 +347,16 @@ namespace GPTipsBotTests
 
             var generatedImagesCount = _messageRepository.GetTodayImagesCount(userId);
 
-            generatedImagesCount.Should().Be(PaymentConstants.FreeImageGenerationsCount);
+            generatedImagesCount.Should().Be(PaymentConfig.NewbieFreeImageGenerations);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
-                    arg.Text == BotResponse.NoFreeRequests
+                    arg.Text == BotResponse.SimpleNoFreeRequests
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
             _imageGeneratorMock.Verify(g => g.GenerateImage("гора"),
-                Times.Exactly(PaymentConstants.FreeImageGenerationsCount));
+                Times.Exactly(PaymentConfig.NewbieFreeImageGenerations));
         }
 
         [Test]
@@ -389,6 +389,7 @@ namespace GPTipsBotTests
 
             await _mainHandler.HandleUpdateAsync(update);
 
+            // todo падает при запуске нескольких тестов, тк мок один и тот же, переделать на асинхронные тесты
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == BotResponse.SendTextRecognitionImage

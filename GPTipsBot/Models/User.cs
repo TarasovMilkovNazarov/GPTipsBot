@@ -16,9 +16,9 @@ namespace GPTipsBot.Models
         public long? BotSettingsId { get; set; }
 
         public List<UserCommand> Commands { get; set; }
-        public int FreeImageGenerations { get; set; } = PaymentConstants.FreeImageGenerationsCount;
-        public int FreeImageTextRecognitions { get; set; } = PaymentConstants.FreeImageGenerationsCount;
-        public int FreeGptRequests { get; set; } = PaymentConstants.FreeChatGptRequests;
+        public int FreeImageGenerations { get; set; } = PaymentConfig.NewbieFreeImageGenerations;
+        public int FreeImageTextRecognitions { get; set; } = PaymentConfig.NewbieFreeTextRecognitions;
+        public int FreeGptRequests { get; set; } = PaymentConfig.NewbieFreeChatGptRequests;
         public Wallet? Wallet { get; set; }
         [ForeignKey("Wallet")]
         public long? WalletId { get; set; }

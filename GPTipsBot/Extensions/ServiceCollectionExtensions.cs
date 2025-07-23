@@ -6,6 +6,7 @@ using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using System.Net.Http.Headers;
+using GPTipsBot.Jobs;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
@@ -61,6 +62,7 @@ namespace GPTipsBot.Extensions
             .AddSingleton<RateLimiter>()
             .AddScoped<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
+            .AddSingleton<IJobService, JobService>()
             .AddScoped<ChatGptService>()
             .AddScoped<OpenAiServiceCreator, ProxyApiService>()
             .AddScoped<ContextWindow>()

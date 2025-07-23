@@ -236,15 +236,23 @@
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>Пополнить баланс</value>
   </data>
-  <data name="NoFreeRequests" xml:space="preserve">
-    <value>Закончился лимит бесплатных запросов на сегодня.
-Пополните баланс для продолжения или приходите завтра, лимиты обновляются каждый день
 
-1 Stars = 10 запросам к ChatGpt или 2 генерации изображения</value>
+  <data name="SimpleNoFreeRequests" xml:space="preserve">
+    <value>❗️Закончился лимит бесплатных запросов на сегодня.
+Пополните баланс или дождитесь обновления бесплатных лимитов
+
+1⭐ = 10 запросам к ChatGpt или 2 генерации изображения</value>
+  </data>
+  <data name="TimeNoFreeRequests" xml:space="preserve">
+    <value>❗️Закончился лимит бесплатных запросов на сегодня.
+Пополните баланс или дождитесь обновления бесплатных лимитов через {0:hh} ч {0:mm} мин
+
+1⭐ = 10 запросам к ChatGPT или 2 генерации изображения</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1 star  = 20 запросов к ChatGpt или 2 генерации изображения
+    <value>1⭐ = 20 запросов к ChatGpt или 2 генерации изображения
 
+Минимальное количество старс для пополнения: {0}
 Введите целое количество stars для пополнения баланса:</value>
   </data>
   <data name="DepositTitle" xml:space="preserve">
@@ -254,7 +262,8 @@
     <value>1 stars  = 20 запросов к ChatGpt или 2 генерации изображения</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>Неправильный ввод количества старсов. Должно быть целое число больше нуля.
+    <value>❗️Неправильный ввод количества старсов
+Минимальное количество для пополнения: {0} старс
 Введите число еще раз:</value>
   </data>
   <data name="MusicResponse" xml:space="preserve">

@@ -10,6 +10,8 @@ using GPTipsBot.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Extensions;
+using GPTipsBot.Jobs;
 using GPTipsBot.Services.YandexCloud;
 using Telegram.Bot.Types.Enums;
 
@@ -27,13 +29,15 @@ namespace GPTipsBot.UpdateHandlers
         private readonly UserService _userService;
         private readonly ApplicationContext _context;
         private readonly TelejetAdClient _telejetAdClient;
+        private readonly IJobService _jobService;
         public const int ImageTextDescriptionLimit = 1000;
         public const int ImagesPerDayLimit = 5;
 
         public ImageGeneratorHandler(ITelegramBotClient botClient, ILogger<ImageGeneratorHandler> logger,
             IImageGenerator ya, UserStatusActivator sendImagestatus, ImageCreatorService imageCreatorService,
             MessageRepository messageRepository, IAdvertisementClient gramadsAdvertisementClient,
-            UserService userService, ApplicationContext context, TelejetAdClient telejetAdClient)
+            UserService userService, ApplicationContext context, TelejetAdClient telejetAdClient,
+            IJobService jobService)
         {
             _botClient = botClient;
             _logger = logger;
@@ -45,6 +49,7 @@ namespace GPTipsBot.UpdateHandlers
             _userService = userService;
             _context = context;
             _telejetAdClient = telejetAdClient;
+            _jobService = jobService;
         }
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -69,8 +74,9 @@ namespace GPTipsBot.UpdateHandlers
             {
                 await dbTransaction.RollbackAsync();
                 _context.ChangeTracker.Clear();
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.NoFreeRequests,
-                    replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+
+                var nextExec = await _jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
+                await _botClient.SendOutOfFreeRequestsMessageAsync(update.UserChatKey.Id, nextExec);
                 return;
             }
 

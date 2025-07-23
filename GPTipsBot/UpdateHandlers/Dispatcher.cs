@@ -88,7 +88,7 @@ namespace GPTipsBot.UpdateHandlers
                 await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
                     "TRX", CancellationToken.None);
                 var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
-                var reply = String.Format(BotResponse.ProfileResponse, profile.FirstName,
+                var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                     profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
                 var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                     .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
@@ -119,7 +119,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Video)
             {
-                var isSuccessPayment = await _moneyService.TryPay(update.UserChatKey.Id, PaymentConstants.Video);
+                var isSuccessPayment = await _moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Video);
                 if (!isSuccessPayment)
                 {
                     return;
@@ -137,9 +137,11 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
-                if (!int.TryParse(update.Message?.Text, out var starsCount) || starsCount <= 0)
+                if (!int.TryParse(update.Message?.Text, out var starsCount) ||
+                    starsCount < PaymentConfig.MinRechargeAmount)
                 {
-                    throw new ClientException(update.UserChatKey.ChatId, BotResponse.InvalidDepositAmountResponse);
+                    throw new ClientException(update.UserChatKey.ChatId,
+                        string.Format(BotResponse.InvalidDepositAmountResponse, PaymentConfig.MinRechargeAmount));
                 }
 
                 await _moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
@@ -148,7 +150,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Music)
             {
-                var isSuccessPayment = await _moneyService.TryPay(update.UserChatKey.Id, PaymentConstants.Music);
+                var isSuccessPayment = await _moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Music);
                 if (!isSuccessPayment)
                 {
                     return;

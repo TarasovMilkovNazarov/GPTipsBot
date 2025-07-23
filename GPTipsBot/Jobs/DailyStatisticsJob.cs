@@ -1,30 +1,24 @@
-using GPTipsBot.Db;
+﻿using GPTipsBot.Db;
+using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Telegram.Bot;
 
-namespace GPTipsBot.Dtos;
+namespace GPTipsBot.Jobs;
 
-public class DailyJob : IJob
+public class DailyStatisticsJob: IJob
 {
     private readonly ApplicationContext _context;
     private readonly ITelegramBotClient _botClient;
 
-    public DailyJob(ApplicationContext context, ITelegramBotClient botClient)
+    public DailyStatisticsJob(ApplicationContext context, ITelegramBotClient botClient)
     {
         _context = context;
         _botClient = botClient;
     }
 
     public async Task Execute(IJobExecutionContext context)
-    {
-        await SendStatistics();
-        await UpdateUserDailyLimits();
-        await RemoveOldMessages();
-    }
-
-    private async Task SendStatistics()
     {
         var today = DateTime.UtcNow.Date;
 
@@ -48,32 +42,5 @@ public class DailyJob : IJob
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
 
         await _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
-    }
-
-    private async Task RemoveOldMessages()
-    {
-        const int batchSize = 100;
-
-        var cutoffDate = DateTime.UtcNow.AddDays(-30);
-
-        while (true)
-        {
-            var deleteCount = await _context.Messages
-                .Where(m => m.CreatedAt < cutoffDate)
-                .Take(batchSize)
-                .ExecuteDeleteAsync();
-
-            if (deleteCount == 0) break;
-        }
-    }
-
-    private async Task UpdateUserDailyLimits()
-    {
-        await _context.Users
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.FreeImageGenerations, PaymentConstants.FreeImageGenerationsCount)
-                .SetProperty(u => u.FreeImageTextRecognitions, PaymentConstants.FreeImageGenerationsCount)
-                .SetProperty(u => u.FreeGptRequests, PaymentConstants.FreeChatGptRequests)
-            );
     }
 }

@@ -162,8 +162,9 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1 star  = 20 запросов к ChatGpt или 2 генерации изображения
+        ///   Looks up a localized string similar to 1⭐ = 20 запросов к ChatGpt или 2 генерации изображения
         ///
+        ///Минимальное количество старс для пополнения: {0}
         ///Введите целое количество stars для пополнения баланса:.
         /// </summary>
         public static string DepositResponse {
@@ -249,7 +250,8 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Неправильный ввод количества старсов. Должно быть целое число больше нуля.
+        ///   Looks up a localized string similar to ❗️Неправильный ввод количества старсов
+        ///Минимальное количество для пополнения: {0} старс
         ///Введите число еще раз:.
         /// </summary>
         public static string InvalidDepositAmountResponse {
@@ -285,18 +287,6 @@ namespace GPTipsBot.Resources {
         public static string MusicResponse {
             get {
                 return ResourceManager.GetString("MusicResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Закончился лимит бесплатных запросов на сегодня.
-        ///Пополните баланс для продолжения или приходите завтра, лимиты обновляются каждый день
-        ///
-        ///1 Stars = 10 запросам к ChatGpt или 2 генерации изображения.
-        /// </summary>
-        public static string NoFreeRequests {
-            get {
-                return ResourceManager.GetString("NoFreeRequests", resourceCulture);
             }
         }
         
@@ -417,6 +407,18 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ❗️Закончился лимит бесплатных запросов на сегодня.
+        ///Пополните баланс или дождитесь обновления бесплатных лимитов
+        ///
+        ///1⭐ = 10 запросам к ChatGpt или 2 генерации изображения.
+        /// </summary>
+        public static string SimpleNoFreeRequests {
+            get {
+                return ResourceManager.GetString("SimpleNoFreeRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Что-то пошло не так, попробуйте ещё раз.
         /// </summary>
         public static string SomethingWentWrong {
@@ -449,6 +451,18 @@ namespace GPTipsBot.Resources {
         public static string SwitchProxy {
             get {
                 return ResourceManager.GetString("SwitchProxy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ❗️Закончился лимит бесплатных запросов на сегодня.
+        ///Пополните баланс или дождитесь обновления бесплатных лимитов через {0:hh} ч {0:mm} мин
+        ///
+        ///1⭐ = 10 запросам к ChatGPT или 2 генерации изображения.
+        /// </summary>
+        public static string TimeNoFreeRequests {
+            get {
+                return ResourceManager.GetString("TimeNoFreeRequests", resourceCulture);
             }
         }
         
