@@ -73,8 +73,8 @@ public class MoneyService
 
         await _botClient.SendInvoiceAsync(
             chatId: userId,
-            title: BotResponse.DepositTitle,
-            description: BotResponse.DepositResponse,
+            title: BotResponse.InvoiceTitle,
+            description: BotResponse.InvoiceText,
             payload: invoice.Id.ToString(),
             providerToken: "",
             currency: Currency.Stars,

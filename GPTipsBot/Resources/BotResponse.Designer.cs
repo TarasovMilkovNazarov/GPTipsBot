@@ -174,15 +174,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Пополнить баланс.
-        /// </summary>
-        public static string DepositTitle {
-            get {
-                return ResourceManager.GetString("DepositTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to GPTipDev.
         /// </summary>
         public static string DevBotName {
@@ -266,6 +257,15 @@ namespace GPTipsBot.Resources {
         public static string InvoiceText {
             get {
                 return ResourceManager.GetString("InvoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Пополнить баланс.
+        /// </summary>
+        public static string InvoiceTitle {
+            get {
+                return ResourceManager.GetString("InvoiceTitle", resourceCulture);
             }
         }
         

@@ -219,7 +219,7 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
   <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
     <value>For image text recognition choose command from bot menu first</value>
   </data>
-  <data name="DepositTitle" xml:space="preserve">
+  <data name="InvoiceTitle" xml:space="preserve">
     <value>Add stars to account</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">

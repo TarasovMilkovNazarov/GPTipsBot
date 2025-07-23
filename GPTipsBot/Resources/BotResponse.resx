@@ -255,7 +255,7 @@
 Минимальное количество старс для пополнения: {0}
 Введите целое количество stars для пополнения баланса:</value>
   </data>
-  <data name="DepositTitle" xml:space="preserve">
+  <data name="InvoiceTitle" xml:space="preserve">
     <value>Пополнить баланс</value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
