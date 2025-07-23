@@ -390,7 +390,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Отправьте изображение для распознавания текста.
+        ///   Looks up a localized string similar to Отправьте изображение для распознавания текста или нажмите /cancel для отмены.
         /// </summary>
         public static string SendTextRecognitionImage {
             get {

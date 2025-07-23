@@ -214,7 +214,7 @@
     <value>Выберите язык интерфейса(влияет только на перевод кнопок, общаться можно на люом языке)</value>
   </data>
   <data name="SendTextRecognitionImage" xml:space="preserve">
-    <value>Отправьте изображение для распознавания текста</value>
+    <value>Отправьте изображение для распознавания текста или нажмите /cancel для отмены</value>
   </data>
   <data name="CantRecognizeText" xml:space="preserve">
     <value>Не удалось распознать текст</value>

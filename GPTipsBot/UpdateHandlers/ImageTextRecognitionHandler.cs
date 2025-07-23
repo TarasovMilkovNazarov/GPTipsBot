@@ -43,6 +43,20 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
+            string base64String;
+            try
+            {
+                base64String = await update.GetPhotoAsync(_botClient);
+            }
+            catch (ArgumentNullException e)
+            {
+                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                    BotResponse.SendTextRecognitionImage,
+                    replyMarkup: TelegramBotUiService.CancelKeyboard);
+
+                return;
+            }
+
             var isAdmin = update.UserChatKey.IsAdmin();
 
             var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
@@ -67,7 +81,6 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var base64String = await update.GetPhotoAsync(_botClient);
             var text = await _yaCloudClient.Recognize(base64String);
 
             var recognitionResultMessage = new MessageDto(update.UserChatKey)

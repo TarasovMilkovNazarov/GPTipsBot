@@ -14,7 +14,7 @@ public static class UpdateDecoratorExtensions
 
     public static bool IsExpired(this UpdateDecorator update)
     {
-        return update.Message.CreatedAt <= FirstUpdateHandler.Start - TimeSpan.FromMinutes(2);
+        return update.Message.CreatedAt <= MainHandler.Start - TimeSpan.FromMinutes(2);
     }
 
     public static async Task<string> GetPhotoAsync(this UpdateDecorator update, ITelegramBotClient botClient)

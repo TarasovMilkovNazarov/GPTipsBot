@@ -214,7 +214,7 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>❗️The daily limit of {0} requests has been reached. We look forward to seeing you tomorrow.</value>
   </data>
   <data name="SendTextRecognitionImage" xml:space="preserve">
-    <value>Send image for text recognition</value>
+    <value>Send image for text recognition or type /cancel</value>
   </data>
   <data name="CantRecognizeText" xml:space="preserve">
     <value>Failed to recognize text on image</value>

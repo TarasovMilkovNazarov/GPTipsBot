@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json;
 using AutoFixture;
 using dotenv.net;
 using FluentAssertions;
@@ -40,7 +41,7 @@ namespace GPTipsBotTests
         private MessageRepository _messageRepository;
         private readonly Mock<IGpt> _gptMock;
         private readonly Mock<IImageGenerator> _imageGeneratorMock;
-        private FirstUpdateHandler _firstUpdateHandler;
+        private MainHandler _mainHandler;
         private readonly Mock<ITextRecognizer> _recognitionServiceMock;
         private readonly Fixture _fixture;
         private IMemoryCache _memoryCache;
@@ -132,7 +133,7 @@ namespace GPTipsBotTests
             await ClearDatabase(appContext);
             _messageRepository = _services.GetRequiredService<MessageRepository>();
             _userCommandRepository = _services.GetRequiredService<UserCommandRepository>();
-            _firstUpdateHandler = _services.GetRequiredService<FirstUpdateHandler>();
+            _mainHandler = _services.GetRequiredService<MainHandler>();
             _memoryCache = _services.GetRequiredService<IMemoryCache>();
         }
 
@@ -169,7 +170,7 @@ namespace GPTipsBotTests
             foreach (var command in commandSet)
             {
                 var update = CreateTelegramUpdate(1, 2, command.Command);
-                await _firstUpdateHandler.HandleUpdateAsync(update);
+                await _mainHandler.HandleUpdateAsync(update);
             }
 
             var commands = _userCommandRepository.Get(c => true).ToList();
@@ -209,7 +210,7 @@ namespace GPTipsBotTests
                 }
             };
 
-            var updateHandlerFunc = async () => await _firstUpdateHandler.HandleUpdateAsync(update);
+            var updateHandlerFunc = async () => await _mainHandler.HandleUpdateAsync(update);
             await updateHandlerFunc.Should().NotThrowAsync("Kicked member just ignored");
         }
 
@@ -228,7 +229,7 @@ namespace GPTipsBotTests
                 }
             };
 
-            var updateHandlerFunc = async () => await _firstUpdateHandler.HandleUpdateAsync(update);
+            var updateHandlerFunc = async () => await _mainHandler.HandleUpdateAsync(update);
             await updateHandlerFunc.Should().NotThrowAsync("Sticker message ignored");
         }
 
@@ -248,7 +249,7 @@ namespace GPTipsBotTests
 
             var messageUpd = CreateTelegramUpdate(1, 2, prompt);
             var userId = messageUpd.Message.From.Id;
-            await _firstUpdateHandler.HandleUpdateAsync(messageUpd);
+            await _mainHandler.HandleUpdateAsync(messageUpd);
 
             _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
                     arg.Message.Text.Equals(prompt)
@@ -271,7 +272,7 @@ namespace GPTipsBotTests
 
             for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
             {
-                await _firstUpdateHandler.HandleUpdateAsync(messageUpd);
+                await _mainHandler.HandleUpdateAsync(messageUpd);
             }
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
@@ -304,7 +305,7 @@ namespace GPTipsBotTests
 
             for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
             {
-                await _firstUpdateHandler.HandleUpdateAsync(messageUpd);
+                await _mainHandler.HandleUpdateAsync(messageUpd);
             }
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
@@ -323,7 +324,7 @@ namespace GPTipsBotTests
             CultureInfo.CurrentUICulture = new CultureInfo("ru");
             var update = CreateTelegramUpdate(1, 2, BotMenu.ChooseLangCommand);
 
-            await _firstUpdateHandler.HandleUpdateAsync(update);
+            await _mainHandler.HandleUpdateAsync(update);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == update.Message!.Chat.Id &&
@@ -339,7 +340,7 @@ namespace GPTipsBotTests
 
             for (var i = 0; i < PaymentConstants.FreeImageGenerationsCount + 1; i++)
             {
-                await _firstUpdateHandler.HandleUpdateAsync(update);
+                await _mainHandler.HandleUpdateAsync(update);
             }
 
             var userId = update.Message!.From.Id;
@@ -363,7 +364,7 @@ namespace GPTipsBotTests
         {
             var imagePromptWithCommand = "/image кракозябра";
             var getImageUpdate = CreateTelegramUpdate(1, 2, imagePromptWithCommand);
-            await _firstUpdateHandler.HandleUpdateAsync(getImageUpdate);
+            await _mainHandler.HandleUpdateAsync(getImageUpdate);
 
             var generatedImagesCount = _messageRepository.GetTodayImagesCount(getImageUpdate.Message!.From.Id);
 
@@ -376,7 +377,7 @@ namespace GPTipsBotTests
             var update = CreateTelegramUpdate(1, 2, BotMenu.ImageTextRecognizeCommand);
             var userId = update.Message!.From.Id;
 
-            await _firstUpdateHandler.HandleUpdateAsync(update);
+            await _mainHandler.HandleUpdateAsync(update);
             update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[]
             {
@@ -386,7 +387,7 @@ namespace GPTipsBotTests
                 }
             };
 
-            await _firstUpdateHandler.HandleUpdateAsync(update);
+            await _mainHandler.HandleUpdateAsync(update);
 
             _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
@@ -410,20 +411,36 @@ namespace GPTipsBotTests
                 }
             };
 
-            var imageUpdateFunc = async() => await _firstUpdateHandler.HandleUpdateAsync(update);
+            var imageUpdateFunc = async() => await _mainHandler.HandleUpdateAsync(update);
 
             await imageUpdateFunc.Should().ThrowExactlyAsync<NotSupportedMessageException>();
         }
 
         [Test]
+        public async Task RecognizeImageTextRequest_CommandSelected_NextMessageImageExpected()
+        {
+            var commandUpdate = CreateTelegramUpdate(2, 2, BotMenu.ImageTextRecognizeCommand);
+            var notImageUpdate = CreateTelegramUpdate(2, 2, null);
+
+            await _mainHandler.HandleUpdateAsync(commandUpdate);
+            await _mainHandler.HandleUpdateAsync(notImageUpdate);
+
+            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+                    arg.ChatId == notImageUpdate.Message!.Chat.Id &&
+                    arg.Text == BotResponse.SendTextRecognitionImage
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task ResetContext_OldContextExists_ReturnNewContextId()
         {
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
             var userId = _startTelegramUpdate.Message!.From.Id;
             var initialContextId = _messageRepository.GetLastContext(userId, userId);
 
             var resetContextUpdDecorator = CreateTelegramUpdate(1, 2, BotMenu.ResetContextCommand);
-            await _firstUpdateHandler.HandleUpdateAsync(resetContextUpdDecorator);
+            await _mainHandler.HandleUpdateAsync(resetContextUpdDecorator);
 
             var newContextId = _messageRepository.GetLastContext(userId, userId);
 
@@ -433,15 +450,15 @@ namespace GPTipsBotTests
         [Test]
         public async Task SendMessage_ContextExists_SameContext()
         {
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
             var userId = _startTelegramUpdate.Message!.From.Id;
             var initialContextId = _messageRepository.GetLastContext(userId, userId);
 
             var firstMessageUpd = CreateTelegramUpdate(1, 2, "first");
-            await _firstUpdateHandler.HandleUpdateAsync(firstMessageUpd);
+            await _mainHandler.HandleUpdateAsync(firstMessageUpd);
 
             var secondMessageUpd = CreateTelegramUpdate(3, 4, "second");
-            await _firstUpdateHandler.HandleUpdateAsync(secondMessageUpd);
+            await _mainHandler.HandleUpdateAsync(secondMessageUpd);
 
             var newContextId = _messageRepository.GetLastContext(userId, userId);
 
@@ -453,7 +470,7 @@ namespace GPTipsBotTests
         {
             var userRepository = _services.GetRequiredService<UserRepository>();
 
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
 
@@ -465,8 +482,8 @@ namespace GPTipsBotTests
         {
             var userRepository = _services.GetRequiredService<UserRepository>();
 
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
             var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + _startTelegramUpdate.Message.From.Id);
@@ -480,7 +497,7 @@ namespace GPTipsBotTests
 
             var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault()?.Balance ?? 0;
 
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
             var starsToAdd = 10;
 
             var paymentUpdate = new Update
@@ -495,7 +512,7 @@ namespace GPTipsBotTests
                     TotalAmount = starsToAdd
                 },
             };
-            await _firstUpdateHandler.HandleUpdateAsync(paymentUpdate);
+            await _mainHandler.HandleUpdateAsync(paymentUpdate);
 
             var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
 
@@ -513,9 +530,9 @@ namespace GPTipsBotTests
 
             var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault()?.Balance ?? 0;
 
-            await _firstUpdateHandler.HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, BotMenu.DepositCommand));
+            await _mainHandler.HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, BotMenu.DepositCommand));
 
-            var starsInputUpdateFunc = async () => await _firstUpdateHandler
+            var starsInputUpdateFunc = async () => await _mainHandler
                 .HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, input));
 
             if (!isValid)
@@ -540,7 +557,7 @@ namespace GPTipsBotTests
                     TotalAmount = int.Parse(input)
                 },
             };
-            await _firstUpdateHandler.HandleUpdateAsync(paymentUpdate);
+            await _mainHandler.HandleUpdateAsync(paymentUpdate);
 
             var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
 
@@ -575,7 +592,7 @@ namespace GPTipsBotTests
 
             var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).First().Balance;
 
-            await _firstUpdateHandler.HandleUpdateAsync(_startTelegramUpdate);
+            await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
             var starsToAdd = 10;
 
             var paymentUpdate = new Update
@@ -590,7 +607,7 @@ namespace GPTipsBotTests
                     TotalAmount = starsToAdd
                 },
             };
-            await _firstUpdateHandler.HandleUpdateAsync(paymentUpdate);
+            await _mainHandler.HandleUpdateAsync(paymentUpdate);
 
             var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
 

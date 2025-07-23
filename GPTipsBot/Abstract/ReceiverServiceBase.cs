@@ -5,6 +5,7 @@ using GPTipsBot;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
+using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -60,7 +61,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, chatId);
                         try
                         {
-                            var worker = scope.ServiceProvider.GetRequiredService<FirstUpdateHandler>();
+                            var worker = scope.ServiceProvider.GetRequiredService<MainHandler>();
                             await worker.HandleUpdateAsync(update);
                         }
                         catch (IgnoreMessageTypeException e)

@@ -1,16 +1,15 @@
-﻿using GPTipsBot.Extensions;
+﻿using System.Globalization;
+using GPTipsBot.Db;
+using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
-using GPTipsBot.UpdateHandlers;
-using System.Globalization;
-using GPTipsBot.Db;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace GPTipsBot
+namespace GPTipsBot.UpdateHandlers
 {
-    public class FirstUpdateHandler
+    public class MainHandler
     {
         private readonly Dispatcher _dispatcher;
         private readonly SpeechToTextService _speechToTextService;
@@ -21,7 +20,7 @@ namespace GPTipsBot
 
         public static DateTime Start { get; private set; }
 
-        public FirstUpdateHandler(
+        public MainHandler(
             Dispatcher dispatcher,
             SpeechToTextService speechToTextService,
             TelejetAdClient telejetAdClient,
