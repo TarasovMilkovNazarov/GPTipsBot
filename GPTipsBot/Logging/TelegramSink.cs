@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Extensions;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Extensions;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;

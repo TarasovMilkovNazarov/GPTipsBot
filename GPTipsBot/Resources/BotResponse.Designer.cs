@@ -318,15 +318,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Извините, но сейчас доступна обработка только текстовых сообщений. В разработке находятся голосовые сообщения и генерация картинок текстом.
-        /// </summary>
-        public static string OnlyMessagesAvailable {
-            get {
-                return ResourceManager.GetString("OnlyMessagesAvailable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ⚙️ Ведутся технические работы. Благодарим за понимание..
         /// </summary>
         public static string OnMaintenance {
@@ -517,6 +508,15 @@ namespace GPTipsBot.Resources {
         public static string TooManyRequests {
             get {
                 return ResourceManager.GetString("TooManyRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Извините, бот не поддерживает данный тип сообщений.
+        /// </summary>
+        public static string UnsupportedMessageType {
+            get {
+                return ResourceManager.GetString("UnsupportedMessageType", resourceCulture);
             }
         }
         

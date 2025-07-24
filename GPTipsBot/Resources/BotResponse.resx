@@ -165,8 +165,8 @@
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>Руссий язык используется для интерфейса</value>
   </data>
-  <data name="OnlyMessagesAvailable" xml:space="preserve">
-    <value>Извините, но сейчас доступна обработка только текстовых сообщений. В разработке находятся голосовые сообщения и генерация картинок текстом</value>
+  <data name="UnsupportedMessageType" xml:space="preserve">
+    <value>Извините, бот не поддерживает данный тип сообщений</value>
   </data>
   <data name="OnMaintenance" xml:space="preserve">
     <value>⚙️ Ведутся технические работы. Благодарим за понимание.</value>

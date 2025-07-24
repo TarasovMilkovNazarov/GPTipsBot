@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using GPTipsBot.Config;
 
 namespace GPTipsBot.Models
 {

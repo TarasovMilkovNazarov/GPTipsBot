@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Ardalis.GuardClauses;
-using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Mapper;
@@ -11,7 +10,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
 
-namespace GPTipsBot.UpdateHandlers
+namespace GPTipsBot.Dtos
 {
     public class UpdateDecorator
     {

@@ -1,6 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 
-namespace GPTipsBot
+namespace GPTipsBot.Config
 {
     public static class AppConfig
     {

@@ -1,4 +1,6 @@
 ﻿using Ardalis.GuardClauses;
+using GPTipsBot.Config;
+using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;

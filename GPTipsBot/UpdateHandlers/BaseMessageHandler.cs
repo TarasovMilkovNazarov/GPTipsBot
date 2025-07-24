@@ -1,4 +1,6 @@
-﻿namespace GPTipsBot.UpdateHandlers
+﻿using GPTipsBot.Dtos;
+
+namespace GPTipsBot.UpdateHandlers
 {
     public abstract class BaseMessageHandler : IMessageHandler<UpdateDecorator>
     {

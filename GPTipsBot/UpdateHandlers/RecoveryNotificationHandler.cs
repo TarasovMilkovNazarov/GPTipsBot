@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;

@@ -1,4 +1,4 @@
-﻿namespace GPTipsBot;
+﻿namespace GPTipsBot.Config;
 
 public static class PaymentConfig
 {

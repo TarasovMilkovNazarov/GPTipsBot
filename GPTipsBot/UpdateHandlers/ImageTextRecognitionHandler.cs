@@ -1,5 +1,4 @@
-﻿using Ardalis.GuardClauses;
-using GPTipsBot.Db;
+﻿using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Extensions;

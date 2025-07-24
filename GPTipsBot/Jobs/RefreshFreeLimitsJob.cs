@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Db;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Db;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 

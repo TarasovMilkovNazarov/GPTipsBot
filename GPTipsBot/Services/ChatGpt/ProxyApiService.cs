@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using GPTipsBot.Config;
+using Microsoft.Extensions.Logging;
 using OpenAI;
 using OpenAI.Managers;
 

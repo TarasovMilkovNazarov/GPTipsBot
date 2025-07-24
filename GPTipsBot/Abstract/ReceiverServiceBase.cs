@@ -2,16 +2,18 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using GPTipsBot;
+using GPTipsBot.Config;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
+using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
 
 // ReSharper disable once CheckNamespace
 namespace Telegram.Bot.Abstract;
@@ -55,11 +57,22 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                 tasks.Add(Task.Run(async () =>
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    using (_log.BeginScope(new [] {update.Id, update.Message?.From?.Id}))
+                    var user = update.GetUser();
+
+                    if (user == null)
                     {
-                        var chatId = update.Message?.Chat.Id;
+                        var updateStr = SerializeUpdate(update);
+                        // just for case but seems impossible
+                        _log.LogError("Could not get user id from update:\n {UpdateStr} ", updateStr);
+                        return;
+                    }
+
+                    var userId = user.Id;
+                    var chatId = update.GetChatId();
+                    using (_log.BeginScope(new [] {update.Id, userId}))
+                    {
                         _log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",
-                            update.Message?.Text, update.Id, update.Message?.From?.Username, update.Message?.From?.Id, chatId);
+                            update.Message?.Text, update.Id, user?.Username, userId, chatId);
                         try
                         {
                             var worker = scope.ServiceProvider.GetRequiredService<MainHandler>();
@@ -84,29 +97,28 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         catch (NotSupportedMessageException notSupportedMessageEx)
                         {
                             await _botClient.SendTextMessageAsync(notSupportedMessageEx.ChatId,
-                                BotResponse.OnlyMessagesAvailable, cancellationToken: stoppingToken);
+                                BotResponse.UnsupportedMessageType, cancellationToken: stoppingToken);
                         }
                         catch (ApiRequestException e)
                         {
-                            _log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
+                            if (e.ErrorCode == 403)
+                            {
+                                var userRepository = scope.ServiceProvider.GetRequiredService<UserRepository>();
+                                await userRepository.SoftlyRemoveUser(userId);
+                            }
+                            else
+                            {
+                                _log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
+                            }
                         }
                         catch (Exception e)
                         {
-                            var updateStr = System.Text.Json.JsonSerializer.Serialize(update,
-                                new JsonSerializerOptions
-                                {
-                                    WriteIndented = true,
-                                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                                });
+                            var updateStr = SerializeUpdate(update);
 
                             _log.LogError(e, "Unknown error while handling update" +
                                              Environment.NewLine + "{update}", updateStr);
-                            if (update.Message == null)
-                                return;
 
-                            await _botClient.SendTextMessageAsync(update.Message.Chat.Id, BotResponse.SomethingWentWrong,
+                            await _botClient.SendTextMessageAsync(userId, BotResponse.SomethingWentWrong,
                                 cancellationToken: stoppingToken);
                         }
                     }
@@ -126,6 +138,19 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         {
             await WaitForUnfinishedTasks(tasks, TimeSpan.FromMinutes(1));
         }
+    }
+
+    private static string SerializeUpdate(Update update)
+    {
+        var updateStr = System.Text.Json.JsonSerializer.Serialize(update,
+            new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+        return updateStr;
     }
 
     private async Task Init(CancellationToken stoppingToken)

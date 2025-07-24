@@ -1,4 +1,4 @@
-﻿using GPTipsBot.Jobs;
+﻿using GPTipsBot.Config;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.Utilities;

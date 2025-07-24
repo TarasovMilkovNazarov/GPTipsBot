@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
+using GPTipsBot.Config;
 using GPTipsBot.Db;
+using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
 using GPTipsBot.Resources;

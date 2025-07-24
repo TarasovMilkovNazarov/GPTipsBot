@@ -5,6 +5,7 @@ using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Ardalis.GuardClauses;
+using GPTipsBot.Config;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Models;

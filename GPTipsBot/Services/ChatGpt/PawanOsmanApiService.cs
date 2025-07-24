@@ -1,4 +1,5 @@
-﻿using OpenAI;
+﻿using GPTipsBot.Config;
+using OpenAI;
 using OpenAI.Managers;
 
 namespace GPTipsBot.Services

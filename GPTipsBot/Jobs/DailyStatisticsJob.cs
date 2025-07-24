@@ -1,7 +1,9 @@
-﻿using GPTipsBot.Db;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Telegram.Bot;
 
@@ -11,11 +13,14 @@ public class DailyStatisticsJob: IJob
 {
     private readonly ApplicationContext _context;
     private readonly ITelegramBotClient _botClient;
+    private readonly ILogger<DailyStatisticsJob> _logger;
 
-    public DailyStatisticsJob(ApplicationContext context, ITelegramBotClient botClient)
+    public DailyStatisticsJob(ApplicationContext context, ITelegramBotClient botClient,
+        ILogger<DailyStatisticsJob> logger)
     {
         _context = context;
         _botClient = botClient;
+        _logger = logger;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -35,12 +40,25 @@ public class DailyStatisticsJob: IJob
             })
             .FirstOrDefaultAsync() ?? new();
 
+        var mau = await CalculateMonthlyActiveUsers();
+
         var message = "#statistics" + Environment.NewLine +
                       $"New users created: {newUsersCount} for {today:dd.MM.yyyy}" + Environment.NewLine;
         message += Environment.NewLine + $"Images generated: {counts.ImagesCount}";
         message += Environment.NewLine + $"Text recognitions: {counts.RecognitionsCount}";
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
+        message += Environment.NewLine + $"Monthly users: {mau}";
 
         await _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
+    }
+
+    private async Task<long> CalculateMonthlyActiveUsers()
+    {
+        var currentMonth = DateTime.Now.Month;
+
+        var mau = await _context.UserCommands.AsNoTracking()
+            .Where(c => c.CreatedAt.Month == currentMonth).GroupBy(c => c.UserId).CountAsync();
+
+        return mau;
     }
 }

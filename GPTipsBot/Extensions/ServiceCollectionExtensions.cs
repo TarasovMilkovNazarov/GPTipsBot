@@ -6,6 +6,7 @@ using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using System.Net.Http.Headers;
+using GPTipsBot.Config;
 using GPTipsBot.Jobs;
 using Telegram.Bot.Services;
 using Telegram.Bot;

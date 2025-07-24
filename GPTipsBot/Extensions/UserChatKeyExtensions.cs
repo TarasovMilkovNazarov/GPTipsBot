@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Dtos;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Dtos;
 
 namespace GPTipsBot.Extensions;
 

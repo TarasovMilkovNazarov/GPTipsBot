@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Repositories;
 using System.Collections.Concurrent;
+using GPTipsBot.Config;
 using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Services

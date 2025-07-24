@@ -1,10 +1,9 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Ardalis.GuardClauses;
+using GPTipsBot.Config;
 using GPTipsBot.Dtos;
-using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
@@ -14,10 +13,8 @@ using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
-using GPTipsBot.Resources;
 using Polly.Retry;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace GPTipsBot.Services
 {

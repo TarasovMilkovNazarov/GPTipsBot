@@ -1,4 +1,4 @@
-﻿using GPTipsBot.UpdateHandlers;
+﻿using GPTipsBot.Dtos;
 using OpenAI.ObjectModels.ResponseModels;
 
 namespace GPTipsBot.Services;

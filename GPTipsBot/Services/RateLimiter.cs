@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using GPTipsBot.Dtos;
 using GPTipsBot.Resources;
-using GPTipsBot.UpdateHandlers;
 using Telegram.Bot;
 
 namespace GPTipsBot.Services

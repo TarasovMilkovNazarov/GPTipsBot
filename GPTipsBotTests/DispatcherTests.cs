@@ -4,6 +4,7 @@ using AutoFixture;
 using dotenv.net;
 using FluentAssertions;
 using GPTipsBot;
+using GPTipsBot.Config;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
@@ -487,7 +488,8 @@ namespace GPTipsBotTests
             await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
 
             var newUser = userRepository.Get(TestConstants.UserId);
-            var cached = _memoryCache.Get<GPTipsBot.Models.User>("User_" + _startTelegramUpdate.Message.From.Id);
+            var cached = _memoryCache.Get<GPTipsBot.Models.User>
+                (UserRepository.CacheKeyPrefix + _startTelegramUpdate.Message!.From.Id);
             cached.Should().BeEquivalentTo(newUser);
         }
 

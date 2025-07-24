@@ -1,5 +1,6 @@
 ﻿using RestSharp;
 using System.Net;
+using GPTipsBot.Config;
 using Telegram.Bot;
 
 namespace GPTipsBot.Services

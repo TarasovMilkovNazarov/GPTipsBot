@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Models;
 using GPTipsBot.UpdateHandlers;
 using Ardalis.GuardClauses;
+using GPTipsBot.Dtos;
 using Telegram.Bot;
 
 namespace GPTipsBot.Extensions;

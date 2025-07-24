@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using GPTipsBot.Config;
 
 namespace GPTipsBot.Services
 {

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using GPTipsBot.Config;
 using GPTipsBot.Dtos;
 using GPTipsBot.Resources;
 using Microsoft.Extensions.Logging;

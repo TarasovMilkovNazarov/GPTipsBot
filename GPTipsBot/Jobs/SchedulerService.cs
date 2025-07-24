@@ -1,6 +1,6 @@
 ﻿using Quartz;
 
-namespace GPTipsBot.Services;
+namespace GPTipsBot.Jobs;
 
 public interface ISchedulerService
 {
@@ -37,9 +37,9 @@ public class SchedulerService : ISchedulerService
 
         var trigger = TriggerBuilder.Create()
             .WithIdentity(triggerKey)
-            .StartAt(startAt)
             .WithSimpleSchedule(x => x.WithInterval(interval)
                 .RepeatForever())
+            .StartAt(startAt)
             // .StartNow()
             .Build();
 

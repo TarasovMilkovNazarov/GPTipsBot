@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Models;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GPTipsBot.Db

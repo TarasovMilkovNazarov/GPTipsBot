@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using GPTipsBot.Config;
 using Newtonsoft.Json;
 
 namespace GPTipsBot.Services;

@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using GPTipsBot.Config;
 using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
@@ -125,7 +126,7 @@ namespace GPTipsBot.Services
 
         public async Task CreateUpdateUser(User user)
         {
-            var cacheKey = $"User_{user.Id}";
+            var cacheKey = UserRepository.CacheKeyPrefix + user.Id;
 
             if (_memoryCache.TryGetValue(cacheKey, out User _))
             {
