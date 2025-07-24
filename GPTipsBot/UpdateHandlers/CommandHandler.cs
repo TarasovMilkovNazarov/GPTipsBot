@@ -88,7 +88,11 @@ namespace GPTipsBot.UpdateHandlers
                 case DepositCommand:
                     await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
                         string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
-                        replyMarkup: null);
+                        replyMarkup: CancelInlineKeyboard);
+                    return;
+                case DonateCommand:
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                        BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
                     return;
                 case MusicCommand:
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton

@@ -81,7 +81,33 @@ public class MoneyService
             prices: new[] { new LabeledPrice("Premium Access", starsCount) }
             ,
             startParameter: "premium_subscription"
-            );
+        );
+
+    }
+
+    public async Task SendDonateInvoice(long userId, int starsCount = 100)
+    {
+        var invoice = new Invoice
+        {
+            CreatedAt = DateTime.UtcNow,
+            UserId = userId,
+            Amount = starsCount,
+            Currency = Currency.Stars,
+            Status = InvoiceStatus.Created
+        };
+        _invoiceRepository.Create(invoice);
+
+        await _context.SaveChangesAsync();
+
+        await _botClient.SendInvoiceAsync(
+            chatId: userId,
+            title: string.Format(BotResponse.DonateTitle, starsCount),
+            description: BotResponse.DonateText,
+            payload: $"donate_{invoice.Id.ToString()}",
+            providerToken: "",
+            currency: Currency.Stars,
+            prices: new[] { new LabeledPrice("Donate", starsCount) }
+        );
 
     }
 

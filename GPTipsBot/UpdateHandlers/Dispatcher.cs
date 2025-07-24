@@ -85,17 +85,31 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.PreCheckoutQuery != null)
             {
-                await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
-                    "TRX", CancellationToken.None);
-                var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
-                var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
-                    profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
-                var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                    .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+                if (update.PreCheckoutQuery.InvoicePayload.StartsWith("donate"))
+                {
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.Id,
+                        BotResponse.DonateText, replyMarkup: null);
 
-                await _botClient.AnswerPreCheckoutQueryAsync(
-                    preCheckoutQueryId: update.PreCheckoutQuery.Id);
-                await _botClient.SendTextMessageAsync(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
+                    await _botClient.AnswerPreCheckoutQueryAsync(
+                        preCheckoutQueryId: update.PreCheckoutQuery.Id);
+                }
+                else
+                {
+                    await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
+                        "TRX", CancellationToken.None);
+                    var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+                    var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
+                        profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
+                    var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
+                        .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+
+                    await _botClient.AnswerPreCheckoutQueryAsync(
+                        preCheckoutQueryId: update.PreCheckoutQuery.Id);
+                    await _botClient.SendTextMessageAsync(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
+                }
+
+                await _userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
+
                 return;
             }
 
@@ -140,11 +154,23 @@ namespace GPTipsBot.UpdateHandlers
                 if (!int.TryParse(update.Message?.Text, out var starsCount) ||
                     starsCount < PaymentConfig.MinRechargeAmount)
                 {
-                    throw new ClientException(update.UserChatKey.ChatId,
+                    throw new ClientCanceledException(update.UserChatKey.ChatId,
                         string.Format(BotResponse.InvalidDepositAmountResponse, PaymentConfig.MinRechargeAmount));
                 }
 
                 await _moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
+
+                return;
+            }
+            else if (lastCommand?.Type == CommandType.Donate)
+            {
+                if (!int.TryParse(update.Message?.Text, out var starsCount) ||
+                    starsCount <= 0)
+                {
+                    throw new ClientCanceledException(update.UserChatKey.ChatId, BotResponse.StarsDonationHint);
+                }
+
+                await _moneyService.SendDonateInvoice(update.UserChatKey.Id, starsCount);
 
                 return;
             }

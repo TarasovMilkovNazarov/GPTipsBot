@@ -82,6 +82,7 @@ namespace GPTipsBot.Services
         public static ReplyKeyboardMarkup CancelKeyboard => GetCancelKeyboardMarkup();
         public static ReplyKeyboardMarkup ChooseLangKeyboard => GetLanguageKeyboardMarkup();
         public static InlineKeyboardMarkup DepositInlineKeyboard => GetDepositInlineKeyboard();
+        public static InlineKeyboardMarkup CancelInlineKeyboard => GetCancelInlineKeyboard();
 
         private static KeyboardButton ImageButton => new(BotUI.ImageButton);
         private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
@@ -184,6 +185,12 @@ namespace GPTipsBot.Services
         {
             return new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+        }
+
+        private static InlineKeyboardMarkup GetCancelInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(InlineKeyboardButton
+                .WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand));
         }
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
         {

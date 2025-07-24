@@ -159,9 +159,6 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and start again with the /image command.</value>
   </data>
-  <data name="ImagesPerDayLimit" xml:space="preserve">
-    <value>❗️ Generated images per day exceeded (&gt; {0})</value>
-  </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>To continue please enter a text description of the image up to {0} characters in length. To quit from image generation mode send /cancel command or press 'Cancel' bots keyboard button.</value>
   </data>
@@ -290,5 +287,26 @@ Top up your balance or wait for the free limits to reset.
 Either add funds now or wait {0:%d} d {0:%h} h {0:%m} min for your free requests to refresh.
 
 1⭐ = 10 ChatGPT queries or 2 AI images</value>
+  </data>
+  <data name="DonateResponse" xml:space="preserve">
+    <value>🌟 Support our project! 💪
+
+💖 Every donation helps us grow and improve the service.
+🤝 We deeply appreciate your support and are working hard to make our product even better! 🚀💡</value>
+  </data>
+  <data name="DonateText" xml:space="preserve">
+    <value>🌱 Because of you, we can grow and improve. Thank you!</value>
+  </data>
+  <data name="DonateTitle" xml:space="preserve">
+    <value>Support us with {0} stars</value>
+  </data>
+  <data name="DonateInstructions" xml:space="preserve">
+    <value>✨ Support Our Project!
+
+👇 Enter the number of stars you'd like to donate.
+Every contribution counts, and we're so grateful for your support! 🤗</value>
+  </data>
+  <data name="StarsDonationHint" xml:space="preserve">
+    <value>✨ Almost there! Just enter a number (like 5, 10, or 50) – every star counts! 🌟 Thank you!</value>
   </data>
 </root>

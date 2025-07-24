@@ -5,6 +5,7 @@ using GPTipsBot;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
+using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -71,6 +72,13 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         catch (ClientException clientEx)
                         {
                             await _botClient.SendTextMessageAsync(clientEx.ChatId, clientEx.Message,
+                                cancellationToken: stoppingToken);
+                        }
+                        catch (ClientCanceledException clientCanceledException)
+                        {
+                            await _botClient.SendTextMessageAsync(clientCanceledException.ChatId,
+                                clientCanceledException.Message,
+                                replyMarkup: TelegramBotUiService.CancelInlineKeyboard,
                                 cancellationToken: stoppingToken);
                         }
                         catch (NotSupportedMessageException notSupportedMessageEx)

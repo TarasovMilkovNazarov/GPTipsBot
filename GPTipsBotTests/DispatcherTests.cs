@@ -510,7 +510,8 @@ namespace GPTipsBotTests
                         Id = TestConstants.UserId
                     },
                     Currency = "XTR",
-                    TotalAmount = starsToAdd
+                    TotalAmount = starsToAdd,
+                    InvoicePayload = string.Empty
                 },
             };
             await _mainHandler.HandleUpdateAsync(paymentUpdate);
@@ -538,7 +539,7 @@ namespace GPTipsBotTests
 
             if (!isValid)
             {
-                await starsInputUpdateFunc.Should().ThrowExactlyAsync<ClientException>();
+                await starsInputUpdateFunc.Should().ThrowExactlyAsync<ClientCanceledException>();
                 return;
             }
             else
@@ -555,7 +556,8 @@ namespace GPTipsBotTests
                         Id = TestConstants.UserId
                     },
                     Currency = "XTR",
-                    TotalAmount = int.Parse(input)
+                    TotalAmount = int.Parse(input),
+                    InvoicePayload = string.Empty
                 },
             };
             await _mainHandler.HandleUpdateAsync(paymentUpdate);
@@ -605,7 +607,8 @@ namespace GPTipsBotTests
                         Id = TestConstants.UserId
                     },
                     Currency = "XTR",
-                    TotalAmount = starsToAdd
+                    TotalAmount = starsToAdd,
+                    InvoicePayload = string.Empty
                 },
             };
             await _mainHandler.HandleUpdateAsync(paymentUpdate);

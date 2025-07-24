@@ -183,6 +183,44 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 👇 Введите целое число старсов для отправки доната. Мы рады любой вашей поддержке 🤗.
+        /// </summary>
+        public static string DonateInstructions {
+            get {
+                return ResourceManager.GetString("DonateInstructions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 🌟 Поддержите наш проект! 💪
+        ///
+        ///💖 Каждый донат помогает развивать и улучшать сервис. 🤝 Мы ценим вашу поддержку и работаем над тем, чтобы сделать наш продукт еще лучше. 🚀💡.
+        /// </summary>
+        public static string DonateResponse {
+            get {
+                return ResourceManager.GetString("DonateResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Спасибо за вашу поддержку!.
+        /// </summary>
+        public static string DonateText {
+            get {
+                return ResourceManager.GetString("DonateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Донат проекту {0} stars.
+        /// </summary>
+        public static string DonateTitle {
+            get {
+                return ResourceManager.GetString("DonateTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Привет!:) Чем могу помочь?.
         /// </summary>
         public static string Greeting {
@@ -197,15 +235,6 @@ namespace GPTipsBot.Resources {
         public static string ImageDescriptionLimitWarning {
             get {
                 return ResourceManager.GetString("ImageDescriptionLimitWarning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ❗️Превышен дневной лимит запросов на генерацию изображений (&gt; {0}).
-        /// </summary>
-        public static string ImagesPerDayLimit {
-            get {
-                return ResourceManager.GetString("ImagesPerDayLimit", resourceCulture);
             }
         }
         
@@ -241,9 +270,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ❗️Неправильный ввод количества старсов
-        ///Минимальное количество для пополнения: {0} старс
-        ///Введите число еще раз:.
+        ///   Looks up a localized string similar to ✨ Ой-ой! Нужно минимум {0} старс. Давайте попробуем снова 👇.
         /// </summary>
         public static string InvalidDepositAmountResponse {
             get {
@@ -442,6 +469,15 @@ namespace GPTipsBot.Resources {
         public static string SongResponse {
             get {
                 return ResourceManager.GetString("SongResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ✨ Почти получилось! Просто введите число (например, 5, 10 или 50) – каждая звёздочка важна! 🌟 Спасибо вам!.
+        /// </summary>
+        public static string StarsDonationHint {
+            get {
+                return ResourceManager.GetString("StarsDonationHint", resourceCulture);
             }
         }
         

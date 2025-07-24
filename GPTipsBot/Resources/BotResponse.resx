@@ -159,9 +159,6 @@
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>
   </data>
-  <data name="ImagesPerDayLimit" xml:space="preserve">
-    <value>❗️Превышен дневной лимит запросов на генерацию изображений (&gt; {0})</value>
-  </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку 'Отмена'</value>
   </data>
@@ -255,16 +252,31 @@
 Минимальное количество старс для пополнения: {0}
 Введите целое количество stars для пополнения баланса:</value>
   </data>
+  <data name="DonateResponse" xml:space="preserve">
+    <value>🌟 Поддержите наш проект! 💪
+
+💖 Каждый донат помогает развивать и улучшать сервис. 🤝 Мы ценим вашу поддержку и работаем над тем, чтобы сделать наш продукт еще лучше. 🚀💡</value>
+  </data>
+  <data name="DonateInstructions" xml:space="preserve">
+    <value>👇 Введите целое число старсов для отправки доната. Мы рады любой вашей поддержке 🤗</value>
+  </data>
   <data name="InvoiceTitle" xml:space="preserve">
     <value>Пополнить баланс</value>
+  </data>
+  <data name="DonateTitle" xml:space="preserve">
+    <value>Донат проекту {0} stars</value>
+  </data>
+  <data name="DonateText" xml:space="preserve">
+    <value>Спасибо за вашу поддержку!</value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
     <value>1 stars  = 20 запросов к ChatGpt или 2 генерации изображения</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>❗️Неправильный ввод количества старсов
-Минимальное количество для пополнения: {0} старс
-Введите число еще раз:</value>
+    <value>✨ Ой-ой! Нужно минимум {0} старс. Давайте попробуем снова 👇</value>
+  </data>
+  <data name="StarsDonationHint" xml:space="preserve">
+    <value>✨ Почти получилось! Просто введите число (например, 5, 10 или 50) – каждая звёздочка важна! 🌟 Спасибо вам!</value>
   </data>
   <data name="MusicResponse" xml:space="preserve">
     <value>Пример запроса для создания музыки:
