@@ -35,7 +35,7 @@ namespace GPTipsBotTests
         private readonly Update _startTelegramUpdate;
         private readonly IServiceCollection _serviceCollection;
         private IServiceProvider _services;
-        private readonly Mock<ITelegramBotClient> _botClientMock = new();
+        private Mock<ITelegramBotClient> _botClientMock;
         private MessageRepository _messageRepository;
         private readonly Mock<IGpt> _gptMock;
         private readonly Mock<IImageGenerator> _imageGeneratorMock;
@@ -44,8 +44,6 @@ namespace GPTipsBotTests
         private readonly Fixture _fixture;
         private IMemoryCache _memoryCache;
         private UserCommandRepository _userCommandRepository;
-
-        private ITelegramBotClient BotClient => _botClientMock.Object;
 
         public DispatcherTests()
         {
@@ -65,24 +63,8 @@ namespace GPTipsBotTests
             _serviceCollection
                 .AddSingleton(_recognitionServiceMock.Object)
                 .AddSingleton(_imageGeneratorMock.Object)
-                .AddSingleton(BotClient)
                 .AddSingleton<IGpt>(_gptMock.Object)
                 .AddSingleton(gramadsMockClient.Object);
-
-            _botClientMock.Setup(b => b.SendRequest(It.IsAny<GetFileRequest>(),
-                It.IsAny<CancellationToken>())).ReturnsAsync(new TGFile()
-            {
-                FileId = "test",
-                FileSize = 1,
-                FilePath = "test.txt"
-            });
-
-            _botClientMock.Setup(b => b.SendRequest(
-                It.IsAny<SendMessageRequest>(),
-                It.IsAny<CancellationToken>())).ReturnsAsync(new Message()
-            {
-                Id = 123
-            });
 
             _startTelegramUpdate = CreateTelegramUpdate(1234, 1234, BotMenu.StartCommand);
         }
@@ -125,7 +107,25 @@ namespace GPTipsBotTests
         [SetUp]
         public async Task Setup()
         {
-            _services = _serviceCollection.BuildServiceProvider();
+            _botClientMock = new();
+            _botClientMock.Setup(b => b.SendRequest(It.IsAny<GetFileRequest>(),
+                It.IsAny<CancellationToken>())).ReturnsAsync(new TGFile()
+            {
+                FileId = "test",
+                FileSize = 1,
+                FilePath = "test.txt"
+            });
+
+            _botClientMock.Setup(b => b.SendRequest(
+                It.IsAny<SendMessageRequest>(),
+                It.IsAny<CancellationToken>())).ReturnsAsync(new Message()
+            {
+                Id = 123
+            });
+
+            _services = _serviceCollection
+                .AddSingleton(_botClientMock.Object)
+                .BuildServiceProvider();
             ResetRequestsRateLimit();
             var appContext = _services.GetRequiredService<ApplicationContext>();
             await ClearDatabase(appContext);
@@ -277,7 +277,7 @@ namespace GPTipsBotTests
                     arg.ChatId == messageUpd.Message.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
-                It.IsAny<CancellationToken>()), Times.Exactly(2));
+                It.IsAny<CancellationToken>()), Times.Once);
 
             _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
                 It.IsAny<CancellationToken>()), Times.Exactly(RateLimiter.MaxMessagesCountPerMinute));
@@ -387,7 +387,6 @@ namespace GPTipsBotTests
 
             await _mainHandler.HandleUpdateAsync(update);
 
-            // todo падает при запуске нескольких тестов, тк мок один и тот же, переделать на асинхронные тесты
             _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == BotResponse.SendTextRecognitionImage
