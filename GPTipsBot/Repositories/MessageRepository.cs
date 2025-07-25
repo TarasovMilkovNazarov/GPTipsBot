@@ -7,16 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories
 {
-    public class MessageRepository
+    public class MessageRepository(ILogger<MessageRepository> logger, ApplicationContext context)
     {
-        private readonly ILogger<MessageRepository> _logger;
-        private readonly ApplicationContext _context;
-
-        public MessageRepository(ILogger<MessageRepository> logger, ApplicationContext context)
-        {
-            _logger = logger;
-            _context = context;
-        }
+        private readonly ILogger<MessageRepository> _logger = logger;
 
         public async Task<Message> AddAsync(MessageDto messageDto, Message? replyTo = null)
         {
@@ -37,9 +30,9 @@ namespace GPTipsBot.Repositories
                 Type = messageDto.BotMessageType
             };
 
-            _context.Messages.Add(newMessage);
+            context.Messages.Add(newMessage);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             messageDto.Id = newMessage.Id;
             messageDto.ContextId = newMessage.ContextId;
@@ -49,12 +42,12 @@ namespace GPTipsBot.Repositories
 
         public IEnumerable<Message> GetAllUserMessages(long telegramId)
         {
-            return _context.Messages.AsNoTracking().Where(x => x.UserId == telegramId);
+            return context.Messages.AsNoTracking().Where(x => x.UserId == telegramId);
         }
 
         public long? GetLastContext(long userId, long chatId)
         {
-            var lastMes = _context.Messages.AsNoTracking().OrderByDescending(x => x.CreatedAt)
+            var lastMes = context.Messages.AsNoTracking().OrderByDescending(x => x.CreatedAt)
                 .FirstOrDefault(x => x.UserId == userId && x.ChatId == chatId && x.ContextId != null);
 
             return lastMes?.ContextId;
@@ -62,7 +55,7 @@ namespace GPTipsBot.Repositories
         
         public List<Message> GetRecentContextMessages(UserChatKey userKey, long contextId)
         {
-            var messages = _context.Messages.AsNoTracking().Where(x =>
+            var messages = context.Messages.AsNoTracking().Where(x =>
                     x.UserId == userKey.Id && 
                     x.ChatId == userKey.ChatId && 
                     x.ContextId == contextId)
@@ -74,7 +67,7 @@ namespace GPTipsBot.Repositories
 
         public int GetTodayImagesCount(UserChatKey userKey)
         {
-            var imagesCount = _context.Messages.AsNoTracking()
+            var imagesCount = context.Messages.AsNoTracking()
                 .Where(x => x.UserId == userKey.Id && x.Type == BotMessageType.ImageGenerated)
                 .Count(m => m.CreatedAt.Date == DateTime.UtcNow.Date)
                 ;
@@ -84,7 +77,7 @@ namespace GPTipsBot.Repositories
 
         public int GetTodayTextRecognitionCount(UserChatKey userKey)
         {
-            var imagesCount = _context.Messages.AsNoTracking()
+            var imagesCount = context.Messages.AsNoTracking()
                 .Where(x => x.Type == BotMessageType.RecognizeText)
                 .Count(m => m.CreatedAt.Date == DateTime.UtcNow.Date);
 

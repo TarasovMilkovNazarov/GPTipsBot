@@ -4,15 +4,8 @@ using GptModels = OpenAI.ObjectModels;
 
 namespace GPTipsBot.Services
 {
-    public class EuroHosterService : OpenAiServiceCreator
+    public class EuroHosterService(TokenQueue tokenQueue) : OpenAiServiceCreator
     {
-        private readonly TokenQueue _apiKeyQueue;
-
-        public EuroHosterService(TokenQueue tokenQueue)
-        {
-            _apiKeyQueue = tokenQueue;
-        }
-
         public override OpenAIService Create(string token)
         {
             var openAiService = new OpenAIService(new OpenAiOptions()
@@ -26,12 +19,12 @@ namespace GPTipsBot.Services
 
         public override async Task<string> GetApiKeyAsync()
         {
-            return await _apiKeyQueue.GetTokenAsync();
+            return await tokenQueue.GetTokenAsync();
         }
 
         public override void ReturnApiKey(string apiKey)
         {
-            _apiKeyQueue.AddToken(apiKey);
+            tokenQueue.AddToken(apiKey);
         }
     }
 }

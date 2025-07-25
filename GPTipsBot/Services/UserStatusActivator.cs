@@ -12,10 +12,8 @@ namespace GPTipsBot.Services
     /// This service trigger status in header of bot
     /// when doing long running actions(like "...Sending photo" or "...Typing")
     /// </summary>
-    public class UserStatusActivator
+    public class UserStatusActivator(ITelegramBotClient botClient, ILogger<UserStatusActivator> logger)
     {
-        private readonly ITelegramBotClient _botClient;
-        private readonly ILogger<UserStatusActivator> _logger;
         private int _serviceMessageId;
 
         /// <summary>
@@ -23,16 +21,10 @@ namespace GPTipsBot.Services
         /// </summary>
         private Timer? _timer;
 
-        public UserStatusActivator(ITelegramBotClient botClient, ILogger<UserStatusActivator> logger)
-        {
-            _botClient = botClient;
-            _logger = logger;
-        }
-
         public async Task<long> Start(UserChatKey userKey, ChatAction chatAction)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
-            var serviceMessage = await _botClient.SendMessage
+            var serviceMessage = await botClient.SendMessage
                 (userKey.ChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
 
@@ -45,15 +37,15 @@ namespace GPTipsBot.Services
                 {
                     if (tokenSource.Token.IsCancellationRequested)
                     {
-                        _logger.LogInformation("Request ChatAction to telegram was canceled");
+                        logger.LogInformation("Request ChatAction to telegram was canceled");
                         return;
                     }
 
-                    _botClient.SendChatAction(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
+                    botClient.SendChatAction(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error while SendChatActionAsync {ex.Message}");
+                    logger.LogError($"Error while SendChatActionAsync {ex.Message}");
                 }
 
             }, null, 0, 8 * 1000);
@@ -66,7 +58,7 @@ namespace GPTipsBot.Services
         {
             if (_serviceMessageId != 0)
             {
-                await _botClient.DeleteMessage(userKey.ChatId, _serviceMessageId);
+                await botClient.DeleteMessage(userKey.ChatId, _serviceMessageId);
             }
 
             Dispatcher.UserState[userKey].MessageIdToCancellation.Remove(_serviceMessageId);

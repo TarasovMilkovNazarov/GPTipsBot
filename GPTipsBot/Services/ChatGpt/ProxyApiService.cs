@@ -5,16 +5,10 @@ using OpenAI.Managers;
 
 namespace GPTipsBot.Services
 {
-    public class ProxyApiService : OpenAiServiceCreator
+    public class ProxyApiService(ILogger<ProxyApiService> logger) : OpenAiServiceCreator
     {
-        private readonly ILogger<ProxyApiService> _logger;
-        private readonly string _token;
-
-        public ProxyApiService(ILogger<ProxyApiService> logger)
-        {
-            _logger = logger;
-            _token = AppConfig.ProxyApiApiKey;
-        }
+        private readonly ILogger<ProxyApiService> _logger = logger;
+        private readonly string _token = AppConfig.ProxyApiApiKey;
 
         public override OpenAIService Create(string token)
         {

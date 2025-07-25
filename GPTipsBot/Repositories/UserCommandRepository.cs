@@ -7,27 +7,21 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories
 {
-    public class UserCommandRepository: GenericRepository<UserCommand>
+    public class UserCommandRepository(
+        ApplicationContext context,
+        ILogger<UserCommandRepository> logger,
+        IMemoryCache memoryCache)
+        : GenericRepository<UserCommand>(context)
     {
-        private readonly ApplicationContext _context;
-        private readonly ILogger<UserCommandRepository> _logger;
-        private readonly IMemoryCache _memoryCache;
-        private readonly MemoryCacheEntryOptions _cacheOptions;
-        private const string CacheKeyPrefix = "UserCommands_{0}_{1}";
+        private readonly ApplicationContext _context = context;
+        private readonly ILogger<UserCommandRepository> _logger = logger;
 
-        public UserCommandRepository(ApplicationContext context, ILogger<UserCommandRepository> logger,
-            IMemoryCache memoryCache) : base(context)
+        private readonly MemoryCacheEntryOptions _cacheOptions = new()
         {
-            _context = context;
-            _logger = logger;
-            _memoryCache = memoryCache;
-
-            _cacheOptions = new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
-                SlidingExpiration = TimeSpan.FromMinutes(20),
-            };
-        }
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(1),
+            SlidingExpiration = TimeSpan.FromMinutes(20),
+        };
+        private const string CacheKeyPrefix = "UserCommands_{0}_{1}";
 
         public async Task<UserCommand> AddAsync(UserChatKey userChatKey, CommandType commandType)
         {
@@ -41,7 +35,7 @@ namespace GPTipsBot.Repositories
             _context.UserCommands.Add(entity);
 
             var cacheKey = string.Format(CacheKeyPrefix, entity.UserId, entity.ChatId);
-            _memoryCache.Set(cacheKey, entity, _cacheOptions);
+            memoryCache.Set(cacheKey, entity, _cacheOptions);
 
             return entity;
         }
@@ -50,7 +44,7 @@ namespace GPTipsBot.Repositories
         {
             var cacheKey = string.Format(CacheKeyPrefix, userChatKey.Id, userChatKey.ChatId);
 
-            if (_memoryCache.TryGetValue(cacheKey, out UserCommand? cachedUserCommand))
+            if (memoryCache.TryGetValue(cacheKey, out UserCommand? cachedUserCommand))
             {
                 return cachedUserCommand;
             }
@@ -59,7 +53,7 @@ namespace GPTipsBot.Repositories
                                                                          c.ChatId == userChatKey.ChatId)
                 .OrderByDescending(c => c.CreatedAt).FirstOrDefaultAsync();
 
-            _memoryCache.Set(cacheKey, command, _cacheOptions);
+            memoryCache.Set(cacheKey, command, _cacheOptions);
 
             return command;
         }

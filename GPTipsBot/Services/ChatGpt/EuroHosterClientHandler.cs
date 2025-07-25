@@ -19,10 +19,5 @@ namespace GPTipsBot.Services
         }
     }
 
-    public class EuroHosterHttpClient : HttpClient
-    {
-        public EuroHosterHttpClient() : base(new EuroHosterClientHandler())
-        {
-        }
-    }
+    public class EuroHosterHttpClient() : HttpClient(new EuroHosterClientHandler());
 }

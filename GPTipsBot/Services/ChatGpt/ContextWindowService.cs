@@ -7,20 +7,12 @@ using TiktokenSharp;
 
 namespace GPTipsBot.Services
 {
-    public class ContextWindow
+    public class ContextWindow(MessageRepository messageRepository)
     {
         public static readonly int WindowSize = 15;
-        public static readonly int TokensLimit = 1000;
-        private readonly MessageRepository _messageRepository;
-        private LinkedList<ChatMessage> _chatMessages;
-        public long TokensCount { get; private set; }
-
-        public ContextWindow(MessageRepository messageRepository)
-        {
-            _chatMessages = new LinkedList<ChatMessage>();
-            TokensCount = 0;
-            _messageRepository = messageRepository;
-        }
+        private static readonly int TokensLimit = 1000;
+        private LinkedList<ChatMessage> _chatMessages = new();
+        private long TokensCount { get; set; } = 0;
 
         public bool TryToAddMessage(string message, string role, out long messageTokensCount)
         {
@@ -45,7 +37,7 @@ namespace GPTipsBot.Services
 
         public ChatMessage[] GetContext(UserChatKey userKey, long contextId)
         {
-            var messages = _messageRepository
+            var messages = messageRepository
                 .GetRecentContextMessages(userKey, contextId).Where(x => !string.IsNullOrEmpty(x.Text));
 
             foreach (var item in messages)

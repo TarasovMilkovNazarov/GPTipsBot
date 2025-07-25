@@ -3,12 +3,7 @@ using GPTipsBot.Models;
 
 namespace GPTipsBot.Repositories;
 
-public class TransactionRepository: GenericRepository<Transaction>
+public class TransactionRepository(ApplicationContext context) : GenericRepository<Transaction>(context)
 {
-    private readonly ApplicationContext _context;
-
-    public TransactionRepository(ApplicationContext context):base(context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationContext _context = context;
 }

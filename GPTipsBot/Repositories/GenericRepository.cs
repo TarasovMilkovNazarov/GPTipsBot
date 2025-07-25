@@ -4,17 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GPTipsBot.Repositories
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
+    public class GenericRepository<TEntity>(ApplicationContext context) : IGenericRepository<TEntity>
+        where TEntity : class
     {
-        private readonly ApplicationContext _context;
-        private readonly DbSet<TEntity> _dbSet;
- 
-        public GenericRepository(ApplicationContext context)
-        {
-            _context = context;
-            _dbSet = context.Set<TEntity>();
-        }
- 
+        private readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
+
         public IEnumerable<TEntity> Get()
         {
             return _dbSet.AsNoTracking().ToList();
@@ -35,7 +29,7 @@ namespace GPTipsBot.Repositories
         }
         public void Update(TEntity item)
         {
-            _context.Entry(item).State = EntityState.Modified;
+            context.Entry(item).State = EntityState.Modified;
         }
         public void Remove(TEntity item)
         {

@@ -5,20 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories
 {
-    public class BotSettingsRepository : GenericRepository<BotSettingsRepository>
+    public class BotSettingsRepository(ApplicationContext context, ILogger<BotSettingsRepository> logger)
+        : GenericRepository<BotSettingsRepository>(context)
     {
-        private readonly ApplicationContext _context;
-        private readonly ILogger<BotSettingsRepository> _logger;
-
-        public BotSettingsRepository(ApplicationContext context, ILogger<BotSettingsRepository> logger) : base(context)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        private readonly ApplicationContext _context = context;
 
         public BotSettings Create(long userId, string languageCode)
         {
-            _logger.LogInformation($"Create settings userId={userId} with language={languageCode}");
+            logger.LogInformation($"Create settings userId={userId} with language={languageCode}");
 
             var settings = new BotSettings() { Id = userId, Language = languageCode };
             _context.BotSettings.Add(settings);
@@ -28,7 +22,7 @@ namespace GPTipsBot.Repositories
 
         public BotSettings Update(long userId, string languageCode)
         {
-            _logger.LogInformation($"Update settings userId={userId} with culture={languageCode}");
+            logger.LogInformation($"Update settings userId={userId} with culture={languageCode}");
 
             var settings = new BotSettings() { Id = userId, Language = languageCode };
             _context.BotSettings.Update(settings);

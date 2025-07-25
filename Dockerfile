@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 COPY *.sln .
@@ -12,7 +12,7 @@ COPY OpenAI.SDK/. ./OpenAI.SDK/
 WORKDIR /src/GPTipsBot
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=build /app/publish ./
 COPY scripts/*.conf ./fluentbit-conf/

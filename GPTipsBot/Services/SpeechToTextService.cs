@@ -5,14 +5,12 @@ using Telegram.Bot;
 
 namespace GPTipsBot.Services
 {
-    public class SpeechToTextService
+    public class SpeechToTextService(ITelegramBotClient telegramBotClient)
     {
-        private readonly ITelegramBotClient _telegramBotClient;
-
         public async Task<string> RecognizeVoice(string fileId)
         {
             using var stream = new MemoryStream();
-            var file = await _telegramBotClient.GetInfoAndDownloadFile(fileId, stream);
+            var file = await telegramBotClient.GetInfoAndDownloadFile(fileId, stream);
             if (file == null)
             {
                 throw new Exception("Can't download file from telegram. The file size should be less than 20mb");
@@ -35,11 +33,6 @@ namespace GPTipsBot.Services
             }
 
             throw new Exception("Request failed: " + response.ErrorMessage);
-        }
-         
-        public SpeechToTextService(ITelegramBotClient telegramBotClient)
-        {
-            _telegramBotClient = telegramBotClient;
         }
     }
 

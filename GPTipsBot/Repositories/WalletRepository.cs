@@ -5,16 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories;
 
-public class WalletRepository: GenericRepository<Wallet>
+public class WalletRepository(ILogger<WalletRepository> logger, ApplicationContext context)
+    : GenericRepository<Wallet>(context)
 {
-    private readonly ILogger<WalletRepository> _logger;
-    private readonly ApplicationContext _context;
-
-    public WalletRepository(ILogger<WalletRepository> logger, ApplicationContext context): base(context)
-    {
-        _logger = logger;
-        _context = context;
-    }
+    private readonly ILogger<WalletRepository> _logger = logger;
+    private readonly ApplicationContext _context = context;
 
     public async Task<bool> UpdateAmountAsync(Wallet wallet, long delta)
     {

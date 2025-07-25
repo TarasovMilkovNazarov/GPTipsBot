@@ -3,12 +3,7 @@ using GPTipsBot.Models;
 
 namespace GPTipsBot.Repositories;
 
-public class InvoiceRepository: GenericRepository<Invoice>
+public class InvoiceRepository(ApplicationContext context) : GenericRepository<Invoice>(context)
 {
-    private readonly ApplicationContext _context;
-
-    public InvoiceRepository(ApplicationContext context) : base(context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationContext _context = context;
 }

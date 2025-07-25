@@ -18,49 +18,27 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class Dispatcher : BaseMessageHandler
+    public class Dispatcher(
+        ITelegramBotClient botClient,
+        RecoveryNotificationHandler recoveryNotificationHandler,
+        ImageTextRecognitionHandler imageTextRecognitionHandler,
+        ImageGeneratorHandler imageGeneratorHandler,
+        CommandHandler commandHandler,
+        ChatGptHandler chatGptHandler,
+        AdminCommandHandler adminCommandHandler,
+        ILogger<Dispatcher> logger,
+        UserService userService,
+        UserCommandRepository userCommandRepository,
+        MoneyService moneyService,
+        ApplicationContext context,
+        BotSettingsRepository botSettingsRepository,
+        InvoiceRepository invoiceRepository,
+        IGpt gptService)
+        : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
-        private readonly UserService _userService;
-        private readonly UserCommandRepository _userCommandRepository;
-        private readonly MoneyService _moneyService;
-        private readonly ApplicationContext _context;
-        private readonly BotSettingsRepository _botSettingsRepository;
-        private readonly InvoiceRepository _invoiceRepository;
-        private readonly IGpt _gptService;
-        private readonly ITelegramBotClient _botClient;
-        private readonly RecoveryNotificationHandler _recoveryNotificationHandler;
-        private readonly ImageTextRecognitionHandler _imageTextRecognitionHandler;
-        private readonly ImageGeneratorHandler _imageGeneratorHandler;
-        private readonly CommandHandler _commandHandler;
-        private readonly ChatGptHandler _chatGptHandler;
-        private readonly AdminCommandHandler _adminCommandHandler;
-        private readonly ILogger<Dispatcher> _logger;
-
-        public Dispatcher(
-            ITelegramBotClient botClient, RecoveryNotificationHandler recoveryNotificationHandler,
-            ImageTextRecognitionHandler imageTextRecognitionHandler, ImageGeneratorHandler imageGeneratorHandler,
-            CommandHandler commandHandler, ChatGptHandler chatGptHandler, AdminCommandHandler adminCommandHandler,
-            ILogger<Dispatcher> logger, UserService userService, UserCommandRepository userCommandRepository,
-            MoneyService moneyService, ApplicationContext context, BotSettingsRepository botSettingsRepository,
-            InvoiceRepository invoiceRepository, IGpt gptService)
-        {
-            _botClient = botClient;
-            _recoveryNotificationHandler = recoveryNotificationHandler;
-            _imageTextRecognitionHandler = imageTextRecognitionHandler;
-            _imageGeneratorHandler = imageGeneratorHandler;
-            _commandHandler = commandHandler;
-            _chatGptHandler = chatGptHandler;
-            _adminCommandHandler = adminCommandHandler;
-            _logger = logger;
-            _userService = userService;
-            _userCommandRepository = userCommandRepository;
-            _moneyService = moneyService;
-            _context = context;
-            _botSettingsRepository = botSettingsRepository;
-            _invoiceRepository = invoiceRepository;
-            _gptService = gptService;
-        }
+        private readonly ApplicationContext _context = context;
+        private readonly InvoiceRepository _invoiceRepository = invoiceRepository;
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
@@ -74,81 +52,81 @@ namespace GPTipsBot.UpdateHandlers
             var newUser = UserMapper.Map(update.User);
             try
             {
-                await _userService.CreateUpdateUser(newUser);
+                await userService.CreateUpdateUser(newUser);
             }
             catch (DbUpdateException ex)
             {
-                _logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
+                logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
             }
 
-            var language = _botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
+            var language = botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
 
             if (update.PreCheckoutQuery != null)
             {
                 if (update.PreCheckoutQuery.InvoicePayload.StartsWith("donate"))
                 {
-                    await _botClient.SendMessage(update.UserChatKey.Id,
+                    await botClient.SendMessage(update.UserChatKey.Id,
                         BotResponse.DonateText, replyMarkup: null);
 
-                    await _botClient.AnswerPreCheckoutQuery(
+                    await botClient.AnswerPreCheckoutQuery(
                         preCheckoutQueryId: update.PreCheckoutQuery.Id);
                 }
                 else
                 {
-                    await _moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
+                    await moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
                         "TRX", CancellationToken.None);
-                    var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
+                    var profile = await userService.GetUserProfile(update.UserChatKey.Id);
                     var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-                    await _botClient.AnswerPreCheckoutQuery(
+                    await botClient.AnswerPreCheckoutQuery(
                         preCheckoutQueryId: update.PreCheckoutQuery.Id);
-                    await _botClient.SendMessage(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
+                    await botClient.SendMessage(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
                 }
 
-                await _userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
+                await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
 
                 return;
             }
 
-            var lastCommand = await _userCommandRepository.GetLastAsync(update.UserChatKey);
+            var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
 
             if (update.IsAdminCommand())
             {
-                SetNextHandler(_adminCommandHandler);
+                SetNextHandler(adminCommandHandler);
             }
             else if (update.IsExpired())
             {
-                SetNextHandler(_recoveryNotificationHandler);
+                SetNextHandler(recoveryNotificationHandler);
             }
             else if (update.CallbackQuery != null || update.IsCommand)
             {
-                SetNextHandler(_commandHandler);
+                SetNextHandler(commandHandler);
             }
             else if (!string.IsNullOrEmpty(update.Message?.Text) && lastCommand?.Type == CommandType.Image)
             {
-                SetNextHandler(_imageGeneratorHandler);
+                SetNextHandler(imageGeneratorHandler);
             }
             else if (lastCommand?.Type == CommandType.Video)
             {
-                var isSuccessPayment = await _moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Video);
+                var isSuccessPayment = await moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Video);
                 if (!isSuccessPayment)
                 {
                     return;
                 }
 
-                await _botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitVideoMsg,
+                await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitVideoMsg,
                     replyMarkup: null);
-                var video = await _gptService.GenerateVideoByText(update.Message!.Text, update.FileId, CancellationToken.None);
-                await _botClient.SendVideo(update.UserChatKey.Id, InputFile.FromUri(video));
+                var video = await gptService.GenerateVideoByText(update.Message!.Text, update.FileId, CancellationToken.None);
+                await botClient.SendVideo(update.UserChatKey.Id, InputFile.FromUri(video));
                 return;
             }
             else if (lastCommand?.Type == CommandType.TextRecognition)
             {
-                SetNextHandler(_imageTextRecognitionHandler);
+                SetNextHandler(imageTextRecognitionHandler);
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
@@ -159,7 +137,7 @@ namespace GPTipsBot.UpdateHandlers
                         string.Format(BotResponse.InvalidDepositAmountResponse, PaymentConfig.MinRechargeAmount));
                 }
 
-                await _moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
+                await moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
 
                 return;
             }
@@ -171,20 +149,20 @@ namespace GPTipsBot.UpdateHandlers
                     throw new ClientCanceledException(update.UserChatKey.ChatId, BotResponse.StarsDonationHint);
                 }
 
-                await _moneyService.SendDonateInvoice(update.UserChatKey.Id, starsCount);
+                await moneyService.SendDonateInvoice(update.UserChatKey.Id, starsCount);
 
                 return;
             }
             else if (lastCommand?.Type == CommandType.Music)
             {
-                var isSuccessPayment = await _moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Music);
+                var isSuccessPayment = await moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Music);
                 if (!isSuccessPayment)
                 {
                     return;
                 }
 
-                var audio = await _gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
-                await _botClient.SendAudio(update.UserChatKey.Id, InputFile.FromStream(audio));
+                var audio = await gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
+                await botClient.SendAudio(update.UserChatKey.Id, InputFile.FromStream(audio));
                 return;
             }
             else if (update.FileId != null)
@@ -193,7 +171,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else
             {
-                SetNextHandler(_chatGptHandler);
+                SetNextHandler(chatGptHandler);
             }
 
             await base.HandleAsync(update);

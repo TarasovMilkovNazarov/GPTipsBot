@@ -5,23 +5,17 @@ using Telegram.Bot.Types.Payments;
 
 namespace GPTipsBot.Dtos
 {
-    public class MessageDto
+    public class MessageDto(UserChatKey userChatKey)
     {
-        public MessageDto(UserChatKey userChatKey)
-        {
-            UserId = userChatKey.Id;
-            ChatId = userChatKey.ChatId;
-        }
-
         public long Id { get; set; }
         public long? ContextId { get; set; }
         public string Text { get; set; }
         public long TelegramId { get; set; }
         public long? TelegramMessageId { get; set; }
-        public long ChatId { get; set; }
+        public long ChatId { get; set; } = userChatKey.ChatId;
         public DateTime CreatedAt { get; set; }
         public MessageOwner Role { get; set; }
-        public long UserId { get; internal set; }
+        public long UserId { get; internal set; } = userChatKey.Id;
         public IEnumerable<string>? EntityValues { get; internal set; }
         public MessageEntity[]? Entities { get; internal set; }
         public Message? ReplyToMessage { get; internal set; }

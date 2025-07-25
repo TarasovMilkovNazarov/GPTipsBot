@@ -5,18 +5,11 @@ using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.Jobs;
 
-public class BotUpdateInformerJob : IJob
+public class BotUpdateInformerJob(ApplicationContext context, ITelegramBotClient botClient) : IJob
 {
-    private readonly ApplicationContext _context;
-    private readonly ITelegramBotClient _botClient;
+    private readonly ITelegramBotClient _botClient = botClient;
 
-    public BotUpdateInformerJob(ApplicationContext context, ITelegramBotClient botClient)
-    {
-        _context = context;
-        _botClient = botClient;
-    }
-
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context1)
     {
         var botClient = new TelegramBotClient("");
 
@@ -26,7 +19,7 @@ public class BotUpdateInformerJob : IJob
             "    🎹 Шаг 2. Бот сгенерирует трек по вашему запросу\n\n    📥 Шаг 3. Скачивайте и делитесь крутыми битами!\n\n" +
             "🚀 Попробуйте прямо сейчас! Просто отправьте боту команду /music или нажмите кнопку в меню.\n\n Стоимость генерации 10⭐️";
 
-        var users = _context.Users.Select(u => u.Id).ToList();
+        var users = context.Users.Select(u => u.Id).ToList();
 
         const int messagesPerSecond = 25;
         var delayPerMessage = TimeSpan.FromMilliseconds(1000 / messagesPerSecond);
@@ -40,7 +33,7 @@ public class BotUpdateInformerJob : IJob
             }
             catch (ApiRequestException ex) when (ex.ErrorCode == 403)
             {
-                var userToDelete = await _context.Users.FindAsync(user);
+                var userToDelete = await context.Users.FindAsync(user);
                 if (userToDelete != null)
                     userToDelete.IsActive = false;
             }
@@ -49,6 +42,6 @@ public class BotUpdateInformerJob : IJob
                 // ignore
             }
         }
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 }

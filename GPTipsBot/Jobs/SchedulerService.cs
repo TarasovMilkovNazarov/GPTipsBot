@@ -9,14 +9,9 @@ public interface ISchedulerService
         where T : IJob;
 }
 
-public class SchedulerService : ISchedulerService
+public class SchedulerService(IServiceProvider serviceProvider) : ISchedulerService
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public SchedulerService(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     public async Task ScheduleJob<T>(IScheduler scheduler, DateTimeOffset startAt,
         TimeSpan interval, CancellationToken cancellationToken)

@@ -6,25 +6,16 @@ using GPTipsBot.Exceptions;
 
 namespace GPTipsBot.Services
 {
-    public class ImageCreatorService
+    public class ImageCreatorService(
+        ILogger<ImageCreatorService> log,
+        TokenQueue tokensQueue,
+        OpenAiServiceCreator openAiServiceCreator)
     {
-        private readonly ILogger<ImageCreatorService> _log;
-        private readonly TokenQueue _tokensQueue;
-        private readonly OpenAiServiceCreator _openAiServiceCreator;
-
-        public ImageCreatorService(ILogger<ImageCreatorService> log, TokenQueue tokensQueue, 
-            OpenAiServiceCreator openAiServiceCreator)
-        {
-            _log = log;
-            _tokensQueue = tokensQueue;
-            _openAiServiceCreator = openAiServiceCreator;
-        }
-
         public async Task<List<string>> GenerateImage(string prompt, long chatId)
         {
-            var apiKey = await _tokensQueue.GetTokenAsync();
+            var apiKey = await tokensQueue.GetTokenAsync();
 
-            var openAiService = _openAiServiceCreator.Create(apiKey);
+            var openAiService = openAiServiceCreator.Create(apiKey);
 
             var imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
             {
@@ -36,7 +27,7 @@ namespace GPTipsBot.Services
                 Model = "dall-e-2"
             });
 
-            _tokensQueue.AddToken(apiKey);
+            tokensQueue.AddToken(apiKey);
 
             if (imageResult.Successful)
             {
@@ -52,7 +43,7 @@ namespace GPTipsBot.Services
                 throw new ClientException(chatId, DalleResponse.RateLimit);
             }
 
-            _log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}",
+            log.LogError("Failed to get images from DALL-E: [{Code}] {Message}, token: {Token}",
                 imageResult.Error?.Code, imageResult.Error?.Message, apiKey[..10]);
 
             throw new ClientException(chatId, BotResponse.SomethingWentWrongWithImageService);

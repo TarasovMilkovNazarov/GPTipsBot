@@ -9,12 +9,7 @@ namespace GPTipsBot.Services
     /// </summary>
     public class PawanOsmanApiService : OpenAiServiceCreator
     {
-        private readonly string _token;
-
-        public PawanOsmanApiService()
-        {
-            _token = AppConfig.PawanOsmanApiKey;
-        }
+        private readonly string _token = AppConfig.PawanOsmanApiKey;
 
         public override OpenAIService Create(string token)
         {

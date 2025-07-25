@@ -4,16 +4,9 @@ using Quartz;
 
 namespace GPTipsBot.Jobs;
 
-public class RemoveOldRecordsJob : IJob
+public class RemoveOldRecordsJob(ApplicationContext context) : IJob
 {
-    private readonly ApplicationContext _context;
-
-    public RemoveOldRecordsJob(ApplicationContext context)
-    {
-        _context = context;
-    }
-
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context1)
     {
         const int batchSize = 100;
 
@@ -21,7 +14,7 @@ public class RemoveOldRecordsJob : IJob
 
         while (true)
         {
-            var deleteCount = await _context.Messages
+            var deleteCount = await context.Messages
                 .Where(m => m.CreatedAt < cutoffDate)
                 .Take(batchSize)
                 .ExecuteDeleteAsync();

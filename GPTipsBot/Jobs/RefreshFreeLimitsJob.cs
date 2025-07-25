@@ -5,18 +5,11 @@ using Quartz;
 
 namespace GPTipsBot.Jobs;
 
-public class RefreshFreeLimitsJob: IJob
+public class RefreshFreeLimitsJob(ApplicationContext context) : IJob
 {
-    private readonly ApplicationContext _context;
-
-    public RefreshFreeLimitsJob(ApplicationContext context)
+    public async Task Execute(IJobExecutionContext context1)
     {
-        _context = context;
-    }
-
-    public async Task Execute(IJobExecutionContext context)
-    {
-        await _context.Users
+        await context.Users
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(u => u.FreeImageGenerations, PaymentConfig.FreeImageGenerations)
                 .SetProperty(u => u.FreeImageTextRecognitions, PaymentConfig.FreeTextRecognitions)

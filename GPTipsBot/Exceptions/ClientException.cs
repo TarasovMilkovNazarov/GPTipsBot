@@ -3,26 +3,16 @@
     /// <summary>
     /// Exception for sending to user's chat
     /// </summary>
-    public class ClientException : Exception
+    public class ClientException(long chatId, string error) : Exception(error)
     {
-        public long ChatId { get; }
-
-        public ClientException(long chatId, string error) : base(error)
-        {
-            ChatId = chatId;
-        }
+        public long ChatId { get; } = chatId;
     }
 
     /// <summary>
     /// Exception for sending to user's chat with inline cancel button
     /// </summary>
-    public class ClientCanceledException : Exception
+    public class ClientCanceledException(long chatId, string error) : Exception(error)
     {
-        public long ChatId { get; }
-
-        public ClientCanceledException(long chatId, string error) : base(error)
-        {
-            ChatId = chatId;
-        }
+        public long ChatId { get; } = chatId;
     }
 }

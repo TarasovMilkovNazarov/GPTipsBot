@@ -8,15 +8,8 @@ using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class AdminCommandHandler : BaseMessageHandler
+    public class AdminCommandHandler(ITelegramBotClient botClient) : BaseMessageHandler
     {
-        private readonly ITelegramBotClient _botClient;
-
-        public AdminCommandHandler(ITelegramBotClient botClient)
-        {
-            _botClient = botClient;
-        }
-
         public override async Task HandleAsync(UpdateDecorator update)
         {
             Guard.Against.Null(update.Message.Text);
@@ -28,11 +21,11 @@ namespace GPTipsBot.UpdateHandlers
                 {
                     var response = AppConfig.IsOnMaintenance ? BotResponse.Recovered : BotResponse.OnMaintenance;
                     AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
-                    await _botClient.SendMessage(chatKey.ChatId, response);
+                    await botClient.SendMessage(chatKey.ChatId, response);
                     return;
                 }
                 case BotMenu.VersionCommand when chatKey.IsAdmin():
-                    await _botClient.SendBotVersionAsync(chatKey.ChatId);
+                    await botClient.SendBotVersionAsync(chatKey.ChatId);
                     return;
             }
         }

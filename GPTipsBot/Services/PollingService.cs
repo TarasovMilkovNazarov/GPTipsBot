@@ -5,11 +5,6 @@ using Telegram.Bot.Services;
 namespace GPTipsBot.Services
 {
     // Compose Polling and ReceiverService implementations
-    public class PollingService : PollingServiceBase<ReceiverService>
-    {
-        public PollingService(IServiceProvider serviceProvider, ILogger<PollingService> log)
-            : base(serviceProvider, log)
-        {
-        }
-    }
+    public class PollingService(IServiceProvider serviceProvider, ILogger<PollingService> log)
+        : PollingServiceBase<ReceiverService>(serviceProvider, log);
 }

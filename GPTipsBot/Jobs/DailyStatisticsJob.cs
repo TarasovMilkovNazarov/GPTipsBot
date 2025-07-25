@@ -9,27 +9,21 @@ using Telegram.Bot;
 
 namespace GPTipsBot.Jobs;
 
-public class DailyStatisticsJob: IJob
+public class DailyStatisticsJob(
+    ApplicationContext context,
+    ITelegramBotClient botClient,
+    ILogger<DailyStatisticsJob> logger)
+    : IJob
 {
-    private readonly ApplicationContext _context;
-    private readonly ITelegramBotClient _botClient;
-    private readonly ILogger<DailyStatisticsJob> _logger;
+    private readonly ILogger<DailyStatisticsJob> _logger = logger;
 
-    public DailyStatisticsJob(ApplicationContext context, ITelegramBotClient botClient,
-        ILogger<DailyStatisticsJob> logger)
-    {
-        _context = context;
-        _botClient = botClient;
-        _logger = logger;
-    }
-
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context1)
     {
         var today = DateTime.UtcNow.Date;
 
-        var newUsersCount = await _context.Users.CountAsync(u => u.CreatedAt > today);
+        var newUsersCount = await context.Users.CountAsync(u => u.CreatedAt > today);
 
-        var counts = await _context.Messages
+        var counts = await context.Messages
             .Where(m => m.CreatedAt > today)
             .GroupBy(m => m.CreatedAt.Date)
             .Select(g => new StatisticsDto
@@ -49,14 +43,14 @@ public class DailyStatisticsJob: IJob
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
         message += Environment.NewLine + $"Monthly users: {mau}";
 
-        await _botClient.SendMessage(AppConfig.AdminIds.First(), message);
+        await botClient.SendMessage(AppConfig.AdminIds.First(), message);
     }
 
     private async Task<long> CalculateMonthlyActiveUsers()
     {
         var currentMonth = DateTime.Now.Month;
 
-        var mau = await _context.UserCommands.AsNoTracking()
+        var mau = await context.UserCommands.AsNoTracking()
             .Where(c => c.CreatedAt.Month == currentMonth).GroupBy(c => c.UserId).CountAsync();
 
         return mau;

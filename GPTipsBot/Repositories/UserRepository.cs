@@ -6,28 +6,18 @@ using User = GPTipsBot.Models.User;
 
 namespace GPTipsBot.Repositories
 {
-    public class UserRepository
+    public class UserRepository(ILogger<UserRepository> logger, ApplicationContext context, IMemoryCache memoryCache)
     {
         public const string CacheKeyPrefix = "user_";
-        private readonly ILogger<UserRepository> _logger;
-        private readonly ApplicationContext _context;
-        private readonly IMemoryCache _memoryCache;
 
-        public UserRepository(ILogger<UserRepository> logger, ApplicationContext context, IMemoryCache memoryCache)
-        {
-            _logger = logger;
-            _context = context;
-            _memoryCache = memoryCache;
-        }
-        
         public bool Any(long id)
         {
-            return _context.Users.Any(x => x.Id == id);
+            return context.Users.Any(x => x.Id == id);
         }
 
         public User? Get(long id)
         {
-            return _context.Users
+            return context.Users
                 .Include(u => u.Wallet)
                 .SingleOrDefault(x => x.Id == id);
                 // .AsNoTracking()
@@ -36,21 +26,21 @@ namespace GPTipsBot.Repositories
 
         public void Delete(long id)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Id == id);
+            var user = context.Users.FirstOrDefault(x => x.Id == id);
 
             if (user == null)
             {
                 throw new Exception($"User id={id} not found");
             }
 
-            _context.Users.Remove(user);
+            context.Users.Remove(user);
         }
 
         public async Task<long> Create(User user)
         {
-            _logger.LogInformation("CreateUser");
-            var entity = _context.Users.Add(user).Entity;
-            await _context.SaveChangesAsync();
+            logger.LogInformation("CreateUser");
+            var entity = context.Users.Add(user).Entity;
+            await context.SaveChangesAsync();
 
             return user.Id;
         }
@@ -69,7 +59,7 @@ namespace GPTipsBot.Repositories
 
         public long GetActiveUsersCount()
         {
-            return _context.Users.AsNoTracking().Count(x => x.IsActive);
+            return context.Users.AsNoTracking().Count(x => x.IsActive);
         }
 
         public async Task<bool> SoftlyRemoveUser(long telegramId)
@@ -79,9 +69,9 @@ namespace GPTipsBot.Repositories
 
             user.IsActive = false;
             // todo добавить UpdateAt поле для подсчета удаливших бота юзеров
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            _memoryCache.Remove(CacheKeyPrefix+telegramId);
+            memoryCache.Remove(CacheKeyPrefix+telegramId);
             return true;
         }
     }

@@ -1,8 +1,3 @@
 ﻿namespace GPTipsBot.Logging;
 
-public class TelegramErrorReportException : Exception
-{
-    public TelegramErrorReportException(Exception innerException) : base(null, innerException)
-    {
-    }
-}
+public class TelegramErrorReportException(Exception innerException) : Exception(null, innerException);

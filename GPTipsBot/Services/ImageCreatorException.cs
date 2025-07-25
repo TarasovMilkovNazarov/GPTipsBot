@@ -1,13 +1,7 @@
 ﻿using RestSharp;
 
 namespace GPTipsBot.Services;
-public class ImageCreatorException : Exception
+public class ImageCreatorException(Exception ex, RestResponse? response) : Exception(null, ex)
 {
-    public RestResponse? Response { get; }
-
-    public ImageCreatorException(Exception ex, RestResponse? response) 
-        : base(null, ex)
-    {
-        Response = response;
-    }
+    public RestResponse? Response { get; } = response;
 }

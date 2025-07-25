@@ -5,29 +5,22 @@ using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Repositories
 {
-    public class OpenaiAccountsRepository
+    public class OpenaiAccountsRepository(ILogger<OpenaiAccountsRepository> logger, ApplicationContext context)
     {
-        private readonly ILogger<OpenaiAccountsRepository> _logger;
-        private readonly ApplicationContext _context;
+        private readonly ILogger<OpenaiAccountsRepository> _logger = logger;
 
-        public OpenaiAccountsRepository(ILogger<OpenaiAccountsRepository> logger, ApplicationContext context)
-        {
-            _logger = logger;
-            _context = context;
-        } 
-        
         public void FreezeApiKey(string token)
         {
-            _context.OpenaiAccounts.Where(x => x.Token == token)
+            context.OpenaiAccounts.Where(x => x.Token == token)
                 .ExecuteUpdate(x => x.SetProperty(y => y.FreezedAt, DateTime.UtcNow));
         }
 
         public void RemoveApiKey(string token, DeletionReason reason)
         {
-            _context.OpenaiAccounts.Where(x => x.Token == token)
+            context.OpenaiAccounts.Where(x => x.Token == token)
                 .ExecuteUpdate(x => x.SetProperty(y => y.IsDeleted, true));
 
-            _context.OpenaiAccounts.Where(x => x.Token == token)
+            context.OpenaiAccounts.Where(x => x.Token == token)
                 .ExecuteUpdate(x => x.SetProperty(y => y.DeletionReason, reason));
         }
 
@@ -42,12 +35,12 @@ namespace GPTipsBot.Repositories
         
         public IEnumerable<OpenaiAccount> GetAll()
         {
-            return _context.OpenaiAccounts.AsNoTracking().ToList();
+            return context.OpenaiAccounts.AsNoTracking().ToList();
         }
 
         public IEnumerable<OpenaiAccount> GetAllAvailable()
         {
-            return _context.OpenaiAccounts.AsNoTracking().Where(x => !x.IsDeleted && x.FreezedAt == null).ToList();
+            return context.OpenaiAccounts.AsNoTracking().Where(x => !x.IsDeleted && x.FreezedAt == null).ToList();
         }
     }
 }

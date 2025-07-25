@@ -2,33 +2,17 @@
 
 namespace GPTipsBot.Exceptions;
 
-public class NotSupportedMessageException : Exception
+public class NotSupportedMessageException(long chatId, string message)
+    : Exception($"Unsupported message type '{message}'.")
 {
-    public long ChatId { get; }
-
-    public NotSupportedMessageException(long chatId, string message) : base($"Unsupported message type '{message}'.")
-    {
-        ChatId = chatId;
-    }
+    public long ChatId { get; } = chatId;
 }
 
 /// <summary>
 /// Exception used for ignoring unsupported updates like post reactions, gifs etc
 /// </summary>
-public class IgnoreMessageTypeException : Exception
-{
-    public IgnoreMessageTypeException(UpdateType updateType) :
-        base($"Silently ignored this message type \"{updateType}\" without user reporting")
-    {
-
-    }
-}
+public class IgnoreMessageTypeException(UpdateType updateType)
+    : Exception($"Silently ignored this message type \"{updateType}\" without user reporting");
 
 
-public class InvalidDepositInputException : Exception
-{
-    public InvalidDepositInputException(string message) : base(message)
-    {
-
-    }
-}
+public class InvalidDepositInputException(string message) : Exception(message);

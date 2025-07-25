@@ -13,31 +13,23 @@ namespace GPTipsBot.Jobs;
 /// <summary>
 /// Определяет покинул ли юзер чат чат (сетит IsActive=false)
 /// </summary>
-public class DeactivateKickedUsersJob: IJob
+public class DeactivateKickedUsersJob(
+    ApplicationContext context,
+    ITelegramBotClient botClient,
+    ILogger<DeactivateKickedUsersJob> logger)
+    : IJob
 {
-    private readonly ApplicationContext _context;
-    private readonly ITelegramBotClient _botClient;
-    private readonly ILogger<DeactivateKickedUsersJob> _logger;
-
-    public DeactivateKickedUsersJob(ApplicationContext context, ITelegramBotClient botClient,
-        ILogger<DeactivateKickedUsersJob> logger)
-    {
-        _context = context;
-        _botClient = botClient;
-        _logger = logger;
-    }
-
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context1)
     {
         var today = DateTime.UtcNow.Date;
 
         await SoftlyRemoveBlockedUsers();
-        var activeUsersAfter = await _context.Users.CountAsync(u => u.IsActive);
+        var activeUsersAfter = await context.Users.CountAsync(u => u.IsActive);
 
         var message = "#active_users" + Environment.NewLine +
                       $"Count: {activeUsersAfter}";
 
-        await _botClient.SendMessage(AppConfig.AdminIds.First(), message);
+        await botClient.SendMessage(AppConfig.AdminIds.First(), message);
     }
 
     private async Task SoftlyRemoveBlockedUsers()
@@ -48,7 +40,7 @@ public class DeactivateKickedUsersJob: IJob
 
         for (var skip = 0; ; skip += batchSize)
         {
-            var userIdBatch = await _context.Users
+            var userIdBatch = await context.Users
                 .Where(u => u.IsActive)
                 .OrderBy(u => u.Id)
                 .Select(u => u.Id)
@@ -64,7 +56,7 @@ public class DeactivateKickedUsersJob: IJob
                 var cts = new CancellationTokenSource();
                 try
                 {
-                    await _botClient.SendChatAction(userId, ChatAction.Typing, cancellationToken: cts.Token);
+                    await botClient.SendChatAction(userId, ChatAction.Typing, cancellationToken: cts.Token);
                 }
                 catch (ApiRequestException ex) when (ex.ErrorCode is 403 or 400)
                 {
@@ -72,7 +64,7 @@ public class DeactivateKickedUsersJob: IJob
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error while performing of deactivation user: '{userId}'", userId);
+                    logger.LogError(ex, "Unexpected error while performing of deactivation user: '{userId}'", userId);
                 }
                 finally
                 {
@@ -82,7 +74,7 @@ public class DeactivateKickedUsersJob: IJob
 
             if (kickedBotUserIds.Any())
             {
-                await _context.Users
+                await context.Users
                     .Where(u => kickedBotUserIds.Contains(u.Id) && u.IsActive)
                     .ExecuteUpdateAsync(u => u.SetProperty(x => x.IsActive, false));
 

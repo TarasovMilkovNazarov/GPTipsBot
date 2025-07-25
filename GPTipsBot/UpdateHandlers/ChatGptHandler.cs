@@ -14,58 +14,34 @@ using OpenAI.ObjectModels.ResponseModels;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class ChatGptHandler : BaseMessageHandler
+    public class ChatGptHandler(
+        MessageRepository messageRepository,
+        IGpt gptService,
+        UserStatusActivator typingStatus,
+        ILogger<ChatGptHandler> log,
+        ITelegramBotClient botClient,
+        IAdvertisementClient gramadsAdvertisementClient,
+        TelejetAdClient telejetAdClient,
+        UserService userService,
+        ApplicationContext context,
+        IJobService jobService)
+        : BaseMessageHandler
     {
-        private readonly MessageRepository _messageRepository;
-        private readonly IGpt _gptService;
-        private readonly UserStatusActivator _typingStatus;
-        private readonly ILogger<ChatGptHandler> _log;
-        private readonly ITelegramBotClient _botClient;
-        private readonly IAdvertisementClient _advertisementClient;
-        private readonly TelejetAdClient _telejetAdClient;
-        private readonly UserService _userService;
-        private readonly ApplicationContext _context;
-        private readonly IJobService _jobService;
-
-        public ChatGptHandler(
-            MessageRepository messageRepository,
-            IGpt gptService,
-            UserStatusActivator typingStatus,
-            ILogger<ChatGptHandler> log,
-            ITelegramBotClient botClient,
-            IAdvertisementClient gramadsAdvertisementClient,
-            TelejetAdClient telejetAdClient,
-            UserService userService,
-            ApplicationContext context,
-            IJobService jobService)
-        {
-            _messageRepository = messageRepository;
-            _gptService = gptService;
-            _typingStatus = typingStatus;
-            _log = log;
-            _botClient = botClient;
-            _advertisementClient = gramadsAdvertisementClient;
-            _telejetAdClient = telejetAdClient;
-            _userService = userService;
-            _context = context;
-            _jobService = jobService;
-        }
-
         public override async Task HandleAsync(UpdateDecorator update)
         {
             var shortMessage = update.Message.Text.Truncate(30) + "...";
             var chatId = update.UserChatKey.Id;
 
-            await using var dbTransaction = await _context.Database.BeginTransactionAsync();
-            var request = await _messageRepository.AddAsync(update.Message);
-            var successPayment = await _userService.PayForGpt(chatId);
+            await using var dbTransaction = await context.Database.BeginTransactionAsync();
+            var request = await messageRepository.AddAsync(update.Message);
+            var successPayment = await userService.PayForGpt(chatId);
 
             if (!successPayment)
             {
                 await dbTransaction.RollbackAsync();
-                _context.ChangeTracker.Clear();
-                var nextExecution = await _jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
-                await _botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExecution);
+                context.ChangeTracker.Clear();
+                var nextExecution = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
+                await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExecution);
                 return;
             }
 
@@ -73,7 +49,7 @@ namespace GPTipsBot.UpdateHandlers
 
             try
             {
-                var serviceMessageId = await _typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
+                var serviceMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
 
                 var sw = Stopwatch.StartNew();
                 var token = Dispatcher.UserState[update.UserChatKey].MessageIdToCancellation[serviceMessageId].Token;
@@ -82,17 +58,17 @@ namespace GPTipsBot.UpdateHandlers
 
                 try
                 {
-                    response = await _gptService.SendMessage(update, token);
+                    response = await gptService.SendMessage(update, token);
                 }
                 catch (OperationCanceledException)
                 {
-                    _log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
+                    log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
                     return;
                 }
                 catch (ChatGptException ex)
                 {
-                    _log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                    await _botClient.SendMessage(
+                    log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
+                    await botClient.SendMessage(
                         chatId,
                         BotResponse.SomethingWentWrong,
                         replyParameters: (int)update.Message.TelegramMessageId, cancellationToken: token
@@ -105,7 +81,7 @@ namespace GPTipsBot.UpdateHandlers
                     sw.Stop();
                 }
 
-                _log.LogInformation("Get response to prompt '{prompt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
+                log.LogInformation("Get response to prompt '{prompt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
 
                 var gptResponse = new MessageDto(update.UserChatKey)
                 {
@@ -116,24 +92,24 @@ namespace GPTipsBot.UpdateHandlers
 
                 Guard.Against.Null(gptResponse);
 
-                await _messageRepository.AddAsync(gptResponse, request);
-                await _botClient.TrySendMarkdown2MessageAsync(chatId, gptResponse.Text, (int)update.Message.TelegramMessageId);
+                await messageRepository.AddAsync(gptResponse, request);
+                await botClient.TrySendMarkdown2MessageAsync(chatId, gptResponse.Text, (int)update.Message.TelegramMessageId);
             }
             catch (ClientException ex)
             {
-                _log.LogInformation(ex, shortMessage);
-                await _botClient.SendMessage(chatId, ex.Message,
+                log.LogInformation(ex, shortMessage);
+                await botClient.SendMessage(chatId, ex.Message,
                     replyParameters: (int)update.Message.TelegramMessageId);
                 return;
             }
             finally
             {
-                await _typingStatus.Stop(update.UserChatKey);
+                await typingStatus.Stop(update.UserChatKey);
             }
 
             await dbTransaction.CommitAsync();
-            await _advertisementClient.SendPostToChat(chatId);
-            await _telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
+            await gramadsAdvertisementClient.SendPostToChat(chatId);
+            await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
         }
     }
 }
