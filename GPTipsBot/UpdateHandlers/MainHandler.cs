@@ -61,7 +61,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (AppConfig.IsOnMaintenance)
             {
-                await _botClient.SendTextMessageAsync(extendedUpd.UserChatKey.ChatId, BotResponse.OnMaintenance);
+                await _botClient.SendMessage(extendedUpd.UserChatKey.ChatId, BotResponse.OnMaintenance);
                 return;
             }
 

@@ -1,9 +1,7 @@
 ﻿using System.Globalization;
-using System.Text.Json;
 using AutoFixture;
 using dotenv.net;
 using FluentAssertions;
-using GPTipsBot;
 using GPTipsBot.Config;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
@@ -27,7 +25,6 @@ using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
-using File = Telegram.Bot.Types.File;
 using Message = Telegram.Bot.Types.Message;
 using User = Telegram.Bot.Types.User;
 
@@ -72,19 +69,19 @@ namespace GPTipsBotTests
                 .AddSingleton<IGpt>(_gptMock.Object)
                 .AddSingleton(gramadsMockClient.Object);
 
-            _botClientMock.Setup(b => b.MakeRequestAsync(It.IsAny<GetFileRequest>(),
-                It.IsAny<CancellationToken>())).ReturnsAsync(new File
+            _botClientMock.Setup(b => b.SendRequest(It.IsAny<GetFileRequest>(),
+                It.IsAny<CancellationToken>())).ReturnsAsync(new TGFile()
             {
                 FileId = "test",
                 FileSize = 1,
                 FilePath = "test.txt"
             });
 
-            _botClientMock.Setup(b => b.MakeRequestAsync(
+            _botClientMock.Setup(b => b.SendRequest(
                 It.IsAny<SendMessageRequest>(),
-                It.IsAny<CancellationToken>())).ReturnsAsync(new Message
+                It.IsAny<CancellationToken>())).ReturnsAsync(new Message()
             {
-                MessageId = 123
+                Id = 123
             });
 
             _startTelegramUpdate = CreateTelegramUpdate(1234, 1234, BotMenu.StartCommand);
@@ -101,7 +98,7 @@ namespace GPTipsBotTests
                 Id = updateId,
                 Message = new Message
                 {
-                    MessageId = messageId,
+                    Id = messageId,
                     From = new User
                     {
                         Id = chatId,
@@ -207,7 +204,7 @@ namespace GPTipsBotTests
                     OldChatMember = new ChatMemberMember(),
                     NewChatMember = new ChatMemberBanned(),
                     InviteLink = null,
-                    ViaChatFolderInviteLink = null
+                    ViaChatFolderInviteLink = false
                 }
             };
 
@@ -217,8 +214,8 @@ namespace GPTipsBotTests
 
         [Test]
         [TestCase(MessageType.Sticker)]
-        [TestCase(MessageType.ChannelCreated)]
-        [TestCase(MessageType.ChatTitleChanged)]
+        [TestCase(MessageType.ChannelChatCreated)]
+        [TestCase(MessageType.NewChatTitle)]
         public async Task UpdateHandler_MessageTypeArgument_Ignored(MessageType messageType)
         {
             var update = new Update()
@@ -276,7 +273,7 @@ namespace GPTipsBotTests
                 await _mainHandler.HandleUpdateAsync(messageUpd);
             }
 
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == messageUpd.Message.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
@@ -309,7 +306,7 @@ namespace GPTipsBotTests
                 await _mainHandler.HandleUpdateAsync(messageUpd);
             }
 
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == messageUpd.Message!.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
@@ -327,7 +324,7 @@ namespace GPTipsBotTests
 
             await _mainHandler.HandleUpdateAsync(update);
 
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == update.Message!.Chat.Id &&
                     arg.Text == BotResponse.ChooseLanguagePlease
                 ),
@@ -350,7 +347,7 @@ namespace GPTipsBotTests
 
             generatedImagesCount.Should().Be(PaymentConfig.NewbieFreeImageGenerations);
 
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == BotResponse.SimpleNoFreeRequests
                 ),
@@ -391,7 +388,7 @@ namespace GPTipsBotTests
             await _mainHandler.HandleUpdateAsync(update);
 
             // todo падает при запуске нескольких тестов, тк мок один и тот же, переделать на асинхронные тесты
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == BotResponse.SendTextRecognitionImage
                 ),
@@ -427,7 +424,7 @@ namespace GPTipsBotTests
             await _mainHandler.HandleUpdateAsync(commandUpdate);
             await _mainHandler.HandleUpdateAsync(notImageUpdate);
 
-            _botClientMock.Verify(b => b.MakeRequestAsync(It.Is<SendMessageRequest>(arg =>
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == notImageUpdate.Message!.Chat.Id &&
                     arg.Text == BotResponse.SendTextRecognitionImage
                 ),

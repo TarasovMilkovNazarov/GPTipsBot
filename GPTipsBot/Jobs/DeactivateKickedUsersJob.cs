@@ -37,7 +37,7 @@ public class DeactivateKickedUsersJob: IJob
         var message = "#active_users" + Environment.NewLine +
                       $"Count: {activeUsersAfter}";
 
-        await _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
+        await _botClient.SendMessage(AppConfig.AdminIds.First(), message);
     }
 
     private async Task SoftlyRemoveBlockedUsers()
@@ -64,7 +64,7 @@ public class DeactivateKickedUsersJob: IJob
                 var cts = new CancellationTokenSource();
                 try
                 {
-                    await _botClient.SendChatActionAsync(userId, ChatAction.Typing, cancellationToken: cts.Token);
+                    await _botClient.SendChatAction(userId, ChatAction.Typing, cancellationToken: cts.Token);
                 }
                 catch (ApiRequestException ex) when (ex.ErrorCode is 403 or 400)
                 {
@@ -76,7 +76,7 @@ public class DeactivateKickedUsersJob: IJob
                 }
                 finally
                 {
-                    cts.Cancel();
+                    await cts.CancelAsync();
                 }
             });
 

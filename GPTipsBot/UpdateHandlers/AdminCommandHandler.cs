@@ -28,7 +28,7 @@ namespace GPTipsBot.UpdateHandlers
                 {
                     var response = AppConfig.IsOnMaintenance ? BotResponse.Recovered : BotResponse.OnMaintenance;
                     AppConfig.IsOnMaintenance = !AppConfig.IsOnMaintenance;
-                    await _botClient.SendTextMessageAsync(chatKey.ChatId, response);
+                    await _botClient.SendMessage(chatKey.ChatId, response);
                     return;
                 }
                 case BotMenu.VersionCommand when chatKey.IsAdmin():

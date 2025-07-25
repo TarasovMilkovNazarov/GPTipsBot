@@ -88,10 +88,10 @@ namespace GPTipsBot.UpdateHandlers
             {
                 if (update.PreCheckoutQuery.InvoicePayload.StartsWith("donate"))
                 {
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.Id,
+                    await _botClient.SendMessage(update.UserChatKey.Id,
                         BotResponse.DonateText, replyMarkup: null);
 
-                    await _botClient.AnswerPreCheckoutQueryAsync(
+                    await _botClient.AnswerPreCheckoutQuery(
                         preCheckoutQueryId: update.PreCheckoutQuery.Id);
                 }
                 else
@@ -104,9 +104,9 @@ namespace GPTipsBot.UpdateHandlers
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-                    await _botClient.AnswerPreCheckoutQueryAsync(
+                    await _botClient.AnswerPreCheckoutQuery(
                         preCheckoutQueryId: update.PreCheckoutQuery.Id);
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
+                    await _botClient.SendMessage(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
                 }
 
                 await _userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
@@ -140,10 +140,10 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitVideoMsg,
+                await _botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitVideoMsg,
                     replyMarkup: null);
                 var video = await _gptService.GenerateVideoByText(update.Message!.Text, update.FileId, CancellationToken.None);
-                await _botClient.SendVideoAsync(update.UserChatKey.Id, InputFile.FromUri(video));
+                await _botClient.SendVideo(update.UserChatKey.Id, InputFile.FromUri(video));
                 return;
             }
             else if (lastCommand?.Type == CommandType.TextRecognition)
@@ -184,7 +184,7 @@ namespace GPTipsBot.UpdateHandlers
                 }
 
                 var audio = await _gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
-                await _botClient.SendAudioAsync(update.UserChatKey.Id, InputFile.FromStream(audio));
+                await _botClient.SendAudio(update.UserChatKey.Id, InputFile.FromStream(audio));
                 return;
             }
             else if (update.FileId != null)

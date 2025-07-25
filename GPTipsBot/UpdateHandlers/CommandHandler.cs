@@ -69,14 +69,14 @@ namespace GPTipsBot.UpdateHandlers
 
             var profile = await _userService.GetUserProfile(update.UserChatKey.Id);
 
-            IReplyMarkup? replyMarkup = StartKeyboard;
+            ReplyMarkup replyMarkup = StartKeyboard;
             update.Message.ContextBound = false;
             string? reply = null;
 
             switch (update!.Command.Command)
             {
                 case StartCommand:
-                    await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(),
+                    await _botClient.SetMyCommands(new BotMenu().GetBotCommands(),
                         BotCommandScope.Chat(chatId));
                     reply = BotResponse.Greeting;
                     break;
@@ -87,18 +87,18 @@ namespace GPTipsBot.UpdateHandlers
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
                     break;
                 case DepositCommand:
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                    await _botClient.SendMessage(update.UserChatKey.ChatId,
                         string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
                         replyMarkup: CancelInlineKeyboard);
                     return;
                 case DonateCommand:
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                    await _botClient.SendMessage(update.UserChatKey.ChatId,
                         BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
                     return;
                 case MusicCommand:
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
-                    await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.MusicResponse,
+                    await _botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.MusicResponse,
                         replyMarkup: replyMarkup);
                     return;
                 case SongCommand:
@@ -108,13 +108,13 @@ namespace GPTipsBot.UpdateHandlers
                     }
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
-                    await _botClient.SendTextMessageAsync(chatId, BotResponse.SongResponse,
+                    await _botClient.SendMessage(chatId, BotResponse.SongResponse,
                         replyMarkup: replyMarkup);
                     return;
                 case VideoCommand:
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
-                    await _botClient.SendTextMessageAsync(chatId, string.Format(BotResponse.VideoInstructions, 60),
+                    await _botClient.SendMessage(chatId, string.Format(BotResponse.VideoInstructions, 60),
                         replyMarkup: replyMarkup);
                     return;
                 case HelpCommand:
@@ -194,14 +194,14 @@ namespace GPTipsBot.UpdateHandlers
             Guard.Against.Null(reply);
 
             await _messageRepository.AddAsync(update.Message);
-            await _botClient.SendTextMessageAsync(chatId, reply, replyMarkup: replyMarkup);
+            await _botClient.SendMessage(chatId, reply, replyMarkup: replyMarkup);
             return;
 
             async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
 
-                await _botClient.SetMyCommandsAsync(new BotMenu().GetBotCommands(), BotCommandScope.Chat(chatId));
+                await _botClient.SetMyCommands(new BotMenu().GetBotCommands(), BotCommandScope.Chat(chatId));
                 replyMarkup = new ReplyKeyboardRemove();
 
                 var settings = _botSettingsRepository.Get(userKey.Id);

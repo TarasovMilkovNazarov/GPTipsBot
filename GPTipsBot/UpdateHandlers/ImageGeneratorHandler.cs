@@ -55,7 +55,7 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            // await botClient.SendTextMessageAsync(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
+            // await botClient.SendMessage(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
             //
             // return;
 
@@ -63,7 +63,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text.Length > ImageTextDescriptionLimit)
             {
-                await _botClient.SendTextMessageAsync(userKey.ChatId,
+                await _botClient.SendMessage(userKey.ChatId,
                     string.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
                 return;
@@ -101,7 +101,7 @@ namespace GPTipsBot.UpdateHandlers
                         Role = MessageOwner.Ya,
                         BotMessageType = BotMessageType.ImageGenerated,
                     });
-                    await _botClient.SendPhotoAsync(userKey.ChatId, InputFile.FromStream(imageStream), cancellationToken: token);
+                    await _botClient.SendPhoto(userKey.ChatId, InputFile.FromStream(imageStream), cancellationToken: token);
                 }
                 else
                 {
@@ -111,12 +111,12 @@ namespace GPTipsBot.UpdateHandlers
                         Role = MessageOwner.Ya,
                         BotMessageType = BotMessageType.ImageGenerated,
                     });
-                    await _botClient.SendPhotoAsync(userKey.ChatId, InputFile
+                    await _botClient.SendPhoto(userKey.ChatId, InputFile
                         .FromUri("https://www.kasandbox.org/programming-images/avatars/leaf-blue.png"),
                         cancellationToken: token);
                 }
 
-                await _botClient.SendTextMessageAsync(userKey.ChatId, string.Format(BotResponse.InputImageDescriptionText,
+                await _botClient.SendMessage(userKey.ChatId, string.Format(BotResponse.InputImageDescriptionText,
                     ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
 
                 sw.Stop();
@@ -127,7 +127,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (ClientException ex)
             {
-                await _botClient.SendTextMessageAsync(userKey.ChatId, ex.Message, replyToMessageId: (int)update.Message.TelegramMessageId!);
+                await _botClient.SendMessage(userKey.ChatId, ex.Message, replyParameters: (int)update.Message.TelegramMessageId!);
             }
             catch (ImageCreatorException ex)
             {
@@ -138,11 +138,11 @@ namespace GPTipsBot.UpdateHandlers
                     ("StatusCode", statusCode)
                     );
                 
-                await _botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
+                await _botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
             }
             catch(Exception ex)
             {
-                await _botClient.SendTextMessageAsync(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
+                await _botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
             }
             finally
             {

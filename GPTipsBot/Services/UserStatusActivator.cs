@@ -32,7 +32,7 @@ namespace GPTipsBot.Services
         public async Task<long> Start(UserChatKey userKey, ChatAction chatAction)
         {
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
-            var serviceMessage = await _botClient.SendTextMessageAsync
+            var serviceMessage = await _botClient.SendMessage
                 (userKey.ChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
 
@@ -49,7 +49,7 @@ namespace GPTipsBot.Services
                         return;
                     }
 
-                    _botClient.SendChatActionAsync(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
+                    _botClient.SendChatAction(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
                 catch (Exception ex)
                 {
@@ -66,7 +66,7 @@ namespace GPTipsBot.Services
         {
             if (_serviceMessageId != 0)
             {
-                await _botClient.DeleteMessageAsync(userKey.ChatId, _serviceMessageId);
+                await _botClient.DeleteMessage(userKey.ChatId, _serviceMessageId);
             }
 
             Dispatcher.UserState[userKey].MessageIdToCancellation.Remove(_serviceMessageId);

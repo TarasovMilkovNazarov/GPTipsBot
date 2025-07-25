@@ -28,7 +28,7 @@ public class TelegramSink : ILogEventSink
 {logEvent.RenderMessage().Truncate(1000)}
 Подробнее: https://console.cloud.yandex.ru/folders/b1ghg7fp1esojrsq87tq/logging/group/e23pildlggn1clcjtr5u/logs{updateIdQuery}
 """;
-                botClient.SendTextMessageAsync(adminId, text).GetAwaiter().GetResult();
+                botClient.SendMessage(adminId, text).GetAwaiter().GetResult();
             }
         }
         catch (Exception e)

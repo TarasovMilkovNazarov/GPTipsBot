@@ -49,7 +49,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (ArgumentNullException e)
             {
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                await _botClient.SendMessage(update.UserChatKey.ChatId,
                     BotResponse.SendTextRecognitionImage,
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
 
@@ -62,7 +62,7 @@ namespace GPTipsBot.UpdateHandlers
 
             if (!isAdmin && lastCommand?.Type != CommandType.TextRecognition)
             {
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
+                await _botClient.SendMessage(update.UserChatKey.ChatId,
                     BotResponse.SendImageTextRecognitionCommandFirst,
                     replyMarkup: TelegramBotUiService.CancelKeyboard);
 
@@ -75,7 +75,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 await dbTransaction.RollbackAsync();
                 _context.ChangeTracker.Clear();
-                await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
+                await _botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
                     replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
@@ -93,8 +93,8 @@ namespace GPTipsBot.UpdateHandlers
             await _messageRepository.AddAsync(recognitionResultMessage);
             await dbTransaction.CommitAsync();
 
-            await _botClient.SendTextMessageAsync(update.UserChatKey.ChatId,
-                text, replyToMessageId: (int)update.Message.TelegramMessageId!);
+            await _botClient.SendMessage(update.UserChatKey.ChatId,
+                text, replyParameters: (int)update.Message.TelegramMessageId!);
 
             await _advertisementClient.SendPostToChat(update.UserChatKey.ChatId);
             await _telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");

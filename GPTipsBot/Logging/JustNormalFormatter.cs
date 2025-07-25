@@ -76,7 +76,7 @@ public class JustNormalFormatter : ConsoleFormatter, IDisposable
                     var text = $"{errorPrefix}{Environment.NewLine}" +
                                $"Не смогли отправить полное сообщение об ошибке в телегу, посмотри его срочно в логах. " +
                                $"Там же будет написано почему оно не попало в телегу";
-                    _botClient.SendTextMessageAsync(adminId, text).GetAwaiter().GetResult();
+                    _botClient.SendMessage(adminId, text).GetAwaiter().GetResult();
                 }
             }
             catch (Exception e2)

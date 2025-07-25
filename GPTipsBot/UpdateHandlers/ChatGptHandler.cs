@@ -69,6 +69,8 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            Guard.Against.Null(update.Message.TelegramMessageId);
+
             try
             {
                 var serviceMessageId = await _typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
@@ -90,10 +92,10 @@ namespace GPTipsBot.UpdateHandlers
                 catch (ChatGptException ex)
                 {
                     _log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                    await _botClient.SendTextMessageAsync(
+                    await _botClient.SendMessage(
                         chatId,
                         BotResponse.SomethingWentWrong,
-                        (int)update.Message.TelegramMessageId!, cancellationToken: token
+                        replyParameters: (int)update.Message.TelegramMessageId, cancellationToken: token
                         );
 
                     return;
@@ -115,13 +117,13 @@ namespace GPTipsBot.UpdateHandlers
                 Guard.Against.Null(gptResponse);
 
                 await _messageRepository.AddAsync(gptResponse, request);
-                await _botClient.TrySendMarkdown2MessageAsync(chatId, gptResponse.Text, (int)update.Message.TelegramMessageId!);
+                await _botClient.TrySendMarkdown2MessageAsync(chatId, gptResponse.Text, (int)update.Message.TelegramMessageId);
             }
             catch (ClientException ex)
             {
                 _log.LogInformation(ex, shortMessage);
-                await _botClient.SendTextMessageAsync(chatId, ex.Message,
-                    replyToMessageId: (int)update.Message.TelegramMessageId!);
+                await _botClient.SendMessage(chatId, ex.Message,
+                    replyParameters: (int)update.Message.TelegramMessageId);
                 return;
             }
             finally

@@ -5,6 +5,7 @@ using GPTipsBot.Utilities;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.Extensions
@@ -13,19 +14,19 @@ namespace GPTipsBot.Extensions
     {
         public static async Task SendTextMessageWithMenuKeyboard(this ITelegramBotClient botClient, long chatId, string text)
         {
-            await botClient.SendTextMessageAsync(chatId, text, replyMarkup: TelegramBotUiService.StartKeyboard);
+            await botClient.SendMessage(chatId, text, replyMarkup: TelegramBotUiService.StartKeyboard);
         }
         
         public static async Task SendBotVersionAsync(this ITelegramBotClient botClient, params long[] chatIds)
         {
             foreach (var chatId in chatIds)
             {
-                await botClient.SendTextMessageAsync(chatId, $"""
+                await botClient.SendMessage(chatId, $"""
 Bot running on:
 
 Version: {StringUtilities.EscapeTextForMarkdown2(AppConfig.Version)}
 CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPTipsBot/commit/{AppConfig.CommitHash})
-""", null, ParseMode.MarkdownV2);
+""", ParseMode.MarkdownV2);
             }
         }
 
@@ -43,7 +44,10 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             foreach (var part in textParts.Take(partsCount))
             {
                 var escapedText = StringUtilities.EscapeTextForMarkdown2(part)!;
-                await botClient.SendTextMessageAsync(chatId, escapedText, null, ParseMode.MarkdownV2, replyToMessageId: replyToMessageId);
+                await botClient.SendMessage(chatId, escapedText, ParseMode.MarkdownV2, new ReplyParameters
+                {
+                    MessageId = replyToMessageId.Value
+                });
             }
         }
 
@@ -87,7 +91,7 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
 
             foreach (var part in textParts.Take(partsCount))
             {
-                await botClient.SendTextMessageAsync(chatId, part, null, replyToMessageId: replyToMessageId);
+                await botClient.SendMessage(chatId, part, replyParameters: replyToMessageId);
             }
         }
 
@@ -96,7 +100,7 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
         {
             if (!nextRefreshExecution.HasValue || nextRefreshExecution.Value < DateTimeOffset.UtcNow)
             {
-                await botClient.SendTextMessageAsync(chatId, BotResponse.SimpleNoFreeRequests,
+                await botClient.SendMessage(chatId, BotResponse.SimpleNoFreeRequests,
                     replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
 
                 return;
@@ -105,7 +109,7 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             var timeTillRefresh = nextRefreshExecution.Value - DateTimeOffset.UtcNow;
             var message = string.Format(BotResponse.TimeNoFreeRequests, timeTillRefresh);
 
-            await botClient.SendTextMessageAsync(chatId, message,
+            await botClient.SendMessage(chatId, message,
                 replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
         }
 

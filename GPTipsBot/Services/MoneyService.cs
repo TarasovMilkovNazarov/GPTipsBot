@@ -47,7 +47,7 @@ public class MoneyService
             var response = string.Format(isVideo ? BotResponse.InsufficientBalanceForVideo :
                 BotResponse.InsufficientBalanceForMusic, amount);
 
-            await _botClient.SendTextMessageAsync(userId, response,
+            await _botClient.SendMessage(userId, response,
                 replyMarkup: inlineKeyboard);
             return false;
         }
@@ -72,7 +72,7 @@ public class MoneyService
 
         await _context.SaveChangesAsync();
 
-        await _botClient.SendInvoiceAsync(
+        await _botClient.SendInvoice(
             chatId: userId,
             title: BotResponse.InvoiceTitle,
             description: BotResponse.InvoiceText,
@@ -100,7 +100,7 @@ public class MoneyService
 
         await _context.SaveChangesAsync();
 
-        await _botClient.SendInvoiceAsync(
+        await _botClient.SendInvoice(
             chatId: userId,
             title: string.Format(BotResponse.DonateTitle, starsCount),
             description: BotResponse.DonateText,
@@ -147,6 +147,6 @@ public class MoneyService
     {
         var message = "#deposit" + Environment.NewLine + $"{wallet.UserId} balance: {wallet.Balance} stars";
 
-        _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
+        _botClient.SendMessage(AppConfig.AdminIds.First(), message);
     }
 }

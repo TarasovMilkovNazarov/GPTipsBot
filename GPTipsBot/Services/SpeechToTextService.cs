@@ -12,7 +12,7 @@ namespace GPTipsBot.Services
         public async Task<string> RecognizeVoice(string fileId)
         {
             using var stream = new MemoryStream();
-            var file = await _telegramBotClient.GetInfoAndDownloadFileAsync(fileId, stream);
+            var file = await _telegramBotClient.GetInfoAndDownloadFile(fileId, stream);
             if (file == null)
             {
                 throw new Exception("Can't download file from telegram. The file size should be less than 20mb");

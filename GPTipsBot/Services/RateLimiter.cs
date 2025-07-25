@@ -47,7 +47,7 @@ namespace GPTipsBot.Services
             var telegramSpamLimitPass = diff < 2;
             if (isBlockingRequest && telegramSpamLimitPass)
             {
-                _botClient.SendTextMessageAsync(chatId, BotResponse.TooManyRequests);
+                _botClient.SendMessage(chatId, BotResponse.TooManyRequests);
             }
 
             return !isBlockingRequest;
@@ -61,7 +61,7 @@ namespace GPTipsBot.Services
             if (isBlockingRequest && diff < 2)
             {
                 var text = string.Format(BotResponse.DailyLimitViolation, MaxMessageCountPerDay);
-                _botClient.SendTextMessageAsync(chatId, text);
+                _botClient.SendMessage(chatId, text);
             }
             
             return !isBlockingRequest;

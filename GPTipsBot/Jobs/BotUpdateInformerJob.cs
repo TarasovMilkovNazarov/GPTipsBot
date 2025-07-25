@@ -35,7 +35,7 @@ public class BotUpdateInformerJob : IJob
         {
             try
             {
-                await botClient.SendTextMessageAsync(user, message);
+                await botClient.SendMessage(user, message);
                 await Task.Delay(delayPerMessage);
             }
             catch (ApiRequestException ex) when (ex.ErrorCode == 403)

@@ -161,7 +161,7 @@ namespace GPTipsBot.Services
 
             foreach (var adminId in AppConfig.AdminIds)
             {
-                _botClient.SendTextMessageAsync(adminId, message);
+                _botClient.SendMessage(adminId, message).GetAwaiter().GetResult();
             }
         }
     }

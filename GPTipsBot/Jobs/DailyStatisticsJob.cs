@@ -49,7 +49,7 @@ public class DailyStatisticsJob: IJob
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
         message += Environment.NewLine + $"Monthly users: {mau}";
 
-        await _botClient.SendTextMessageAsync(AppConfig.AdminIds.First(), message);
+        await _botClient.SendMessage(AppConfig.AdminIds.First(), message);
     }
 
     private async Task<long> CalculateMonthlyActiveUsers()

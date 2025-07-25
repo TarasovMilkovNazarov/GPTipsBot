@@ -110,10 +110,10 @@ namespace GPTipsBot.Extensions
         static void InitializeBot(ITelegramBotClient botClient, string? langCode = null)
         {
             var botMenu = new BotMenu();
-            botClient.SetMyCommandsAsync(botMenu.GetBotCommands(), languageCode: langCode);
-            botClient.SetMyNameAsync(AppConfig.IsProduction ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
-            botClient.SetMyDescriptionAsync(BotResponse.BotDescription, languageCode: langCode);
-            botClient.SetMyShortDescriptionAsync(AppConfig.IsProduction ? BotResponse.ShortDescription :
+            botClient.SetMyCommands(botMenu.GetBotCommands(), languageCode: langCode);
+            botClient.SetMyName(AppConfig.IsProduction ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
+            botClient.SetMyDescription(BotResponse.BotDescription, languageCode: langCode);
+            botClient.SetMyShortDescription(AppConfig.IsProduction ? BotResponse.ShortDescription :
                 BotResponse.ShortDevDescription, languageCode: langCode);
         }
     }

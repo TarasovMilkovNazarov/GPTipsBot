@@ -40,7 +40,7 @@ namespace GPTipsBot.UpdateHandlers
 
                 if (ChatToInformAboutRecovery.TryAdd(chatId, true))
                 {
-                    await _botClient.SendTextMessageAsync(chatId, BotResponse.Recovered);
+                    await _botClient.SendMessage(chatId, BotResponse.Recovered);
                 }
 
                 return;

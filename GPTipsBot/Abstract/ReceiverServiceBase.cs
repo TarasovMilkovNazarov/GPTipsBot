@@ -84,19 +84,19 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         }
                         catch (ClientException clientEx)
                         {
-                            await _botClient.SendTextMessageAsync(clientEx.ChatId, clientEx.Message,
+                            await _botClient.SendMessage(clientEx.ChatId, clientEx.Message,
                                 cancellationToken: stoppingToken);
                         }
                         catch (ClientCanceledException clientCanceledException)
                         {
-                            await _botClient.SendTextMessageAsync(clientCanceledException.ChatId,
+                            await _botClient.SendMessage(clientCanceledException.ChatId,
                                 clientCanceledException.Message,
                                 replyMarkup: TelegramBotUiService.CancelInlineKeyboard,
                                 cancellationToken: stoppingToken);
                         }
                         catch (NotSupportedMessageException notSupportedMessageEx)
                         {
-                            await _botClient.SendTextMessageAsync(notSupportedMessageEx.ChatId,
+                            await _botClient.SendMessage(notSupportedMessageEx.ChatId,
                                 BotResponse.UnsupportedMessageType, cancellationToken: stoppingToken);
                         }
                         catch (ApiRequestException e)
@@ -118,7 +118,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             _log.LogError(e, "Unknown error while handling update" +
                                              Environment.NewLine + "{update}", updateStr);
 
-                            await _botClient.SendTextMessageAsync(userId, BotResponse.SomethingWentWrong,
+                            await _botClient.SendMessage(userId, BotResponse.SomethingWentWrong,
                                 cancellationToken: stoppingToken);
                         }
                     }
@@ -155,7 +155,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
     private async Task Init(CancellationToken stoppingToken)
     {
-        var me = await _botClient.GetMeAsync(stoppingToken);
+        var me = await _botClient.GetMe(stoppingToken);
         AppConfig.BotName = me.Username ?? "GPTipsBot";
         _log.LogInformation("Bot running. {BotName} is ready to receive messages", AppConfig.BotName);
         _ = _botClient.SendBotVersionAsync(AppConfig.AdminIds);

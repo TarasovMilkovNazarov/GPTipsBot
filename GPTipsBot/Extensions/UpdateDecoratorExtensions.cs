@@ -29,12 +29,12 @@ public static class UpdateDecoratorExtensions
     {
         Guard.Against.Null(fileId);
 
-        var file = await botClient.GetFileAsync(fileId);
+        var file = await botClient.GetFile(fileId);
 
         Guard.Against.Null(file.FilePath);
 
         using var memoryStream = new MemoryStream();
-        await botClient.DownloadFileAsync(file.FilePath, memoryStream);
+        await botClient.DownloadFile(file.FilePath, memoryStream);
         memoryStream.Position = 0;
 
         var base64String = Convert.ToBase64String(memoryStream.ToArray());
