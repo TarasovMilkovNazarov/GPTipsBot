@@ -1,11 +1,17 @@
+using System.Collections.Concurrent;
 using GPTipsBot.Db;
+using GPTipsBot.Resources;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.Jobs;
 
-public class BotUpdateInformerJob(ApplicationContext context, ITelegramBotClient botClient) : IJob
+public class BotUpdateInformerJob(ApplicationContext context, ITelegramBotClient botClient,
+    ILogger<BotUpdateInformerJob> logger) : IJob
 {
     private readonly ITelegramBotClient _botClient = botClient;
 
@@ -13,35 +19,49 @@ public class BotUpdateInformerJob(ApplicationContext context, ITelegramBotClient
     {
         var botClient = new TelegramBotClient("");
 
-        var message =
-            "🎵 Новый крутой функционал в боте! 🎧\n\nТеперь вы можете создавать уникальную музыку просто из текста! 🎶✨\n\n" +
-            "🔹 Как это работает?\n\n    ✨ Шаг 1. Введите команду /music и придумайте описание мелодии (например, \"космический синтвейв, 120 bpm\")\n\n" +
-            "    🎹 Шаг 2. Бот сгенерирует трек по вашему запросу\n\n    📥 Шаг 3. Скачивайте и делитесь крутыми битами!\n\n" +
-            "🚀 Попробуйте прямо сейчас! Просто отправьте боту команду /music или нажмите кнопку в меню.\n\n Стоимость генерации 10⭐️";
+        var message = BotResponse.AdvertisementText;
 
-        var users = context.Users.Select(u => u.Id).ToList();
+        const int batchSize = 100;
+        var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+        var kickedBotUserIds = new ConcurrentBag<long>();
 
-        const int messagesPerSecond = 25;
-        var delayPerMessage = TimeSpan.FromMilliseconds(1000 / messagesPerSecond);
-
-        foreach (var user in users)
+        for (var skip = 0; ; skip += batchSize)
         {
-            try
+            var userIdBatch = await context.Users
+                .Where(u => u.IsActive)
+                .OrderBy(u => u.Id)
+                .Select(u => u.Id)
+                .Skip(skip)
+                .Take(batchSize)
+                .ToListAsync();
+
+            if (!userIdBatch.Any())
+                break;
+
+            await Parallel.ForEachAsync(userIdBatch, parallelOptions, async (userId, token) =>
             {
-                await botClient.SendMessage(user, message);
-                await Task.Delay(delayPerMessage);
-            }
-            catch (ApiRequestException ex) when (ex.ErrorCode == 403)
+                try
+                {
+                    await botClient.SendMessage(userId, message, ParseMode.MarkdownV2, cancellationToken: token);
+                }
+                catch (ApiRequestException ex) when (ex.ErrorCode is 403 or 400)
+                {
+                    kickedBotUserIds.Add(userId);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Unexpected error while sending advertisement for user: '{userId}'", userId);
+                }
+            });
+
+            if (kickedBotUserIds.Any())
             {
-                var userToDelete = await context.Users.FindAsync(user);
-                if (userToDelete != null)
-                    userToDelete.IsActive = false;
-            }
-            catch (Exception e)
-            {
-                // ignore
+                await context.Users
+                    .Where(u => kickedBotUserIds.Contains(u.Id) && u.IsActive)
+                    .ExecuteUpdateAsync(u => u.SetProperty(x => x.IsActive, false));
+
+                kickedBotUserIds.Clear();
             }
         }
-        await context.SaveChangesAsync();
     }
 }

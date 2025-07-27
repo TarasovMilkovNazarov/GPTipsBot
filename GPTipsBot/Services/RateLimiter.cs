@@ -8,14 +8,11 @@ namespace GPTipsBot.Services
     public class RateLimiter
     {
         private readonly ITelegramBotClient _botClient;
-        private Timer _resetMessageCountsPerMinuteTimer;
-        private Timer _resetMessageCountsPerDayTimer;
+        private readonly Timer _resetMessageCountsPerMinuteTimer;
 
         public const int MaxMessagesCountPerMinute = 5;
-        public const int MaxMessageCountPerDay = 30;
 
         private TimeSpan MinuteResetInterval { get; } = TimeSpan.FromSeconds(60);
-        private TimeSpan DayResetInterval { get; } = TimeSpan.FromDays(1);
 
         private ConcurrentDictionary<long, int> UserToDayMessageCount { get; } = new();
         private ConcurrentDictionary<long, int> UserToMinuteMessageCount { get; } = new();
@@ -27,8 +24,6 @@ namespace GPTipsBot.Services
 
             _resetMessageCountsPerMinuteTimer = new Timer(ResetMessageCountsPerMinute, null, TimeSpan.Zero,
                 MinuteResetInterval);
-            _resetMessageCountsPerDayTimer =
-                new Timer(ResetMessageCountsPerDay, null, TimeSpan.Zero, DayResetInterval);
         }
 
         public bool IsAllowed(UpdateDecorator update)
@@ -53,28 +48,9 @@ namespace GPTipsBot.Services
             return !isBlockingRequest;
         }
 
-        private bool IsDailyLimitOk(long chatId)
-        {
-            var value = UserToDayMessageCount.GetOrAdd(chatId, 0);
-            var diff = value - MaxMessageCountPerDay;
-            var isBlockingRequest = diff >= 0;
-            if (isBlockingRequest && diff < 2)
-            {
-                var text = string.Format(BotResponse.DailyLimitViolation, MaxMessageCountPerDay);
-                _botClient.SendMessage(chatId, text);
-            }
-            
-            return !isBlockingRequest;
-        }
-
         private void ResetMessageCountsPerMinute(object? o)
         {
             UserToMinuteMessageCount.Clear();
-        }
-
-        private void ResetMessageCountsPerDay(object? o)
-        {
-            UserToDayMessageCount.Clear();
         }
 
         public bool TryIncrementMessageCount(long chatId)
@@ -82,12 +58,7 @@ namespace GPTipsBot.Services
             lock (_sync)
             {
                 IncrementMinuteMessageCount(chatId);
-                var isAllLimitsOk = IsMinuteLimitOk(chatId) && IsDailyLimitOk(chatId);
-                if (!isAllLimitsOk) return false;
-                IncrementDailyMessageCount(chatId);
-                
-                return true;
-
+                return IsMinuteLimitOk(chatId);
             }
         }
         private int IncrementMinuteMessageCount(long chatId)
@@ -95,12 +66,6 @@ namespace GPTipsBot.Services
             var minuteCounter = UserToMinuteMessageCount.AddOrUpdate(chatId, 1, (k, v) => Interlocked.Increment(ref v));
 
             return minuteCounter;
-        }
-        private int IncrementDailyMessageCount(long chatId)
-        {
-            var daysCounter = UserToDayMessageCount.AddOrUpdate(chatId, 1, (k, v) => Interlocked.Increment(ref v));
-
-            return daysCounter;
         }
     }
 }

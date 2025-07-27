@@ -149,12 +149,13 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>Hello! How can I help you?</value>
   </data>
   <data name="AdvertisementText" xml:space="preserve">
-    <value>[VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
+    <value>[VPN для всей семьи всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
 
 🎁 Первые 2 дня бесплатно
 🚀 Высокая скорость
 ▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
-📱💻 Для телефонов, компьютеров и планшетов</value>
+📱💻 Для телефонов, компьютеров и планшетов
+👩‍👩‍👧‍👧Можно подключить даже деда (внука, если вы дед)</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and start again with the /image command.</value>
@@ -236,10 +237,10 @@ Free requests:
 </value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>1 star = 20 ChatGPT requests OR 2 image generations</value>
+    <value>1 star = 10 ChatGPT requests OR 2 image generations</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1⭐ = 20 requests to ChatGPT or 2 image generations
+    <value>1⭐ = 10 ChatGPT requests or 2 image generations
 
 Minimum Stars to recharge: {0}
 Enter whole Stars amount to top up:</value>
@@ -286,7 +287,7 @@ Top up your balance or wait for the free limits to reset.
     <value>❗️You've used all your free requests for today.
 Either add funds now or wait {0:%d} d {0:%h} h {0:%m} min for your free requests to refresh.
 
-1⭐ = 10 ChatGPT queries or 2 AI images</value>
+1⭐ = 10 ChatGPT requests or 2 AI images</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
     <value>🌟 Support our project! 💪

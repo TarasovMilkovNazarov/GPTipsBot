@@ -69,12 +69,13 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [VPN в телеграмме всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
+        ///   Looks up a localized string similar to [VPN для всей семьи всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
         ///
         ///🎁 Первые 2 дня бесплатно
         ///🚀 Высокая скорость
         ///▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
-        ///📱💻 Для телефонов, компьютеров и планшетов.
+        ///📱💻 Для телефонов, компьютеров и планшетов
+        ///👩‍👩‍👧‍👧Можно подключить даже деда (внука, если вы дед).
         /// </summary>
         public static string AdvertisementText {
             get {
@@ -162,7 +163,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1⭐ = 20 запросов к ChatGpt или 2 генерации изображения
+        ///   Looks up a localized string similar to 1⭐ = 10 запросов к ChatGpt или 2 генерации изображения
         ///
         ///Минимальное количество старс для пополнения: {0}
         ///Введите целое количество stars для пополнения баланса:.
@@ -485,7 +486,7 @@ namespace GPTipsBot.Resources {
         ///   Looks up a localized string similar to ❗️Закончился лимит бесплатных запросов на сегодня.
         ///Пополните баланс или дождитесь обновления бесплатных запросов через {0:%d} д {0:%h} ч {0:%m} мин
         ///
-        ///1⭐ = 10 запросам к ChatGPT или 2 генерации изображения.
+        ///1⭐ = 10 запросов к ChatGPT или 2 генерации изображения.
         /// </summary>
         public static string TimeNoFreeRequests {
             get {
