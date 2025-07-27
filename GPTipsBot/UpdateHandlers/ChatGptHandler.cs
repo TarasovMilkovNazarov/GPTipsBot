@@ -24,7 +24,8 @@ namespace GPTipsBot.UpdateHandlers
         TelejetAdClient telejetAdClient,
         UserService userService,
         ApplicationContext context,
-        IJobService jobService)
+        IJobService jobService,
+        InMemoryAdvertisementTracker advertisementTracker)
         : BaseMessageHandler
     {
         public override async Task HandleAsync(UpdateDecorator update)
@@ -108,8 +109,10 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             await dbTransaction.CommitAsync();
+
             await gramadsAdvertisementClient.SendPostToChat(chatId);
             await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
+            await advertisementTracker.TrySendAdvertisement(update.UserChatKey.Id);
         }
     }
 }

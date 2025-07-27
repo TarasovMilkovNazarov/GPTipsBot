@@ -23,7 +23,7 @@ public class SchedulerService(IServiceProvider serviceProvider) : ISchedulerServ
         
         if (await scheduler.CheckExists(jobKey, cancellationToken))
         {
-            await scheduler.DeleteJob(jobKey, cancellationToken);
+            return;
         }
 
         var job = JobBuilder.Create<T>()

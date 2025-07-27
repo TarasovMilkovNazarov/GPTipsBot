@@ -24,6 +24,11 @@ namespace GPTipsBot.Extensions
             services.AddQuartz(q =>
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
+                q.UsePersistentStore(opt =>
+                {
+                    opt.UsePostgres(AppConfig.ConnectionString);
+                    opt.UseNewtonsoftJsonSerializer();
+                });
             });
             services.AddMemoryCache();
             services.AddLocalization(options =>
@@ -81,6 +86,7 @@ namespace GPTipsBot.Extensions
 
                 return botClient;
             })
+            .AddSingleton<InMemoryAdvertisementTracker>()
             ;
 
             services.AddDbContext<ApplicationContext>();

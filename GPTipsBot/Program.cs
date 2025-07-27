@@ -1,10 +1,13 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Collections.Specialized;
+using Microsoft.Extensions.Hosting;
 using dotenv.net;
+using GPTipsBot.Config;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
+using Quartz.Impl;
 using Serilog;
 
 //uncomment for sniffing requests in fiddler

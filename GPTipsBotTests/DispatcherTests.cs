@@ -567,6 +567,28 @@ namespace GPTipsBotTests
         }
 
         [Test]
+        public async Task InMemoryAdvertisement_InParallel_SentOnce()
+        {
+            var tracker = new InMemoryAdvertisementTracker(_botClientMock.Object);
+            int successCount = 0;
+            int attempts = 0;
+
+            Parallel.For(0, 10, async _ => {
+                Interlocked.Increment(ref attempts);
+                if (await tracker.TrySendAdvertisement(TestConstants.UserId))
+                {
+                    Interlocked.Increment(ref successCount);
+                }
+            });
+
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
+                    arg.ChatId == TestConstants.UserId &&
+                    arg.Text == BotResponse.AdvertisementText
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task DepositCommand_WalletExists_BalanceChanged()
         {
             await using var scope = _services.CreateAsyncScope();

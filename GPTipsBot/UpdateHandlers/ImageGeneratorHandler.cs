@@ -29,7 +29,8 @@ namespace GPTipsBot.UpdateHandlers
         UserService userService,
         ApplicationContext context,
         TelejetAdClient telejetAdClient,
-        IJobService jobService)
+        IJobService jobService,
+        InMemoryAdvertisementTracker advertisementTracker)
         : BaseMessageHandler
     {
         private readonly ImageCreatorService _imageCreatorService = imageCreatorService;
@@ -136,6 +137,7 @@ namespace GPTipsBot.UpdateHandlers
 
             await gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
             await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
+            await advertisementTracker.TrySendAdvertisement(update.UserChatKey.Id);
         }
     }
 }
