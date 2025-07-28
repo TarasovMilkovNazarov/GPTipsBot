@@ -30,7 +30,6 @@ var schedulerFactory = host.Services.GetRequiredService<ISchedulerFactory>();
 var scheduler = await schedulerFactory.GetScheduler();
 var schedulerService = host.Services.GetRequiredService<ISchedulerService>();
 
-// todo добавить бд для джоб
 await schedulerService.ScheduleJob<DailyStatisticsJob>(scheduler, DateBuilder.TodayAt(23, 55, 0),
     TimeSpan.FromDays(1),  CancellationToken.None);
 await schedulerService.ScheduleJob<RefreshFreeLimitsJob>(scheduler, DateBuilder.TodayAt(23, 59, 0),

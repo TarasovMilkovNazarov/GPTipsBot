@@ -61,9 +61,6 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
                     if (user == null)
                     {
-                        var updateStr = SerializeUpdate(update);
-                        // just for case but seems impossible
-                        _log.LogError("Could not get user id from update:\n {UpdateStr} ", updateStr);
                         return;
                     }
 
