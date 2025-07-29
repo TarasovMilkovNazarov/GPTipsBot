@@ -128,11 +128,19 @@ namespace GPTipsBot.UpdateHandlers
                     replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
                 case ImageSquareCommand:
+                    if (previousCommand?.Type == CommandType.ImageSquare)
+                    {
+                        return;
+                    }
                     await botClient.EditMessageReplyMarkup(update.UserChatKey.ChatId,
                         (int)update.Message.TelegramMessageId!.Value,
                         replyMarkup: GetImageInstructionInlineKeyboard(true));
                     return;
                 case ImageRectangleCommand:
+                    if (previousCommand?.Type == CommandType.ImageRectangle)
+                    {
+                        return;
+                    }
                     await botClient.EditMessageReplyMarkup(update.UserChatKey.ChatId,
                         (int)update.Message.TelegramMessageId!.Value,
                         replyMarkup: GetImageInstructionInlineKeyboard(false));
