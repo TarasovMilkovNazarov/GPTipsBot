@@ -106,7 +106,8 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(commandHandler);
             }
-            else if (!string.IsNullOrEmpty(update.Message?.Text) && lastCommand?.Type == CommandType.Image)
+            else if (!string.IsNullOrEmpty(update.Message?.Text) &&
+                     lastCommand?.Type is CommandType.Image or CommandType.ImageSquare or CommandType.ImageRectangle)
             {
                 SetNextHandler(imageGeneratorHandler);
             }

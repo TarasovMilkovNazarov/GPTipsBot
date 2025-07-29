@@ -1,81 +1,10 @@
 ﻿using GPTipsBot.Localization;
 using GPTipsBot.Resources;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System.Globalization;
-using GPTipsBot.Dtos;
-using GPTipsBot.Models;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.Services
 {
-    [JsonObject(MemberSerialization.OptIn, NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-    public class BotMenu
-    {
-        public const string StartCommand = "/start";
-        public const string ImageCommand = "/image";
-        public const string ResetContextCommand = "/reset_context";
-        public const string HelpCommand = "/help";
-        public const string ChooseLangCommand = "/setLang";
-        public const string SetRuLangCommand = "/setRuLang";
-        public const string SetEngLangCommand = "/setEngLang";
-        public const string CancelCommand = "/cancel";
-        public const string StopRequestCommand = "/stopRequest";
-        public const string ImageTextRecognizeCommand = "/get_image_text";
-        public const string DepositCommand = "/deposit";
-        public const string GetProfileCommand = "/profile";
-        public const string DonateCommand = "/donate";
-        public const string MusicCommand = "/music";
-        public const string SongCommand = "/song";
-        public const string VideoCommand = "/video";
-
-        public const string FixCommand = "/fix";
-        public const string VersionCommand = "/version";
-
-        public static CustomBotCommand Start => new() { Command = StartCommand, Description = BotUI.Start, Type = CommandType.Start};
-        public static CustomBotCommand Image => new() { Command = ImageCommand, Description = BotUI.Image, Type = CommandType.Image };
-        public static CustomBotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize, Type = CommandType.TextRecognition};
-        public static CustomBotCommand ResetContext => new() { Command = ResetContextCommand, Description = BotUI.ResetContext, Type = CommandType.ResetContext};
-        public static CustomBotCommand Help => new() { Command = HelpCommand, Description = BotUI.Help, Type = CommandType.Help};
-        public static CustomBotCommand ChooseLang => new() { Command = ChooseLangCommand, Description = BotUI.SetLang, Type = CommandType.ChooseLanguage};
-        public static CustomBotCommand SetRuLang => new() { Command = SetRuLangCommand, Description = BotUI.SetRuLang, Type = CommandType.SetRuLang };
-        public static CustomBotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang, Type = CommandType.SetEngLang };
-        public static CustomBotCommand StopRequest => new() { Command = StopRequestCommand, Type = CommandType.StopRequest };
-        public static CustomBotCommand Cancel => new() { Command = CancelCommand, Type = CommandType.CancelPreviousCommand };
-        public static CustomBotCommand Deposit => new() { Command = DepositCommand, Description = BotUI.DepositButton, Type = CommandType.Deposit };
-        public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
-        public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
-        public static CustomBotCommand Music => new() { Command = MusicCommand, Description = BotUI.MusicButton, Type = CommandType.Music };
-        public static CustomBotCommand Song => new() { Command = SongCommand, Description = BotUI.SongButton, Type = CommandType.Song, IsDisabled = true };
-        public static CustomBotCommand Video => new() { Command = VideoCommand, Description = BotUI.SongButton, Type = CommandType.Video };
-
-        public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
-        public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
-
-        public BotMenu()
-        {
-        }
-
-        public BotCommand[] GetBotCommands()
-        {
-            return new[]
-            {
-                Start,
-                Image,
-                ImageRecText,
-                ResetContext,
-                Help,
-                Deposit,
-                Profile,
-                Donate,
-                Music,
-                // Song,
-                Video
-            };
-        }
-    }
-
     public class TelegramBotUiService
     {
         public static ReplyKeyboardMarkup StartKeyboard => GetMenuKeyboardMarkup();
@@ -191,6 +120,26 @@ namespace GPTipsBot.Services
         {
             return new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand));
+        }
+        public static InlineKeyboardMarkup GetImageInstructionInlineKeyboard(bool isSquare)
+        {
+            return new InlineKeyboardMarkup
+            {
+                InlineKeyboard = new List<IEnumerable<InlineKeyboardButton>>()
+                {
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData(isSquare ? "✅ 1:1 🟦" : "1:1 🟦",
+                            BotMenu.ImageSquareCommand),
+                        InlineKeyboardButton.WithCallbackData(isSquare ? "2:1 🟦🟦" : "✅ 2:1 🟦🟦",
+                            BotMenu.ImageRectangleCommand),
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)
+                    },
+                }
+            };
         }
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
         {

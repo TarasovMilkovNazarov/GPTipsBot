@@ -55,7 +55,7 @@ namespace GPTipsBotTests
             _imageGeneratorMock = new Mock<IImageGenerator>();
             _recognitionServiceMock.Setup(s => s.Recognize(It.IsAny<string>()))
                 .ReturnsAsync(TestConstants.ImageTextResponse);
-            _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>()))
+            _imageGeneratorMock.Setup(s => s.GenerateImage(It.IsAny<string>(), false))
                 .ReturnsAsync(TestConstants.GeneratedImage);
             _gptMock = GptApiMock.CreateGptMock();
             var gramadsMockClient = new Mock<IAdvertisementClient>();
@@ -347,13 +347,15 @@ namespace GPTipsBotTests
 
             generatedImagesCount.Should().Be(PaymentConfig.NewbieFreeImageGenerations);
 
+            // падает тк появилось форматированное сообщение с DateTime.UtcNow
+            // todo добавить TimeProvider
             _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
                     arg.ChatId == userId &&
                     arg.Text == BotResponse.SimpleNoFreeRequests
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
-            _imageGeneratorMock.Verify(g => g.GenerateImage("гора"),
+            _imageGeneratorMock.Verify(g => g.GenerateImage("гора", false),
                 Times.Exactly(PaymentConfig.NewbieFreeImageGenerations));
         }
 

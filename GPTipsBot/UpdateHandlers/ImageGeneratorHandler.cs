@@ -13,8 +13,10 @@ using Telegram.Bot.Types;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
+using GPTipsBot.Models;
 using GPTipsBot.Services.YandexCloud;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -30,7 +32,8 @@ namespace GPTipsBot.UpdateHandlers
         ApplicationContext context,
         TelejetAdClient telejetAdClient,
         IJobService jobService,
-        InMemoryAdvertisementTracker advertisementTracker)
+        InMemoryAdvertisementTracker advertisementTracker,
+        UserCommandRepository userCommandRepository)
         : BaseMessageHandler
     {
         private readonly ImageCreatorService _imageCreatorService = imageCreatorService;
@@ -72,11 +75,14 @@ namespace GPTipsBot.UpdateHandlers
                 var sw = Stopwatch.StartNew();
                 var token = Dispatcher.UserState[update.UserChatKey]
                     .MessageIdToCancellation[serviceMessageId].Token;
-                var replyMarkup = TelegramBotUiService.CancelKeyboard;
+
+                var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+                var isSquare = previousCommand?.Type == CommandType.ImageSquare;
 
                 if (AppConfig.IsProduction)
                 {
-                    var response = await ya.GenerateImage(update.Message.Text);
+                    var response = await ya.GenerateImage(update.Message.Text,
+                        isSquare);
 
                     using var imageStream = new MemoryStream(Convert.FromBase64String(response));
                     await messageRepository.AddAsync(new MessageDto(update.UserChatKey)
@@ -101,7 +107,8 @@ namespace GPTipsBot.UpdateHandlers
                 }
 
                 await botClient.SendMessage(userKey.ChatId, string.Format(BotResponse.InputImageDescriptionText,
-                    ImageTextDescriptionLimit), replyMarkup: replyMarkup, disableNotification: true, cancellationToken: token);
+                        ImageTextDescriptionLimit),
+                    replyMarkup: TelegramBotUiService.GetImageInstructionInlineKeyboard(isSquare), cancellationToken: token);
 
                 sw.Stop();
             }

@@ -15,7 +15,7 @@ namespace GPTipsBot.Services.YandexCloud
 
     public interface IImageGenerator
     {
-        Task<string> GenerateImage(string prompt);
+        Task<string> GenerateImage(string prompt, bool square);
     }
 
     public class YaCloudClient : ITextRecognizer, IImageGenerator
@@ -59,20 +59,23 @@ namespace GPTipsBot.Services.YandexCloud
             return !string.IsNullOrWhiteSpace(result?.Result?.TextAnnotation?.FullText) ? result.Result.TextAnnotation.FullText : BotResponse.CantRecognizeText;
         }
 
-        public async Task<string> GenerateImage(string prompt)
+        public async Task<string> GenerateImage(string prompt, bool square)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync");
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                "https://llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync");
+
+            var aspectRatio = new AspectRatio
+            {
+                WidthRatio = square ? "1" : "2",
+                HeightRatio = "1"
+            };
             var body = new YandexArtRequest
             {
                 ModelUri = $"art://{_folderId}/yandex-art/latest",
                 GenerationOptions = new GenerationOptions
                 {
                     Seed = "1863",
-                    AspectRatio = new AspectRatio
-                    {
-                        WidthRatio = "2",
-                        HeightRatio = "1"
-                    }
+                    AspectRatio = aspectRatio
                 },
                 Messages = new List<Message>()
                 {

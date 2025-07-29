@@ -27,7 +27,9 @@ public enum CommandType
     Donate,
     Music,
     Song,
-    Video
+    Video,
+    ImageRectangle,
+    ImageSquare,
 }
 
 public class Wallet: Entity

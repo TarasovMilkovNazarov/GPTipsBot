@@ -122,9 +122,21 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    reply = string.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit);
-                    replyMarkup = CancelKeyboard;
+                    reply = string.Format(
+                        BotResponse.InputImageDescriptionText,
+                        ImageGeneratorHandler.ImageTextDescriptionLimit);
+                    replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
+                case ImageSquareCommand:
+                    await botClient.EditMessageReplyMarkup(update.UserChatKey.ChatId,
+                        (int)update.Message.TelegramMessageId!.Value,
+                        replyMarkup: GetImageInstructionInlineKeyboard(true));
+                    return;
+                case ImageRectangleCommand:
+                    await botClient.EditMessageReplyMarkup(update.UserChatKey.ChatId,
+                        (int)update.Message.TelegramMessageId!.Value,
+                        replyMarkup: GetImageInstructionInlineKeyboard(false));
+                    return;
                 case ImageTextRecognizeCommand:
                     if (profile is { ImageTexts: <= 0, Stars: <= 0 })
                     {
