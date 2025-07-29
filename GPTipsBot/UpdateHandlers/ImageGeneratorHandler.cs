@@ -42,10 +42,6 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            // await botClient.SendMessage(update.UserChatKey.ChatId, "Sorry. This service temporary not available now", replyMarkup: TelegramBotUiService.CancelKeyboard);
-            //
-            // return;
-
             var userKey = update.UserChatKey;
 
             if (update.Message.Text.Length > ImageTextDescriptionLimit)

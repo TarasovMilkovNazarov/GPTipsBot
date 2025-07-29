@@ -263,22 +263,11 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Необходимо иметь {0} stars для выполнения операции
         ///
-        ///После пополнения введите команду /music заново.
+        ///После пополнения выберите команду заново.
         /// </summary>
-        public static string InsufficientBalanceForMusic {
+        public static string InsufficientBalance {
             get {
-                return ResourceManager.GetString("InsufficientBalanceForMusic", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Необходимо иметь {0} stars для выполнения операции
-        ///
-        ///После пополнения введите команду /video заново.
-        /// </summary>
-        public static string InsufficientBalanceForVideo {
-            get {
-                return ResourceManager.GetString("InsufficientBalanceForVideo", resourceCulture);
+                return ResourceManager.GetString("InsufficientBalance", resourceCulture);
             }
         }
         
@@ -407,6 +396,17 @@ namespace GPTipsBot.Resources {
         public static string SendImageTextRecognitionCommandFirst {
             get {
                 return ResourceManager.GetString("SendImageTextRecognitionCommandFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Отправьте фото для превращения в мультяшный стиль
+        ///Цена: {0} stars
+        ///.
+        /// </summary>
+        public static string SendPhotoToCartoonify {
+            get {
+                return ResourceManager.GetString("SendPhotoToCartoonify", resourceCulture);
             }
         }
         

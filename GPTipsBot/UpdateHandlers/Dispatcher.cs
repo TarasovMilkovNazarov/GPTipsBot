@@ -98,7 +98,7 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(adminCommandHandler);
             }
-            else if (update.IsExpired())
+            else if (update.IsExpired() && update.CallbackQuery == null)
             {
                 SetNextHandler(recoveryNotificationHandler);
             }
@@ -164,6 +164,19 @@ namespace GPTipsBot.UpdateHandlers
 
                 var audio = await gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
                 await botClient.SendAudio(update.UserChatKey.Id, InputFile.FromStream(audio));
+                return;
+            }
+            else if (lastCommand?.Type == CommandType.ImageCartoonify)
+            {
+                var isSuccessPayment = await moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Cartoonify);
+                if (!isSuccessPayment)
+                {
+                    return;
+                }
+
+                var response = await gptService.CartoonifyImage(update.FileId);
+                using var imageStream = new MemoryStream(response);
+                await botClient.SendPhoto(update.UserChatKey.ChatId, InputFile.FromStream(imageStream));
                 return;
             }
             else if (update.FileId != null)

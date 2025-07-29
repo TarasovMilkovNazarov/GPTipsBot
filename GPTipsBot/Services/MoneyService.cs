@@ -36,7 +36,7 @@ public class MoneyService
         UserBalanceChanged += UserBalanceChangedHandler;
     }
 
-    public async Task<bool> TryPay(long userId, int amount, bool isVideo = false)
+    public async Task<bool> TryPay(long userId, int amount)
     {
         var wallet = _walletRepository.Get(w => w.UserId == userId).FirstOrDefault();
         if (wallet == null || wallet.Balance < amount)
@@ -44,8 +44,7 @@ public class MoneyService
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-            var response = string.Format(isVideo ? BotResponse.InsufficientBalanceForVideo :
-                BotResponse.InsufficientBalanceForMusic, amount);
+            var response = string.Format(BotResponse.InsufficientBalance, amount);
 
             await _botClient.SendMessage(userId, response,
                 replyMarkup: inlineKeyboard);

@@ -120,6 +120,9 @@
   <data name="CancelButton" xml:space="preserve">
     <value>Отмена</value>
   </data>
+  <data name="CartoonifyButton" xml:space="preserve">
+    <value>Сделай фото в мультяшном стиле (10⭐️)</value>
+  </data>
   <data name="ContinueButton" xml:space="preserve">
     <value>Продолжить</value>
   </data>

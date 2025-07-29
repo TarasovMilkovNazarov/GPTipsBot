@@ -167,6 +167,42 @@ namespace GPTipsBot.Services
             return new Uri(url);
         }
 
+        public async Task<byte[]> CartoonifyImage(string imageFileId, CancellationToken cancellationToken = default)
+        {
+            var model = "img2img-aitransform/cartoonify";
+            var aspectRatio = "16:9";
+
+            var generateRequestDto = new GenerateRequest
+            {
+                Model = model,
+                Action = "generate",
+                AspectRatio = aspectRatio,
+                Prompt = "Frozen"
+            };
+
+            var base64Image = await imageFileId.GetPhotoAsync(_botClient);
+            generateRequestDto.Image = string.Format(generateRequestDto.Image, base64Image);
+
+            var jsonContent = JsonSerializer.Serialize(generateRequestDto);
+
+            var request = new HttpRequestMessage
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8),
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(_httpClient.BaseAddress, "images/generations"),
+                Headers =
+                {
+                    {"Accept", "application/json"},
+                    {"Authorization", $"Bearer {AppConfig.ProxyApiApiKey}"},
+                }
+            };
+            var generateResponse = await _httpClient.SendAsync(request, cancellationToken);
+            var generateResult = await generateResponse.Content.ReadFromJsonAsync<GenerateResponse>
+                (cancellationToken: cancellationToken);
+
+            return Convert.FromBase64String(generateResult.Data[0].Base64Json);
+        }
+
         public async Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken)
         {
             var model = "txt2sng-minimax/music";
@@ -320,5 +356,6 @@ namespace GPTipsBot.Services
         Task<Stream> GenerateMusicByText(string text, CancellationToken cancellationToken);
         Task<Uri> GenerateVideoByText(string text, string? imageFileId, CancellationToken cancellationToken);
         Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken);
+        Task<byte[]> CartoonifyImage(string imageFileId, CancellationToken cancellationToken = default);
     }
 }

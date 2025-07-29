@@ -20,4 +20,5 @@ public static class PaymentConfig
     public const int NewbieFreeTextRecognitions = 3;
     public const int NewbieFreeChatGptRequests = 10;
     public const int MinRechargeAmount = 10;
+    public const int Cartoonify = 8;
 };

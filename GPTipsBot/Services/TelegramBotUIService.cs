@@ -1,6 +1,7 @@
 ﻿using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using System.Globalization;
+using GPTipsBot.Config;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.Services
@@ -133,6 +134,12 @@ namespace GPTipsBot.Services
                             BotMenu.ImageSquareCommand),
                         InlineKeyboardButton.WithCallbackData(isSquare ? "2:1 🟦🟦" : "✅ 2:1 🟦🟦",
                             BotMenu.ImageRectangleCommand),
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData(
+                            string.Format(BotUI.CartoonifyButton, PaymentConfig.Cartoonify),
+                            BotMenu.ImageCartoonifyCommand)
                     },
                     new[]
                     {

@@ -191,4 +191,7 @@
   <data name="ProfileButton" xml:space="preserve">
     <value>👤 Personal Account</value>
   </data>
+  <data name="CartoonifyButton" xml:space="preserve">
+    <value>Cartoonify your photo (10⭐️)</value>
+  </data>
 </root>

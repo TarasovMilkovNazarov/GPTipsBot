@@ -13,5 +13,7 @@ public class GenerateRequest
     [JsonPropertyName("aspect_ratio")]
     public string AspectRatio { get; set; }
 
+    [JsonPropertyName("response_format")] public string ResponseFormat { get; set; } = "b64_json";
+
     [JsonPropertyName("image_url")] public string Image { get; set; } = "data:image/jpeg;base64,{0}";
 }

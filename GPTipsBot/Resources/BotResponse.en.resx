@@ -163,6 +163,12 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>English was set as interface language</value>
   </data>
+  <data name="SendPhotoToCartoonify" xml:space="preserve">
+    <value>
+Send photo to cartoonify
+Price: {0} stars
+</value>
+  </data>
   <data name="UnsupportedMessageType" xml:space="preserve">
     <value>I'm sorry, only text or voice messages are supported currently</value>
   </data>
@@ -252,11 +258,6 @@ Enter whole Stars amount to top up:</value>
 
 The bot will send a 30-second audio file. Generation cost: 10 stars.</value>
   </data>
-  <data name="InsufficientBalanceForMusic" xml:space="preserve">
-    <value>You need to have {0} stars to perform this operation.
-
-After topping up, enter the /music command again.</value>
-  </data>
   <data name="SongResponse" xml:space="preserve">
     <value>Input the text of a song. Generation cost: 20 stars.</value>
   </data>
@@ -266,10 +267,10 @@ You’ll get a GIF (up to 5 seconds). The operation usually takes from 5 to 10 m
 Note: This is a beta feature and may behave unpredictably
 Cost: {0} stars</value>
   </data>
-  <data name="InsufficientBalanceForVideo" xml:space="preserve">
+  <data name="InsufficientBalance" xml:space="preserve">
     <value>You need to have {0} stars to perform this operation.
 
-After topping up, enter the /video command again.</value>
+After topping up, enter the command again.</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
     <value>⌛️ Video generation typically takes between 5 to 10 minutes. Please wait, preparing the response...</value>

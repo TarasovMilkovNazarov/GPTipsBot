@@ -137,6 +137,13 @@ namespace GPTipsBot.UpdateHandlers
                         ImageGeneratorHandler.ImageTextDescriptionLimit);
                     replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
+                case ImageCartoonifyCommand:
+                    await botClient.EditMessageText(update.UserChatKey.ChatId,
+                        (int)update.Message.TelegramMessageId!.Value,
+                        string.Format(BotResponse.SendPhotoToCartoonify, PaymentConfig.Cartoonify),
+                        replyMarkup: CancelInlineKeyboard);
+
+                    return;
                 case ImageSquareCommand:
                     if (previousCommand?.Type == CommandType.ImageSquare)
                     {
@@ -147,7 +154,7 @@ namespace GPTipsBot.UpdateHandlers
                         replyMarkup: GetImageInstructionInlineKeyboard(true));
                     return;
                 case ImageRectangleCommand:
-                    if (previousCommand?.Type == CommandType.ImageRectangle)
+                    if (previousCommand?.Type != CommandType.ImageSquare)
                     {
                         return;
                     }
