@@ -73,9 +73,9 @@ namespace GPTipsBot.Resources {
         ///
         ///🎁 Первые 2 дня бесплатно
         ///🚀 Высокая скорость
-        ///▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
+        ///▶️ Доступ к ютуб, инстаграмм, СhatGpt из России без рекламы
         ///📱💻 Для телефонов, компьютеров и планшетов
-        ///👩‍👩‍👧‍👧Можно подключить даже деда или внука, если ты дед.
+        ///👩‍👩‍👧‍👧 Можно подключить несколько устройств на одну подписку.
         /// </summary>
         public static string AdvertisementText {
             get {
@@ -141,6 +141,15 @@ namespace GPTipsBot.Resources {
         public static string ContextUpdated {
             get {
                 return ResourceManager.GetString("ContextUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Отправьте сообщение, чтобы продолжить диалог.
+        /// </summary>
+        public static string ContinueConversation {
+            get {
+                return ResourceManager.GetString("ContinueConversation", resourceCulture);
             }
         }
         
@@ -231,7 +240,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image.
+        ///   Looks up a localized string similar to Текстовое описание изображения должно быть не более {0} символов. Сократите описание и отправьте заново.
         /// </summary>
         public static string ImageDescriptionLimitWarning {
             get {
@@ -240,7 +249,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку &apos;Отмена&apos;.
+        ///   Looks up a localized string similar to Чтобы продолжить введите текстовое описание длиной до {0} символов.
         /// </summary>
         public static string InputImageDescriptionText {
             get {
@@ -399,7 +408,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Отправьте изображение для распознавания текста или нажмите /cancel для отмены.
+        ///   Looks up a localized string similar to Отправьте изображение для распознавания текста.
         /// </summary>
         public static string SendTextRecognitionImage {
             get {

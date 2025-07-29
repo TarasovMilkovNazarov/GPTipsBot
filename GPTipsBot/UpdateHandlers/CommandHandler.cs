@@ -73,9 +73,19 @@ namespace GPTipsBot.UpdateHandlers
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
                     break;
                 case DepositCommand:
-                    await botClient.SendMessage(update.UserChatKey.ChatId,
-                        string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
-                        replyMarkup: CancelInlineKeyboard);
+                    if (update.CallbackQuery == null)
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId,
+                            string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
+                            replyMarkup: CancelInlineKeyboard);
+                    }
+                    else
+                    {
+                        await botClient.EditMessageText(update.UserChatKey.ChatId, (int)update.Message.TelegramMessageId!,
+                            string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
+                            replyMarkup: CancelInlineKeyboard);
+                    }
+
                     return;
                 case DonateCommand:
                     await botClient.SendMessage(update.UserChatKey.ChatId,
@@ -153,7 +163,7 @@ namespace GPTipsBot.UpdateHandlers
                     }
 
                     reply = BotResponse.SendTextRecognitionImage;
-                    replyMarkup = CancelKeyboard;
+                    replyMarkup = CancelInlineKeyboard;
                     break;
                 case ResetContextCommand:
                     reply = BotResponse.ContextUpdated;
@@ -170,7 +180,17 @@ namespace GPTipsBot.UpdateHandlers
                     reply = await UpdateLanguage(update.UserChatKey, "ru");
                     break;
                 case CancelCommand:
-                    reply = BotResponse.Cancel;
+                    if (update.CallbackQuery == null)
+                    {
+                        reply = BotResponse.ContinueConversation;
+                    }
+                    else if (update.Message.TelegramMessageId.HasValue)
+                    {
+                        await botClient.EditMessageText(update.UserChatKey.ChatId,
+                            (int)update.Message.TelegramMessageId.Value, BotResponse.ContinueConversation);
+                        return;
+                    };
+
                     break;
                 case StopRequestCommand:
                     reply = BotResponse.Cancel;

@@ -60,15 +60,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Приключение.
-        /// </summary>
-        internal static string AdventureButton {
-            get {
-                return ResourceManager.GetString("AdventureButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Отмена.
         /// </summary>
         internal static string CancelButton {

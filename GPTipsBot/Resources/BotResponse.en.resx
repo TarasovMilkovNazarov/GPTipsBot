@@ -133,6 +133,9 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
   <data name="Cancel" xml:space="preserve">
     <value>Operation canceled</value>
   </data>
+  <data name="ContinueConversation" xml:space="preserve">
+    <value>Send message to continue conversation</value>
+  </data>
   <data name="ChooseLanguagePlease" xml:space="preserve">
     <value>Choose user interface language please</value>
   </data>
@@ -149,10 +152,10 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>Hello! How can I help you?</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
-    <value>The text description of the image should not exceed {0} characters. Please shorten the description and start again with the /image command.</value>
+    <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>To continue please enter a text description of the image up to {0} characters in length. To quit from image generation mode send /cancel command or press 'Cancel' bots keyboard button.</value>
+    <value>To continue please enter a text description of the image up to {0} characters in length</value>
   </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>English was set as interface language</value>
@@ -200,7 +203,7 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>❗️The daily limit of {0} requests has been reached. We look forward to seeing you tomorrow.</value>
   </data>
   <data name="SendTextRecognitionImage" xml:space="preserve">
-    <value>Send image for text recognition or type /cancel</value>
+    <value>Send image for text recognition</value>
   </data>
   <data name="CantRecognizeText" xml:space="preserve">
     <value>Failed to recognize text on image</value>

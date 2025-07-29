@@ -133,6 +133,9 @@
   <data name="Cancel" xml:space="preserve">
     <value>Операция отменена</value>
   </data>
+  <data name="ContinueConversation" xml:space="preserve">
+    <value>Отправьте сообщение, чтобы продолжить диалог</value>
+  </data>
   <data name="ChooseLanguagePlease" xml:space="preserve">
     <value>Пожалуйста выберите язык интерфейса</value>
   </data>
@@ -153,15 +156,15 @@
 
 🎁 Первые 2 дня бесплатно
 🚀 Высокая скорость
-▶️ Доступ к ютуб, инстаграмм, СhatGpt из России
+▶️ Доступ к ютуб, инстаграмм, СhatGpt из России без рекламы
 📱💻 Для телефонов, компьютеров и планшетов
-👩‍👩‍👧‍👧Можно подключить даже деда или внука, если ты дед</value>
+👩‍👩‍👧‍👧 Можно подключить несколько устройств на одну подписку</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
-    <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и начните заново с команды /image</value>
+    <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и отправьте заново</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>Чтобы продолжить введите текстовое описание длиной до {0} символов. Для выхода из режима генерации изображений введите /cancel или нажмите кнопку 'Отмена'</value>
+    <value>Чтобы продолжить введите текстовое описание длиной до {0} символов</value>
   </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>Руссий язык используется для интерфейса</value>
@@ -212,7 +215,7 @@
     <value>Выберите язык интерфейса(влияет только на перевод кнопок, общаться можно на люом языке)</value>
   </data>
   <data name="SendTextRecognitionImage" xml:space="preserve">
-    <value>Отправьте изображение для распознавания текста или нажмите /cancel для отмены</value>
+    <value>Отправьте изображение для распознавания текста</value>
   </data>
   <data name="CantRecognizeText" xml:space="preserve">
     <value>Не удалось распознать текст</value>

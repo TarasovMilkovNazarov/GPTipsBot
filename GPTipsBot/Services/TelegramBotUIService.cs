@@ -17,7 +17,7 @@ namespace GPTipsBot.Services
         private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
-        private static KeyboardButton CancelButton => new(BotUI.CancelButton);
+        private static KeyboardButton  CancelButton => new(BotUI.CancelButton);
         private static KeyboardButton LangButton => new(BotUI.LangButton);
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
