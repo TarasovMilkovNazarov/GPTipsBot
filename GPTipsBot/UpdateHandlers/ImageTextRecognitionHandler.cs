@@ -24,8 +24,6 @@ namespace GPTipsBot.UpdateHandlers
         TelejetAdClient telejetAdClient)
         : BaseMessageHandler
     {
-        private readonly ILogger<ImageTextRecognitionHandler> _logger = logger;
-
         public override async Task HandleAsync(UpdateDecorator update)
         {
             string base64String;

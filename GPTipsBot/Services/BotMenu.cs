@@ -49,7 +49,7 @@ public class BotMenu
     public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
     public static CustomBotCommand Music => new() { Command = MusicCommand, Description = BotUI.MusicButton, Type = CommandType.Music };
     public static CustomBotCommand Song => new() { Command = SongCommand, Description = BotUI.SongButton, Type = CommandType.Song, IsDisabled = true };
-    public static CustomBotCommand Video => new() { Command = VideoCommand, Description = BotUI.SongButton, Type = CommandType.Video };
+    public static CustomBotCommand Video => new() { Command = VideoCommand, Description = BotUI.VideoButton, Type = CommandType.Video };
 
     public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
     public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };

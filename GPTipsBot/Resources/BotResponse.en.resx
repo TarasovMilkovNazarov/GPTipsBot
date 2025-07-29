@@ -157,8 +157,8 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
   <data name="InputImageDescriptionText" xml:space="preserve">
     <value>To continue please enter a text description of the image up to {0} characters in length
 
-❔1:1 🟦 - square image
-2:1 🟦🟦 - rectangular image (default)  </value>
+❔ 1:1 - square image
+   2:1 - rectangular image (default)  </value>
   </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>English was set as interface language</value>
