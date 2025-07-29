@@ -251,8 +251,8 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Чтобы продолжить введите текстовое описание длиной до {0} символов
         ///
-        ///❔ 1:1 - квадратное изображение
-        ///   2:1 - прямоугольное (по умолчанию).
+        ///1:1 - квадратное изображение
+        ///2:1 - прямоугольное (по умолчанию).
         /// </summary>
         public static string InputImageDescriptionText {
             get {
