@@ -11,7 +11,7 @@ namespace GPTipsBot.Services
     {
         private readonly string _apiKey = AppConfig.TelejetApiKey;
         private const string BapPrefix = "/__bap";
-        private static readonly (string, int) Addr = ("api.production.bap.codd.io", 8080);
+        private static readonly (string, int) Addr = ("bap.teleads.pro", 8080);
         private const int ApiVersion = 3;
         private readonly UdpClient _udpClient = new(Addr.Item1, Addr.Item2);
 

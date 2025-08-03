@@ -12,6 +12,7 @@ public class InMemoryAdvertisementTracker(ITelegramBotClient botClient)
 
     public async Task<bool> TrySendAdvertisement(long userId)
     {
+        return await ValueTask.FromResult(true);
         var now = DateTime.Now;
         var isAdvertNotSentYet = _sentAdvertisements.AddOrUpdate(
             userId,

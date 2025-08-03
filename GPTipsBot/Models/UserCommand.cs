@@ -11,26 +11,26 @@ public class UserCommand: Entity
 
 public enum CommandType
 {
-    Start,
-    ChooseLanguage,
-    Image,
-    TextRecognition,
-    ResetContext,
-    Help,
-    SetRuLang,
-    SetEngLang,
-    StopRequest,
-    CancelPreviousCommand,
-    Admin,
-    Deposit,
-    GetProfile,
-    Donate,
-    Music,
-    Song,
-    Video,
-    ImageRectangle,
-    ImageSquare,
-    ImageCartoonify
+    Start = 0,
+    ChooseLanguage = 1,
+    Image = 2,
+    TextRecognition = 3,
+    ResetContext = 4,
+    Help = 5,
+    SetRuLang = 6,
+    SetEngLang = 7,
+    StopRequest = 8,
+    CancelPreviousCommand = 9,
+    Admin = 10,
+    Deposit = 11,
+    GetProfile = 12,
+    Donate = 13,
+    Music = 14,
+    Song = 15,
+    Video = 16,
+    ImageRectangle = 17,
+    ImageSquare = 18,
+    ImageCartoonify = 19
 }
 
 public class Wallet: Entity
