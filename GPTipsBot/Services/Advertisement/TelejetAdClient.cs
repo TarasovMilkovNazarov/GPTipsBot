@@ -71,9 +71,13 @@ namespace GPTipsBot.Services
 
     class TelejetDto
     {
+        [JsonProperty("api_key")]
         public string ApiKey { get; set; }
+        [JsonProperty("method")]
         public string Method { get; set; }
+        [JsonProperty("version")]
         public int Version { get; set; }
+        [JsonProperty("update")]
         public Update Update { get; set; }
     }
 }
