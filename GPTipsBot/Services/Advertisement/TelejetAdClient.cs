@@ -1,19 +1,19 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 using GPTipsBot.Config;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Telegram.Bot.Types;
 
 namespace GPTipsBot.Services
 {
-    public class TelejetAdClient
+    public class TelejetAdClient(ILogger<TelejetAdClient> logger): IDisposable
     {
         private readonly string _apiKey = AppConfig.TelejetApiKey;
         private const string BapPrefix = "/__bap";
-        private static readonly (string, int) Addr = ("bap.teleads.pro", 8080);
         private const int ApiVersion = 3;
-        private readonly UdpClient _udpClient = new(Addr.Item1, Addr.Item2);
+        private readonly UdpClient _udpClient = new("bap.teleads.pro", 8080);
 
         /// <summary>
         /// If this method returns true then update should be processed by bot otherwise ignore it
@@ -43,7 +43,7 @@ namespace GPTipsBot.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to send data to BAP API. Status Code: {ex}");
+                logger.LogError(ex, "Failed to send data to BAP API");
             }
         }
 
@@ -66,6 +66,11 @@ namespace GPTipsBot.Services
             var data = update.CallbackQuery?.Data;
 
             return data != null && data.StartsWith(BapPrefix);
+        }
+
+        public void Dispose()
+        {
+            _udpClient.Dispose();
         }
     }
 
