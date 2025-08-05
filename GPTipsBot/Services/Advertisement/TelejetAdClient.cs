@@ -1,10 +1,11 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using GPTipsBot.Config;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Telegram.Bot.Types;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace GPTipsBot.Services
 {
@@ -53,14 +54,11 @@ namespace GPTipsBot.Services
 
         private string Serialize(TelejetDto dto)
         {
-            var settings = new JsonSerializerSettings
+            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions
             {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
-            var json = JsonConvert.SerializeObject(dto, settings);
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+            });
 
             return json;
         }
@@ -75,13 +73,13 @@ namespace GPTipsBot.Services
 
     class TelejetDto
     {
-        [JsonProperty("api_key")]
+        [JsonPropertyName("api_key")]
         public string ApiKey { get; set; }
-        [JsonProperty("method")]
+        [JsonPropertyName("method")]
         public string Method { get; set; }
-        [JsonProperty("version")]
+        [JsonPropertyName("version")]
         public int Version { get; set; }
-        [JsonProperty("update")]
+        [JsonPropertyName("update")]
         public Update Update { get; set; }
     }
 }

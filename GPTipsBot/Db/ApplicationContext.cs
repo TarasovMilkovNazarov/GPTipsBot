@@ -26,19 +26,5 @@ namespace GPTipsBot.Db
         {
             optionsBuilder.UseNpgsql(AppConfig.ConnectionString);
         }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // modelBuilder.Entity<User>()
-            //     .HasOne(u => u.Wallet)
-            //     .WithOne(w => w.User)
-            //     .HasForeignKey<Wallet>(w => w.UserId)
-            //     .OnDelete(DeleteBehavior.Cascade);
-            //
-            // modelBuilder.Entity<Wallet>()
-            //     .HasOne(m => m.User)
-            //     .WithOne(u => u.Wallet)
-            //     .HasForeignKey<User>(m => m.WalletId);
-        }
     }
 }

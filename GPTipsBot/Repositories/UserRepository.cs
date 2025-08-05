@@ -20,8 +20,6 @@ namespace GPTipsBot.Repositories
             return context.Users
                 .Include(u => u.Wallet)
                 .SingleOrDefault(x => x.Id == id);
-                // .AsNoTracking()
-                // .Find(id);
         }
 
         public void Delete(long id)
