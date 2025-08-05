@@ -8,12 +8,15 @@ using Telegram.Bot.Types;
 
 namespace GPTipsBot.Services
 {
-    public class TelejetAdClient(ILogger<TelejetAdClient> logger): IDisposable
+    public class TelejetAdClient(ILogger<TelejetAdClient> logger)
     {
         private readonly string _apiKey = AppConfig.TelejetApiKey;
         private const string BapPrefix = "/__bap";
         private const int ApiVersion = 3;
-        private readonly UdpClient _udpClient = new("bap.teleads.pro", 8080);
+        private const string Host = "bap.teleads.pro";
+        private const int Port = 8080;
+
+        private readonly UdpClient _udpClient = new(Host, Port);
 
         /// <summary>
         /// If this method returns true then update should be processed by bot otherwise ignore it
@@ -39,6 +42,7 @@ namespace GPTipsBot.Services
 
                 var json = Serialize(dto);
                 var data = Encoding.UTF8.GetBytes(json);
+                await _udpClient.Client.ConnectAsync(Host, Port);
                 await _udpClient.SendAsync(data, data.Length);
             }
             catch (Exception ex)
@@ -66,11 +70,6 @@ namespace GPTipsBot.Services
             var data = update.CallbackQuery?.Data;
 
             return data != null && data.StartsWith(BapPrefix);
-        }
-
-        public void Dispose()
-        {
-            _udpClient.Dispose();
         }
     }
 
