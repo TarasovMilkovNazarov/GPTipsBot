@@ -33,7 +33,7 @@ var schedulerService = host.Services.GetRequiredService<ISchedulerService>();
 await schedulerService.ScheduleJob<DailyStatisticsJob>(scheduler, DateBuilder.TodayAt(23, 55, 0),
     TimeSpan.FromDays(1),  CancellationToken.None);
 await schedulerService.ScheduleJob<RefreshFreeLimitsJob>(scheduler, DateBuilder.TodayAt(23, 59, 0),
-    TimeSpan.FromDays(2),  CancellationToken.None);
+    TimeSpan.FromDays(1),  CancellationToken.None);
 await schedulerService.ScheduleJob<RemoveOldRecordsJob>(scheduler, DateBuilder.FutureDate(14, IntervalUnit.Day),
     TimeSpan.FromDays(14),  CancellationToken.None);
 await schedulerService.ScheduleJob<DeactivateKickedUsersJob>(scheduler, DateBuilder.FutureDate(5, IntervalUnit.Day),
