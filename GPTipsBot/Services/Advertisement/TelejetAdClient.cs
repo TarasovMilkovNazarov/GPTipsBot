@@ -31,8 +31,6 @@ namespace GPTipsBot.Services
 
         public async Task SendToBapAsync(Update update, string method)
         {
-            return;
-
             try
             {
                 var dto = new TelejetDto
