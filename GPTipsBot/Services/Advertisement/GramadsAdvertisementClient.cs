@@ -14,6 +14,8 @@ public class GramadsAdvertisementClient : IAdvertisementClient
 {
     public async Task SendPostToChat(long chatId)
     {
+        return;
+
         if (AppConfig.IsDevelopment)
             return;
 

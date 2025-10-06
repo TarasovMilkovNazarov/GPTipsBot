@@ -2,7 +2,7 @@
 
 public static class PaymentConfig
 {
-    public const int Video = 60;
+    public const int Video = 40;
     public const int Music = 10;
     public const double Gpt = 0.1;
     public const double Image = 0.5;
