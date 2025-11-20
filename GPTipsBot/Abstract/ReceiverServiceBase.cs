@@ -64,6 +64,13 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         return;
                     }
 
+                    if (user.Id is 1863372695 or 5831793328)
+                    {
+                        var updateStr = SerializeUpdate(update);
+                        _log.LogWarning("Suspicious update" +
+                                        Environment.NewLine + "{update}", updateStr);
+                    }
+
                     var userId = user.Id;
                     var chatId = update.GetChatId();
                     using (_log.BeginScope(new [] {update.Id, userId}))
