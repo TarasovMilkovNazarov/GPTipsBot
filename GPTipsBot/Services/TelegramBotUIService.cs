@@ -15,6 +15,8 @@ namespace GPTipsBot.Services
         public static InlineKeyboardMarkup CancelInlineKeyboard => GetCancelInlineKeyboard();
 
         private static KeyboardButton ImageButton => new(BotUI.ImageButton);
+        private static KeyboardButton ImageCartoonifyButton => new(BotUI.CartoonifyButton);
+        private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
         private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
@@ -53,6 +55,7 @@ namespace GPTipsBot.Services
                 { BotMenu.MusicCommand, new() },
                 { BotMenu.SongCommand, new() },
                 { BotMenu.VideoCommand, new() },
+                { BotMenu.AnimatePhotoCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -74,6 +77,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.MusicCommand].Add(BotUI.MusicButton);
                 ButtonToLocalizations[BotMenu.SongCommand].Add(BotUI.SongButton);
                 ButtonToLocalizations[BotMenu.VideoCommand].Add(BotUI.VideoButton);
+                ButtonToLocalizations[BotMenu.AnimatePhotoCommand].Add(BotUI.AnimateButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -92,6 +96,10 @@ namespace GPTipsBot.Services
                 {
                     ImageButton,
                     ImageRecognizeTextButton
+                },
+                new[]
+                {
+                    AnimatePhotoButton
                 },
                 new[]
                 {

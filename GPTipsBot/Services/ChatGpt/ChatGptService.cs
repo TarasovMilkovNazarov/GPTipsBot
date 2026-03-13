@@ -13,8 +13,10 @@ using GPTipsBot.Models;
 using Polly;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
+using GPTipsBot.Services.YandexPhotoAnimator;
 using Polly.Retry;
 using Telegram.Bot;
+using GenerateRequest = GPTipsBot.Services.YandexPhotoAnimator.GenerateRequest;
 
 namespace GPTipsBot.Services
 {
@@ -27,6 +29,7 @@ namespace GPTipsBot.Services
         private readonly ContextWindow _contextWindow;
         private readonly ITelegramBotClient _botClient;
         private readonly HttpClient _httpClient;
+        private readonly YaPhotoAnimatorService _yandexPhotoAnimator;
         private Timer _timer;
         private readonly AsyncRetryPolicy _policy;
 
@@ -34,7 +37,7 @@ namespace GPTipsBot.Services
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
             TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow,
-            ITelegramBotClient botClient, HttpClient httpClient)
+            ITelegramBotClient botClient, HttpClient httpClient, YaPhotoAnimatorService yandexPhotoAnimator)
         {
             _log = log;
             _openaiAccountsRepository = openaiAccountsRepository;
@@ -43,6 +46,7 @@ namespace GPTipsBot.Services
             _contextWindow = contextWindow;
             _botClient = botClient;
             _httpClient = httpClient;
+            _yandexPhotoAnimator = yandexPhotoAnimator;
             _timer = setup_Timer(openaiAccountsRepository);
             _policy = Policy
                 .Handle<ChatGptException>()
@@ -94,7 +98,7 @@ namespace GPTipsBot.Services
             var model = imageFileId != null ? "img2vid-kling/standart16" : "txt2vid-kling/standart";
             var aspectRatio = "16:9";
 
-            var generateRequestDto = new GenerateRequest
+            var generateRequestDto = new GPTipsBot.Dtos.GenerateRequest
             {
                 Model = model,
                 Action = "generate",
@@ -167,12 +171,23 @@ namespace GPTipsBot.Services
             return new Uri(url);
         }
 
+        public async Task<Uri> AnimatePhoto(string prompt, string imageFileId, CancellationToken cancellationToken = default)
+        {
+            var base64Image = await imageFileId.GetPhotoAsync(_botClient);
+
+            var imageUrl = await _yandexPhotoAnimator.UploadImageFromBase64(base64Image);
+            var videoResponse = await _yandexPhotoAnimator.GenerateVideo(imageUrl, prompt);
+            videoResponse = await _yandexPhotoAnimator.WaitForResult(videoResponse.VideoGeneration.Id);
+
+            return new Uri(videoResponse.VideoGeneration.VideoURL);
+        }
+
         public async Task<byte[]> CartoonifyImage(string imageFileId, CancellationToken cancellationToken = default)
         {
             var model = "img2img-aitransform/cartoonify";
             var aspectRatio = "16:9";
 
-            var generateRequestDto = new GenerateRequest
+            var generateRequestDto = new GPTipsBot.Dtos.GenerateRequest
             {
                 Model = model,
                 Action = "generate",
@@ -207,7 +222,7 @@ namespace GPTipsBot.Services
         {
             var model = "txt2sng-minimax/music";
 
-            var jsonContent = JsonSerializer.Serialize(new GenerateRequest
+            var jsonContent = JsonSerializer.Serialize(new GPTipsBot.Dtos.GenerateRequest
             {
                 Model = model,
                 Action = "generate",
@@ -357,5 +372,6 @@ namespace GPTipsBot.Services
         Task<Uri> GenerateVideoByText(string text, string? imageFileId, CancellationToken cancellationToken);
         Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken);
         Task<byte[]> CartoonifyImage(string imageFileId, CancellationToken cancellationToken = default);
+        Task<Uri> AnimatePhoto(string prompt, string imageFileId, CancellationToken cancellationToken = default);
     }
 }

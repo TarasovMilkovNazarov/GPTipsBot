@@ -308,4 +308,10 @@ Every contribution counts, and we're so grateful for your support! 🤗</value>
   <data name="StarsDonationHint" xml:space="preserve">
     <value>✨ Almost there! Just enter a number (like 5, 10, or 50) – every star counts! 🌟 Thank you!</value>
   </data>
+  <data name="SendPhotoToAnimate" xml:space="preserve">
+    <value>Send a photo to bring it to life. Briefly describe what actions should take place. For example: "laughing", "dancing", "writing", etc.</value>
+  </data>
+  <data name="SendAnimatePrompt" xml:space="preserve">
+    <value>Input animation prompt</value>
+  </data>
 </root>

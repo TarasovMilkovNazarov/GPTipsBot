@@ -11,7 +11,9 @@ using GPTipsBot.Jobs;
 using Telegram.Bot.Services;
 using Telegram.Bot;
 using GPTipsBot.Resources;
+using GPTipsBot.Services.Cache;
 using GPTipsBot.Services.YandexCloud;
+using GPTipsBot.Services.YandexPhotoAnimator;
 using Quartz;
 
 namespace GPTipsBot.Extensions
@@ -69,6 +71,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<IGpt, ChatGptService>()
             .AddSingleton<TokenQueue>()
             .AddSingleton<IJobService, JobService>()
+            .AddSingleton<YaPhotoAnimatorService>()
             .AddScoped<ChatGptService>()
             .AddScoped<OpenAiServiceCreator, ProxyApiService>()
             .AddScoped<ContextWindow>()
@@ -97,6 +100,8 @@ namespace GPTipsBot.Extensions
                 b.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", AppConfig.ProxyApiApiKey);
             });
+
+            services.AddImageCache();
 
             return services;
         }

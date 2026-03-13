@@ -60,6 +60,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Оживить фото.
+        /// </summary>
+        internal static string AnimateButton {
+            get {
+                return ResourceManager.GetString("AnimateButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Отмена.
         /// </summary>
         internal static string CancelButton {
@@ -69,7 +78,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Фото в мультяншом стиле (10⭐️).
+        ///   Looks up a localized string similar to Сделай фото в мультяшном стиле (10⭐️).
         /// </summary>
         internal static string CartoonifyButton {
             get {

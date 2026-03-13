@@ -30,7 +30,8 @@ public class DailyStatisticsJob(
             {
                 ImagesCount = g.Count(m => m.Type == BotMessageType.ImageGenerated),
                 RecognitionsCount = g.Count(m => m.Type == BotMessageType.RecognizeText),
-                GptResponses = g.Count(m => m.Role == MessageOwner.Assistant)
+                GptResponses = g.Count(m => m.Role == MessageOwner.Assistant),
+                AnimatedPhotosCount = g.Count(m => m.Type == BotMessageType.AnimatedPhoto)
             })
             .FirstOrDefaultAsync() ?? new();
 
@@ -39,6 +40,7 @@ public class DailyStatisticsJob(
         var message = "#statistics" + Environment.NewLine +
                       $"New users created: {newUsersCount} for {today:dd.MM.yyyy}" + Environment.NewLine;
         message += Environment.NewLine + $"Images generated: {counts.ImagesCount}";
+        message += Environment.NewLine + $"Animated photos count: {counts.AnimatedPhotosCount}";
         message += Environment.NewLine + $"Text recognitions: {counts.RecognitionsCount}";
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
         message += Environment.NewLine + $"Monthly users: {mau}";

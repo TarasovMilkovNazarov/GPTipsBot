@@ -194,4 +194,7 @@
   <data name="VideoButton" xml:space="preserve">
     <value>📹 Видео</value>
   </data>
+  <data name="AnimateButton" xml:space="preserve">
+    <value>Оживить фото</value>
+  </data>
 </root>

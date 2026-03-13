@@ -7,11 +7,13 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Globalization;
 using GPTipsBot.Config;
+using GPTipsBot.Enums;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
+using GPTipsBot.Services.Cache;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -33,12 +35,12 @@ namespace GPTipsBot.UpdateHandlers
         ApplicationContext context,
         BotSettingsRepository botSettingsRepository,
         InvoiceRepository invoiceRepository,
-        IGpt gptService)
+        IGpt gptService,
+        IImageCache imageCache,
+        MessageRepository messageRepository)
         : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
-        private readonly ApplicationContext _context = context;
-        private readonly InvoiceRepository _invoiceRepository = invoiceRepository;
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
@@ -74,6 +76,9 @@ namespace GPTipsBot.UpdateHandlers
                 }
                 else
                 {
+                    await botClient.AnswerPreCheckoutQuery(
+                        preCheckoutQueryId: update.PreCheckoutQuery.Id);
+
                     await moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
                         "TRX", CancellationToken.None);
                     var profile = await userService.GetUserProfile(update.UserChatKey.Id);
@@ -82,8 +87,6 @@ namespace GPTipsBot.UpdateHandlers
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-                    await botClient.AnswerPreCheckoutQuery(
-                        preCheckoutQueryId: update.PreCheckoutQuery.Id);
                     await botClient.SendMessage(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
                 }
 
@@ -166,17 +169,36 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendAudio(update.UserChatKey.Id, InputFile.FromStream(audio));
                 return;
             }
-            else if (lastCommand?.Type == CommandType.ImageCartoonify)
+            else if (lastCommand?.Type == CommandType.AnimatePhoto)
             {
-                var isSuccessPayment = await moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Cartoonify);
-                if (!isSuccessPayment)
+                var imageId = update.FileId;
+                if (update.FileId == null && imageCache.TryGet(update.UserChatKey.ChatId, out imageId) == false)
                 {
+                    await botClient.SendMessage(update.UserChatKey.ChatId,
+                        BotResponse.SendPhotoToAnimate,
+                        replyMarkup: TelegramBotUiService.CancelInlineKeyboard);
+
                     return;
                 }
 
-                var response = await gptService.CartoonifyImage(update.FileId);
-                using var imageStream = new MemoryStream(response);
-                await botClient.SendPhoto(update.UserChatKey.ChatId, InputFile.FromStream(imageStream));
+                if (string.IsNullOrWhiteSpace(update.Message?.Text))
+                {
+                    imageCache.Set(update.UserChatKey.ChatId, imageId!);
+                    await botClient.SendMessage(update.UserChatKey.ChatId,
+                        BotResponse.SendAnimatePrompt, replyMarkup: TelegramBotUiService.CancelInlineKeyboard);
+                    return;
+                }
+
+                var video = await gptService.AnimatePhoto(update.Message.Text, imageId);
+                await botClient.SendVideo(update.UserChatKey.Id, InputFile.FromUri(video));
+
+                await messageRepository.AddAsync(new MessageDto(update.UserChatKey)
+                {
+                    TelegramId = update.UserChatKey.Id,
+                    Role = MessageOwner.Ya,
+                    BotMessageType = BotMessageType.AnimatedPhoto,
+                });
+
                 return;
             }
             else if (update.FileId != null)

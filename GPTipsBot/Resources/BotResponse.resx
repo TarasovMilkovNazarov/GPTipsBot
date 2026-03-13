@@ -312,4 +312,10 @@
 Стоимость генерации {0} stars
     </value>
   </data>
+  <data name="SendPhotoToAnimate" xml:space="preserve">
+    <value>Отправьте фото для оживления. Опишите кратко, какие действия должны происходить. Например: "смеются", "танцуют", "пишет" и тд</value>
+  </data>
+  <data name="SendAnimatePrompt" xml:space="preserve">
+    <value>Введите промпт для анимации, используйте глаголы</value>
+  </data>
 </root>

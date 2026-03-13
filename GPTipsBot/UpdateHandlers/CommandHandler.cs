@@ -137,10 +137,9 @@ namespace GPTipsBot.UpdateHandlers
                         ImageGeneratorHandler.ImageTextDescriptionLimit);
                     replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
-                case ImageCartoonifyCommand:
-                    await botClient.EditMessageText(update.UserChatKey.ChatId,
-                        (int)update.Message.TelegramMessageId!.Value,
-                        string.Format(BotResponse.SendPhotoToCartoonify, PaymentConfig.Cartoonify),
+                case AnimatePhotoCommand:
+                    await botClient.SendMessage(update.UserChatKey.ChatId,
+                        BotResponse.SendPhotoToAnimate,
                         replyMarkup: CancelInlineKeyboard);
 
                     return;

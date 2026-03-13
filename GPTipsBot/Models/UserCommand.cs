@@ -30,7 +30,8 @@ public enum CommandType
     Video = 16,
     ImageRectangle = 17,
     ImageSquare = 18,
-    ImageCartoonify = 19
+    ImageCartoonify = 19,
+    AnimatePhoto = 20,
 }
 
 public class Wallet: Entity

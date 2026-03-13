@@ -382,6 +382,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Введите промпт для анимации, используйте глаголы.
+        /// </summary>
+        public static string SendAnimatePrompt {
+            get {
+                return ResourceManager.GetString("SendAnimatePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Введите сообщение ниже. Будем рады любой обратной связи..
         /// </summary>
         public static string SendFeedback {
@@ -396,6 +405,15 @@ namespace GPTipsBot.Resources {
         public static string SendImageTextRecognitionCommandFirst {
             get {
                 return ResourceManager.GetString("SendImageTextRecognitionCommandFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Отправьте фото для оживления. Опишите кратко, какие действия должны происходить. Например: &quot;смеются&quot;, &quot;танцуют&quot;, &quot;пишет&quot; и тд.
+        /// </summary>
+        public static string SendPhotoToAnimate {
+            get {
+                return ResourceManager.GetString("SendPhotoToAnimate", resourceCulture);
             }
         }
         
