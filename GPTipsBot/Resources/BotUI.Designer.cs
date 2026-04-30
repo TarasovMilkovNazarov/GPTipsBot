@@ -60,7 +60,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Оживить фото.
+        ///   Looks up a localized string similar to ✨ Оживить фото.
         /// </summary>
         internal static string AnimateButton {
             get {
@@ -161,7 +161,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Текс на картинке.
+        ///   Looks up a localized string similar to Текст на изображении.
         /// </summary>
         internal static string ImageTextRecognize {
             get {

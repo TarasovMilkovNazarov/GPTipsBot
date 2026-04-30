@@ -172,7 +172,7 @@
     <value>Распознать текст на изображении</value>
   </data>
   <data name="ImageTextRecognize" xml:space="preserve">
-    <value>Текс на картинке</value>
+    <value>Текст на изображении</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
     <value>Пополнить баланс</value>
@@ -195,6 +195,6 @@
     <value>📹 Видео</value>
   </data>
   <data name="AnimateButton" xml:space="preserve">
-    <value>Оживить фото</value>
+    <value>✨ Оживить фото</value>
   </data>
 </root>
