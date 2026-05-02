@@ -120,11 +120,8 @@ namespace GPTipsBot.UpdateHandlers
             {
                 var statusCode = ex.Response?.StatusCode.ToString("G");
 
-                logger.WithProps(
-                    () => logger.LogError(ex, "Что-то пошло не так при получении ответа от создателя картинок."),
-                    ("StatusCode", statusCode)
-                    );
-                
+                logger.LogError(ex, $"Что-то пошло не так при получении ответа ({statusCode}) от создателя картинок.");
+
                 await botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
             }
             catch(Exception ex)

@@ -1,14 +1,10 @@
-﻿using System.Collections.Specialized;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using dotenv.net;
-using GPTipsBot.Config;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
-using Quartz.Impl;
-using Serilog;
 
 //uncomment for sniffing requests in fiddler
 //ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
@@ -17,12 +13,8 @@ using Serilog;
 //metricServer.Start();
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
-Log.Logger = new LoggerConfiguration()
-    .AddBotLogger()
-    .CreateBootstrapLogger();
-
 var host = Host.CreateDefaultBuilder(args)
-    .UseSerilog((context, services, configuration) => configuration.AddBotLogger(context.Configuration, services))
+    .SetupGpTipsLog()
     .ConfigureServices((_, services) => services.ConfigureServices())
     .Build();
 
