@@ -102,7 +102,8 @@ namespace GPTipsBot.Extensions
             });
 
             services.AddImageCache();
-
+            
+            // dummy comment remove please
             return services;
         }
 
