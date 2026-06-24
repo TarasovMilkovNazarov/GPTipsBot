@@ -318,4 +318,16 @@
   <data name="SendAnimatePrompt" xml:space="preserve">
     <value>Введите промпт для анимации, используйте глаголы</value>
   </data>
+  <data name="PhotoAnimationDownloading" xml:space="preserve">
+    <value>📥 Загружаю фото...</value>
+  </data>
+  <data name="PhotoAnimationUploading" xml:space="preserve">
+    <value>📤 Отправляю фото на сервер генерации...</value>
+  </data>
+  <data name="PhotoAnimationGenerating" xml:space="preserve">
+    <value>🎬 Запускаю генерацию видео...</value>
+  </data>
+  <data name="PhotoAnimationWaiting" xml:space="preserve">
+    <value>⏳ Генерация видео... осталось ~{0} сек. (шаг {1}/{2})</value>
+  </data>
 </root>

@@ -169,44 +169,47 @@ public class YaPhotoAnimatorService
         }
     }
 
+    public async Task<VideoGenerationResponse> GetGenerationStatus(string generationId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, WaitForResultUrl);
+
+        var getRequest = new GetVideoRequest
+        {
+            GenerationId = generationId
+        };
+
+        var json = JsonSerializer.Serialize(getRequest);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Content = content;
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<VideoGenerationResponse>(responseJson, options)
+               ?? throw new Exception("Не удалось получить статус генерации видео");
+    }
+
     public async Task<VideoGenerationResponse> WaitForResult(string generationId)
     {
-        var maxAttempts = 10; // Максимум 60 попыток (примерно 5 минут при задержке 5 сек)
+        const int maxAttempts = 10;
 
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            Console.WriteLine($"Попытка {attempt}/{maxAttempts}...");
+            var result = await GetGenerationStatus(generationId);
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, WaitForResultUrl);
-
-            var getRequest = new GetVideoRequest
-            {
-                GenerationId = generationId
-            };
-
-            var json = JsonSerializer.Serialize(getRequest);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            request.Content = content;
-
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-            var responseJson = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<VideoGenerationResponse>(responseJson, options);
-
-            if (!string.IsNullOrEmpty(result?.VideoGeneration.VideoURL))
+            if (!string.IsNullOrEmpty(result.VideoGeneration.VideoURL))
             {
                 return result;
             }
 
-            Console.WriteLine($"Ожидание {result!.VideoGeneration.RemainingTimeSec} сек...");
-            await Task.Delay(TimeSpan.FromSeconds(result!.VideoGeneration.RemainingTimeSec));
+            await Task.Delay(TimeSpan.FromSeconds(Math.Max(result.VideoGeneration.RemainingTimeSec, 5)));
         }
 
         throw new Exception("Превышено время ожидания генерации видео");

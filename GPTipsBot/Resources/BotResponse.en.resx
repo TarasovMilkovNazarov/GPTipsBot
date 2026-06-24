@@ -314,4 +314,16 @@ Every contribution counts, and we're so grateful for your support! 🤗</value>
   <data name="SendAnimatePrompt" xml:space="preserve">
     <value>Input animation prompt</value>
   </data>
+  <data name="PhotoAnimationDownloading" xml:space="preserve">
+    <value>📥 Downloading photo...</value>
+  </data>
+  <data name="PhotoAnimationUploading" xml:space="preserve">
+    <value>📤 Uploading photo to generation server...</value>
+  </data>
+  <data name="PhotoAnimationGenerating" xml:space="preserve">
+    <value>🎬 Starting video generation...</value>
+  </data>
+  <data name="PhotoAnimationWaiting" xml:space="preserve">
+    <value>⏳ Generating video... ~{0} sec remaining (step {1}/{2})</value>
+  </data>
 </root>

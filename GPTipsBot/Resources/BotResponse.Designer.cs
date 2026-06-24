@@ -551,6 +551,30 @@ namespace GPTipsBot.Resources {
             }
         }
         
+        public static string PhotoAnimationDownloading {
+            get {
+                return ResourceManager.GetString("PhotoAnimationDownloading", resourceCulture);
+            }
+        }
+        
+        public static string PhotoAnimationUploading {
+            get {
+                return ResourceManager.GetString("PhotoAnimationUploading", resourceCulture);
+            }
+        }
+        
+        public static string PhotoAnimationGenerating {
+            get {
+                return ResourceManager.GetString("PhotoAnimationGenerating", resourceCulture);
+            }
+        }
+        
+        public static string PhotoAnimationWaiting {
+            get {
+                return ResourceManager.GetString("PhotoAnimationWaiting", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to 
         ///Отправьте фото с описанием (заголовком). Бот добавит анимацию к объектам на фото: машина едет, люди улыбаются и тд

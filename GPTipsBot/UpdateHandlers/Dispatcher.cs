@@ -16,6 +16,7 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
@@ -37,7 +38,8 @@ namespace GPTipsBot.UpdateHandlers
         InvoiceRepository invoiceRepository,
         IGpt gptService,
         IImageCache imageCache,
-        MessageRepository messageRepository)
+        MessageRepository messageRepository,
+        PhotoAnimationProgressNotifier photoAnimationProgressNotifier)
         : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
@@ -189,16 +191,16 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
-                var video = await gptService.AnimatePhoto(update.Message.Text, imageId);
-                await botClient.SendVideo(update.UserChatKey.Id, InputFile.FromUri(video));
+                var progressMessageId = await photoAnimationProgressNotifier.StartAsync(userKey.ChatId);
 
-                await messageRepository.AddAsync(new MessageDto(update.UserChatKey)
-                {
-                    TelegramId = update.UserChatKey.Id,
-                    Role = MessageOwner.Ya,
-                    BotMessageType = BotMessageType.AnimatedPhoto,
-                });
+                await gptService.StartAnimatePhoto(
+                    update.Message.Text,
+                    imageId!,
+                    userKey.ChatId,
+                    userKey.Id,
+                    progressMessageId);
 
+                imageCache.Remove(userKey.ChatId);
                 return;
             }
             else if (update.FileId != null)

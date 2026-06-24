@@ -14,6 +14,7 @@ using Polly;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Services.YandexPhotoAnimator;
+using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
 using Polly.Retry;
 using Telegram.Bot;
 using GenerateRequest = GPTipsBot.Services.YandexPhotoAnimator.GenerateRequest;
@@ -29,7 +30,7 @@ namespace GPTipsBot.Services
         private readonly ContextWindow _contextWindow;
         private readonly ITelegramBotClient _botClient;
         private readonly HttpClient _httpClient;
-        private readonly YaPhotoAnimatorService _yandexPhotoAnimator;
+        private readonly PhotoAnimationWorkflowService _photoAnimationWorkflowService;
         private Timer _timer;
         private readonly AsyncRetryPolicy _policy;
 
@@ -37,7 +38,7 @@ namespace GPTipsBot.Services
 
         public ChatGptService(ILogger<ChatGptService> log, OpenaiAccountsRepository openaiAccountsRepository,
             TokenQueue tokenQueue, OpenAiServiceCreator openAiServiceCreator, ContextWindow contextWindow,
-            ITelegramBotClient botClient, HttpClient httpClient, YaPhotoAnimatorService yandexPhotoAnimator)
+            ITelegramBotClient botClient, HttpClient httpClient, PhotoAnimationWorkflowService photoAnimationWorkflowService)
         {
             _log = log;
             _openaiAccountsRepository = openaiAccountsRepository;
@@ -46,7 +47,7 @@ namespace GPTipsBot.Services
             _contextWindow = contextWindow;
             _botClient = botClient;
             _httpClient = httpClient;
-            _yandexPhotoAnimator = yandexPhotoAnimator;
+            _photoAnimationWorkflowService = photoAnimationWorkflowService;
             _timer = setup_Timer(openaiAccountsRepository);
             _policy = Policy
                 .Handle<ChatGptException>()
@@ -171,15 +172,23 @@ namespace GPTipsBot.Services
             return new Uri(url);
         }
 
-        public async Task<Uri> AnimatePhoto(string prompt, string imageFileId, CancellationToken cancellationToken = default)
+        public Task StartAnimatePhoto(
+            string prompt,
+            string imageFileId,
+            long chatId,
+            long userId,
+            int progressMessageId)
         {
-            var base64Image = await imageFileId.GetPhotoAsync(_botClient);
+            var workflowData = new PhotoAnimationWorkflowData
+            {
+                ChatId = chatId,
+                UserId = userId,
+                ImageFileId = imageFileId,
+                Prompt = prompt,
+                ProgressMessageId = progressMessageId
+            };
 
-            var imageUrl = await _yandexPhotoAnimator.UploadImageFromBase64(base64Image);
-            var videoResponse = await _yandexPhotoAnimator.GenerateVideo(imageUrl, prompt);
-            videoResponse = await _yandexPhotoAnimator.WaitForResult(videoResponse.VideoGeneration.Id);
-
-            return new Uri(videoResponse.VideoGeneration.VideoURL);
+            return _photoAnimationWorkflowService.StartAsync(workflowData);
         }
 
         public async Task<byte[]> CartoonifyImage(string imageFileId, CancellationToken cancellationToken = default)
@@ -372,6 +381,11 @@ namespace GPTipsBot.Services
         Task<Uri> GenerateVideoByText(string text, string? imageFileId, CancellationToken cancellationToken);
         Task<Uri> GenerateSongByText(string text, CancellationToken cancellationToken);
         Task<byte[]> CartoonifyImage(string imageFileId, CancellationToken cancellationToken = default);
-        Task<Uri> AnimatePhoto(string prompt, string imageFileId, CancellationToken cancellationToken = default);
+        Task StartAnimatePhoto(
+            string prompt,
+            string imageFileId,
+            long chatId,
+            long userId,
+            int progressMessageId);
     }
 }

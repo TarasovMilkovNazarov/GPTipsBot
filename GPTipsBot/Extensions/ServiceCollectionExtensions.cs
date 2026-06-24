@@ -14,6 +14,10 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
 using GPTipsBot.Services.YandexCloud;
 using GPTipsBot.Services.YandexPhotoAnimator;
+using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
+using GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
+using WorkflowCore.Interface;
+using WorkflowCore.Persistence.PostgreSQL;
 using Quartz;
 
 namespace GPTipsBot.Extensions
@@ -22,6 +26,16 @@ namespace GPTipsBot.Extensions
     {
         public static IServiceCollection ConfigureServices(this IServiceCollection services)
         {
+            services.AddWorkflow(cfg => cfg.UsePostgreSQL(AppConfig.ConnectionString, false, true));
+            services.AddTransient<DownloadPhotoStep>();
+            services.AddTransient<UploadImageStep>();
+            services.AddTransient<GenerateVideoStep>();
+            services.AddTransient<WaitForVideoStep>();
+            services.AddTransient<NotifyUserStep>();
+            services.AddSingleton<PhotoAnimationProgressNotifier>();
+            services.AddSingleton<PhotoAnimationWorkflowService>();
+            services.AddHostedService<WorkflowHostService>();
+
             services.AddSingleton<ISchedulerService, SchedulerService>();
             services.AddQuartz(q =>
             {
