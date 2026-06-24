@@ -12,5 +12,4 @@ public class PhotoAnimationWorkflowData
     public string? GenerationId { get; set; }
     public string? VideoUrl { get; set; }
     public string? ErrorMessage { get; set; }
-    public int PollAttempt { get; set; }
 }

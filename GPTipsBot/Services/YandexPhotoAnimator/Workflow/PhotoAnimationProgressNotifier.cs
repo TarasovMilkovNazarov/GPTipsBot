@@ -24,7 +24,7 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
         {
             await botClient.EditMessageText(chatId, messageId, text, cancellationToken: cancellationToken);
         }
-        catch
+        catch (Telegram.Bot.Exceptions.ApiRequestException ex) when (ex.Message.Contains("message is not modified"))
         {
             // Telegram returns error when message text is unchanged.
         }
