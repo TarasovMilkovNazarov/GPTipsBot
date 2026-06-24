@@ -324,6 +324,6 @@ Every contribution counts, and we're so grateful for your support! 🤗</value>
     <value>🎬 Starting video generation...</value>
   </data>
   <data name="PhotoAnimationWaiting" xml:space="preserve">
-    <value>⏳ Generating video... ~{0} sec remaining (step {1}/{2})</value>
+    <value>⏳ Generating video... approximately {0} left</value>
   </data>
 </root>

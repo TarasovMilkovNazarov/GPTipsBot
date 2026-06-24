@@ -569,6 +569,9 @@ namespace GPTipsBot.Resources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to ⏳ Генерация видео... осталось примерно {0}.
+        /// </summary>
         public static string PhotoAnimationWaiting {
             get {
                 return ResourceManager.GetString("PhotoAnimationWaiting", resourceCulture);

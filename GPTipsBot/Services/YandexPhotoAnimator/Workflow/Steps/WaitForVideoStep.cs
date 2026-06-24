@@ -7,12 +7,12 @@ public class WaitForVideoStep(
     YaPhotoAnimatorService animator,
     PhotoAnimationProgressNotifier progressNotifier) : StepBodyAsync
 {
-    private const int MaxAttempts = 60;
-
     public string GenerationId { get; set; } = string.Empty;
     public long ChatId { get; set; }
     public int? ProgressMessageId { get; set; }
-    public int PollAttempt { get; set; }
+    public int InitialRemainingTimeSec { get; set; }
+    public int LastReportedRemainingSec { get; set; }
+    public DateTime? DeadlineUtc { get; set; }
     public string? VideoUrl { get; set; }
     public string? ErrorMessage { get; set; }
 
@@ -26,6 +26,7 @@ public class WaitForVideoStep(
         try
         {
             var result = await animator.GetGenerationStatus(GenerationId);
+            var remainingSeconds = Math.Max(result.VideoGeneration.RemainingTimeSec, 0);
 
             if (!string.IsNullOrEmpty(result.VideoGeneration.VideoURL))
             {
@@ -33,26 +34,31 @@ public class WaitForVideoStep(
                 return ExecutionResult.Next();
             }
 
-            PollAttempt++;
+            if (InitialRemainingTimeSec == 0)
+            {
+                InitialRemainingTimeSec = Math.Max(remainingSeconds, PhotoAnimationWaitPolicy.MinEstimatedSeconds);
+                var timeoutSeconds = PhotoAnimationWaitPolicy.CalculateTimeoutSeconds(InitialRemainingTimeSec);
+                DeadlineUtc = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+            }
 
-            if (PollAttempt > MaxAttempts)
+            if (DeadlineUtc.HasValue && DateTime.UtcNow >= DeadlineUtc.Value)
             {
                 ErrorMessage = "Превышено время ожидания генерации видео";
                 return ExecutionResult.Next();
             }
 
-            if (ProgressMessageId.HasValue)
+            if (ProgressMessageId.HasValue
+                && PhotoAnimationWaitPolicy.ShouldUpdateProgress(LastReportedRemainingSec, remainingSeconds))
             {
                 await progressNotifier.ReportWaitingAsync(
                     ChatId,
                     ProgressMessageId.Value,
-                    result.VideoGeneration.RemainingTimeSec,
-                    PollAttempt,
-                    MaxAttempts);
+                    remainingSeconds);
+                LastReportedRemainingSec = remainingSeconds;
             }
 
-            var delaySeconds = Math.Max(result.VideoGeneration.RemainingTimeSec, 5);
-            return ExecutionResult.Sleep(TimeSpan.FromSeconds(delaySeconds), PollAttempt);
+            var pollIntervalSec = PhotoAnimationWaitPolicy.GetPollIntervalSeconds(remainingSeconds);
+            return ExecutionResult.Sleep(TimeSpan.FromSeconds(pollIntervalSec), remainingSeconds);
         }
         catch (Exception ex)
         {

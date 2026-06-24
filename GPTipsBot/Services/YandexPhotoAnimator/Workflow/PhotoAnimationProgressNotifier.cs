@@ -1,7 +1,8 @@
+using System.Globalization;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.Services.YandexPhotoAnimator.Workflow;
 
@@ -24,7 +25,7 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
         {
             await botClient.EditMessageText(chatId, messageId, text, cancellationToken: cancellationToken);
         }
-        catch (Telegram.Bot.Exceptions.ApiRequestException ex) when (ex.Message.Contains("message is not modified"))
+        catch (ApiRequestException ex) when (ex.Message.Contains("message is not modified"))
         {
             // Telegram returns error when message text is unchanged.
         }
@@ -43,11 +44,17 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
         long chatId,
         int messageId,
         int remainingSeconds,
-        int attempt,
-        int maxAttempts,
         CancellationToken cancellationToken = default)
     {
-        var text = string.Format(BotResponse.PhotoAnimationWaiting, remainingSeconds, attempt, maxAttempts);
+        var formatted = FormatRemainingTime(remainingSeconds);
+        var text = string.Format(BotResponse.PhotoAnimationWaiting, formatted);
         await UpdateAsync(chatId, messageId, text, cancellationToken);
+    }
+
+    private static string FormatRemainingTime(int remainingSeconds)
+    {
+        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en"
+            ? PhotoAnimationWaitPolicy.FormatRemainingTimeEn(remainingSeconds)
+            : PhotoAnimationWaitPolicy.FormatRemainingTime(remainingSeconds);
     }
 }

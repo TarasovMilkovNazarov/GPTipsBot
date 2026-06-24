@@ -328,6 +328,6 @@
     <value>🎬 Запускаю генерацию видео...</value>
   </data>
   <data name="PhotoAnimationWaiting" xml:space="preserve">
-    <value>⏳ Генерация видео... осталось ~{0} сек. (шаг {1}/{2})</value>
+    <value>⏳ Генерация видео... осталось примерно {0}</value>
   </data>
 </root>
