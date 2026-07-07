@@ -169,11 +169,6 @@
 1:1 - квадратное изображение
 2:1 - прямоугольное (по умолчанию)</value>
   </data>
-  <data name="SendPhotoToCartoonify" xml:space="preserve">
-    <value>Отправьте фото для превращения в мультяшный стиль
-Цена: {0} stars
-</value>
-  </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>Руссий язык используется для интерфейса</value>
   </data>
@@ -203,12 +198,6 @@
   </data>
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>Что-то пошло не так, попробуйте ещё раз</value>
-  </data>
-  <data name="SomethingWentWrongWithImageService" xml:space="preserve">
-    <value>Сервис генерации изображений находится в тестовом режиме. Попробуйте заново, начиная с команды /image, либо дождитесь исправления ошибок. Мы работаем над улучшением сервиса, благодарим за понимание 🙏</value>
-  </data>
-  <data name="SwitchProxy" xml:space="preserve">
-    <value>Использовать бесплатное прокси: {0}</value>
   </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>Количество токенов в вашем сообщении {1} превышает лимит в {0} токенов. Сократите своё сообщение. Считайте, что в одном слове содержится примерно 1 токен</value>
@@ -290,27 +279,10 @@
   <data name="StarsDonationHint" xml:space="preserve">
     <value>✨ Почти получилось! Просто введите число (например, 5, 10 или 50) – каждая звёздочка важна! 🌟 Спасибо вам!</value>
   </data>
-  <data name="MusicResponse" xml:space="preserve">
-    <value>Пример запроса для создания музыки:
-"Напиши расслабленный лоу-фай бит с джазовыми аккордами на пианино, винтажным виниловым шумом, мягким кик-барабаном и щелчками на 2 и 4. Темп: 85 BPM. Добавь немного джазовой бас-линии и случайные звуки (скрип двери, голоса в фоне)."
-
-Бот отправит звуковой файл длительностью до 30 секунд. Стоимость генерации 10 stars</value>
-  </data>
   <data name="InsufficientBalance" xml:space="preserve">
     <value>Необходимо иметь {0} stars для выполнения операции
 
 После пополнения выберите команду заново</value>
-  </data>
-  <data name="SongResponse" xml:space="preserve">
-    <value>Введите текст песни. Стоимость генерации 20 stars</value>
-  </data>
-  <data name="VideoInstructions" xml:space="preserve">
-    <value>
-Отправьте фото с описанием (заголовком). Бот добавит анимацию к объектам на фото: машина едет, люди улыбаются и тд
-Результат: gif файл длительностью до 5 секунд, время генерации от 5 до 10 минут
-Это бета-версия функционала, может работать не стабильно
-Стоимость генерации {0} stars
-    </value>
   </data>
   <data name="SendPhotoToAnimate" xml:space="preserve">
     <value>Отправьте фото для оживления. Опишите кратко, какие действия должны происходить. Например: "смеются", "танцуют", "пишет" и тд</value>
@@ -329,5 +301,8 @@
   </data>
   <data name="PhotoAnimationWaiting" xml:space="preserve">
     <value>⏳ Генерация видео... осталось примерно {0}</value>
+  </data>
+  <data name="PhotoAnimationFailed" xml:space="preserve">
+    <value>Не удалось оживить фото. Попробуйте позже или выберите другое изображение.</value>
   </data>
 </root>

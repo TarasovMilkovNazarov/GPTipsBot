@@ -163,12 +163,6 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>English was set as interface language</value>
   </data>
-  <data name="SendPhotoToCartoonify" xml:space="preserve">
-    <value>
-Send photo to cartoonify
-Price: {0} stars
-</value>
-  </data>
   <data name="UnsupportedMessageType" xml:space="preserve">
     <value>I'm sorry, only text or voice messages are supported currently</value>
   </data>
@@ -195,12 +189,6 @@ Price: {0} stars
   </data>
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>Something went wrong, please try again.</value>
-  </data>
-  <data name="SomethingWentWrongWithImageService" xml:space="preserve">
-    <value>The image generation service is in testing mode. Please try again, starting with the /image command, or wait for the issues to be resolved. We are working on improving the service, thank you for your understanding 🙏</value>
-  </data>
-  <data name="SwitchProxy" xml:space="preserve">
-    <value>Use free proxy: {0}</value>
   </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>The number of tokens in your message {1} exceeds the limit of {0} tokens. Please shorten your request. Consider that one word approximately contains one token.</value>
@@ -250,22 +238,6 @@ Enter whole Stars amount to top up:</value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>Top up your balance</value>
-  </data>
-  <data name="MusicResponse" xml:space="preserve">
-    <value>Example Music Generation Prompt:
-
-"Create a chill lo-fi beat with jazzy piano chords, vintage vinyl crackle, a soft kick drum, and snappy snares on the 2 and 4. Tempo: 85 BPM. Add a smooth jazz bassline and some random ambient sounds (door creak, background voices)."
-
-The bot will send a 30-second audio file. Generation cost: 10 stars.</value>
-  </data>
-  <data name="SongResponse" xml:space="preserve">
-    <value>Input the text of a song. Generation cost: 20 stars.</value>
-  </data>
-  <data name="VideoInstructions" xml:space="preserve">
-    <value>Submit a photo with a caption. The bot can animate objects in it — like making cars move or people smile
-You’ll get a GIF (up to 5 seconds). The operation usually takes from 5 to 10 minutes
-Note: This is a beta feature and may behave unpredictably
-Cost: {0} stars</value>
   </data>
   <data name="InsufficientBalance" xml:space="preserve">
     <value>You need to have {0} stars to perform this operation.
@@ -325,5 +297,8 @@ Every contribution counts, and we're so grateful for your support! 🤗</value>
   </data>
   <data name="PhotoAnimationWaiting" xml:space="preserve">
     <value>⏳ Generating video... approximately {0} left</value>
+  </data>
+  <data name="PhotoAnimationFailed" xml:space="preserve">
+    <value>Could not animate the photo. Please try again later or choose a different image.</value>
   </data>
 </root>

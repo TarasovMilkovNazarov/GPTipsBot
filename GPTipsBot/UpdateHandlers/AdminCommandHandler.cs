@@ -8,7 +8,9 @@ using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
 {
-    public class AdminCommandHandler(ITelegramBotClient botClient) : BaseMessageHandler
+    public class AdminCommandHandler(
+        ITelegramBotClient botClient,
+        OpenAiVpnConnectivityService connectivityService) : BaseMessageHandler
     {
         public override async Task HandleAsync(UpdateDecorator update)
         {
@@ -27,6 +29,13 @@ namespace GPTipsBot.UpdateHandlers
                 case BotMenu.VersionCommand when chatKey.IsAdmin():
                     await botClient.SendBotVersionAsync(chatKey.ChatId);
                     return;
+                case BotMenu.VpnCheckCommand when chatKey.IsAdmin():
+                {
+                    var result = await connectivityService.CheckAsync();
+                    var message = OpenAiVpnConnectivityService.FormatResultMessage(result);
+                    await botClient.SendMessage(chatKey.ChatId, message);
+                    return;
+                }
             }
         }
     }

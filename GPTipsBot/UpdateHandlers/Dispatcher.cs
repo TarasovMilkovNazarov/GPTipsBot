@@ -116,20 +116,6 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(imageGeneratorHandler);
             }
-            else if (lastCommand?.Type == CommandType.Video)
-            {
-                var isSuccessPayment = await moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Video);
-                if (!isSuccessPayment)
-                {
-                    return;
-                }
-
-                await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitVideoMsg,
-                    replyMarkup: null);
-                var video = await gptService.GenerateVideoByText(update.Message!.Text, update.FileId, CancellationToken.None);
-                await botClient.SendVideo(update.UserChatKey.Id, InputFile.FromUri(video));
-                return;
-            }
             else if (lastCommand?.Type == CommandType.TextRecognition)
             {
                 SetNextHandler(imageTextRecognitionHandler);
@@ -157,18 +143,6 @@ namespace GPTipsBot.UpdateHandlers
 
                 await moneyService.SendDonateInvoice(update.UserChatKey.Id, starsCount);
 
-                return;
-            }
-            else if (lastCommand?.Type == CommandType.Music)
-            {
-                var isSuccessPayment = await moneyService.TryPay(update.UserChatKey.Id, PaymentConfig.Music);
-                if (!isSuccessPayment)
-                {
-                    return;
-                }
-
-                var audio = await gptService.GenerateMusicByText(update.Message!.Text, CancellationToken.None);
-                await botClient.SendAudio(update.UserChatKey.Id, InputFile.FromStream(audio));
                 return;
             }
             else if (lastCommand?.Type == CommandType.AnimatePhoto)

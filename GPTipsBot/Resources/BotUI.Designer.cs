@@ -78,15 +78,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сделай фото в мультяшном стиле (10⭐️).
-        /// </summary>
-        internal static string CartoonifyButton {
-            get {
-                return ResourceManager.GetString("CartoonifyButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Продолжить.
         /// </summary>
         internal static string ContinueButton {
@@ -188,15 +179,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 🎸 Создать музыку.
-        /// </summary>
-        internal static string MusicButton {
-            get {
-                return ResourceManager.GetString("MusicButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to 👤 Личный кабинет.
         /// </summary>
         internal static string ProfileButton {
@@ -260,15 +242,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 🎧 Песня.
-        /// </summary>
-        internal static string SongButton {
-            get {
-                return ResourceManager.GetString("SongButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Начать пользоваться ботом.
         /// </summary>
         internal static string Start {
@@ -283,15 +256,6 @@ namespace GPTipsBot.Resources {
         internal static string StopRequestButton {
             get {
                 return ResourceManager.GetString("StopRequestButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 📹 Видео.
-        /// </summary>
-        internal static string VideoButton {
-            get {
-                return ResourceManager.GetString("VideoButton", resourceCulture);
             }
         }
     }

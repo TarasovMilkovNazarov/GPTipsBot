@@ -1,7 +1,6 @@
 ﻿using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using System.Globalization;
-using GPTipsBot.Config;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.Services
@@ -15,20 +14,16 @@ namespace GPTipsBot.Services
         public static InlineKeyboardMarkup CancelInlineKeyboard => GetCancelInlineKeyboard();
 
         private static KeyboardButton ImageButton => new(BotUI.ImageButton);
-        private static KeyboardButton ImageCartoonifyButton => new(BotUI.CartoonifyButton);
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
         private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
-        private static KeyboardButton  CancelButton => new(BotUI.CancelButton);
+        private static KeyboardButton CancelButton => new(BotUI.CancelButton);
         private static KeyboardButton LangButton => new(BotUI.LangButton);
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
         private static KeyboardButton DepositButton => new(BotUI.DepositButton);
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
-        private static KeyboardButton MusicButton => new(BotUI.MusicButton);
-        private static KeyboardButton SongButton => new(BotUI.SongButton);
-        private static KeyboardButton VideoButton => new(BotUI.VideoButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -37,7 +32,6 @@ namespace GPTipsBot.Services
             SetButtonToLocalizations();
         }
 
-        // If user sends command from keyboard then it sends as text on choosen button
         private static void SetButtonToLocalizations()
         {
             ButtonToLocalizations = new Dictionary<string, List<string>>()
@@ -52,9 +46,6 @@ namespace GPTipsBot.Services
                 { BotMenu.ImageTextRecognizeCommand, new() },
                 { BotMenu.DepositCommand, new() },
                 { BotMenu.GetProfileCommand, new() },
-                { BotMenu.MusicCommand, new() },
-                { BotMenu.SongCommand, new() },
-                { BotMenu.VideoCommand, new() },
                 { BotMenu.AnimatePhotoCommand, new() },
             };
 
@@ -74,9 +65,6 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
                 ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
                 ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
-                ButtonToLocalizations[BotMenu.MusicCommand].Add(BotUI.MusicButton);
-                ButtonToLocalizations[BotMenu.SongCommand].Add(BotUI.SongButton);
-                ButtonToLocalizations[BotMenu.VideoCommand].Add(BotUI.VideoButton);
                 ButtonToLocalizations[BotMenu.AnimatePhotoCommand].Add(BotUI.AnimateButton);
             }
 
@@ -103,11 +91,6 @@ namespace GPTipsBot.Services
                 },
                 new[]
                 {
-                    VideoButton,
-                    MusicButton
-                },
-                new[]
-                {
                     LangButton,
                     HelpButton
                 },
@@ -130,6 +113,7 @@ namespace GPTipsBot.Services
             return new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand));
         }
+
         public static InlineKeyboardMarkup GetImageInstructionInlineKeyboard(bool isSquare)
         {
             return new InlineKeyboardMarkup
@@ -145,17 +129,12 @@ namespace GPTipsBot.Services
                     },
                     new[]
                     {
-                        InlineKeyboardButton.WithCallbackData(
-                            string.Format(BotUI.CartoonifyButton, PaymentConfig.Cartoonify),
-                            BotMenu.ImageCartoonifyCommand)
-                    },
-                    new[]
-                    {
                         InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)
                     },
                 }
             };
         }
+
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()
         {
             var keyboardMarkup = new ReplyKeyboardMarkup(CancelButton);
@@ -165,6 +144,7 @@ namespace GPTipsBot.Services
 
             return keyboardMarkup;
         }
+
         private static ReplyKeyboardMarkup GetLanguageKeyboardMarkup()
         {
             var keyboardMarkup = new ReplyKeyboardMarkup(new[] { RuLangButton, EngLangButton });

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -5,7 +6,8 @@ namespace GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
 
 public class GenerateVideoStep(
     YaPhotoAnimatorService animator,
-    PhotoAnimationProgressNotifier progressNotifier) : StepBodyAsync
+    PhotoAnimationProgressNotifier progressNotifier,
+    ILogger<GenerateVideoStep> logger) : StepBodyAsync
 {
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
@@ -25,7 +27,8 @@ public class GenerateVideoStep(
             var response = await animator.GenerateVideo(data.ImageUrl!, data.Prompt);
             if (response?.VideoGeneration?.Id == null)
             {
-                data.ErrorMessage = "Не удалось запустить генерацию видео";
+                logger.LogWarning("Photo animation generation was not started for chat {ChatId}", data.ChatId);
+                data.ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
                 return ExecutionResult.Next();
             }
 
@@ -33,7 +36,8 @@ public class GenerateVideoStep(
         }
         catch (Exception ex)
         {
-            data.ErrorMessage = ex.Message;
+            logger.LogError(ex, "Failed to start photo animation for chat {ChatId}", data.ChatId);
+            data.ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
         }
 
         return ExecutionResult.Next();

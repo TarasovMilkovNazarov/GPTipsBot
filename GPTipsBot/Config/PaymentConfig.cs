@@ -2,8 +2,6 @@
 
 public static class PaymentConfig
 {
-    public const int Video = 40;
-    public const int Music = 10;
     public const double Gpt = 0.1;
     public const double Image = 0.5;
 
@@ -20,5 +18,4 @@ public static class PaymentConfig
     public const int NewbieFreeTextRecognitions = 10;
     public const int NewbieFreeChatGptRequests = 10;
     public const int MinRechargeAmount = 10;
-    public const int Cartoonify = 8;
 };

@@ -4,6 +4,8 @@ services:
   gptipsbot:
     container_name: gptipsbot-app
     build: .
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "80:80"
     volumes:

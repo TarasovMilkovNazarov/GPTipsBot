@@ -38,9 +38,7 @@ public class NotifyUserStep(
             }
             else
             {
-                await botClient.SendMessage(
-                    data.ChatId,
-                    data.ErrorMessage ?? BotResponse.SomethingWentWrong);
+                await botClient.SendMessage(data.ChatId, BotResponse.PhotoAnimationFailed);
             }
         }
         catch (Exception ex)

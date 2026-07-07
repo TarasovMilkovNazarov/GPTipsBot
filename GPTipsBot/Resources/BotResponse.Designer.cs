@@ -308,18 +308,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Пример запроса для создания музыки:
-        ///&quot;Напиши расслабленный лоу-фай бит с джазовыми аккордами на пианино, винтажным виниловым шумом, мягким кик-барабаном и щелчками на 2 и 4. Темп: 85 BPM. Добавь немного джазовой бас-линии и случайные звуки (скрип двери, голоса в фоне).&quot;
-        ///
-        ///Бот отправит звуковой файл длительностью до 30 секунд. Стоимость генерации 10 stars.
-        /// </summary>
-        public static string MusicResponse {
-            get {
-                return ResourceManager.GetString("MusicResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ⚙️ Ведутся технические работы. Благодарим за понимание..
         /// </summary>
         public static string OnMaintenance {
@@ -418,17 +406,6 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Отправьте фото для превращения в мультяшный стиль
-        ///Цена: {0} stars
-        ///.
-        /// </summary>
-        public static string SendPhotoToCartoonify {
-            get {
-                return ResourceManager.GetString("SendPhotoToCartoonify", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Отправьте изображение для распознавания текста.
         /// </summary>
         public static string SendTextRecognitionImage {
@@ -477,38 +454,11 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сервис генерации изображений находится в тестовом режиме. Попробуйте заново, начиная с команды /image, либо дождитесь исправления ошибок. Мы работаем над улучшением сервиса, благодарим за понимание 🙏.
-        /// </summary>
-        public static string SomethingWentWrongWithImageService {
-            get {
-                return ResourceManager.GetString("SomethingWentWrongWithImageService", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Введите текст песни. Стоимость генерации 20 stars.
-        /// </summary>
-        public static string SongResponse {
-            get {
-                return ResourceManager.GetString("SongResponse", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ✨ Почти получилось! Просто введите число (например, 5, 10 или 50) – каждая звёздочка важна! 🌟 Спасибо вам!.
         /// </summary>
         public static string StarsDonationHint {
             get {
                 return ResourceManager.GetString("StarsDonationHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Использовать бесплатное прокси: {0}.
-        /// </summary>
-        public static string SwitchProxy {
-            get {
-                return ResourceManager.GetString("SwitchProxy", resourceCulture);
             }
         }
         
@@ -579,16 +529,11 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 
-        ///Отправьте фото с описанием (заголовком). Бот добавит анимацию к объектам на фото: машина едет, люди улыбаются и тд
-        ///Результат: gif файл длительностью до 5 секунд, время генерации от 5 до 10 минут
-        ///Это бета-версия функционала, может работать не стабильно
-        ///Стоимость генерации {0} stars
-        ///    .
+        ///   Looks up a localized string similar to Не удалось оживить фото. Попробуйте позже или выберите другое изображение..
         /// </summary>
-        public static string VideoInstructions {
+        public static string PhotoAnimationFailed {
             get {
-                return ResourceManager.GetString("VideoInstructions", resourceCulture);
+                return ResourceManager.GetString("PhotoAnimationFailed", resourceCulture);
             }
         }
     }

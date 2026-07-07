@@ -91,28 +91,6 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendMessage(update.UserChatKey.ChatId,
                         BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
                     return;
-                case MusicCommand:
-                    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
-                    await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.MusicResponse,
-                        replyMarkup: replyMarkup);
-                    return;
-                case SongCommand:
-                    if (update.Command.IsDisabled)
-                    {
-                        return;
-                    }
-                    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
-                    await botClient.SendMessage(chatId, BotResponse.SongResponse,
-                        replyMarkup: replyMarkup);
-                    return;
-                case VideoCommand:
-                    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
-                    await botClient.SendMessage(chatId, string.Format(BotResponse.VideoInstructions, 60),
-                        replyMarkup: replyMarkup);
-                    return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;
                     break;

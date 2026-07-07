@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -5,7 +6,8 @@ namespace GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
 
 public class UploadImageStep(
     YaPhotoAnimatorService animator,
-    PhotoAnimationProgressNotifier progressNotifier) : StepBodyAsync
+    PhotoAnimationProgressNotifier progressNotifier,
+    ILogger<UploadImageStep> logger) : StepBodyAsync
 {
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
@@ -26,7 +28,8 @@ public class UploadImageStep(
         }
         catch (Exception ex)
         {
-            data.ErrorMessage = ex.Message;
+            logger.LogError(ex, "Failed to upload image for animation in chat {ChatId}", data.ChatId);
+            data.ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
         }
 
         return ExecutionResult.Next();

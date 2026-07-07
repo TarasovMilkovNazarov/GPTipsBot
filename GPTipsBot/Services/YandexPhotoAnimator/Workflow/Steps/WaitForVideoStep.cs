@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -5,7 +6,8 @@ namespace GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
 
 public class WaitForVideoStep(
     YaPhotoAnimatorService animator,
-    PhotoAnimationProgressNotifier progressNotifier) : StepBodyAsync
+    PhotoAnimationProgressNotifier progressNotifier,
+    ILogger<WaitForVideoStep> logger) : StepBodyAsync
 {
     public string GenerationId { get; set; } = string.Empty;
     public long ChatId { get; set; }
@@ -43,7 +45,8 @@ public class WaitForVideoStep(
 
             if (DeadlineUtc.HasValue && DateTime.UtcNow >= DeadlineUtc.Value)
             {
-                ErrorMessage = "Превышено время ожидания генерации видео";
+                logger.LogWarning("Photo animation timed out for chat {ChatId}", ChatId);
+                ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
                 return ExecutionResult.Next();
             }
 
@@ -62,7 +65,8 @@ public class WaitForVideoStep(
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            logger.LogError(ex, "Failed while waiting for photo animation in chat {ChatId}", ChatId);
+            ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
             return ExecutionResult.Next();
         }
     }

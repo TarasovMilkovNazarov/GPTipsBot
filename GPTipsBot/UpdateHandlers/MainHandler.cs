@@ -72,7 +72,15 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message?.Voice != null)
             {
-                extendedUpd.Message.Text = await _speechToTextService.RecognizeVoice(update.Message.Voice.FileId);
+                try
+                {
+                    extendedUpd.Message.Text = await _speechToTextService.RecognizeVoice(update.Message.Voice.FileId);
+                }
+                catch (Exception)
+                {
+                    await _botClient.SendMessage(extendedUpd.UserChatKey.ChatId, BotResponse.SomethingWentWrong);
+                    return;
+                }
             }
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);

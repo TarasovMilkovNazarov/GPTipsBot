@@ -179,20 +179,8 @@
 
 💖 Every donation helps us develop and improve the service. 🤝 We appreciate your support and are working to make our product even better. 🚀💡</value>
   </data>
-  <data name="MusicButton" xml:space="preserve">
-    <value>🎸 Create music</value>
-  </data>
-  <data name="SongButton" xml:space="preserve">
-    <value>🎧 Song</value>
-  </data>
-  <data name="VideoButton" xml:space="preserve">
-    <value>📹 Video</value>
-  </data>
   <data name="ProfileButton" xml:space="preserve">
     <value>👤 Personal Account</value>
-  </data>
-  <data name="CartoonifyButton" xml:space="preserve">
-    <value>Cartoonify your photo (10⭐️)</value>
   </data>
   <data name="AnimateButton" xml:space="preserve">
     <value>✨ Animate photo</value>

@@ -5,7 +5,6 @@ using GPTipsBot.Services;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
-using System.Net.Http.Headers;
 using GPTipsBot.Config;
 using GPTipsBot.Jobs;
 using Telegram.Bot.Services;
@@ -26,6 +25,7 @@ namespace GPTipsBot.Extensions
     {
         public static IServiceCollection ConfigureServices(this IServiceCollection services)
         {
+            services.AddOpenAiClient();
             services.AddWorkflow(cfg => cfg.UsePostgreSQL(AppConfig.ConnectionString, false, true));
             services.AddTransient<DownloadPhotoStep>();
             services.AddTransient<UploadImageStep>();
@@ -83,11 +83,10 @@ namespace GPTipsBot.Extensions
             .AddSingleton<SpeechToTextService>()
             .AddSingleton<RateLimiter>()
             .AddScoped<IGpt, ChatGptService>()
-            .AddSingleton<TokenQueue>()
+            .AddSingleton<OpenAiVpnConnectivityService>()
             .AddSingleton<IJobService, JobService>()
             .AddSingleton<YaPhotoAnimatorService>()
             .AddScoped<ChatGptService>()
-            .AddScoped<OpenAiServiceCreator, ProxyApiService>()
             .AddScoped<ContextWindow>()
             .AddRepositories()
             .AddScoped<MoneyService>()
@@ -108,12 +107,7 @@ namespace GPTipsBot.Extensions
 
             services.AddDbContext<ApplicationContext>();
 
-            services.AddHttpClient<IGpt, ChatGptService>(b =>
-            {
-                b.BaseAddress = new Uri("https://api.vsegpt.ru/v1/");
-                b.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", AppConfig.ProxyApiApiKey);
-            });
+            services.AddHttpClient(nameof(OpenAiVpnConnectivityService));
 
             services.AddImageCache();
             

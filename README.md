@@ -13,9 +13,119 @@ Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 * Registry: https://hub.docker.com/r/alanextar/gptipsbot
 * Auto Deploy: пушим ветку release
 
+## VPN / OpenAI (mihomo)
+
+Проверка прямого доступа к OpenAI через VPN-подписку Happ. Работает **только по админской команде** `/vpn_check` — фоновой джобы нет.
+
+### Схема
+
+```
+Подписка Happ (URL)
+        ↓
+mihomo на VPS-хосте (systemd)  →  VPN-серверы из подписки
+        ↓
+HTTP-прокси :10809 на хосте
+        ↓
+gptipsbot-app (Docker)  →  api.openai.com
+```
+
+| Компонент | Где живёт | Роль |
+|-----------|-----------|------|
+| **mihomo** | VPS-хост, `systemd` | Качает подписку, поднимает HTTP-прокси |
+| **gptipsbot** | Docker-контейнер | Ходит в OpenAI через прокси хоста |
+| **Watchtower / yc-container-daemon** | Docker | Обновляет только образ бота — mihomo не трогает |
+
+Основной чат и DALL-E идут напрямую в `api.openai.com` через HTTP-прокси mihomo. Токен — `OPENAI_TOKEN` из окружения.
+
+### Что делает `/vpn_check`
+
+1. **Subscription** — доступен ли URL подписки (если задан `HAPP_SUBSCRIPTION_URL`).
+2. **OpenAI** — отвечает ли `api.openai.com` через HTTP-прокси mihomo.
+
+Пример ответа:
+
+```
+#vpn_openai_check
+Subscription: OK (1234 bytes)
+Proxy: host.docker.internal:10809
+OpenAI: OK
+Duration: 842 ms
+```
+
+### Установка mihomo на VPS (один раз)
+
+```bash
+# В .env укажите HAPP_SUBSCRIPTION_URL, затем на VPS:
+chmod +x scripts/setup-mihomo.sh
+sudo ./scripts/setup-mihomo.sh
+```
+
+Скрипт:
+- скачивает [mihomo](https://github.com/MetaCubeX/mihomo) в `/usr/local/bin/mihomo`;
+- создаёт `/etc/mihomo/config.yaml` из подписки;
+- регистрирует `systemd`-сервис на порту **10809**.
+
+Проверка на хосте:
+
+```bash
+sudo systemctl status mihomo
+curl -x http://127.0.0.1:10809 https://api.openai.com/v1/models \
+  -H "Authorization: Bearer $OPENAI_TOKEN"
+```
+
+Ответ `401` без ключа — нормально: прокси работает, нужен валидный `OPENAI_TOKEN`.
+
+### Переменные бота
+
+В `.env` / конфиге деплоя контейнера:
+
+```env
+HAPP_SUBSCRIPTION_URL=https://bot.tiroel.ru/t-consult_service/xxxxxxx/486xxxxxx
+HAPP_PROXY_IP=host.docker.internal
+HAPP_PROXY_PORT=10809
+OPENAI_TOKEN=sk-...
+```
+
+`host.docker.internal` — адрес VPS-хоста изнутри контейнера. В `docker-compose.yml` для этого добавлен `extra_hosts`:
+
+```yaml
+extra_hosts:
+  - "host.docker.internal:host-gateway"
+```
+
+На проде (yc-container-daemon) те же переменные и `extra_hosts` нужно прописать в конфиге контейнера `gptipsbot-app`.
+
+### Проверка из контейнера
+
+```bash
+docker exec gptipsbot-app curl -x http://host.docker.internal:10809 \
+  https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_TOKEN"
+```
+
+В Telegram: `/vpn_check` с админского аккаунта.
+
+### Управление mihomo
+
+```bash
+sudo systemctl status mihomo
+sudo systemctl restart mihomo
+sudo journalctl -u mihomo -f
+ss -tln | grep 10809
+```
+
+При смене подписки — отредактируйте `url` в `/etc/mihomo/config.yaml` и выполните `sudo systemctl restart mihomo`, либо перезапустите `setup-mihomo.sh`.
+
+Конфиг и бинарник на хосте:
+
+| Путь | Описание |
+|------|----------|
+| `/usr/local/bin/mihomo` | Бинарник |
+| `/etc/mihomo/config.yaml` | Конфиг (подписка, порт 10809) |
+| `/etc/systemd/system/mihomo.service` | Автозапуск |
+
 ## Как это работает
-* На ВМ крутятся оба контейнера. С приложением и с базой.
-* Есть третий контейнер, который обновляет приложение как только в registry появлется новый latest образ
+* На ВМ крутятся контейнеры: бот, БД, fluentbit. **mihomo** — отдельно на хосте, вне Docker.
+* Watchtower обновляет образ `alanextar/gptipsbot:latest` и перезапускает контейнер бота. Mihomo при этом не перезапускается.
 * Настроен crontab на создание бэкапов БД. Посмотреть настроенные джобы `sudo crontab -l`. Там будет видно какой скрипт он запускает
 * Для рестора надо выполнить эту команду, **указав имя нужного файла**
 ```bash

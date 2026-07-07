@@ -1,4 +1,5 @@
 using GPTipsBot.Extensions;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -7,7 +8,8 @@ namespace GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
 
 public class DownloadPhotoStep(
     ITelegramBotClient botClient,
-    PhotoAnimationProgressNotifier progressNotifier) : StepBodyAsync
+    PhotoAnimationProgressNotifier progressNotifier,
+    ILogger<DownloadPhotoStep> logger) : StepBodyAsync
 {
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
@@ -28,7 +30,8 @@ public class DownloadPhotoStep(
         }
         catch (Exception ex)
         {
-            data.ErrorMessage = ex.Message;
+            logger.LogError(ex, "Failed to download photo for animation in chat {ChatId}", data.ChatId);
+            data.ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
         }
 
         return ExecutionResult.Next();

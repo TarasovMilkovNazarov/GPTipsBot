@@ -122,11 +122,12 @@ namespace GPTipsBot.UpdateHandlers
 
                 logger.LogError(ex, $"Что-то пошло не так при получении ответа ({statusCode}) от создателя картинок.");
 
-                await botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
+                await botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrong);
             }
             catch(Exception ex)
             {
-                await botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrongWithImageService);
+                logger.LogError(ex, "Image generation failed for chat {ChatId}", userKey.ChatId);
+                await botClient.SendMessage(userKey.ChatId, BotResponse.SomethingWentWrong);
             }
             finally
             {

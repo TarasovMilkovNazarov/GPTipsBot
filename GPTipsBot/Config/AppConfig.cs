@@ -18,6 +18,10 @@ namespace GPTipsBot.Config
         public static string Env => Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         public static string? Version => Environment.GetEnvironmentVariable("GPTIPSBOT_VERSION");
         public static string? CommitHash => Environment.GetEnvironmentVariable("GPTIPSBOT_COMMITHASH");
+        public static string OpenAiToken =>
+            IsDevelopment && DebugOpenAiApiKey is not null
+                ? DebugOpenAiApiKey
+                : GetEnvStrict("OPENAI_TOKEN");
         public static string? DebugOpenAiApiKey => Environment.GetEnvironmentVariable("DEBUG_OPENAI_TOKEN");
         public static string YandexCloudApiKey => GetEnvStrict("YC_API_KEY");
         public static string YandexIamToken => Environment.GetEnvironmentVariable("YC_IAM_TOKEN");
@@ -26,6 +30,11 @@ namespace GPTipsBot.Config
         public static string ProxyApiApiKey => Environment.GetEnvironmentVariable("WWW_PROXY_API_API_KEY");
         public static string PawanOsmanApiKey => Environment.GetEnvironmentVariable("PAWAN_OSMAN_API_KEY");
         public static string? GramadsBearerToken => Environment.GetEnvironmentVariable("GRAMADS_BEARER");
+        public static string? HappSubscriptionUrl => Environment.GetEnvironmentVariable("HAPP_SUBSCRIPTION_URL");
+        public static string HappProxyIp => Environment.GetEnvironmentVariable("HAPP_PROXY_IP") ?? "127.0.0.1";
+        public static int HappProxyPort => int.TryParse(Environment.GetEnvironmentVariable("HAPP_PROXY_PORT"), out var port) ? port : 10809;
+        public static string? HappProxyLogin => Environment.GetEnvironmentVariable("HAPP_PROXY_LOGIN");
+        public static string? HappProxyPassword => Environment.GetEnvironmentVariable("HAPP_PROXY_PASSWORD");
 
         private static string GetEnvStrict(string name)
         {
