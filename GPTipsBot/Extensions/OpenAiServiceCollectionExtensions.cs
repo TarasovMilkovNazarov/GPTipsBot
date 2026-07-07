@@ -17,7 +17,7 @@ public static class OpenAiServiceCollectionExtensions
             new OpenAiOptions
             {
                 ApiKey = AppConfig.OpenAiToken,
-                DefaultModelId = GptModels.Models.Gpt_3_5_Turbo
+                DefaultModelId = GptModels.Models.Gpt_4o_mini
             },
             sp.GetRequiredService<HappHttpClient>()));
 

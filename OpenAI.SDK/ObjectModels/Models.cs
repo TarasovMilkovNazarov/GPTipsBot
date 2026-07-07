@@ -100,7 +100,8 @@ public static class Models
         Gpt_4_turbo_2024_04_09,
         Gpt_4o,
         Gpt_4o_2024_05_13,
-        
+        Gpt_4o_mini,
+
         WhisperV1,
 
         Dall_e_2,
@@ -218,6 +219,8 @@ public static class Models
     /// 128,000 tokens	Up to Oct 2023
     /// </summary>
     public static string Gpt_4o_2024_05_13 => "gpt-4o-2024-05-13";
+
+    public static string Gpt_4o_mini => "gpt-4o-mini";
 
 
     public static string Ada => "ada";
@@ -450,6 +453,7 @@ public static class Models
             Model.Gpt_4_turbo_2024_04_09 => Gpt_4_turbo_2024_04_09,
             Model.Gpt_4o => Gpt_4o,
             Model.Gpt_4o_2024_05_13 => Gpt_4o_2024_05_13,
+            Model.Gpt_4o_mini => Gpt_4o_mini,
             Model.Tts_1 => Tts_1,
             Model.Tts_1_hd => Tts_1_hd,
             Model.Text_moderation_007 => TextModeration007,

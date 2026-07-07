@@ -62,7 +62,7 @@ namespace GPTipsBot.Services
 
         public static long CountTokens(string message)
         {
-            var tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
+            var tikToken = TikToken.EncodingForModel("gpt-4o-mini");
             var i = tikToken.Encode(message); //[15339, 1917]
 
             return i.Count;

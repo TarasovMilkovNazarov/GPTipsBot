@@ -94,9 +94,9 @@ namespace GPTipsBot.Services
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // handled below via response
+                    _log.LogError(ex, "OpenAI request failed on attempt #{RetryAttempt}", retryAttempt);
                 }
 
                 context["retryAttempt"] = retryAttempt + 1;
