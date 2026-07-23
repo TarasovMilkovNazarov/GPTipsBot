@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Config;
 using GPTipsBot.Extensions;
+using GPTipsBot.Services;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -16,7 +17,8 @@ public class TelegramSink : ILogEventSink
 
         try
         {
-            var botClient = new TelegramBotClient(new TelegramBotClientOptions(AppConfig.TelegramToken));
+            using var httpClient = new HttpClient(new HappProxyClientHandler());
+            var botClient = new TelegramBotClient(AppConfig.TelegramToken, httpClient);
             foreach (var adminId in AppConfig.AdminIds)
             {
                 var text = $"""

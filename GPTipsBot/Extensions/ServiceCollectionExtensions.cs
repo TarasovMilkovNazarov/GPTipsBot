@@ -52,13 +52,6 @@ namespace GPTipsBot.Extensions
                 options.ResourcesPath = "Resources";
             });
 
-            services.AddHttpClient("telegram_bot_client")
-                    .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
-                    {
-                        TelegramBotClientOptions options = new(AppConfig.TelegramToken);
-                        return new TelegramBotClient(options);
-                    });
-
             services.AddScoped<MainHandler>();
             services.AddScoped<ReceiverService>();
             services.AddHostedService<PollingService>();
@@ -90,9 +83,11 @@ namespace GPTipsBot.Extensions
             .AddScoped<ContextWindow>()
             .AddRepositories()
             .AddScoped<MoneyService>()
-            .AddSingleton<ITelegramBotClient>(x =>
+            .AddSingleton<ITelegramBotClient>(_ =>
             {
-                var botClient = ActivatorUtilities.CreateInstance<TelegramBotClient>(x, AppConfig.TelegramToken);
+                // Отдельный HttpClient: HappHttpClient OpenAI мутирует BaseAddress/headers.
+                var httpClient = new HttpClient(new HappProxyClientHandler());
+                var botClient = new TelegramBotClient(AppConfig.TelegramToken, httpClient);
 
                 CultureInfo.CurrentUICulture = LocalizationManager.Ru;
                 InitializeBot(botClient, "ru");
