@@ -17,5 +17,5 @@ public static class PaymentConfig
     public const int NewbieFreeImageGenerations = 10;
     public const int NewbieFreeTextRecognitions = 10;
     public const int NewbieFreeChatGptRequests = 10;
-    public const int MinRechargeAmount = 10;
+    public const int MinRechargeAmount = 1;
 };

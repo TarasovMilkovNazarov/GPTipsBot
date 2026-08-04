@@ -4,6 +4,7 @@ using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
+using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -11,8 +12,17 @@ using Invoice = GPTipsBot.Models.Invoice;
 
 namespace GPTipsBot.Services;
 
+public enum PaymentConfirmResult
+{
+    Ignored,
+    DepositCredited,
+    DonateConfirmed
+}
+
 public class MoneyService
 {
+    private const string DonatePayloadPrefix = "donate_";
+
     private readonly WalletRepository _walletRepository;
     private readonly UserRepository _userRepository;
     private readonly InvoiceRepository _invoiceRepository;
@@ -103,12 +113,117 @@ public class MoneyService
             chatId: userId,
             title: string.Format(BotResponse.DonateTitle, starsCount),
             description: BotResponse.DonateText,
-            payload: $"donate_{invoice.Id.ToString()}",
+            payload: $"{DonatePayloadPrefix}{invoice.Id}",
             providerToken: "",
             currency: Currency.Stars,
             prices: new[] { new LabeledPrice("Donate", starsCount) }
         );
 
+    }
+
+    public bool TryValidatePreCheckout(PreCheckoutQuery query, out string? errorMessage)
+    {
+        errorMessage = null;
+
+        if (!TryParseInvoicePayload(query.InvoicePayload, out var invoiceId, out _))
+        {
+            errorMessage = "Invalid invoice";
+            return false;
+        }
+
+        var invoice = _invoiceRepository.GetById(invoiceId);
+        if (invoice == null || invoice.Status != InvoiceStatus.Created)
+        {
+            errorMessage = "Invoice not found";
+            return false;
+        }
+
+        if (invoice.UserId != query.From.Id)
+        {
+            errorMessage = "Invoice user mismatch";
+            return false;
+        }
+
+        if (invoice.Amount != query.TotalAmount || query.Currency != Currency.Stars)
+        {
+            errorMessage = "Invoice amount mismatch";
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<PaymentConfirmResult> ConfirmSuccessfulPaymentAsync(
+        SuccessfulPayment payment,
+        long userId,
+        CancellationToken cancellationToken)
+    {
+        if (!TryParseInvoicePayload(payment.InvoicePayload, out var invoiceId, out var isDonate))
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        var invoice = _invoiceRepository.GetById(invoiceId);
+        if (invoice == null)
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        if (invoice.UserId != userId ||
+            invoice.Amount != payment.TotalAmount ||
+            payment.Currency != Currency.Stars)
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        if (invoice.Status == InvoiceStatus.Paid)
+        {
+            return isDonate ? PaymentConfirmResult.DonateConfirmed : PaymentConfirmResult.DepositCredited;
+        }
+
+        if (invoice.Status != InvoiceStatus.Created)
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        // Atomic claim: only one concurrent confirm can transition Created -> Paid.
+        var claimed = await _context.Invoices
+            .Where(i => i.Id == invoiceId && i.Status == InvoiceStatus.Created)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(i => i.Status, InvoiceStatus.Paid),
+                cancellationToken);
+
+        if (claimed == 0)
+        {
+            return isDonate ? PaymentConfirmResult.DonateConfirmed : PaymentConfirmResult.DepositCredited;
+        }
+
+        if (isDonate)
+        {
+            return PaymentConfirmResult.DonateConfirmed;
+        }
+
+        await AddMoneyAsync(userId, (int)payment.TotalAmount, Currency.Stars, cancellationToken);
+        return PaymentConfirmResult.DepositCredited;
+    }
+
+    public static bool TryParseInvoicePayload(string? payload, out long invoiceId, out bool isDonate)
+    {
+        invoiceId = 0;
+        isDonate = false;
+
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            return false;
+        }
+
+        if (payload.StartsWith(DonatePayloadPrefix, StringComparison.Ordinal))
+        {
+            isDonate = true;
+            return long.TryParse(payload[DonatePayloadPrefix.Length..], out invoiceId);
+        }
+
+        return long.TryParse(payload, out invoiceId);
     }
 
     public async Task AddMoneyAsync(long userId, int amount, string currency,  CancellationToken cancellationToken)

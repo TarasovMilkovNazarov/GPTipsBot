@@ -12,10 +12,11 @@ using Telegram.Bot;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
 using GPTipsBot.Services.YandexCloud;
+using GPTipsBot.Services.YandexCloud.Workflow;
+using GPTipsBot.Services.YandexCloud.Workflow.Steps;
 using GPTipsBot.Services.YandexPhotoAnimator;
 using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
-using GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
-using WorkflowCore.Interface;
+using PhotoAnimationSteps = GPTipsBot.Services.YandexPhotoAnimator.Workflow.Steps;
 using WorkflowCore.Persistence.PostgreSQL;
 using Quartz;
 
@@ -27,13 +28,17 @@ namespace GPTipsBot.Extensions
         {
             services.AddOpenAiClient();
             services.AddWorkflow(cfg => cfg.UsePostgreSQL(AppConfig.ConnectionString, false, true));
-            services.AddTransient<DownloadPhotoStep>();
-            services.AddTransient<UploadImageStep>();
-            services.AddTransient<GenerateVideoStep>();
-            services.AddTransient<WaitForVideoStep>();
+            services.AddTransient<PhotoAnimationSteps.DownloadPhotoStep>();
+            services.AddTransient<PhotoAnimationSteps.UploadImageStep>();
+            services.AddTransient<PhotoAnimationSteps.GenerateVideoStep>();
+            services.AddTransient<PhotoAnimationSteps.WaitForVideoStep>();
+            services.AddTransient<PhotoAnimationSteps.NotifyUserStep>();
+            services.AddTransient<StartGenerateImageStep>();
+            services.AddTransient<WaitForImageStep>();
             services.AddTransient<NotifyUserStep>();
             services.AddSingleton<PhotoAnimationProgressNotifier>();
             services.AddSingleton<PhotoAnimationWorkflowService>();
+            services.AddSingleton<ImageGenerationWorkflowService>();
             services.AddHostedService<WorkflowHostService>();
 
             services.AddSingleton<ISchedulerService, SchedulerService>();

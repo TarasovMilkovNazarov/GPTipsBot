@@ -91,6 +91,7 @@ namespace GPTipsBot.Extensions
                 case MessageType.Text:
                 case MessageType.Voice:
                 case MessageType.Photo:
+                case MessageType.SuccessfulPayment:
                     return false;
                 case MessageType.Video:
                 case MessageType.Audio:

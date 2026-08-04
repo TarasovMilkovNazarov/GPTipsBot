@@ -68,21 +68,35 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.PreCheckoutQuery != null)
             {
-                if (update.PreCheckoutQuery.InvoicePayload.StartsWith("donate"))
+                if (moneyService.TryValidatePreCheckout(update.PreCheckoutQuery, out var errorMessage))
                 {
-                    await botClient.SendMessage(update.UserChatKey.Id,
-                        BotResponse.DonateText, replyMarkup: null);
-
                     await botClient.AnswerPreCheckoutQuery(
                         preCheckoutQueryId: update.PreCheckoutQuery.Id);
                 }
                 else
                 {
                     await botClient.AnswerPreCheckoutQuery(
-                        preCheckoutQueryId: update.PreCheckoutQuery.Id);
+                        preCheckoutQueryId: update.PreCheckoutQuery.Id,
+                        errorMessage: errorMessage ?? "Invalid invoice");
+                }
 
-                    await moneyService.AddMoneyAsync(update.UserChatKey.Id, update.PreCheckoutQuery.TotalAmount,
-                        "TRX", CancellationToken.None);
+                return;
+            }
+
+            if (update.Message?.SuccessfulPayment != null)
+            {
+                var confirmResult = await moneyService.ConfirmSuccessfulPaymentAsync(
+                    update.Message.SuccessfulPayment,
+                    update.UserChatKey.Id,
+                    CancellationToken.None);
+
+                if (confirmResult == PaymentConfirmResult.DonateConfirmed)
+                {
+                    await botClient.SendMessage(update.UserChatKey.Id,
+                        BotResponse.DonateText, replyMarkup: null);
+                }
+                else if (confirmResult == PaymentConfirmResult.DepositCredited)
+                {
                     var profile = await userService.GetUserProfile(update.UserChatKey.Id);
                     var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);

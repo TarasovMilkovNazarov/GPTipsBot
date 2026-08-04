@@ -13,23 +13,24 @@ namespace GPTipsBot.Services.YandexCloud
         Task<string> Recognize(string base64String);
     }
 
+    public record ImageGenerationStatus(bool Done, string? ImageBase64);
+
     public interface IImageGenerator
     {
-        Task<string> GenerateImage(string prompt, bool square);
+        Task<string> StartImageGenerationAsync(string prompt, bool square);
+        Task<ImageGenerationStatus> GetImageGenerationStatusAsync(string operationId);
     }
 
     public class YaCloudClient : ITextRecognizer, IImageGenerator
     {
         private readonly ILogger<YaCloudClient> _logger;
         private readonly HttpClient _httpClient;
-        private readonly string _token;
         private readonly string _folderId;
 
         public YaCloudClient(ILogger<YaCloudClient> logger, HttpClient httpClient)
         {
             _logger = logger;
             _httpClient = httpClient;
-            _token = AppConfig.YandexCloudApiKey;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Api-Key", AppConfig.YandexCloudApiKey);
             _folderId = AppConfig.YandexCloudFolderId;
         }
@@ -59,7 +60,7 @@ namespace GPTipsBot.Services.YandexCloud
             return !string.IsNullOrWhiteSpace(result?.Result?.TextAnnotation?.FullText) ? result.Result.TextAnnotation.FullText : BotResponse.CantRecognizeText;
         }
 
-        public async Task<string> GenerateImage(string prompt, bool square)
+        public async Task<string> StartImageGenerationAsync(string prompt, bool square)
         {
             var request = new HttpRequestMessage(HttpMethod.Post,
                 "https://llm.api.cloud.yandex.net/foundationModels/v1/imageGenerationAsync");
@@ -93,21 +94,19 @@ namespace GPTipsBot.Services.YandexCloud
             var contentResult = await response.Content.ReadAsStringAsync();
 
             var result = JsonSerializer.Deserialize<YandexArtResponse>(contentResult);
+            return result?.Id ?? throw new Exception("YandexART did not return operation id");
+        }
 
-            while (true)
-            {
-                await Task.Delay(3000);
-                var getResultResponse = await _httpClient.GetAsync($"https://llm.api.cloud.yandex.net:443/operations/{result.Id}");
+        public async Task<ImageGenerationStatus> GetImageGenerationStatusAsync(string operationId)
+        {
+            var getResultResponse = await _httpClient.GetAsync(
+                $"https://llm.api.cloud.yandex.net:443/operations/{operationId}");
+            getResultResponse.EnsureSuccessStatusCode();
 
-                result = JsonSerializer.Deserialize<YandexArtResponse>(await getResultResponse.Content.ReadAsStringAsync());
+            var result = JsonSerializer.Deserialize<YandexArtResponse>(
+                await getResultResponse.Content.ReadAsStringAsync());
 
-                if (result?.Done == true)
-                {
-                    break;
-                }
-            }
-
-            return result?.Response?.Image ?? throw new Exception();
+            return new ImageGenerationStatus(result?.Done == true, result?.Response?.Image);
         }
     }
 }
