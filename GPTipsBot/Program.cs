@@ -41,6 +41,8 @@ await schedulerService.ScheduleJob<RemoveOldRecordsJob>(scheduler, DateBuilder.F
     TimeSpan.FromDays(14),  CancellationToken.None);
 await schedulerService.ScheduleJob<DeactivateKickedUsersJob>(scheduler, DateBuilder.FutureDate(5, IntervalUnit.Day),
     TimeSpan.FromDays(5),  CancellationToken.None);
+await schedulerService.ScheduleJob<SyncYooKassaPaymentsJob>(scheduler, DateBuilder.FutureDate(1, IntervalUnit.Minute),
+    TimeSpan.FromMinutes(2), CancellationToken.None);
 await scheduler.Start();
 
 await app.RunAsync();

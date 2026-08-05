@@ -27,6 +27,7 @@ public static class PaymentCallbacks
     public const string StarsPrefix = "pay_stars_";
     public const string YooKassaPrefix = "pay_yk_";
     public const string PackagePrefix = "dep_";
+    public const string YooKassaCheckPrefix = "yk_check_";
 
     public static bool TryParsePackage(string? data, out int starsCount)
     {
@@ -40,6 +41,15 @@ public static class PaymentCallbacks
 
         return starsCount >= PaymentConfig.MinRechargeStars &&
                MoneyService.ToKopecks(starsCount) >= PaymentConfig.MinRechargeRub * 100L;
+    }
+
+    public static bool TryParseCheck(string? data, out long invoiceId)
+    {
+        invoiceId = 0;
+        return !string.IsNullOrWhiteSpace(data) &&
+               data.StartsWith(YooKassaCheckPrefix, StringComparison.Ordinal) &&
+               long.TryParse(data[YooKassaCheckPrefix.Length..], out invoiceId) &&
+               invoiceId > 0;
     }
 
     public static bool TryParse(string? data, out string provider, out int starsCount)
@@ -329,7 +339,7 @@ public class MoneyService
                 cancellationToken);
 
         await SendYooKassaPaymentLinkAsync(
-            userId, starsCount, rubValue, payment.Confirmation.ConfirmationUrl, cancellationToken);
+            userId, starsCount, rubValue, payment.Confirmation.ConfirmationUrl, invoice.Id, cancellationToken);
         _logger.LogInformation(
             "CreateYooKassa: link sent to userId={UserId} invoiceId={InvoiceId} paymentId={PaymentId}",
             userId,
@@ -346,7 +356,7 @@ public class MoneyService
             ? "https://yookassa.ru/"
             : $"https://t.me/{AppConfig.BotName.TrimStart('@')}";
 
-        await SendYooKassaPaymentLinkAsync(userId, starsCount, rubValue, stubUrl, cancellationToken);
+        await SendYooKassaPaymentLinkAsync(userId, starsCount, rubValue, stubUrl, invoiceId: null, cancellationToken);
     }
 
     private async Task SendYooKassaPaymentLinkAsync(
@@ -354,16 +364,112 @@ public class MoneyService
         int starsCount,
         string rubValue,
         string paymentUrl,
+        long? invoiceId,
         CancellationToken cancellationToken)
     {
-        var keyboard = new InlineKeyboardMarkup(
-            InlineKeyboardButton.WithUrl(BotResponse.OpenYooKassaPaymentButton, paymentUrl));
+        var rows = new List<IEnumerable<InlineKeyboardButton>>
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithUrl(BotResponse.OpenYooKassaPaymentButton, paymentUrl)
+            }
+        };
+
+        if (invoiceId is > 0)
+        {
+            rows.Add(new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    BotResponse.CheckYooKassaPaymentButton,
+                    $"{PaymentCallbacks.YooKassaCheckPrefix}{invoiceId}")
+            });
+        }
 
         await _botClient.SendMessage(
             userId,
             string.Format(BotResponse.YooKassaPaymentLinkResponse, starsCount, rubValue),
-            replyMarkup: keyboard,
+            replyMarkup: new InlineKeyboardMarkup(rows),
             cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// Poll YooKassa API for an invoice (manual button / background sync when webhook is missed).
+    /// </summary>
+    public async Task<PaymentConfirmResult> SyncYooKassaInvoiceAsync(
+        long invoiceId,
+        long userId,
+        CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "SyncYooKassa: manual/user sync invoiceId={InvoiceId} userId={UserId}",
+            invoiceId,
+            userId);
+
+        var invoice = _invoiceRepository.GetById(invoiceId);
+        if (invoice == null ||
+            invoice.Provider != PaymentProvider.YooKassa ||
+            invoice.UserId != userId)
+        {
+            _logger.LogWarning(
+                "SyncYooKassa: invoice not found or user mismatch invoiceId={InvoiceId}",
+                invoiceId);
+            return PaymentConfirmResult.Ignored;
+        }
+
+        if (invoice.Status == InvoiceStatus.Paid)
+        {
+            return PaymentConfirmResult.DepositCredited;
+        }
+
+        if (string.IsNullOrWhiteSpace(invoice.ExternalPaymentId))
+        {
+            _logger.LogWarning("SyncYooKassa: invoice {InvoiceId} has no ExternalPaymentId", invoiceId);
+            return PaymentConfirmResult.Ignored;
+        }
+
+        return await ConfirmYooKassaPaymentAsync(invoice.ExternalPaymentId, cancellationToken);
+    }
+
+    /// <summary>
+    /// Background catch-up for Created YooKassa invoices with a known payment id.
+    /// </summary>
+    public async Task<int> SyncPendingYooKassaPaymentsAsync(CancellationToken cancellationToken)
+    {
+        if (!YooKassaConfig.IsEnabled)
+        {
+            return 0;
+        }
+
+        var pending = _invoiceRepository.GetPendingYooKassa(TimeSpan.FromHours(24));
+        _logger.LogInformation("SyncYooKassa: pending invoices to poll={Count}", pending.Count);
+
+        var credited = 0;
+        foreach (var invoice in pending)
+        {
+            if (string.IsNullOrWhiteSpace(invoice.ExternalPaymentId))
+            {
+                continue;
+            }
+
+            try
+            {
+                var result = await ConfirmYooKassaPaymentAsync(invoice.ExternalPaymentId, cancellationToken);
+                if (result == PaymentConfirmResult.DepositCredited)
+                {
+                    credited++;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SyncYooKassa: failed for invoice {InvoiceId} payment {PaymentId}",
+                    invoice.Id,
+                    invoice.ExternalPaymentId);
+            }
+        }
+
+        _logger.LogInformation("SyncYooKassa: poll finished creditedOrConfirmed={Credited}", credited);
+        return credited;
     }
 
     public bool TryValidatePreCheckout(PreCheckoutQuery query, out string? errorMessage)

@@ -56,20 +56,26 @@ public static class YooKassaWebhookEndpoint
             return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
 
-        var ipAllowed = !AppConfig.IsProduction || YooKassaIpAllowList.IsAllowed(remoteIp);
+        // IP allowlist is advisory: real auth is GetPaymentAsync with shop secret.
+        // Behind Caddy, RemoteIp may be the proxy if ForwardedHeaders misconfigured;
+        // hard 401 then drops all YooKassa notifications.
+        var ipAllowed = !AppConfig.IsProduction ||
+                        YooKassaIpAllowList.IsAllowed(remoteIp) ||
+                        YooKassaIpAllowList.IsAllowedFromForwarded(forwardedFor);
+
         logger.LogInformation(
-            "Webhook IP check: isProduction={IsProduction} remoteIp={RemoteIp} allowed={Allowed}",
+            "Webhook IP check: isProduction={IsProduction} remoteIp={RemoteIp} xff={XForwardedFor} allowed={Allowed}",
             AppConfig.IsProduction,
             remoteIp,
+            forwardedFor,
             ipAllowed);
 
         if (!ipAllowed)
         {
             logger.LogWarning(
-                "Webhook rejected by IP allowlist: remoteIp={RemoteIp} xff={XForwardedFor}",
+                "Webhook IP not in YooKassa allowlist (continuing; payment will be verified via API): remoteIp={RemoteIp} xff={XForwardedFor}",
                 remoteIp,
                 forwardedFor);
-            return Results.Unauthorized();
         }
 
         using var reader = new StreamReader(request.Body);

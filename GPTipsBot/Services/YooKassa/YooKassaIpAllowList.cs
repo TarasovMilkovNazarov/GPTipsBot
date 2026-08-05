@@ -56,6 +56,25 @@ public static class YooKassaIpAllowList
         return false;
     }
 
+    /// <summary>True if any hop in X-Forwarded-For is a YooKassa notification IP.</summary>
+    public static bool IsAllowedFromForwarded(string? xForwardedFor)
+    {
+        if (string.IsNullOrWhiteSpace(xForwardedFor))
+        {
+            return false;
+        }
+
+        foreach (var part in xForwardedFor.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (IPAddress.TryParse(part, out var ip) && IsAllowed(ip))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool IsInCidr(IPAddress address, IPAddress network, int prefixLength)
     {
         var addressBytes = address.GetAddressBytes();

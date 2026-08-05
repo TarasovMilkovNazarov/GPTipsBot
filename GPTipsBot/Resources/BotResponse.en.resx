@@ -266,6 +266,15 @@ Your balance will update automatically after a successful payment.</value>
   <data name="OpenYooKassaPaymentButton" xml:space="preserve">
     <value>Pay now</value>
   </data>
+  <data name="CheckYooKassaPaymentButton" xml:space="preserve">
+    <value>Check payment</value>
+  </data>
+  <data name="YooKassaPaymentCheckPending" xml:space="preserve">
+    <value>Payment not received yet. If you already paid, wait a minute and try again.</value>
+  </data>
+  <data name="YooKassaPaymentCheckOk" xml:space="preserve">
+    <value>Payment found, balance updated ✅</value>
+  </data>
   <data name="YooKassaPaymentDescription" xml:space="preserve">
     <value>GPTipsBot balance top-up: {0} stars</value>
   </data>

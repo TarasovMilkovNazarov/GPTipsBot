@@ -307,6 +307,15 @@
   <data name="OpenYooKassaPaymentButton" xml:space="preserve">
     <value>Перейти к оплате</value>
   </data>
+  <data name="CheckYooKassaPaymentButton" xml:space="preserve">
+    <value>Проверить оплату</value>
+  </data>
+  <data name="YooKassaPaymentCheckPending" xml:space="preserve">
+    <value>Оплата ещё не поступила. Если вы уже заплатили — подождите минуту и нажмите снова.</value>
+  </data>
+  <data name="YooKassaPaymentCheckOk" xml:space="preserve">
+    <value>Оплата найдена, баланс обновлён ✅</value>
+  </data>
   <data name="YooKassaPaymentDescription" xml:space="preserve">
     <value>Пополнение баланса GPTipsBot: {0} stars</value>
   </data>

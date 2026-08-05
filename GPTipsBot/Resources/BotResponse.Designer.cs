@@ -597,6 +597,33 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Проверить оплату.
+        /// </summary>
+        public static string CheckYooKassaPaymentButton {
+            get {
+                return ResourceManager.GetString("CheckYooKassaPaymentButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Оплата ещё не поступила. Если вы уже заплатили — подождите минуту и нажмите снова..
+        /// </summary>
+        public static string YooKassaPaymentCheckPending {
+            get {
+                return ResourceManager.GetString("YooKassaPaymentCheckPending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Оплата найдена, баланс обновлён ✅.
+        /// </summary>
+        public static string YooKassaPaymentCheckOk {
+            get {
+                return ResourceManager.GetString("YooKassaPaymentCheckOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Пополнение баланса GPTipsBot: {0} stars.
         /// </summary>
         public static string YooKassaPaymentDescription {

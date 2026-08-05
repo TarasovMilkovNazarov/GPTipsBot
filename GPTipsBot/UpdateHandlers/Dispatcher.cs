@@ -84,6 +84,31 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             if (update.CallbackQuery != null &&
+                PaymentCallbacks.TryParseCheck(update.CallbackQuery.Data, out var checkInvoiceId))
+            {
+                var syncResult = await moneyService.SyncYooKassaInvoiceAsync(
+                    checkInvoiceId,
+                    update.UserChatKey.Id,
+                    CancellationToken.None);
+
+                if (syncResult == PaymentConfirmResult.DepositCredited)
+                {
+                    await botClient.AnswerCallbackQuery(
+                        update.CallbackQuery.Id,
+                        BotResponse.YooKassaPaymentCheckOk);
+                }
+                else
+                {
+                    await botClient.AnswerCallbackQuery(
+                        update.CallbackQuery.Id,
+                        BotResponse.YooKassaPaymentCheckPending,
+                        showAlert: true);
+                }
+
+                return;
+            }
+
+            if (update.CallbackQuery != null &&
                 PaymentCallbacks.TryParsePackage(update.CallbackQuery.Data, out var packageStars))
             {
                 await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
