@@ -14,6 +14,7 @@ public class RefreshFreeLimitsJob(ApplicationContext context) : IJob
                 .SetProperty(u => u.FreeImageGenerations, PaymentConfig.FreeImageGenerations)
                 .SetProperty(u => u.FreeImageTextRecognitions, PaymentConfig.FreeTextRecognitions)
                 .SetProperty(u => u.FreeGptRequests, PaymentConfig.FreeChatGptRequests)
+                .SetProperty(u => u.FreePhotoAnimations, PaymentConfig.FreePhotoAnimations)
             );
     }
 }

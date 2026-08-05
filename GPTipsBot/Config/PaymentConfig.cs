@@ -4,6 +4,7 @@ public static class PaymentConfig
 {
     public const double Gpt = 0.1;
     public const double Image = 0.5;
+    public const double Animation = 0.5;
 
     /// <summary>
     /// Число бесплатных запросов на генерацию изображений, которое добавляется джобой обновления лимитов
@@ -11,12 +12,14 @@ public static class PaymentConfig
     public const int FreeImageGenerations = 10;
     public const int FreeTextRecognitions = 10;
     public const int FreeChatGptRequests = 10;
+    public const int FreePhotoAnimations = 2;
     /// <summary>
     /// Число бесплатных запросов для новых пользователей
     /// </summary>
     public const int NewbieFreeImageGenerations = 10;
     public const int NewbieFreeTextRecognitions = 10;
     public const int NewbieFreeChatGptRequests = 10;
+    public const int NewbieFreePhotoAnimations = 2;
 
     /// <summary>Minimum YooKassa top-up in rubles.</summary>
     public const int MinRechargeRub = 50;

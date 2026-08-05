@@ -6,4 +6,5 @@
     public long Images { get; set; }
     public long ImageTexts { get; set; }
     public long GptRequests { get; set; }
+    public long PhotoAnimations { get; set; }
 }

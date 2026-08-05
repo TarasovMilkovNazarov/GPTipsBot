@@ -20,6 +20,7 @@ namespace GPTipsBot.Db
         {
             Database.EnsureCreated();
             EnsureYooKassaInvoiceColumns();
+            EnsureFreePhotoAnimationsColumn();
             Guid = Guid.NewGuid();
         }
         
@@ -37,6 +38,16 @@ namespace GPTipsBot.Db
                 ALTER TABLE "Invoices" ADD COLUMN IF NOT EXISTS "Provider" integer NOT NULL DEFAULT 0;
                 ALTER TABLE "Invoices" ADD COLUMN IF NOT EXISTS "ExternalPaymentId" text NULL;
                 ALTER TABLE "Invoices" ADD COLUMN IF NOT EXISTS "FiatAmountKopecks" bigint NULL;
+                """);
+        }
+
+        /// <summary>
+        /// EnsureCreated does not alter existing tables; add free animation counter idempotently.
+        /// </summary>
+        private void EnsureFreePhotoAnimationsColumn()
+        {
+            Database.ExecuteSqlRaw($"""
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "FreePhotoAnimations" integer NOT NULL DEFAULT {PaymentConfig.NewbieFreePhotoAnimations};
                 """);
         }
     }

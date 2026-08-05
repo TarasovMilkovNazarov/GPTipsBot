@@ -224,13 +224,14 @@ Free requests:
  -- ChatGpt: {3}
  -- image generations: {4}
  -- image text recognitions: {5}
+ -- photo animations: {6}
 </value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>1 star = 10 ChatGPT requests OR 2 image generations</value>
+    <value>1 star = 10 ChatGPT requests OR 2 image generations OR 2 photo animations</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1⭐ = 10 ChatGPT requests or 2 image generations
+    <value>1⭐ = 10 ChatGPT requests, 2 image generations or 2 photo animations
 
 Minimum top-up: {0} RUB ({1}⭐)
 Choose a package or enter a whole Stars amount:</value>
@@ -288,13 +289,13 @@ Your balance will update automatically after a successful payment.</value>
     <value>❗️Your free request limit for today has been reached.
 Top up your balance or wait for the free limits to reset.
 
-1⭐ = 10 ChatGPT requests or 2 image generations.</value>
+1⭐ = 10 ChatGPT requests, 2 image generations or 2 photo animations.</value>
   </data>
   <data name="TimeNoFreeRequests" xml:space="preserve">
     <value>❗️You've used all your free requests for today.
 Either add funds now or wait {0:%d} d {0:%h} h {0:%m} min for your free requests to refresh.
 
-1⭐ = 10 ChatGPT requests or 2 AI images</value>
+1⭐ = 10 ChatGPT requests, 2 image generations or 2 photo animations</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
     <value>🌟 Support our project! 💪

@@ -49,7 +49,8 @@ namespace GPTipsBot.Services
                 Stars = user.Wallet?.Balance ?? 0.0,
                 Images = user.FreeImageGenerations,
                 ImageTexts = user.FreeImageTextRecognitions,
-                GptRequests = user.FreeGptRequests
+                GptRequests = user.FreeGptRequests,
+                PhotoAnimations = user.FreePhotoAnimations
             };
 
             return profile;
@@ -121,6 +122,28 @@ namespace GPTipsBot.Services
             }
 
             user.Wallet!.Balance -= PaymentConfig.Image;
+            return true;
+        }
+
+        public async Task<bool> PayForAnimationAsync(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            Guard.Against.Null(user);
+
+            if (user.FreePhotoAnimations > 0)
+            {
+                user.FreePhotoAnimations -= 1;
+                _userRepository.Update(user);
+
+                return true;
+            }
+
+            if (user.Wallet == null || user.Wallet?.Balance < PaymentConfig.Animation)
+            {
+                return false;
+            }
+
+            user.Wallet!.Balance -= PaymentConfig.Animation;
             return true;
         }
 

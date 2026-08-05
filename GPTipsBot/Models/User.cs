@@ -20,6 +20,7 @@ namespace GPTipsBot.Models
         public int FreeImageGenerations { get; set; } = PaymentConfig.NewbieFreeImageGenerations;
         public int FreeImageTextRecognitions { get; set; } = PaymentConfig.NewbieFreeTextRecognitions;
         public int FreeGptRequests { get; set; } = PaymentConfig.NewbieFreeChatGptRequests;
+        public int FreePhotoAnimations { get; set; } = PaymentConfig.NewbieFreePhotoAnimations;
         public Wallet? Wallet { get; set; }
         [ForeignKey("Wallet")]
         public long? WalletId { get; set; }

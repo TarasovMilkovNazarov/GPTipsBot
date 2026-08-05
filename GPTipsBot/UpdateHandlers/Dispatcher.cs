@@ -10,6 +10,7 @@ using GPTipsBot.Config;
 using GPTipsBot.Enums;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
+using GPTipsBot.Jobs;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
@@ -39,7 +40,8 @@ namespace GPTipsBot.UpdateHandlers
         IGpt gptService,
         IImageCache imageCache,
         MessageRepository messageRepository,
-        PhotoAnimationProgressNotifier photoAnimationProgressNotifier)
+        PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
+        IJobService jobService)
         : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
@@ -155,7 +157,8 @@ namespace GPTipsBot.UpdateHandlers
                 {
                     var profile = await userService.GetUserProfile(update.UserChatKey.Id);
                     var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
-                        profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts);
+                        profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
+                        profile.PhotoAnimations);
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
@@ -241,6 +244,18 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
+                await using var dbTransaction = await context.Database.BeginTransactionAsync();
+                var successPayment = await userService.PayForAnimationAsync(userKey.Id);
+                if (!successPayment)
+                {
+                    await dbTransaction.RollbackAsync();
+                    context.ChangeTracker.Clear();
+
+                    var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
+                    await botClient.SendOutOfFreeRequestsMessageAsync(userKey.Id, nextExec);
+                    return;
+                }
+
                 var progressMessageId = await photoAnimationProgressNotifier.StartAsync(userKey.ChatId);
 
                 await gptService.StartAnimatePhoto(
@@ -250,6 +265,7 @@ namespace GPTipsBot.UpdateHandlers
                     userKey.Id,
                     progressMessageId);
 
+                await dbTransaction.CommitAsync();
                 imageCache.Remove(userKey.ChatId);
                 return;
             }
