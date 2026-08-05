@@ -48,8 +48,11 @@ public class YooKassaClient
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError("YooKassa create payment failed: {Status} {Body}", response.StatusCode, body);
-            throw new InvalidOperationException($"YooKassa create payment failed: {(int)response.StatusCode}");
+            throw new InvalidOperationException($"YooKassa create payment failed: {response.StatusCode} {body}");
         }
+
+        _logger.LogInformation("YooKassa create payment OK: {BodyPreview}",
+            body.Length <= 300 ? body : body[..300] + "...");
 
         var payment = JsonConvert.DeserializeObject<YooKassaPayment>(body, JsonSettings);
         if (payment == null || string.IsNullOrWhiteSpace(payment.Id))
@@ -71,8 +74,12 @@ public class YooKassaClient
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError("YooKassa get payment failed: {Status} {Body}", response.StatusCode, body);
-            throw new InvalidOperationException($"YooKassa get payment failed: {(int)response.StatusCode}");
+            throw new InvalidOperationException($"YooKassa get payment failed: {response.StatusCode} {body}");
         }
+
+        _logger.LogInformation("YooKassa get payment OK id={PaymentId}: {BodyPreview}",
+            paymentId,
+            body.Length <= 300 ? body : body[..300] + "...");
 
         var payment = JsonConvert.DeserializeObject<YooKassaPayment>(body, JsonSettings);
         if (payment == null)
@@ -88,6 +95,13 @@ public class YooKassaClient
         if (!YooKassaConfig.IsEnabled)
         {
             throw new InvalidOperationException("YooKassa is not configured");
+        }
+
+        if (!YooKassaConfig.HasValidSecretKeyFormat)
+        {
+            throw new InvalidOperationException(
+                "YOOKASSA_SECRET_KEY must be an API key from Merchant Profile → Integration → API keys " +
+                "(starts with test_ or live_). Do not use shopPassword or payout AgentID secret.");
         }
 
         var credentials = Convert.ToBase64String(
