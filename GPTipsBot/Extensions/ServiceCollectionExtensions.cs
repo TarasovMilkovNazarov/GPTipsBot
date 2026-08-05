@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Db;
+﻿using GPTipsBot.Services.YooKassa;
+using GPTipsBot.Db;
 using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
@@ -52,6 +53,7 @@ namespace GPTipsBot.Extensions
                 });
             });
             services.AddMemoryCache();
+            services.AddLogging();
             services.AddLocalization(options =>
             {
                 options.ResourcesPath = "Resources";
@@ -108,6 +110,10 @@ namespace GPTipsBot.Extensions
             services.AddDbContext<ApplicationContext>();
 
             services.AddHttpClient(nameof(OpenAiVpnConnectivityService));
+            services.AddHttpClient<YooKassaClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.yookassa.ru/v3/");
+            });
 
             services.AddImageCache();
             

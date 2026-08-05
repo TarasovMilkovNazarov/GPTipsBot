@@ -83,6 +83,37 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            if (update.CallbackQuery != null &&
+                PaymentCallbacks.TryParsePackage(update.CallbackQuery.Data, out var packageStars))
+            {
+                await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
+                await botClient.SendMessage(
+                    update.UserChatKey.Id,
+                    string.Format(BotResponse.ChoosePaymentMethod, packageStars,
+                        MoneyService.FormatRubAmount(packageStars)),
+                    replyMarkup: moneyService.BuildPaymentMethodKeyboard(packageStars));
+                return;
+            }
+
+            if (update.CallbackQuery != null &&
+                PaymentCallbacks.TryParse(update.CallbackQuery.Data, out var paymentProvider, out var payStarsCount))
+            {
+                await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
+
+                if (paymentProvider == PaymentCallbacks.StarsPrefix)
+                {
+                    await moneyService.SendInvoice(update.UserChatKey.Id, payStarsCount);
+                }
+                else if (paymentProvider == PaymentCallbacks.YooKassaPrefix)
+                {
+                    await moneyService.CreateYooKassaPaymentAsync(
+                        update.UserChatKey.Id, payStarsCount, CancellationToken.None);
+                }
+
+                await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
+                return;
+            }
+
             if (update.Message?.SuccessfulPayment != null)
             {
                 var confirmResult = await moneyService.ConfirmSuccessfulPaymentAsync(
@@ -137,13 +168,19 @@ namespace GPTipsBot.UpdateHandlers
             else if (lastCommand?.Type == CommandType.Deposit)
             {
                 if (!int.TryParse(update.Message?.Text, out var starsCount) ||
-                    starsCount < PaymentConfig.MinRechargeAmount)
+                    starsCount < PaymentConfig.MinRechargeStars ||
+                    MoneyService.ToKopecks(starsCount) < PaymentConfig.MinRechargeRub * 100L)
                 {
                     throw new ClientCanceledException(update.UserChatKey.ChatId,
-                        string.Format(BotResponse.InvalidDepositAmountResponse, PaymentConfig.MinRechargeAmount));
+                        string.Format(BotResponse.InvalidDepositAmountResponse,
+                            PaymentConfig.MinRechargeRub, PaymentConfig.MinRechargeStars));
                 }
 
-                await moneyService.SendInvoice(update.UserChatKey.Id, starsCount);
+                await botClient.SendMessage(
+                    update.UserChatKey.Id,
+                    string.Format(BotResponse.ChoosePaymentMethod, starsCount,
+                        MoneyService.FormatRubAmount(starsCount)),
+                    replyMarkup: moneyService.BuildPaymentMethodKeyboard(starsCount));
 
                 return;
             }

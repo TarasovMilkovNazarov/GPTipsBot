@@ -57,6 +57,15 @@ namespace GPTipsBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ExternalPaymentId")
+                        .HasColumnType("text");
+
+                    b.Property<long?>("FiatAmountKopecks")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 

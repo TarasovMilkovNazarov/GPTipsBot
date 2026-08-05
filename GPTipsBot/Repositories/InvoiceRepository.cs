@@ -10,4 +10,8 @@ public class InvoiceRepository(ApplicationContext context) : GenericRepository<I
 
     public Invoice? GetById(long id) =>
         _context.Invoices.AsNoTracking().FirstOrDefault(i => i.Id == id);
+
+    public Invoice? GetByExternalPaymentId(string externalPaymentId) =>
+        _context.Invoices.AsNoTracking()
+            .FirstOrDefault(i => i.ExternalPaymentId == externalPaymentId);
 }

@@ -19,12 +19,25 @@ namespace GPTipsBot.Db
         public ApplicationContext()
         {
             Database.EnsureCreated();
+            EnsureYooKassaInvoiceColumns();
             Guid = Guid.NewGuid();
         }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(AppConfig.ConnectionString);
+        }
+
+        /// <summary>
+        /// EnsureCreated does not alter existing tables; add YooKassa columns idempotently.
+        /// </summary>
+        private void EnsureYooKassaInvoiceColumns()
+        {
+            Database.ExecuteSqlRaw("""
+                ALTER TABLE "Invoices" ADD COLUMN IF NOT EXISTS "Provider" integer NOT NULL DEFAULT 0;
+                ALTER TABLE "Invoices" ADD COLUMN IF NOT EXISTS "ExternalPaymentId" text NULL;
+                ALTER TABLE "Invoices" ADD COLUMN IF NOT EXISTS "FiatAmountKopecks" bigint NULL;
+                """);
         }
     }
 }

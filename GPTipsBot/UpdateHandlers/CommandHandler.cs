@@ -73,20 +73,27 @@ namespace GPTipsBot.UpdateHandlers
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
                     break;
                 case DepositCommand:
+                {
+                    var depositText = string.Format(
+                        BotResponse.DepositResponse,
+                        PaymentConfig.MinRechargeRub,
+                        PaymentConfig.MinRechargeStars);
+                    var packagesKeyboard = moneyService.BuildDepositPackagesKeyboard();
                     if (update.CallbackQuery == null)
                     {
                         await botClient.SendMessage(update.UserChatKey.ChatId,
-                            string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
-                            replyMarkup: CancelInlineKeyboard);
+                            depositText,
+                            replyMarkup: packagesKeyboard);
                     }
                     else
                     {
                         await botClient.EditMessageText(update.UserChatKey.ChatId, (int)update.Message.TelegramMessageId!,
-                            string.Format(BotResponse.DepositResponse, PaymentConfig.MinRechargeAmount),
-                            replyMarkup: CancelInlineKeyboard);
+                            depositText,
+                            replyMarkup: packagesKeyboard);
                     }
 
                     return;
+                }
                 case DonateCommand:
                     await botClient.SendMessage(update.UserChatKey.ChatId,
                         BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);

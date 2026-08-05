@@ -250,8 +250,8 @@
   <data name="DepositResponse" xml:space="preserve">
     <value>1⭐ = 10 запросов к ChatGpt или 2 генерации изображения
 
-Минимальное количество старс для пополнения: {0}
-Введите целое количество stars для пополнения баланса:</value>
+Минимальное пополнение: {0} ₽ ({1}⭐)
+Выберите пакет или введите целое число stars:</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
     <value>🌟 Поддержите наш проект! 💪
@@ -274,7 +274,7 @@
     <value>1 stars  = 20 запросов к ChatGpt или 2 генерации изображения</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>✨ Ой-ой! Нужно минимум {0} старс. Давайте попробуем снова 👇</value>
+    <value>✨ Нужно минимум {0} ₽ ({1}⭐). Выберите пакет или введите сумму снова 👇</value>
   </data>
   <data name="StarsDonationHint" xml:space="preserve">
     <value>✨ Почти получилось! Просто введите число (например, 5, 10 или 50) – каждая звёздочка важна! 🌟 Спасибо вам!</value>
@@ -283,6 +283,35 @@
     <value>Необходимо иметь {0} stars для выполнения операции
 
 После пополнения выберите команду заново</value>
+  </data>
+  <data name="ChoosePaymentMethod" xml:space="preserve">
+    <value>Пополнение на {0}⭐ ({1} ₽)
+
+Выберите способ оплаты:</value>
+  </data>
+  <data name="PayWithStarsButton" xml:space="preserve">
+    <value>⭐ Telegram Stars</value>
+  </data>
+  <data name="DepositPackageButton" xml:space="preserve">
+    <value>{0}⭐ · {1} ₽</value>
+  </data>
+  <data name="PayWithYooKassaButton" xml:space="preserve">
+    <value>💳 Карта / СБП / SberPay · {0} ₽</value>
+  </data>
+  <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
+    <value>Оплата {0}⭐ ({1} ₽)
+
+Нажмите кнопку ниже, чтобы открыть платёжную форму ЮKassa.
+После успешной оплаты баланс пополнится автоматически.</value>
+  </data>
+  <data name="OpenYooKassaPaymentButton" xml:space="preserve">
+    <value>Перейти к оплате</value>
+  </data>
+  <data name="YooKassaPaymentDescription" xml:space="preserve">
+    <value>Пополнение баланса GPTipsBot: {0} stars</value>
+  </data>
+  <data name="YooKassaPaymentSucceeded" xml:space="preserve">
+    <value>✅ Оплата прошла успешно! Баланс пополнен.</value>
   </data>
   <data name="SendPhotoToAnimate" xml:space="preserve">
     <value>Отправьте фото для оживления. Опишите кратко, какие действия должны происходить. Например: "смеются", "танцуют", "пишет" и тд</value>

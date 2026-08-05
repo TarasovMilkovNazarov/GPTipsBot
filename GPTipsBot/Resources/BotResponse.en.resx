@@ -212,9 +212,8 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>Add stars to account</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>❗️Invalid number of stars entered
-Minimum Stars to recharge: {0}
-Please enter the number again:</value>
+    <value>❗️Minimum top-up is {0} RUB ({1}⭐)
+Choose a package or enter the amount again:</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Profile: {0} {1}
@@ -233,8 +232,8 @@ Free requests:
   <data name="DepositResponse" xml:space="preserve">
     <value>1⭐ = 10 ChatGPT requests or 2 image generations
 
-Minimum Stars to recharge: {0}
-Enter whole Stars amount to top up:</value>
+Minimum top-up: {0} RUB ({1}⭐)
+Choose a package or enter a whole Stars amount:</value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>Top up your balance</value>
@@ -243,6 +242,35 @@ Enter whole Stars amount to top up:</value>
     <value>You need to have {0} stars to perform this operation.
 
 After topping up, enter the command again.</value>
+  </data>
+  <data name="ChoosePaymentMethod" xml:space="preserve">
+    <value>Top up {0}⭐ ({1} RUB)
+
+Choose a payment method:</value>
+  </data>
+  <data name="PayWithStarsButton" xml:space="preserve">
+    <value>⭐ Telegram Stars</value>
+  </data>
+  <data name="DepositPackageButton" xml:space="preserve">
+    <value>{0}⭐ · {1} RUB</value>
+  </data>
+  <data name="PayWithYooKassaButton" xml:space="preserve">
+    <value>💳 Card / SBP / SberPay · {0} RUB</value>
+  </data>
+  <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
+    <value>Payment for {0}⭐ ({1} RUB)
+
+Tap the button below to open the YooKassa payment form.
+Your balance will update automatically after a successful payment.</value>
+  </data>
+  <data name="OpenYooKassaPaymentButton" xml:space="preserve">
+    <value>Pay now</value>
+  </data>
+  <data name="YooKassaPaymentDescription" xml:space="preserve">
+    <value>GPTipsBot balance top-up: {0} stars</value>
+  </data>
+  <data name="YooKassaPaymentSucceeded" xml:space="preserve">
+    <value>✅ Payment successful! Your balance has been topped up.</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
     <value>⌛️ Video generation typically takes between 5 to 10 minutes. Please wait, preparing the response...</value>

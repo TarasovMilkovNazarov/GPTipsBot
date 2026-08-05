@@ -174,8 +174,8 @@ namespace GPTipsBot.Resources {
         /// <summary>
         ///   Looks up a localized string similar to 1⭐ = 10 запросов к ChatGpt или 2 генерации изображения
         ///
-        ///Минимальное количество старс для пополнения: {0}
-        ///Введите целое количество stars для пополнения баланса:.
+        ///Минимальное пополнение: {0} ₽ ({1}⭐)
+        ///Выберите пакет или введите целое число stars:.
         /// </summary>
         public static string DepositResponse {
             get {
@@ -272,7 +272,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ✨ Ой-ой! Нужно минимум {0} старс. Давайте попробуем снова 👇.
+        ///   Looks up a localized string similar to ✨ Нужно минимум {0} ₽ ({1}⭐). Выберите пакет или введите сумму снова 👇.
         /// </summary>
         public static string InvalidDepositAmountResponse {
             get {
@@ -534,6 +534,83 @@ namespace GPTipsBot.Resources {
         public static string PhotoAnimationFailed {
             get {
                 return ResourceManager.GetString("PhotoAnimationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Пополнение на {0}⭐ ({1} ₽)
+        ///
+        ///Выберите способ оплаты:.
+        /// </summary>
+        public static string ChoosePaymentMethod {
+            get {
+                return ResourceManager.GetString("ChoosePaymentMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ⭐ Telegram Stars.
+        /// </summary>
+        public static string PayWithStarsButton {
+            get {
+                return ResourceManager.GetString("PayWithStarsButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}⭐ · {1} ₽.
+        /// </summary>
+        public static string DepositPackageButton {
+            get {
+                return ResourceManager.GetString("DepositPackageButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 💳 Карта / СБП / SberPay · {0} ₽.
+        /// </summary>
+        public static string PayWithYooKassaButton {
+            get {
+                return ResourceManager.GetString("PayWithYooKassaButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Оплата {0}⭐ ({1} ₽)
+        ///
+        ///Нажмите кнопку ниже, чтобы открыть платёжную форму ЮKassa.
+        ///После успешной оплаты баланс пополнится автоматически..
+        /// </summary>
+        public static string YooKassaPaymentLinkResponse {
+            get {
+                return ResourceManager.GetString("YooKassaPaymentLinkResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Перейти к оплате.
+        /// </summary>
+        public static string OpenYooKassaPaymentButton {
+            get {
+                return ResourceManager.GetString("OpenYooKassaPaymentButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Пополнение баланса GPTipsBot: {0} stars.
+        /// </summary>
+        public static string YooKassaPaymentDescription {
+            get {
+                return ResourceManager.GetString("YooKassaPaymentDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ✅ Оплата прошла успешно! Баланс пополнен..
+        /// </summary>
+        public static string YooKassaPaymentSucceeded {
+            get {
+                return ResourceManager.GetString("YooKassaPaymentSucceeded", resourceCulture);
             }
         }
     }

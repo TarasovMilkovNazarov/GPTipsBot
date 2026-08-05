@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Hosting;
-using dotenv.net;
+﻿using dotenv.net;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Logging;
+using GPTipsBot.Webhooks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
@@ -13,14 +15,23 @@ using Quartz;
 //metricServer.Start();
 DotEnv.Fluent().WithProbeForEnv(10).Load();
 
-var host = Host.CreateDefaultBuilder(args)
-    .SetupGpTipsLog()
-    .ConfigureServices((_, services) => services.ConfigureServices())
-    .Build();
+var builder = WebApplication.CreateBuilder(args);
+builder.Host.SetupGpTipsLog();
+builder.Services.ConfigureServices();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
-var schedulerFactory = host.Services.GetRequiredService<ISchedulerFactory>();
+var app = builder.Build();
+app.UseForwardedHeaders();
+app.MapYooKassaWebhook();
+
+var schedulerFactory = app.Services.GetRequiredService<ISchedulerFactory>();
 var scheduler = await schedulerFactory.GetScheduler();
-var schedulerService = host.Services.GetRequiredService<ISchedulerService>();
+var schedulerService = app.Services.GetRequiredService<ISchedulerService>();
 
 await schedulerService.ScheduleJob<DailyStatisticsJob>(scheduler, DateBuilder.TodayAt(23, 55, 0),
     TimeSpan.FromDays(1),  CancellationToken.None);
@@ -32,4 +43,4 @@ await schedulerService.ScheduleJob<DeactivateKickedUsersJob>(scheduler, DateBuil
     TimeSpan.FromDays(5),  CancellationToken.None);
 await scheduler.Start();
 
-await host.RunAsync();
+await app.RunAsync();
