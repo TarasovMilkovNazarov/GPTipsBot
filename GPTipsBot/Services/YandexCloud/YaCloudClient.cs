@@ -90,8 +90,19 @@ namespace GPTipsBot.Services.YandexCloud
             request.Content = new StringContent(JsonSerializer.Serialize(body), null, "application/json");
 
             var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
             var contentResult = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "YandexART imageGenerationAsync failed with {StatusCode}. Prompt length: {PromptLength}. Response: {ResponseBody}",
+                    (int)response.StatusCode,
+                    prompt.Length,
+                    contentResult);
+                throw new HttpRequestException(
+                    $"YandexART imageGenerationAsync failed with {(int)response.StatusCode} ({response.ReasonPhrase}): {contentResult}",
+                    null,
+                    response.StatusCode);
+            }
 
             var result = JsonSerializer.Deserialize<YandexArtResponse>(contentResult);
             return result?.Id ?? throw new Exception("YandexART did not return operation id");
@@ -101,10 +112,21 @@ namespace GPTipsBot.Services.YandexCloud
         {
             var getResultResponse = await _httpClient.GetAsync(
                 $"https://llm.api.cloud.yandex.net:443/operations/{operationId}");
-            getResultResponse.EnsureSuccessStatusCode();
+            var contentResult = await getResultResponse.Content.ReadAsStringAsync();
+            if (!getResultResponse.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "YandexART get operation {OperationId} failed with {StatusCode}. Response: {ResponseBody}",
+                    operationId,
+                    (int)getResultResponse.StatusCode,
+                    contentResult);
+                throw new HttpRequestException(
+                    $"YandexART get operation failed with {(int)getResultResponse.StatusCode} ({getResultResponse.ReasonPhrase}): {contentResult}",
+                    null,
+                    getResultResponse.StatusCode);
+            }
 
-            var result = JsonSerializer.Deserialize<YandexArtResponse>(
-                await getResultResponse.Content.ReadAsStringAsync());
+            var result = JsonSerializer.Deserialize<YandexArtResponse>(contentResult);
 
             return new ImageGenerationStatus(result?.Done == true, result?.Response?.Image);
         }
