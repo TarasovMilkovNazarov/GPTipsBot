@@ -23,7 +23,7 @@ namespace GPTipsBot.UpdateHandlers
         ImageGenerationWorkflowService imageGenerationWorkflowService)
         : BaseMessageHandler
     {
-        public const int ImageTextDescriptionLimit = 1000;
+        public const int ImageTextDescriptionLimit = 500;
         public const int ImagesPerDayLimit = 5;
 
         public override async Task HandleAsync(UpdateDecorator update)
