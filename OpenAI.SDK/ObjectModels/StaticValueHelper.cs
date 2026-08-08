@@ -38,12 +38,27 @@ public class StaticValues
             /// </summary>
             // ReSharper disable once InconsistentNaming
             public static string Size1024x1792 => "1024x1792";
+
+            /// <summary>GPT Image landscape.</summary>
+            public static string Size1536x1024 => "1536x1024";
+
+            /// <summary>GPT Image portrait.</summary>
+            public static string Size1024x1536 => "1024x1536";
+
+            public static string Auto => "auto";
         }
 
         public static class ResponseFormat
         {
             public static string Url => "url";
             public static string Base64 => "b64_json";
+        }
+
+        public static class OutputFormat
+        {
+            public static string Png => "png";
+            public static string Jpeg => "jpeg";
+            public static string Webp => "webp";
         }
 
         public static class Style
@@ -56,6 +71,10 @@ public class StaticValues
         {
             public static string Standard => "standard";
             public static string Hd => "hd";
+            public static string Low => "low";
+            public static string Medium => "medium";
+            public static string High => "high";
+            public static string Auto => "auto";
         }
 
         public static class ImageFileTypes

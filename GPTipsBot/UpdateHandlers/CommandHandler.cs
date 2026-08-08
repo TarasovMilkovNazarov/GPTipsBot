@@ -12,6 +12,7 @@ using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
+using GPTipsBot.Services.Cache;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -28,13 +29,15 @@ namespace GPTipsBot.UpdateHandlers
         MessageRepository messageRepository,
         UserCommandRepository userCommandRepository,
         ImageGeneratorHandler imageGeneratorHandler,
+        GptImageHandler gptImageHandler,
         ChatGptHandler chatGptHandler,
         InvoiceRepository invoiceRepository,
         UserService userService,
         BotSettingsRepository botSettingsRepository,
         MoneyService moneyService,
         IJobService jobService,
-        IGpt gptService)
+        IGpt gptService,
+        IGptImageSessionCache gptImageSessionCache)
         : BaseMessageHandler
     {
         private readonly ApplicationContext _context = context;
@@ -88,10 +91,37 @@ namespace GPTipsBot.UpdateHandlers
                 case GetProfileCommand:
                     reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations, profile.Summaries);
-                    replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
-                        .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
+                        profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName);
+                    replyMarkup = GetProfileInlineKeyboard();
                     break;
+                case ModelCommand:
+                    await HandleModelCommandAsync(update, profile);
+                    return;
+                case GptImageCommand:
+                    if (UpdateDecorator.TryGetCommandArgument(messageText, GptImageCommand, out var gptImagePrompt))
+                    {
+                        var session = gptImageSessionCache.GetOrCreate(update.UserChatKey.Id);
+                        session.Mode = GptImageMode.Generate;
+                        gptImageSessionCache.Set(update.UserChatKey.Id, session);
+                        update.Message.Text = gptImagePrompt;
+                        SetNextHandler(gptImageHandler);
+                        await base.HandleAsync(update);
+                        return;
+                    }
+
+                    await HandleGptImageStartAsync(update, GptImageMode.Generate);
+                    return;
+                case EditImageCommand:
+                    await HandleGptImageStartAsync(update, GptImageMode.Edit);
+                    return;
+                case GptImageSizeSquareCommand:
+                case GptImageSizeLandscapeCommand:
+                case GptImageSizePortraitCommand:
+                case GptImageQualityLowCommand:
+                case GptImageQualityMediumCommand:
+                case GptImageQualityHighCommand:
+                    await HandleGptImageOptionAsync(update);
+                    return;
                 case DepositCommand:
                 {
                     var depositText = string.Format(
@@ -276,6 +306,206 @@ namespace GPTipsBot.UpdateHandlers
                 }
 
                 return BotResponse.LanguageWasSetSuccessfully;
+            }
+        }
+
+        private async Task HandleGptImageStartAsync(UpdateDecorator update, GptImageMode mode)
+        {
+            var chatId = update.UserChatKey.ChatId;
+            var session = gptImageSessionCache.GetOrCreate(update.UserChatKey.Id);
+            session.Mode = mode;
+            if (mode == GptImageMode.Generate)
+            {
+                session.ImageFileId = null;
+            }
+
+            gptImageSessionCache.Set(update.UserChatKey.Id, session);
+
+            var text = mode == GptImageMode.Edit
+                ? string.Format(BotResponse.GptImageEditIntro, session.StarsCost)
+                : string.Format(BotResponse.GptImageGenerateIntro, session.StarsCost);
+
+            var keyboard = mode == GptImageMode.Edit
+                ? CancelInlineKeyboard
+                : GetGptImageOptionsKeyboard(session);
+
+            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+            {
+                await botClient.EditMessageText(
+                    chatId,
+                    (int)update.Message.TelegramMessageId.Value,
+                    text,
+                    replyMarkup: keyboard);
+            }
+            else
+            {
+                await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+            }
+        }
+
+        private async Task HandleGptImageOptionAsync(UpdateDecorator update)
+        {
+            var chatId = update.UserChatKey.ChatId;
+            var session = gptImageSessionCache.GetOrCreate(update.UserChatKey.Id);
+            // Keep generate/edit mode when toggling size/quality.
+
+            switch (update.Command!.Command)
+            {
+                case GptImageSizeSquareCommand:
+                    session.Size = GptImageConfig.SizeSquare;
+                    break;
+                case GptImageSizeLandscapeCommand:
+                    session.Size = GptImageConfig.SizeLandscape;
+                    break;
+                case GptImageSizePortraitCommand:
+                    session.Size = GptImageConfig.SizePortrait;
+                    break;
+                case GptImageQualityLowCommand:
+                    session.Quality = GptImageConfig.QualityLow;
+                    break;
+                case GptImageQualityMediumCommand:
+                    session.Quality = GptImageConfig.QualityMedium;
+                    break;
+                case GptImageQualityHighCommand:
+                    session.Quality = GptImageConfig.QualityHigh;
+                    break;
+            }
+
+            gptImageSessionCache.Set(update.UserChatKey.Id, session);
+
+            var text = session.Mode == GptImageMode.Edit
+                ? string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost)
+                : string.Format(BotResponse.GptImageGenerateIntro, session.StarsCost);
+            var keyboard = GetGptImageOptionsKeyboard(session);
+
+            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+            {
+                await botClient.EditMessageText(
+                    chatId,
+                    (int)update.Message.TelegramMessageId.Value,
+                    text,
+                    replyMarkup: keyboard);
+            }
+            else
+            {
+                await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+            }
+        }
+
+        private async Task HandleModelCommandAsync(UpdateDecorator update, UserProfileDto profile)
+        {
+            var chatId = update.UserChatKey.ChatId;
+            var language = botSettingsRepository.Get(update.UserChatKey.Id)?.Language
+                           ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+            if (UpdateDecorator.TryGetCommandArgument(update.Message.Text, ModelCommand, out var modelIdRaw))
+            {
+                var model = GptModelCatalog.Find(modelIdRaw.Trim());
+                if (model is null)
+                {
+                    await botClient.SendUserReplyAsync(update, BotResponse.UnknownModel);
+                    return;
+                }
+
+                if (!model.AllowFreeQuota && profile.Stars < model.StarsCost)
+                {
+                    var text = string.Format(
+                        BotResponse.ModelNeedsBalance,
+                        model.DisplayName,
+                        model.StarsCost,
+                        GptModelCatalog.Default.DisplayName);
+                    var needsBalanceKeyboard = GetModelNeedsBalanceKeyboard();
+
+                    if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+                    {
+                        await botClient.EditMessageText(
+                            chatId,
+                            (int)update.Message.TelegramMessageId.Value,
+                            text,
+                            replyMarkup: needsBalanceKeyboard);
+                    }
+                    else
+                    {
+                        await botClient.SendMessage(chatId, text, replyMarkup: needsBalanceKeyboard);
+                    }
+
+                    return;
+                }
+
+                botSettingsRepository.SetPreferredGptModel(update.UserChatKey.Id, model.Id, language);
+
+                var selectedText = string.Format(BotResponse.ModelSelected, model.DisplayName, model.StarsCost);
+                var keyboard = profile.Stars > 0
+                    ? GetModelSelectionKeyboard(model.Id)
+                    : GetModelNeedsBalanceKeyboard();
+
+                if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+                {
+                    await botClient.EditMessageText(
+                        chatId,
+                        (int)update.Message.TelegramMessageId.Value,
+                        selectedText,
+                        replyMarkup: keyboard);
+                }
+                else
+                {
+                    await botClient.SendMessage(chatId, selectedText, replyMarkup: keyboard);
+                }
+
+                return;
+            }
+
+            await SendModelPickerOrDepositAsync(update, profile);
+        }
+
+        private async Task SendModelPickerOrDepositAsync(
+            UpdateDecorator update,
+            UserProfileDto profile)
+        {
+            var chatId = update.UserChatKey.ChatId;
+            var current = userService.GetPreferredGptModel(update.UserChatKey.Id);
+
+            if (profile.Stars <= 0)
+            {
+                var text = string.Format(
+                    BotResponse.ModelSelectionRequiresBalance,
+                    GptModelCatalog.Default.DisplayName);
+                var keyboard = GetModelNeedsBalanceKeyboard();
+
+                if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+                {
+                    await botClient.EditMessageText(
+                        chatId,
+                        (int)update.Message.TelegramMessageId.Value,
+                        text,
+                        replyMarkup: keyboard);
+                }
+                else
+                {
+                    await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+                }
+
+                return;
+            }
+
+            var pickerText = string.Format(
+                BotResponse.ChooseModel,
+                current.DisplayName,
+                current.StarsCost,
+                GptModelCatalog.Default.DisplayName);
+            var pickerKeyboard = GetModelSelectionKeyboard(current.Id);
+
+            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+            {
+                await botClient.EditMessageText(
+                    chatId,
+                    (int)update.Message.TelegramMessageId.Value,
+                    pickerText,
+                    replyMarkup: pickerKeyboard);
+            }
+            else
+            {
+                await botClient.SendMessage(chatId, pickerText, replyMarkup: pickerKeyboard);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using GPTipsBot.Db;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Db;
 using GPTipsBot.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,11 +11,16 @@ namespace GPTipsBot.Repositories
     {
         private readonly ApplicationContext _context = context;
 
-        public BotSettings Create(long userId, string languageCode)
+        public BotSettings Create(long userId, string languageCode, string? preferredGptModel = null)
         {
-            logger.LogInformation($"Create settings userId={userId} with language={languageCode}");
+            logger.LogInformation("Create settings userId={UserId} with language={Language}", userId, languageCode);
 
-            var settings = new BotSettings() { Id = userId, Language = languageCode };
+            var settings = new BotSettings
+            {
+                Id = userId,
+                Language = languageCode,
+                PreferredGptModel = preferredGptModel,
+            };
             _context.BotSettings.Add(settings);
 
             return settings;
@@ -22,13 +28,34 @@ namespace GPTipsBot.Repositories
 
         public BotSettings Update(long userId, string languageCode)
         {
-            logger.LogInformation($"Update settings userId={userId} with culture={languageCode}");
+            logger.LogInformation("Update settings userId={UserId} with culture={Language}", userId, languageCode);
 
-            var settings = new BotSettings() { Id = userId, Language = languageCode };
-            _context.BotSettings.Update(settings);
+            var settings = GetTracked(userId);
+            if (settings == null)
+            {
+                return Create(userId, languageCode);
+            }
 
+            settings.Language = languageCode;
             return settings;
         }
+
+        public BotSettings SetPreferredGptModel(long userId, string modelId, string fallbackLanguage = "ru")
+        {
+            logger.LogInformation("Set preferred model userId={UserId} model={ModelId}", userId, modelId);
+
+            var settings = GetTracked(userId);
+            if (settings == null)
+            {
+                return Create(userId, fallbackLanguage, modelId);
+            }
+
+            settings.PreferredGptModel = modelId;
+            return settings;
+        }
+
+        public string GetPreferredGptModelId(long userId) =>
+            GptModelCatalog.Resolve(Get(userId)?.PreferredGptModel).Id;
 
         public void Delete(long id)
         {
@@ -46,5 +73,8 @@ namespace GPTipsBot.Repositories
         {
             return _context.BotSettings.AsNoTracking().FirstOrDefault(x => x.Id == userId);
         }
+
+        private BotSettings? GetTracked(long userId) =>
+            _context.BotSettings.FirstOrDefault(x => x.Id == userId);
     }
 }

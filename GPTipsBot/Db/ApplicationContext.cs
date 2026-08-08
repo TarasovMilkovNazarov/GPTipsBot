@@ -25,6 +25,7 @@ namespace GPTipsBot.Db
             EnsureFreeSummaryRequestsColumn();
             EnsurePaymentHoldsTable();
             EnsureMessageThreadIdColumn();
+            EnsurePreferredGptModelColumn();
             Guid = Guid.NewGuid();
         }
         
@@ -85,6 +86,13 @@ namespace GPTipsBot.Db
                 ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "MessageThreadId" bigint NULL;
                 CREATE INDEX IF NOT EXISTS "IX_Messages_ChatId_MessageThreadId_CreatedAt"
                     ON "Messages" ("ChatId", "MessageThreadId", "CreatedAt");
+                """);
+        }
+
+        private void EnsurePreferredGptModelColumn()
+        {
+            Database.ExecuteSqlRaw("""
+                ALTER TABLE "BotSettings" ADD COLUMN IF NOT EXISTS "PreferredGptModel" text NULL;
                 """);
         }
     }

@@ -1,4 +1,6 @@
-﻿public class UserProfileDto
+﻿using GPTipsBot.Config;
+
+public class UserProfileDto
 {
     public string FirstName { get; set; }
     public string? LastName { get; set; }
@@ -8,4 +10,6 @@
     public long GptRequests { get; set; }
     public long PhotoAnimations { get; set; }
     public long Summaries { get; set; }
+    public string GptModelDisplayName { get; set; } = GptModelCatalog.Default.DisplayName;
+    public string GptModelId { get; set; } = GptModelCatalog.DefaultModelId;
 }

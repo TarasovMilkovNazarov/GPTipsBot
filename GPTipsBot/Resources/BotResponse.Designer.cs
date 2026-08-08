@@ -682,5 +682,71 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("AskUsage", resourceCulture);
             }
         }
+
+        public static string ChooseModel {
+            get {
+                return ResourceManager.GetString("ChooseModel", resourceCulture);
+            }
+        }
+
+        public static string ModelSelected {
+            get {
+                return ResourceManager.GetString("ModelSelected", resourceCulture);
+            }
+        }
+
+        public static string ModelSelectionRequiresBalance {
+            get {
+                return ResourceManager.GetString("ModelSelectionRequiresBalance", resourceCulture);
+            }
+        }
+
+        public static string ModelNeedsBalance {
+            get {
+                return ResourceManager.GetString("ModelNeedsBalance", resourceCulture);
+            }
+        }
+
+        public static string UnknownModel {
+            get {
+                return ResourceManager.GetString("UnknownModel", resourceCulture);
+            }
+        }
+
+        public static string GptImageGenerateIntro {
+            get {
+                return ResourceManager.GetString("GptImageGenerateIntro", resourceCulture);
+            }
+        }
+
+        public static string GptImageEditIntro {
+            get {
+                return ResourceManager.GetString("GptImageEditIntro", resourceCulture);
+            }
+        }
+
+        public static string GptImageSendPhotoFirst {
+            get {
+                return ResourceManager.GetString("GptImageSendPhotoFirst", resourceCulture);
+            }
+        }
+
+        public static string GptImageSendPrompt {
+            get {
+                return ResourceManager.GetString("GptImageSendPrompt", resourceCulture);
+            }
+        }
+
+        public static string GptImageSendEditPrompt {
+            get {
+                return ResourceManager.GetString("GptImageSendEditPrompt", resourceCulture);
+            }
+        }
+
+        public static string GptImageDoneCaption {
+            get {
+                return ResourceManager.GetString("GptImageDoneCaption", resourceCulture);
+            }
+        }
     }
 }

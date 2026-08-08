@@ -220,6 +220,7 @@ Choose a package or enter the amount again:</value>
 
 
 💵 Balance: {2} Stars 💵
+🤖 Model: {8}
 Free requests:
  -- ChatGpt: {3}
  -- image generations: {4}
@@ -372,5 +373,55 @@ Other commands work in a private chat with the bot.</value>
   <data name="AskUsage" xml:space="preserve">
     <value>Write your question after the command, for example:
 /ask How does photosynthesis work?</value>
+  </data>
+  <data name="ChooseModel" xml:space="preserve">
+    <value>🤖 Choose a ChatGPT model
+
+Current: {0} ({1:0.##}⭐ per message)
+
+Free requests work only with {2}.
+Other models spend Stars from your balance.</value>
+  </data>
+  <data name="ModelSelected" xml:space="preserve">
+    <value>✅ Model selected: {0}
+Cost per message: {1:0.##}⭐</value>
+  </data>
+  <data name="ModelSelectionRequiresBalance" xml:space="preserve">
+    <value>🔒 Model selection is available when your Stars balance is positive.
+
+You can switch to {0} or top up your balance.</value>
+  </data>
+  <data name="ModelNeedsBalance" xml:space="preserve">
+    <value>❗️Not enough Stars for {0} ({1:0.##}⭐ per message).
+
+Top up your balance or switch to {2}.</value>
+  </data>
+  <data name="UnknownModel" xml:space="preserve">
+    <value>Unknown model. Open /model and pick one from the list.</value>
+  </data>
+  <data name="GptImageGenerateIntro" xml:space="preserve">
+    <value>🎨 GPT Image 2 — generate
+
+Choose size and quality, then send a description.
+Cost: {0:0.##}⭐ (no free quota)</value>
+  </data>
+  <data name="GptImageEditIntro" xml:space="preserve">
+    <value>🛠 GPT Image 2 — edit
+
+Send a photo, then choose size/quality and describe the changes.
+Cost: {0:0.##}⭐ (no free quota)</value>
+  </data>
+  <data name="GptImageSendPhotoFirst" xml:space="preserve">
+    <value>Send a photo to edit first</value>
+  </data>
+  <data name="GptImageSendPrompt" xml:space="preserve">
+    <value>Send a text description for the image</value>
+  </data>
+  <data name="GptImageSendEditPrompt" xml:space="preserve">
+    <value>Describe what to change in the photo.
+Cost: {0:0.##}⭐</value>
+  </data>
+  <data name="GptImageDoneCaption" xml:space="preserve">
+    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
   </data>
 </root>

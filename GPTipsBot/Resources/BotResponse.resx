@@ -225,6 +225,7 @@
 
 
 💵 Баланс: {2} Stars 💵
+🤖 Модель: {8}
 Количество бесплатных запросов:
  -- запросов к ChatGpt: {3}
  -- генераций изображений: {4}
@@ -377,5 +378,55 @@
   <data name="AskUsage" xml:space="preserve">
     <value>Напишите вопрос после команды, например:
 /ask Как работает фотосинтез?</value>
+  </data>
+  <data name="ChooseModel" xml:space="preserve">
+    <value>🤖 Выберите модель ChatGPT
+
+Текущая: {0} ({1:0.##}⭐ за сообщение)
+
+Бесплатные запросы работают только на {2}.
+Остальные модели списывают Stars с баланса.</value>
+  </data>
+  <data name="ModelSelected" xml:space="preserve">
+    <value>✅ Модель выбрана: {0}
+Стоимость сообщения: {1:0.##}⭐</value>
+  </data>
+  <data name="ModelSelectionRequiresBalance" xml:space="preserve">
+    <value>🔒 Выбор модели доступен при положительном балансе Stars.
+
+Можно переключиться на {0} или пополнить баланс.</value>
+  </data>
+  <data name="ModelNeedsBalance" xml:space="preserve">
+    <value>❗️Недостаточно Stars для модели {0} ({1:0.##}⭐ за сообщение).
+
+Пополните баланс или переключитесь на {2}.</value>
+  </data>
+  <data name="UnknownModel" xml:space="preserve">
+    <value>Неизвестная модель. Откройте /model и выберите из списка.</value>
+  </data>
+  <data name="GptImageGenerateIntro" xml:space="preserve">
+    <value>🎨 GPT Image 2 — генерация
+
+Выберите размер и качество, затем отправьте описание.
+Стоимость: {0:0.##}⭐ (без бесплатных запросов)</value>
+  </data>
+  <data name="GptImageEditIntro" xml:space="preserve">
+    <value>🛠 GPT Image 2 — редактирование
+
+Отправьте фото. Потом выберите размер/качество и опишите правки.
+Стоимость: {0:0.##}⭐ (без бесплатных запросов)</value>
+  </data>
+  <data name="GptImageSendPhotoFirst" xml:space="preserve">
+    <value>Сначала отправьте фото для редактирования</value>
+  </data>
+  <data name="GptImageSendPrompt" xml:space="preserve">
+    <value>Отправьте текстовое описание изображения</value>
+  </data>
+  <data name="GptImageSendEditPrompt" xml:space="preserve">
+    <value>Опишите, что изменить на фото.
+Стоимость: {0:0.##}⭐</value>
+  </data>
+  <data name="GptImageDoneCaption" xml:space="preserve">
+    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
   </data>
 </root>

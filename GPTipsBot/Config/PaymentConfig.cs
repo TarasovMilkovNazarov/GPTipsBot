@@ -3,10 +3,25 @@
 public static class PaymentConfig
 {
     public const double Gpt = 0.1;
+    /// <summary>gpt-5-mini (~3× gpt-4o-mini API cost).</summary>
+    public const double Gpt5Mini = 0.3;
+    /// <summary>gpt-4.1 (~10× gpt-4o-mini).</summary>
+    public const double Gpt41 = 1.0;
+    /// <summary>gpt-5 flagship (~12×, output-heavy).</summary>
+    public const double Gpt5 = 1.2;
+    /// <summary>o3 reasoning (~20× with reasoning tokens).</summary>
+    public const double GptReasoning = 2.0;
     /// <summary>Day summary is a larger one-off prompt (~3× a normal GPT reply).</summary>
     public const double Summary = 0.3;
     public const double Image = 0.5;
     public const double Animation = 0.5;
+
+    /// <summary>GPT Image 2 low quality (~$0.006 / 1024²).</summary>
+    public const double GptImageLow = 1.0;
+    /// <summary>GPT Image 2 medium quality (~$0.053 / 1024²).</summary>
+    public const double GptImageMedium = 2.0;
+    /// <summary>GPT Image 2 high quality (~$0.211 / 1024²).</summary>
+    public const double GptImageHigh = 4.0;
 
     /// <summary>
     /// Число бесплатных запросов на генерацию изображений, которое добавляется джобой обновления лимитов

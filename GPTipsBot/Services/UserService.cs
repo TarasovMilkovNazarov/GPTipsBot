@@ -14,6 +14,7 @@ namespace GPTipsBot.Services
         private readonly ITelegramBotClient _botClient;
         private readonly UserRepository _userRepository;
         private readonly WalletRepository _walletRepository;
+        private readonly BotSettingsRepository _botSettingsRepository;
         private readonly IMemoryCache _memoryCache;
         private readonly ApplicationContext _context;
         private readonly MemoryCacheEntryOptions _cacheOptions;
@@ -21,11 +22,13 @@ namespace GPTipsBot.Services
         private static long? activeUserCount;
 
         public UserService(ITelegramBotClient botClient, UserRepository userRepository,
-            WalletRepository walletRepository, IMemoryCache memoryCache, ApplicationContext context)
+            WalletRepository walletRepository, BotSettingsRepository botSettingsRepository,
+            IMemoryCache memoryCache, ApplicationContext context)
         {
             _botClient = botClient;
             _userRepository = userRepository;
             _walletRepository = walletRepository;
+            _botSettingsRepository = botSettingsRepository;
             UserCreated += UserCreatedEventHandler;
 
             _memoryCache = memoryCache;
@@ -43,6 +46,8 @@ namespace GPTipsBot.Services
             var user = _userRepository.Get(userId);
             Guard.Against.Null(user);
 
+            var model = GetPreferredGptModel(userId);
+
             var profile = new UserProfileDto()
             {
                 FirstName = user.FirstName,
@@ -52,14 +57,22 @@ namespace GPTipsBot.Services
                 ImageTexts = user.FreeImageTextRecognitions,
                 GptRequests = user.FreeGptRequests,
                 PhotoAnimations = user.FreePhotoAnimations,
-                Summaries = user.FreeSummaryRequests
+                Summaries = user.FreeSummaryRequests,
+                GptModelId = model.Id,
+                GptModelDisplayName = model.DisplayName,
             };
 
             return profile;
         }
 
+        public GptModelOption GetPreferredGptModel(long userId) =>
+            GptModelCatalog.Resolve(_botSettingsRepository.Get(userId)?.PreferredGptModel);
+
         public Task<PaymentHold?> TryReserveGptAsync(long userId) =>
-            TryReserveAsync(userId, PaidFeature.Gpt, PaymentConfig.Gpt);
+            TryReserveGptAsync(userId, GetPreferredGptModel(userId));
+
+        public Task<PaymentHold?> TryReserveGptAsync(long userId, GptModelOption model) =>
+            TryReserveAsync(userId, PaidFeature.Gpt, model.StarsCost, allowFreeQuota: model.AllowFreeQuota);
 
         public Task<PaymentHold?> TryReserveImageAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.Image, PaymentConfig.Image);
@@ -72,6 +85,9 @@ namespace GPTipsBot.Services
 
         public Task<PaymentHold?> TryReserveSummaryAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.Summary, PaymentConfig.Summary);
+
+        public Task<PaymentHold?> TryReserveGptImageAsync(long userId, double starsCost) =>
+            TryReserveAsync(userId, PaidFeature.GptImage, starsCost, allowFreeQuota: false);
 
         public async Task ConfirmAsync(long holdId)
         {
@@ -125,18 +141,25 @@ namespace GPTipsBot.Services
             }
         }
 
-        private async Task<PaymentHold?> TryReserveAsync(long userId, PaidFeature feature, double walletPrice)
+        private async Task<PaymentHold?> TryReserveAsync(
+            long userId,
+            PaidFeature feature,
+            double walletPrice,
+            bool allowFreeQuota = true)
         {
             await using var tx = await _context.Database.BeginTransactionAsync();
 
-            var freeUpdated = await DecrementFreeQuotaAsync(userId, feature);
-            if (freeUpdated == 1)
+            if (allowFreeQuota)
             {
-                var hold = NewHold(userId, feature, usedFreeQuota: true, walletAmount: 0);
-                _context.PaymentHolds.Add(hold);
-                await _context.SaveChangesAsync();
-                await tx.CommitAsync();
-                return hold;
+                var freeUpdated = await DecrementFreeQuotaAsync(userId, feature);
+                if (freeUpdated == 1)
+                {
+                    var hold = NewHold(userId, feature, usedFreeQuota: true, walletAmount: 0);
+                    _context.PaymentHolds.Add(hold);
+                    await _context.SaveChangesAsync();
+                    await tx.CommitAsync();
+                    return hold;
+                }
             }
 
             var walletUpdated = await _context.Wallets

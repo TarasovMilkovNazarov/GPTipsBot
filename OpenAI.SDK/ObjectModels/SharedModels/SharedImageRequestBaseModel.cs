@@ -12,30 +12,38 @@ public record SharedImageRequestBaseModel
     public int? N { get; set; }
 
     /// <summary>
-    ///     The size of the generated images. 
-    ///     Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. 
-    ///     Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models.
-    ///     <br /><br />Check <see cref="StaticValues.ImageStatics.Size"/> for possible values
+    ///     The size of the generated images.
     /// </summary>
     [JsonPropertyName("size")]
     public string? Size { get; set; }
 
     /// <summary>
-    ///     The format in which the generated images are returned. Must be one of url or b64_json
+    ///     The format in which the generated images are returned. Must be one of url or b64_json.
+    ///     Prefer <see cref="OutputFormat"/> for GPT Image models.
     /// </summary>
     [JsonPropertyName("response_format")]
     public string? ResponseFormat { get; set; }
 
     /// <summary>
+    ///     Output file format for GPT Image models: png, jpeg, or webp.
+    /// </summary>
+    [JsonPropertyName("output_format")]
+    public string? OutputFormat { get; set; }
+
+    /// <summary>
+    ///     Image quality. dall-e-3: standard/hd. GPT Image: low/medium/high/auto.
+    /// </summary>
+    [JsonPropertyName("quality")]
+    public string? Quality { get; set; }
+
+    /// <summary>
     ///     A unique identifier representing your end-user, which will help OpenAI to monitor and detect abuse.
-    ///     <a href="https://platform.openai.com/docs/usage-policies/end-user-ids">Learn more</a>.
     /// </summary>
     [JsonPropertyName("user")]
     public string? User { get; set; }
 
     /// <summary>
-    ///     The model to use for image generation. Must be one of dall-e-2 or dall-e-3
-    ///     For ImageEditCreateRequest and for ImageVariationCreateRequest only dall-e-2 modell is supported at this time.
+    ///     The model to use for image generation (e.g. dall-e-2, dall-e-3, gpt-image-2).
     /// </summary>
     [JsonPropertyName("model")]
     public string? Model { get; set; }

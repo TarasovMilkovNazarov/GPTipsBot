@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using GPTipsBot.Config;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
@@ -34,9 +35,24 @@ namespace GPTipsBot.UpdateHandlers
             var chatId = update.UserChatKey.ChatId;
             var userId = update.UserChatKey.Id;
 
-            var hold = await userService.TryReserveGptAsync(userId);
+            var model = userService.GetPreferredGptModel(userId);
+            var hold = await userService.TryReserveGptAsync(userId, model);
             if (hold is null)
             {
+                if (!model.AllowFreeQuota)
+                {
+                    await botClient.SendMessage(
+                        chatId,
+                        string.Format(
+                            BotResponse.ModelNeedsBalance,
+                            model.DisplayName,
+                            model.StarsCost,
+                            GptModelCatalog.Default.DisplayName),
+                        replyMarkup: TelegramBotUiService.GetModelNeedsBalanceKeyboard(),
+                        replyParameters: (int)update.Message.TelegramMessageId!);
+                    return;
+                }
+
                 var nextExecution = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
                 await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExecution);
                 return;

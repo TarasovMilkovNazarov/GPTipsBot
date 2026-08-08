@@ -26,6 +26,7 @@ namespace GPTipsBot.UpdateHandlers
         RecoveryNotificationHandler recoveryNotificationHandler,
         ImageTextRecognitionHandler imageTextRecognitionHandler,
         ImageGeneratorHandler imageGeneratorHandler,
+        GptImageHandler gptImageHandler,
         CommandHandler commandHandler,
         ChatGptHandler chatGptHandler,
         AdminCommandHandler adminCommandHandler,
@@ -37,6 +38,7 @@ namespace GPTipsBot.UpdateHandlers
         InvoiceRepository invoiceRepository,
         IGpt gptService,
         IImageCache imageCache,
+        IGptImageSessionCache gptImageSessionCache,
         MessageRepository messageRepository,
         PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
         IJobService jobService)
@@ -197,11 +199,67 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(imageGeneratorHandler);
             }
+            else if (lastCommand?.Type is CommandType.GptImage or CommandType.EditImage)
+            {
+                var session = gptImageSessionCache.GetOrCreate(userKey.Id);
+                if (lastCommand.Type == CommandType.EditImage)
+                {
+                    session.Mode = GptImageMode.Edit;
+                }
+
+                if (session.Mode == GptImageMode.Edit)
+                {
+                    var imageId = update.FileId;
+                    if (imageId == null && string.IsNullOrWhiteSpace(session.ImageFileId))
+                    {
+                        await botClient.SendUserReplyAsync(update, BotResponse.GptImageSendPhotoFirst,
+                            TelegramBotUiService.CancelInlineKeyboard);
+                        return;
+                    }
+
+                    if (imageId != null)
+                    {
+                        session.ImageFileId = imageId;
+                        gptImageSessionCache.Set(userKey.Id, session);
+
+                        if (string.IsNullOrWhiteSpace(update.Message?.Text))
+                        {
+                            await botClient.SendUserReplyAsync(
+                                update,
+                                string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost),
+                                TelegramBotUiService.GetGptImageOptionsKeyboard(session));
+                            return;
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(update.Message?.Text))
+                    {
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost),
+                            TelegramBotUiService.GetGptImageOptionsKeyboard(session));
+                        return;
+                    }
+
+                    gptImageSessionCache.Set(userKey.Id, session);
+                    SetNextHandler(gptImageHandler);
+                }
+                else if (!string.IsNullOrEmpty(update.Message?.Text))
+                {
+                    SetNextHandler(gptImageHandler);
+                }
+                else
+                {
+                    return;
+                }
+            }
             else if (update.IsGroupOrChannel &&
                      lastCommand?.Type is CommandType.TextRecognition
                          or CommandType.Deposit
                          or CommandType.Donate
-                         or CommandType.AnimatePhoto)
+                         or CommandType.AnimatePhoto
+                         or CommandType.GptImage
+                         or CommandType.EditImage)
             {
                 await botClient.SendMessage(userKey.ChatId, BotResponse.GroupCommandNotAvailable);
                 return;

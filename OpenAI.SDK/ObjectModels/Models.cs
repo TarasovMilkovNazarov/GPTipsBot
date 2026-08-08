@@ -347,6 +347,9 @@ public static class Models
     /// </summary>
     public static string Dall_e_3 => "dall-e-3";
 
+    /// <summary>State-of-the-art GPT Image generation and editing model.</summary>
+    public static string Gpt_image_2 => "gpt-image-2";
+
     /// <summary>
     /// TTS is an AI model that converts text to natural sounding spoken text. 
     /// tts-1 is optimized for real time text to speech use cases.

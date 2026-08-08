@@ -27,6 +27,15 @@ public class BotMenu
     public const string GetProfileCommand = "/profile";
     public const string DonateCommand = "/donate";
 
+    public const string ModelCommand = "/model";
+    public const string GptImageCommand = "/gpt_image";
+    public const string EditImageCommand = "/edit_image";
+    public const string GptImageSizeSquareCommand = "/gpt_image_sq";
+    public const string GptImageSizeLandscapeCommand = "/gpt_image_land";
+    public const string GptImageSizePortraitCommand = "/gpt_image_port";
+    public const string GptImageQualityLowCommand = "/gpt_image_q_low";
+    public const string GptImageQualityMediumCommand = "/gpt_image_q_med";
+    public const string GptImageQualityHighCommand = "/gpt_image_q_high";
     public const string SummaryCommand = "/summary";
     public const string AskCommand = "/ask";
     public const string FixCommand = "/fix";
@@ -49,6 +58,15 @@ public class BotMenu
     public static CustomBotCommand Deposit => new() { Command = DepositCommand, Description = BotUI.DepositButton, Type = CommandType.Deposit };
     public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
     public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
+    public static CustomBotCommand Model => new() { Command = ModelCommand, Description = BotUI.Model, Type = CommandType.SelectModel };
+    public static CustomBotCommand GptImage => new() { Command = GptImageCommand, Description = BotUI.GptImage, Type = CommandType.GptImage };
+    public static CustomBotCommand EditImage => new() { Command = EditImageCommand, Description = BotUI.EditImage, Type = CommandType.EditImage };
+    public static CustomBotCommand GptImageSizeSquare => new() { Command = GptImageSizeSquareCommand, Type = CommandType.GptImage };
+    public static CustomBotCommand GptImageSizeLandscape => new() { Command = GptImageSizeLandscapeCommand, Type = CommandType.GptImage };
+    public static CustomBotCommand GptImageSizePortrait => new() { Command = GptImageSizePortraitCommand, Type = CommandType.GptImage };
+    public static CustomBotCommand GptImageQualityLow => new() { Command = GptImageQualityLowCommand, Type = CommandType.GptImage };
+    public static CustomBotCommand GptImageQualityMedium => new() { Command = GptImageQualityMediumCommand, Type = CommandType.GptImage };
+    public static CustomBotCommand GptImageQualityHigh => new() { Command = GptImageQualityHighCommand, Type = CommandType.GptImage };
     public static CustomBotCommand Summary => new() { Command = SummaryCommand, Description = BotUI.Summary, Type = CommandType.Summary };
     public static CustomBotCommand Ask => new() { Command = AskCommand, Description = BotUI.Ask, Type = CommandType.Ask };
 
@@ -72,6 +90,9 @@ public class BotMenu
             Deposit,
             Profile,
             Donate,
+            Model,
+            GptImage,
+            EditImage,
             Summary,
             Ask
         ];

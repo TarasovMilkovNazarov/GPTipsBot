@@ -7,6 +7,7 @@ public enum PaidFeature
     TextRecognition = 2,
     Animation = 3,
     Summary = 4,
+    GptImage = 5,
 }
 
 public enum PaymentHoldStatus

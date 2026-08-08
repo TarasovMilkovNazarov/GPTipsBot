@@ -191,4 +191,22 @@
   <data name="Ask" xml:space="preserve">
     <value>Ask the AI</value>
   </data>
+  <data name="Model" xml:space="preserve">
+    <value>Choose ChatGPT model</value>
+  </data>
+  <data name="ModelButton" xml:space="preserve">
+    <value>🤖 Model</value>
+  </data>
+  <data name="GptImage" xml:space="preserve">
+    <value>GPT Image 2 — generate</value>
+  </data>
+  <data name="GptImageButton" xml:space="preserve">
+    <value>🎨 GPT Image 2</value>
+  </data>
+  <data name="EditImage" xml:space="preserve">
+    <value>GPT Image 2 — edit photo</value>
+  </data>
+  <data name="EditImageButton" xml:space="preserve">
+    <value>🛠 Edit photo</value>
+  </data>
 </root>

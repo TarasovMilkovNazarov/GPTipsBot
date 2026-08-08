@@ -1,5 +1,7 @@
-﻿using GPTipsBot.Localization;
+﻿using GPTipsBot.Config;
+using GPTipsBot.Localization;
 using GPTipsBot.Resources;
+using GPTipsBot.Services.Cache;
 using System.Globalization;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -33,6 +35,9 @@ namespace GPTipsBot.Services
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
         private static KeyboardButton DepositButton => new(BotUI.DepositButton);
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
+        private static KeyboardButton ModelButton => new(BotUI.ModelButton);
+        private static KeyboardButton GptImageButton => new(BotUI.GptImageButton);
+        private static KeyboardButton EditImageButton => new(BotUI.EditImageButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -56,6 +61,9 @@ namespace GPTipsBot.Services
                 { BotMenu.DepositCommand, new() },
                 { BotMenu.GetProfileCommand, new() },
                 { BotMenu.AnimatePhotoCommand, new() },
+                { BotMenu.ModelCommand, new() },
+                { BotMenu.GptImageCommand, new() },
+                { BotMenu.EditImageCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -75,6 +83,9 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
                 ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
                 ButtonToLocalizations[BotMenu.AnimatePhotoCommand].Add(BotUI.AnimateButton);
+                ButtonToLocalizations[BotMenu.ModelCommand].Add(BotUI.ModelButton);
+                ButtonToLocalizations[BotMenu.GptImageCommand].Add(BotUI.GptImageButton);
+                ButtonToLocalizations[BotMenu.EditImageCommand].Add(BotUI.EditImageButton);
             }
 
             CultureInfo.CurrentUICulture = savedCulture;
@@ -88,6 +99,16 @@ namespace GPTipsBot.Services
                 {
                     ResetContextButton,
                     ProfileButton
+                },
+                new[]
+                {
+                    ModelButton,
+                    DepositButton
+                },
+                new[]
+                {
+                    GptImageButton,
+                    EditImageButton
                 },
                 new[]
                 {
@@ -151,6 +172,91 @@ namespace GPTipsBot.Services
                     },
                 }
             };
+        }
+
+        public static InlineKeyboardMarkup GetModelSelectionKeyboard(string selectedModelId)
+        {
+            var rows = GptModelCatalog.All
+                .Select(model => new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        model.FormatButtonLabel(string.Equals(model.Id, selectedModelId, StringComparison.OrdinalIgnoreCase)),
+                        $"{BotMenu.ModelCommand} {model.Id}")
+                })
+                .Cast<IEnumerable<InlineKeyboardButton>>()
+                .ToList();
+
+            rows.Add([InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)]);
+
+            return new InlineKeyboardMarkup(rows);
+        }
+
+        public static InlineKeyboardMarkup GetModelNeedsBalanceKeyboard()
+        {
+            return new InlineKeyboardMarkup(new[]
+            {
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        GptModelCatalog.Default.FormatButtonLabel(false),
+                        $"{BotMenu.ModelCommand} {GptModelCatalog.DefaultModelId}"),
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand),
+                },
+            });
+        }
+
+        public static InlineKeyboardMarkup GetProfileInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(new[]
+            {
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(BotUI.ModelButton, BotMenu.ModelCommand),
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand),
+                },
+            });
+        }
+
+        public static InlineKeyboardMarkup GetGptImageOptionsKeyboard(GptImageSession session)
+        {
+            var sizeRow = GptImageConfig.Sizes.Select(size =>
+            {
+                var selected = string.Equals(size.Id, session.Size, StringComparison.OrdinalIgnoreCase);
+                var label = $"{(selected ? "✅ " : "")}{size.Label}";
+                var command = size.Id switch
+                {
+                    GptImageConfig.SizeLandscape => BotMenu.GptImageSizeLandscapeCommand,
+                    GptImageConfig.SizePortrait => BotMenu.GptImageSizePortraitCommand,
+                    _ => BotMenu.GptImageSizeSquareCommand,
+                };
+                return InlineKeyboardButton.WithCallbackData(label, command);
+            }).ToArray();
+
+            var qualityRow = GptImageConfig.Qualities.Select(quality =>
+            {
+                var selected = string.Equals(quality.Id, session.Quality, StringComparison.OrdinalIgnoreCase);
+                var label = $"{(selected ? "✅ " : "")}{quality.Label} · {quality.StarsCost:0.##}⭐";
+                var command = quality.Id switch
+                {
+                    GptImageConfig.QualityLow => BotMenu.GptImageQualityLowCommand,
+                    GptImageConfig.QualityHigh => BotMenu.GptImageQualityHighCommand,
+                    _ => BotMenu.GptImageQualityMediumCommand,
+                };
+                return InlineKeyboardButton.WithCallbackData(label, command);
+            }).ToArray();
+
+            return new InlineKeyboardMarkup(
+            [
+                sizeRow,
+                qualityRow,
+                [InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)],
+            ]);
         }
 
         private static ReplyKeyboardMarkup GetCancelKeyboardMarkup()

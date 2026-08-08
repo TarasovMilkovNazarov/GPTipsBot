@@ -34,6 +34,9 @@ namespace GPTipsBot.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PreferredGptModel")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("BotSettings");

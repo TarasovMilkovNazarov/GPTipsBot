@@ -17,7 +17,11 @@ namespace GPTipsBotTests.Services
 
             mock.Setup(m => m.SendMessage(It.IsAny<UpdateDecorator>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(response);
-            mock.Setup(m => m.SendOneOffAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            mock.Setup(m => m.SendOneOffAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<string?>()))
                 .ReturnsAsync(response);
 
             return mock;

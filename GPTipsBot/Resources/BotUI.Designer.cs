@@ -79,6 +79,42 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("Ask", resourceCulture);
             }
         }
+
+        internal static string Model {
+            get {
+                return ResourceManager.GetString("Model", resourceCulture);
+            }
+        }
+
+        internal static string ModelButton {
+            get {
+                return ResourceManager.GetString("ModelButton", resourceCulture);
+            }
+        }
+
+        internal static string GptImage {
+            get {
+                return ResourceManager.GetString("GptImage", resourceCulture);
+            }
+        }
+
+        internal static string GptImageButton {
+            get {
+                return ResourceManager.GetString("GptImageButton", resourceCulture);
+            }
+        }
+
+        internal static string EditImage {
+            get {
+                return ResourceManager.GetString("EditImage", resourceCulture);
+            }
+        }
+
+        internal static string EditImageButton {
+            get {
+                return ResourceManager.GetString("EditImageButton", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Отмена.

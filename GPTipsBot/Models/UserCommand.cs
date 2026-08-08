@@ -34,6 +34,9 @@ public enum CommandType
     AnimatePhoto = 20,
     Summary = 21,
     Ask = 22,
+    SelectModel = 23,
+    GptImage = 24,
+    EditImage = 25,
 }
 
 public class Wallet: Entity

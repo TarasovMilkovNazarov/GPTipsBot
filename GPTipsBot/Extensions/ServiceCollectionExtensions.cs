@@ -73,11 +73,13 @@ namespace GPTipsBot.Extensions
             .AddScoped<ImageGeneratorHandler>()
             .AddScoped<ImageTextRecognitionHandler>()
             .AddScoped<ChatGptHandler>()
+            .AddScoped<GptImageHandler>()
             // services
             .AddScoped<UserService>()
             .AddSingleton<TelejetAdClient>()
             .AddSingleton<IAdvertisementClient, GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
+            .AddSingleton<IGptImageSessionCache, GptImageSessionCache>()
             .AddSingleton<IImageGenerator, YaCloudClient>()
             .AddSingleton<ITextRecognizer, YaCloudClient>()
             .AddScoped<UserStatusActivator>()
