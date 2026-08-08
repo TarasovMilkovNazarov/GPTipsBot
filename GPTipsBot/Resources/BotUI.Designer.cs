@@ -172,9 +172,6 @@ namespace GPTipsBot.Resources {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to ❔ Help.
-        /// </summary>
         internal static string HelpButton {
             get {
                 return ResourceManager.GetString("HelpButton", resourceCulture);
@@ -198,6 +195,24 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("ImageButton", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Меню работы с изображениями.
+        /// </summary>
+        internal static string ImagesMenu {
+            get {
+                return ResourceManager.GetString("ImagesMenu", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 🎨 Изображения.
+        /// </summary>
+        internal static string ImagesMenuButton {
+            get {
+                return ResourceManager.GetString("ImagesMenuButton", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Текст на изображении.
@@ -209,7 +224,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Распознать текст на изображении.
+        ///   Looks up a localized string similar to 📝 Текст с фото.
         /// </summary>
         internal static string ImageTextRecognizeButton {
             get {
@@ -218,7 +233,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Язык.
+        ///   Looks up a localized string similar to 🌐 Язык.
         /// </summary>
         internal static string LangButton {
             get {
@@ -227,7 +242,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 👤 Личный кабинет.
+        ///   Looks up a localized string similar to 👤 Кабинет.
         /// </summary>
         internal static string ProfileButton {
             get {
@@ -245,7 +260,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 💬 Новый диалог с ChatGPT (сбросить контекст).
+        ///   Looks up a localized string similar to 💬 Новый диалог.
         /// </summary>
         internal static string ResetContextButton {
             get {

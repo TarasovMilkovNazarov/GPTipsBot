@@ -94,6 +94,10 @@ namespace GPTipsBot.UpdateHandlers
                         profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName);
                     replyMarkup = GetProfileInlineKeyboard();
                     break;
+                case ImagesMenuCommand:
+                    reply = BotResponse.ChooseImagesPlease;
+                    replyMarkup = GetImagesMenuInlineKeyboard();
+                    break;
                 case ModelCommand:
                     await HandleModelCommandAsync(update, profile);
                     return;

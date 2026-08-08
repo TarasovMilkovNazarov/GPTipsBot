@@ -134,7 +134,16 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("ChooseLanguagePlease", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Что сделать с изображением?.
+        /// </summary>
+        public static string ChooseImagesPlease {
+            get {
+                return ResourceManager.GetString("ChooseImagesPlease", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Контекст успешно сброшен. Начните новый диалог.
         /// </summary>

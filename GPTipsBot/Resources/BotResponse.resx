@@ -149,7 +149,11 @@
     <value>GPTipDev</value>
   </data>
   <data name="Greeting" xml:space="preserve">
-    <value>Привет!:) Чем могу помочь?</value>
+    <value>Привет! Чем могу помочь?
+Выберите действие в меню ниже или просто напишите вопрос.</value>
+  </data>
+  <data name="ChooseImagesPlease" xml:space="preserve">
+    <value>Что сделать с изображением?</value>
   </data>
   <data name="AdvertisementText" xml:space="preserve">
     <value>[VPN для всей семьи всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
@@ -405,13 +409,13 @@
     <value>Неизвестная модель. Откройте /model и выберите из списка.</value>
   </data>
   <data name="GptImageGenerateIntro" xml:space="preserve">
-    <value>🎨 GPT Image 2 — генерация
+    <value>🎨 GPT IMAGE 1 — генерация
 
 Выберите размер и качество, затем отправьте описание.
 Стоимость: {0:0.##}⭐ (без бесплатных запросов)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
-    <value>🛠 GPT Image 2 — редактирование
+    <value>🛠 GPT IMAGE 1 — редактирование
 
 Отправьте фото. Потом выберите размер/качество и опишите правки.
 Стоимость: {0:0.##}⭐ (без бесплатных запросов)</value>
@@ -427,6 +431,6 @@
 Стоимость: {0:0.##}⭐</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT IMAGE 1 · {0} · {1} · {2:0.##}⭐</value>
   </data>
 </root>

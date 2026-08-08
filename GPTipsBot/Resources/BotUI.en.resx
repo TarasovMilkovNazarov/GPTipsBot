@@ -136,16 +136,22 @@
     <value>Create image by text description</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
-    <value>🖼 Сreate image</value>
+    <value>🖼 Create image</value>
+  </data>
+  <data name="ImagesMenu" xml:space="preserve">
+    <value>Image tools menu</value>
+  </data>
+  <data name="ImagesMenuButton" xml:space="preserve">
+    <value>🎨 Images</value>
   </data>
   <data name="LangButton" xml:space="preserve">
-    <value>Language</value>
+    <value>🌐 Language</value>
   </data>
   <data name="ResetContext" xml:space="preserve">
     <value>Start new dialog with ChatGPT (reset context)</value>
   </data>
   <data name="ResetContextButton" xml:space="preserve">
-    <value>💬 New dialog with ChatGPT (reset context)</value>
+    <value>💬 New chat</value>
   </data>
   <data name="RussianButton" xml:space="preserve">
     <value>Русский</value>
@@ -166,13 +172,13 @@
     <value>cancel request</value>
   </data>
   <data name="ImageTextRecognizeButton" xml:space="preserve">
-    <value>Get text on image</value>
+    <value>📝 Text from photo</value>
   </data>
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>Get text on image</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
-    <value>Add funds</value>
+    <value>⭐ Top up</value>
   </data>
   <data name="DonateButton" xml:space="preserve">
     <value>🌟 Support our project! 💪
@@ -180,13 +186,13 @@
 💖 Every donation helps us develop and improve the service. 🤝 We appreciate your support and are working to make our product even better. 🚀💡</value>
   </data>
   <data name="ProfileButton" xml:space="preserve">
-    <value>👤 Personal Account</value>
+    <value>👤 Account</value>
   </data>
   <data name="AnimateButton" xml:space="preserve">
     <value>✨ Animate photo</value>
   </data>
   <data name="Summary" xml:space="preserve">
-    <value>Summarize today's messages</value>
+    <value>Summarize today's messages — a handy feature for groups</value>
   </data>
   <data name="Ask" xml:space="preserve">
     <value>Ask the AI</value>
@@ -198,13 +204,13 @@
     <value>🤖 Model</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT Image 2 — generate</value>
+    <value>GPT IMAGE 1 — generate</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image 2</value>
+    <value>🎨 GPT IMAGE 1</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT Image 2 — edit photo</value>
+    <value>GPT IMAGE 1 — edit photo</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 Edit photo</value>

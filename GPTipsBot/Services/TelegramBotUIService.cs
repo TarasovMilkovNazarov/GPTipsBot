@@ -24,20 +24,14 @@ namespace GPTipsBot.Services
         public static ReplyMarkup GetChooseLangMarkup(bool isGroupOrChannel) =>
             isGroupOrChannel ? GetLanguageInlineKeyboard() : ChooseLangKeyboard;
 
-        private static KeyboardButton ImageButton => new(BotUI.ImageButton);
+        private static KeyboardButton ImagesMenuButton => new(BotUI.ImagesMenuButton);
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
-        private static KeyboardButton ImageRecognizeTextButton => new(BotUI.ImageTextRecognizeButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
         private static KeyboardButton CancelButton => new(BotUI.CancelButton);
-        private static KeyboardButton LangButton => new(BotUI.LangButton);
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
-        private static KeyboardButton DepositButton => new(BotUI.DepositButton);
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
-        private static KeyboardButton ModelButton => new(BotUI.ModelButton);
-        private static KeyboardButton GptImageButton => new(BotUI.GptImageButton);
-        private static KeyboardButton EditImageButton => new(BotUI.EditImageButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -64,6 +58,7 @@ namespace GPTipsBot.Services
                 { BotMenu.ModelCommand, new() },
                 { BotMenu.GptImageCommand, new() },
                 { BotMenu.EditImageCommand, new() },
+                { BotMenu.ImagesMenuCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -86,48 +81,58 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ModelCommand].Add(BotUI.ModelButton);
                 ButtonToLocalizations[BotMenu.GptImageCommand].Add(BotUI.GptImageButton);
                 ButtonToLocalizations[BotMenu.EditImageCommand].Add(BotUI.EditImageButton);
+                ButtonToLocalizations[BotMenu.ImagesMenuCommand].Add(BotUI.ImagesMenuButton);
             }
+
+            // Keep old reply-keyboard labels working until users get the new menu via /start.
+            AddLegacyButtonLabels();
 
             CultureInfo.CurrentUICulture = savedCulture;
         }
 
+        private static void AddLegacyButtonLabels()
+        {
+            AddUnique(BotMenu.ResetContextCommand,
+                "💬 Новый диалог с ChatGPT (сбросить контекст)",
+                "💬 New dialog with ChatGPT (reset context)");
+            AddUnique(BotMenu.GetProfileCommand,
+                "👤 Личный кабинет",
+                "👤 Personal Account");
+            AddUnique(BotMenu.DepositCommand,
+                "Пополнить баланс",
+                "Add funds");
+            AddUnique(BotMenu.ImageTextRecognizeCommand,
+                "Распознать текст на изображении",
+                "Get text on image");
+            AddUnique(BotMenu.HelpCommand, "❔ Help");
+            AddUnique(BotMenu.ChooseLangCommand, "Язык", "Language");
+            AddUnique(BotMenu.ImageCommand, "🖼 Сreate image");
+            AddUnique(BotMenu.GptImageCommand, "🎨 GPT Image 2");
+        }
+
+        private static void AddUnique(string command, params string[] labels)
+        {
+            var list = ButtonToLocalizations[command];
+            foreach (var label in labels)
+            {
+                if (!list.Exists(existing => string.Equals(existing, label, StringComparison.OrdinalIgnoreCase)))
+                {
+                    list.Add(label);
+                }
+            }
+        }
+
         private static ReplyKeyboardMarkup GetMenuKeyboardMarkup()
         {
-            var keyboardMarkup = new ReplyKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    ResetContextButton,
-                    ProfileButton
-                },
-                new[]
-                {
-                    ModelButton,
-                    DepositButton
-                },
-                new[]
-                {
-                    GptImageButton,
-                    EditImageButton
-                },
-                new[]
-                {
-                    ImageButton,
-                    ImageRecognizeTextButton
-                },
-                new[]
-                {
-                    AnimatePhotoButton
-                },
-                new[]
-                {
-                    LangButton,
-                    HelpButton
-                },
-            });
+            var keyboardMarkup = new ReplyKeyboardMarkup(
+            [
+                [ResetContextButton, ProfileButton],
+                [ImagesMenuButton, AnimatePhotoButton],
+                [HelpButton],
+            ]);
 
             keyboardMarkup.ResizeKeyboard = true;
-            keyboardMarkup.OneTimeKeyboard = true;
+            keyboardMarkup.OneTimeKeyboard = false;
 
             return keyboardMarkup;
         }
@@ -210,17 +215,23 @@ namespace GPTipsBot.Services
 
         public static InlineKeyboardMarkup GetProfileInlineKeyboard()
         {
-            return new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(BotUI.ModelButton, BotMenu.ModelCommand),
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand),
-                },
-            });
+            return new InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton.WithCallbackData(BotUI.ModelButton, BotMenu.ModelCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.DepositButton, BotMenu.DepositCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.LangButton, BotMenu.ChooseLangCommand)],
+            ]);
+        }
+
+        public static InlineKeyboardMarkup GetImagesMenuInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.ImageButton, BotMenu.ImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand)],
+            ]);
         }
 
         public static InlineKeyboardMarkup GetGptImageOptionsKeyboard(GptImageSession session)

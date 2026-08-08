@@ -28,6 +28,7 @@ public class BotMenu
     public const string DonateCommand = "/donate";
 
     public const string ModelCommand = "/model";
+    public const string ImagesMenuCommand = "/images";
     public const string GptImageCommand = "/gpt_image";
     public const string EditImageCommand = "/edit_image";
     public const string GptImageSizeSquareCommand = "/gpt_image_sq";
@@ -59,6 +60,7 @@ public class BotMenu
     public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
     public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
     public static CustomBotCommand Model => new() { Command = ModelCommand, Description = BotUI.Model, Type = CommandType.SelectModel };
+    public static CustomBotCommand ImagesMenu => new() { Command = ImagesMenuCommand, Description = BotUI.ImagesMenu, Type = CommandType.ImagesMenu };
     public static CustomBotCommand GptImage => new() { Command = GptImageCommand, Description = BotUI.GptImage, Type = CommandType.GptImage };
     public static CustomBotCommand EditImage => new() { Command = EditImageCommand, Description = BotUI.EditImage, Type = CommandType.EditImage };
     public static CustomBotCommand GptImageSizeSquare => new() { Command = GptImageSizeSquareCommand, Type = CommandType.GptImage };

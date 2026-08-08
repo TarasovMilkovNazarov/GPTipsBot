@@ -149,7 +149,11 @@ Note, that free requests amount is limited. Requests balance you can see in /pro
     <value>GPTipDev</value>
   </data>
   <data name="Greeting" xml:space="preserve">
-    <value>Hello! How can I help you?</value>
+    <value>Hello! How can I help?
+Pick an action from the menu below or just type your question.</value>
+  </data>
+  <data name="ChooseImagesPlease" xml:space="preserve">
+    <value>What would you like to do with an image?</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
