@@ -55,33 +55,50 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            await using var dbTransaction = await context.Database.BeginTransactionAsync();
-            var isSuccessPayment = await userService.PayForTextRecognitions(update.UserChatKey.Id);
-            if (!isSuccessPayment)
+            var hold = await userService.TryReserveTextRecognitionAsync(update.UserChatKey.Id);
+            if (hold is null)
             {
-                await dbTransaction.RollbackAsync();
-                context.ChangeTracker.Clear();
                 await botClient.SendUserReplyAsync(update, BotResponse.PleaseWaitMsg,
                     TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
 
-            var text = await yaCloudClient.Recognize(base64String);
-
-            var recognitionResultMessage = new MessageDto(update.UserChatKey)
+            var confirmed = false;
+            try
             {
-                Text = text,
-                BotMessageType = BotMessageType.RecognizeText,
-                ContextBound = false,
-                Role = MessageOwner.Ya,
-            };
+                await using var dbTransaction = await context.Database.BeginTransactionAsync();
 
-            await messageRepository.AddAsync(recognitionResultMessage);
-            await dbTransaction.CommitAsync();
+                var text = await yaCloudClient.Recognize(base64String);
 
-            await botClient.SendUserReplyAsync(update, text);
+                var recognitionResultMessage = new MessageDto(update.UserChatKey)
+                {
+                    Text = text,
+                    BotMessageType = BotMessageType.RecognizeText,
+                    ContextBound = false,
+                    Role = MessageOwner.Ya,
+                };
 
-            if (update.IsGroupOrChannel)
+                await messageRepository.AddAsync(recognitionResultMessage);
+                await dbTransaction.CommitAsync();
+
+                await botClient.SendUserReplyAsync(update, text);
+                await userService.ConfirmAsync(hold.Id);
+                confirmed = true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Text recognition failed for user {UserId}", update.UserChatKey.Id);
+                await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
+            }
+            finally
+            {
+                if (!confirmed)
+                {
+                    await userService.ReleaseAsync(hold.Id);
+                }
+            }
+
+            if (!confirmed || update.IsGroupOrChannel)
             {
                 return;
             }

@@ -3,6 +3,7 @@ using GPTipsBot.Config;
 using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
 
@@ -57,118 +58,166 @@ namespace GPTipsBot.Services
             return profile;
         }
 
-        public async Task<bool> PayForGpt(long userId)
+        public Task<PaymentHold?> TryReserveGptAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.Gpt, PaymentConfig.Gpt);
+
+        public Task<PaymentHold?> TryReserveImageAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.Image, PaymentConfig.Image);
+
+        public Task<PaymentHold?> TryReserveTextRecognitionAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.TextRecognition, PaymentConfig.Image);
+
+        public Task<PaymentHold?> TryReserveAnimationAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.Animation, PaymentConfig.Animation);
+
+        public Task<PaymentHold?> TryReserveSummaryAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.Summary, PaymentConfig.Summary);
+
+        public async Task ConfirmAsync(long holdId)
         {
-            var user = _userRepository.Get(userId);
-            Guard.Against.Null(user);
-
-            if (user.FreeGptRequests > 0)
-            {
-                user.FreeGptRequests -= 1;
-                _userRepository.Update(user);
-
-                return true;
-            }
-
-            var wallet = user.Wallet;
-
-            if (wallet is null || wallet.Balance < PaymentConfig.Gpt)
-            {
-                return false;
-            }
-
-            user.Wallet!.Balance -= PaymentConfig.Gpt;
-            return true;
+            await _context.PaymentHolds
+                .Where(h => h.Id == holdId && h.Status == PaymentHoldStatus.Held)
+                .ExecuteUpdateAsync(s => s.SetProperty(h => h.Status, PaymentHoldStatus.Confirmed));
         }
 
-        public async Task<bool> PayForImageAsync(long userId)
+        public async Task ReleaseAsync(long holdId)
         {
-            var user = _userRepository.Get(userId);
-            Guard.Against.Null(user);
+            await using var tx = await _context.Database.BeginTransactionAsync();
 
-            if (user.FreeImageGenerations > 0)
+            var claimed = await _context.PaymentHolds
+                .Where(h => h.Id == holdId && h.Status == PaymentHoldStatus.Held)
+                .ExecuteUpdateAsync(s => s.SetProperty(h => h.Status, PaymentHoldStatus.Released));
+
+            if (claimed != 1)
             {
-                user.FreeImageGenerations -= 1;
-                _userRepository.Update(user);
-
-                return true;
+                await tx.RollbackAsync();
+                return;
             }
 
-            if (user.Wallet == null || user.Wallet?.Balance < PaymentConfig.Image)
+            var hold = await _context.PaymentHolds.AsNoTracking()
+                .FirstAsync(h => h.Id == holdId);
+
+            if (hold.UsedFreeQuota)
             {
-                return false;
+                await RestoreFreeQuotaAsync(hold.UserId, hold.Feature);
+            }
+            else if (hold.WalletAmount > 0)
+            {
+                await _context.Wallets
+                    .Where(w => w.UserId == hold.UserId)
+                    .ExecuteUpdateAsync(s => s.SetProperty(w => w.Balance, w => w.Balance + hold.WalletAmount));
             }
 
-            user.Wallet!.Balance -= PaymentConfig.Image;
-
-            return true;
+            await tx.CommitAsync();
         }
 
-        public async Task<bool> PayForTextRecognitions(long userId)
+        public async Task ReleaseExpiredHoldsAsync(CancellationToken cancellationToken = default)
         {
-            var user = _userRepository.Get(userId);
-            Guard.Against.Null(user);
+            var cutoff = DateTime.UtcNow - PaymentConfig.PaymentHoldTtl;
+            var expiredIds = await _context.PaymentHolds.AsNoTracking()
+                .Where(h => h.Status == PaymentHoldStatus.Held && h.CreatedAt < cutoff)
+                .Select(h => h.Id)
+                .ToListAsync(cancellationToken);
 
-            if (user.FreeImageTextRecognitions > 0)
+            foreach (var holdId in expiredIds)
             {
-                user.FreeImageTextRecognitions -= 1;
-                _userRepository.Update(user);
-
-                return true;
+                await ReleaseAsync(holdId);
             }
-
-            if (user.Wallet == null || user.Wallet?.Balance < PaymentConfig.Image)
-            {
-                return false;
-            }
-
-            user.Wallet!.Balance -= PaymentConfig.Image;
-            return true;
         }
 
-        public async Task<bool> PayForAnimationAsync(long userId)
+        private async Task<PaymentHold?> TryReserveAsync(long userId, PaidFeature feature, double walletPrice)
         {
-            var user = _userRepository.Get(userId);
-            Guard.Against.Null(user);
+            await using var tx = await _context.Database.BeginTransactionAsync();
 
-            if (user.FreePhotoAnimations > 0)
+            var freeUpdated = await DecrementFreeQuotaAsync(userId, feature);
+            if (freeUpdated == 1)
             {
-                user.FreePhotoAnimations -= 1;
-                _userRepository.Update(user);
-
-                return true;
+                var hold = NewHold(userId, feature, usedFreeQuota: true, walletAmount: 0);
+                _context.PaymentHolds.Add(hold);
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+                return hold;
             }
 
-            if (user.Wallet == null || user.Wallet?.Balance < PaymentConfig.Animation)
+            var walletUpdated = await _context.Wallets
+                .Where(w => w.UserId == userId && w.Balance >= walletPrice)
+                .ExecuteUpdateAsync(s => s.SetProperty(w => w.Balance, w => w.Balance - walletPrice));
+
+            if (walletUpdated == 1)
             {
-                return false;
+                var hold = NewHold(userId, feature, usedFreeQuota: false, walletAmount: walletPrice);
+                _context.PaymentHolds.Add(hold);
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+                return hold;
             }
 
-            user.Wallet!.Balance -= PaymentConfig.Animation;
-            return true;
+            await tx.RollbackAsync();
+            return null;
         }
 
-        public async Task<bool> PayForSummaryAsync(long userId)
+        private async Task<int> DecrementFreeQuotaAsync(long userId, PaidFeature feature) => feature switch
         {
-            var user = _userRepository.Get(userId);
-            Guard.Against.Null(user);
+            PaidFeature.Gpt => await _context.Users
+                .Where(u => u.Id == userId && u.FreeGptRequests > 0)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeGptRequests, u => u.FreeGptRequests - 1)),
+            PaidFeature.Image => await _context.Users
+                .Where(u => u.Id == userId && u.FreeImageGenerations > 0)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeImageGenerations, u => u.FreeImageGenerations - 1)),
+            PaidFeature.TextRecognition => await _context.Users
+                .Where(u => u.Id == userId && u.FreeImageTextRecognitions > 0)
+                .ExecuteUpdateAsync(s =>
+                    s.SetProperty(u => u.FreeImageTextRecognitions, u => u.FreeImageTextRecognitions - 1)),
+            PaidFeature.Animation => await _context.Users
+                .Where(u => u.Id == userId && u.FreePhotoAnimations > 0)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreePhotoAnimations, u => u.FreePhotoAnimations - 1)),
+            PaidFeature.Summary => await _context.Users
+                .Where(u => u.Id == userId && u.FreeSummaryRequests > 0)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeSummaryRequests, u => u.FreeSummaryRequests - 1)),
+            _ => 0,
+        };
 
-            if (user.FreeSummaryRequests > 0)
+        private async Task RestoreFreeQuotaAsync(long userId, PaidFeature feature)
+        {
+            switch (feature)
             {
-                user.FreeSummaryRequests -= 1;
-                _userRepository.Update(user);
-
-                return true;
+                case PaidFeature.Gpt:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeGptRequests, u => u.FreeGptRequests + 1));
+                    break;
+                case PaidFeature.Image:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(u => u.FreeImageGenerations, u => u.FreeImageGenerations + 1));
+                    break;
+                case PaidFeature.TextRecognition:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(u => u.FreeImageTextRecognitions, u => u.FreeImageTextRecognitions + 1));
+                    break;
+                case PaidFeature.Animation:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(u => u.FreePhotoAnimations, u => u.FreePhotoAnimations + 1));
+                    break;
+                case PaidFeature.Summary:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(u => u.FreeSummaryRequests, u => u.FreeSummaryRequests + 1));
+                    break;
             }
-
-            if (user.Wallet == null || user.Wallet.Balance < PaymentConfig.Summary)
-            {
-                return false;
-            }
-
-            user.Wallet.Balance -= PaymentConfig.Summary;
-            return true;
         }
+
+        private static PaymentHold NewHold(long userId, PaidFeature feature, bool usedFreeQuota, double walletAmount) =>
+            new()
+            {
+                UserId = userId,
+                Feature = feature,
+                UsedFreeQuota = usedFreeQuota,
+                WalletAmount = walletAmount,
+                Status = PaymentHoldStatus.Held,
+                CreatedAt = DateTime.UtcNow,
+            };
 
         public async Task CreateUpdateUser(User user)
         {

@@ -34,90 +34,101 @@ namespace GPTipsBot.UpdateHandlers
             var chatId = update.UserChatKey.ChatId;
             var userId = update.UserChatKey.Id;
 
-            await using var dbTransaction = await context.Database.BeginTransactionAsync();
-            var request = await messageRepository.AddAsync(update.Message);
-            var successPayment = await userService.PayForGpt(userId);
-
-            if (!successPayment)
+            var hold = await userService.TryReserveGptAsync(userId);
+            if (hold is null)
             {
-                await dbTransaction.RollbackAsync();
-                context.ChangeTracker.Clear();
                 var nextExecution = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
                 await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExecution);
                 return;
             }
 
-            Guard.Against.Null(update.Message.TelegramMessageId);
-
+            var confirmed = false;
             try
             {
-                var serviceMessageId = await typingStatus.Start(
-                    update.UserChatKey,
-                    Telegram.Bot.Types.Enums.ChatAction.Typing,
-                    chatId);
+                await using var dbTransaction = await context.Database.BeginTransactionAsync();
+                var request = await messageRepository.AddAsync(update.Message);
 
-                var sw = Stopwatch.StartNew();
-                var token = Dispatcher.UserState[update.UserChatKey].MessageIdToCancellation[serviceMessageId].Token;
-
-                ChatCompletionCreateResponse? response = null;
+                Guard.Against.Null(update.Message.TelegramMessageId);
 
                 try
                 {
-                    response = await gptService.SendMessage(update, token);
-                }
-                catch (OperationCanceledException)
-                {
-                    log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
-                    return;
-                }
-                catch (ChatGptException)
-                {
-                    log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                    await botClient.SendMessage(
+                    var serviceMessageId = await typingStatus.Start(
+                        update.UserChatKey,
+                        Telegram.Bot.Types.Enums.ChatAction.Typing,
+                        chatId);
+
+                    var sw = Stopwatch.StartNew();
+                    var token = Dispatcher.UserState[update.UserChatKey].MessageIdToCancellation[serviceMessageId].Token;
+
+                    ChatCompletionCreateResponse? response = null;
+
+                    try
+                    {
+                        response = await gptService.SendMessage(update, token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        log.LogInformation("Request to openai service with promt '{promt}' was canceled", shortMessage);
+                        return;
+                    }
+                    catch (ChatGptException)
+                    {
+                        log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
+                        await botClient.SendMessage(
+                            chatId,
+                            BotResponse.SomethingWentWrong,
+                            replyParameters: (int)update.Message.TelegramMessageId,
+                            cancellationToken: token);
+                        return;
+                    }
+                    finally
+                    {
+                        sw.Stop();
+                    }
+
+                    log.LogInformation("Get response to prompt '{prompt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
+
+                    var gptResponse = new MessageDto(update.UserChatKey)
+                    {
+                        Text = response.Choices.FirstOrDefault()?.Message.Content ?? "",
+                        Role = Enums.MessageOwner.Assistant,
+                        ContextBound = true,
+                    };
+
+                    Guard.Against.Null(gptResponse);
+
+                    await messageRepository.AddAsync(gptResponse, request);
+                    await botClient.TrySendMarkdown2MessageAsync(
                         chatId,
-                        BotResponse.SomethingWentWrong,
-                        replyParameters: (int)update.Message.TelegramMessageId,
-                        cancellationToken: token);
+                        gptResponse.Text,
+                        (int)update.Message.TelegramMessageId,
+                        logger: log);
+
+                    await userService.ConfirmAsync(hold.Id);
+                    confirmed = true;
+                    await dbTransaction.CommitAsync();
+                }
+                catch (ClientException ex)
+                {
+                    log.LogInformation(ex, shortMessage);
+                    await botClient.SendMessage(chatId, ex.Message,
+                        replyParameters: (int)update.Message.TelegramMessageId!);
                     return;
                 }
                 finally
                 {
-                    sw.Stop();
+                    await typingStatus.Stop(update.UserChatKey);
                 }
-
-                log.LogInformation("Get response to prompt '{prompt}' takes {duration}s", shortMessage, sw.Elapsed.TotalSeconds);
-
-                var gptResponse = new MessageDto(update.UserChatKey)
-                {
-                    Text = response.Choices.FirstOrDefault()?.Message.Content ?? "",
-                    Role = Enums.MessageOwner.Assistant,
-                    ContextBound = true,
-                };
-
-                Guard.Against.Null(gptResponse);
-
-                await messageRepository.AddAsync(gptResponse, request);
-                await botClient.TrySendMarkdown2MessageAsync(
-                    chatId,
-                    gptResponse.Text,
-                    (int)update.Message.TelegramMessageId,
-                    logger: log);
-            }
-            catch (ClientException ex)
-            {
-                log.LogInformation(ex, shortMessage);
-                await botClient.SendMessage(chatId, ex.Message,
-                    replyParameters: (int)update.Message.TelegramMessageId);
-                return;
             }
             finally
             {
-                await typingStatus.Stop(update.UserChatKey);
+                if (!confirmed)
+                {
+                    await userService.ReleaseAsync(hold.Id);
+                }
             }
 
-            await dbTransaction.CommitAsync();
-
-            if (update.IsGroupOrChannel)
+            if (!confirmed || update.IsGroupOrChannel)
             {
                 return;
             }

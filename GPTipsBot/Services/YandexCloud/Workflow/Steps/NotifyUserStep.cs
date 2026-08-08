@@ -25,17 +25,20 @@ public class NotifyUserStep(
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
         var data = (ImageGenerationWorkflowData)context.Workflow.Data;
+        var success = false;
 
         try
         {
             if (data.UseDevPlaceholder)
             {
                 await SendSuccessAsync(data, InputFile.FromUri(DevPlaceholderUrl));
+                success = true;
             }
             else if (!string.IsNullOrEmpty(data.ImageBase64))
             {
                 await using var imageStream = new MemoryStream(Convert.FromBase64String(data.ImageBase64));
                 await SendSuccessAsync(data, InputFile.FromStream(imageStream));
+                success = true;
             }
             else
             {
@@ -45,6 +48,7 @@ public class NotifyUserStep(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to notify user about image generation result for chat {ChatId}", data.ChatId);
+            success = false;
 
             try
             {
@@ -57,6 +61,8 @@ public class NotifyUserStep(
         }
         finally
         {
+            await FinalizePaymentAsync(data.PaymentHoldId, success);
+
             if (data.ProgressMessageId.HasValue)
             {
                 try
@@ -90,5 +96,24 @@ public class NotifyUserStep(
             data.DeliveryChatId,
             string.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit),
             replyMarkup: TelegramBotUiService.GetImageInstructionInlineKeyboard(data.IsSquare));
+    }
+
+    private async Task FinalizePaymentAsync(long? paymentHoldId, bool success)
+    {
+        if (paymentHoldId is null)
+        {
+            return;
+        }
+
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+        if (success)
+        {
+            await userService.ConfirmAsync(paymentHoldId.Value);
+        }
+        else
+        {
+            await userService.ReleaseAsync(paymentHoldId.Value);
+        }
     }
 }

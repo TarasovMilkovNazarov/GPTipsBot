@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Db;
-using GPTipsBot.Dtos;
+﻿using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Models;
@@ -15,7 +14,6 @@ namespace GPTipsBot.UpdateHandlers
         ITelegramBotClient botClient,
         IAdvertisementClient gramadsAdvertisementClient,
         UserService userService,
-        ApplicationContext context,
         TelejetAdClient telejetAdClient,
         IJobService jobService,
         InMemoryAdvertisementTracker advertisementTracker,
@@ -40,33 +38,36 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            await using var dbTransaction = await context.Database.BeginTransactionAsync();
-            var successPayment = await userService.PayForImageAsync(userKey.Id);
-            if (!successPayment)
+            var hold = await userService.TryReserveImageAsync(userKey.Id);
+            if (hold is null)
             {
-                await dbTransaction.RollbackAsync();
-                context.ChangeTracker.Clear();
-
                 var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
                 await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExec);
                 return;
             }
 
-            var progressMessage = await botClient.SendMessage(chatId, BotResponse.PleaseWaitMsg);
-            var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
-            var isSquare = previousCommand?.Type == CommandType.ImageSquare;
-
-            await imageGenerationWorkflowService.StartAsync(new ImageGenerationWorkflowData
+            try
             {
-                ChatId = chatId,
-                ReplyChatId = chatId,
-                UserId = userKey.Id,
-                Prompt = update.Message.Text,
-                IsSquare = isSquare,
-                ProgressMessageId = progressMessage.MessageId,
-            });
+                var progressMessage = await botClient.SendMessage(chatId, BotResponse.PleaseWaitMsg);
+                var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+                var isSquare = previousCommand?.Type == CommandType.ImageSquare;
 
-            await dbTransaction.CommitAsync();
+                await imageGenerationWorkflowService.StartAsync(new ImageGenerationWorkflowData
+                {
+                    ChatId = chatId,
+                    ReplyChatId = chatId,
+                    UserId = userKey.Id,
+                    Prompt = update.Message.Text,
+                    IsSquare = isSquare,
+                    ProgressMessageId = progressMessage.MessageId,
+                    PaymentHoldId = hold.Id,
+                });
+            }
+            catch
+            {
+                await userService.ReleaseAsync(hold.Id);
+                throw;
+            }
 
             if (update.IsGroupOrChannel)
             {

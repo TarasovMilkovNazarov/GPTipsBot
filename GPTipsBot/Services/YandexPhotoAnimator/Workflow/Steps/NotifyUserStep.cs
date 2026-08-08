@@ -3,6 +3,7 @@ using GPTipsBot.Enums;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
+using GPTipsBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -20,6 +21,7 @@ public class NotifyUserStep(
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
         var data = (PhotoAnimationWorkflowData)context.Workflow.Data;
+        var success = false;
 
         try
         {
@@ -35,6 +37,7 @@ public class NotifyUserStep(
                     Role = MessageOwner.Ya,
                     BotMessageType = BotMessageType.AnimatedPhoto,
                 });
+                success = true;
             }
             else
             {
@@ -44,6 +47,7 @@ public class NotifyUserStep(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to notify user about photo animation result for chat {ChatId}", data.ChatId);
+            success = false;
 
             try
             {
@@ -56,6 +60,8 @@ public class NotifyUserStep(
         }
         finally
         {
+            await FinalizePaymentAsync(data.PaymentHoldId, success);
+
             if (data.ProgressMessageId.HasValue)
             {
                 try
@@ -70,5 +76,24 @@ public class NotifyUserStep(
         }
 
         return ExecutionResult.Next();
+    }
+
+    private async Task FinalizePaymentAsync(long? paymentHoldId, bool success)
+    {
+        if (paymentHoldId is null)
+        {
+            return;
+        }
+
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+        if (success)
+        {
+            await userService.ConfirmAsync(paymentHoldId.Value);
+        }
+        else
+        {
+            await userService.ReleaseAsync(paymentHoldId.Value);
+        }
     }
 }

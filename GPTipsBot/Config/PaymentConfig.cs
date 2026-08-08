@@ -25,6 +25,9 @@ public static class PaymentConfig
     /// <summary>One-time free /summary uses (not refreshed by the daily limits job).</summary>
     public const int NewbieFreeSummaries = 3;
 
+    /// <summary>Abandoned Held payment holds older than this are auto-released.</summary>
+    public static readonly TimeSpan PaymentHoldTtl = TimeSpan.FromMinutes(60);
+
     /// <summary>Minimum YooKassa top-up in rubles.</summary>
     public const int MinRechargeRub = 50;
 

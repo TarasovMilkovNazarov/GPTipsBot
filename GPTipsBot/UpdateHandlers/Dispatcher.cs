@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Db;
-using GPTipsBot.Dtos;
+﻿using GPTipsBot.Dtos;
 using GPTipsBot.Mapper;
 using GPTipsBot.Services;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +33,6 @@ namespace GPTipsBot.UpdateHandlers
         UserService userService,
         UserCommandRepository userCommandRepository,
         MoneyService moneyService,
-        ApplicationContext context,
         BotSettingsRepository botSettingsRepository,
         InvoiceRepository invoiceRepository,
         IGpt gptService,
@@ -262,28 +260,32 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
-                await using var dbTransaction = await context.Database.BeginTransactionAsync();
-                var successPayment = await userService.PayForAnimationAsync(userKey.Id);
-                if (!successPayment)
+                var hold = await userService.TryReserveAnimationAsync(userKey.Id);
+                if (hold is null)
                 {
-                    await dbTransaction.RollbackAsync();
-                    context.ChangeTracker.Clear();
-
                     var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
                     await botClient.SendOutOfFreeRequestsMessageAsync(update.ReplyChatId, nextExec);
                     return;
                 }
 
-                var progressMessageId = await photoAnimationProgressNotifier.StartAsync(update.ReplyChatId);
+                try
+                {
+                    var progressMessageId = await photoAnimationProgressNotifier.StartAsync(update.ReplyChatId);
 
-                await gptService.StartAnimatePhoto(
-                    update.Message.Text,
-                    imageId!,
-                    update.ReplyChatId,
-                    userKey.Id,
-                    progressMessageId);
+                    await gptService.StartAnimatePhoto(
+                        update.Message.Text,
+                        imageId!,
+                        update.ReplyChatId,
+                        userKey.Id,
+                        progressMessageId,
+                        hold.Id);
+                }
+                catch
+                {
+                    await userService.ReleaseAsync(hold.Id);
+                    throw;
+                }
 
-                await dbTransaction.CommitAsync();
                 imageCache.Remove(userKey.ChatId);
                 return;
             }

@@ -295,8 +295,8 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var successPayment = await userService.PayForSummaryAsync(update.UserChatKey.Id);
-            if (!successPayment)
+            var hold = await userService.TryReserveSummaryAsync(update.UserChatKey.Id);
+            if (hold is null)
             {
                 await botClient.SendMessage(
                     chatId,
@@ -310,6 +310,7 @@ namespace GPTipsBot.UpdateHandlers
 
             var transcript = BuildTranscript(dayMessages);
             var prompt = string.Format(BotResponse.SummaryPrompt, transcript);
+            var confirmed = false;
 
             try
             {
@@ -336,11 +337,21 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendUserReplyAsync(
                     update,
                     $"{BotResponse.SummaryHeader}\n\n{summaryText}");
+
+                await userService.ConfirmAsync(hold.Id);
+                confirmed = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to build day summary for chat {ChatId}", chatId);
                 await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
+            }
+            finally
+            {
+                if (!confirmed)
+                {
+                    await userService.ReleaseAsync(hold.Id);
+                }
             }
         }
 

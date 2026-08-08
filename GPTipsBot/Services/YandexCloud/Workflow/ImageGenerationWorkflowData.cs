@@ -13,6 +13,7 @@ public class ImageGenerationWorkflowData
     public bool UseDevPlaceholder { get; set; }
     public DateTime? DeadlineUtc { get; set; }
     public string? ErrorMessage { get; set; }
+    public long? PaymentHoldId { get; set; }
 
     public long DeliveryChatId => ReplyChatId != 0 ? ReplyChatId : ChatId;
 }

@@ -71,7 +71,8 @@ namespace GPTipsBot.Services
             string imageFileId,
             long chatId,
             long userId,
-            int progressMessageId)
+            int progressMessageId,
+            long paymentHoldId)
         {
             var workflowData = new PhotoAnimationWorkflowData
             {
@@ -79,7 +80,8 @@ namespace GPTipsBot.Services
                 UserId = userId,
                 ImageFileId = imageFileId,
                 Prompt = prompt,
-                ProgressMessageId = progressMessageId
+                ProgressMessageId = progressMessageId,
+                PaymentHoldId = paymentHoldId,
             };
 
             return _photoAnimationWorkflowService.StartAsync(workflowData);
@@ -137,6 +139,7 @@ namespace GPTipsBot.Services
             string imageFileId,
             long chatId,
             long userId,
-            int progressMessageId);
+            int progressMessageId,
+            long paymentHoldId);
     }
 }
