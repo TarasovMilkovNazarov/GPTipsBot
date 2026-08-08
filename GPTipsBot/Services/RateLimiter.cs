@@ -28,6 +28,13 @@ namespace GPTipsBot.Services
 
         public bool IsAllowed(UpdateDecorator update)
         {
+            // In groups, non-addressed chatter is only archived for /summary and must not
+            // consume the rate limit or trigger "too many requests" for the whole chat.
+            if (update.IsGroupOrChannel && !update.IsAddressedToBot)
+            {
+                return true;
+            }
+
             var chatId = update.UserChatKey.ChatId;
 
             return update.IsCommand || TryIncrementMessageCount(chatId);
