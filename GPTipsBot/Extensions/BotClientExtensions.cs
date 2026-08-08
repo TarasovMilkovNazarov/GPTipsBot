@@ -33,8 +33,7 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
         }
 
         /// <summary>
-        /// Sends a user-facing reply to the private chat when the update came from a group.
-        /// On 403 (user never opened DM), falls back to the group with instructions.
+        /// Sends a user-facing reply into the chat where the update came from.
         /// </summary>
         public static async Task<bool> SendUserReplyAsync(
             this ITelegramBotClient botClient,
@@ -43,20 +42,12 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             ReplyMarkup? replyMarkup = null,
             bool acknowledgeInGroup = true)
         {
-            try
-            {
-                await botClient.SendMessage(update.ReplyChatId, text, replyMarkup: replyMarkup);
-                await AcknowledgePrivateReplyAsync(botClient, update, acknowledgeInGroup);
-                return true;
-            }
-            catch (ApiRequestException ex) when (ex.ErrorCode == 403 && update.IsGroupOrChannel)
-            {
-                await botClient.SendMessage(
-                    update.UserChatKey.ChatId,
-                    string.Format(BotResponse.OpenPrivateChatFirst, AppConfig.BotName.TrimStart('@')),
-                    replyParameters: ToReplyParameters(update));
-                return false;
-            }
+            await botClient.SendMessage(
+                update.UserChatKey.ChatId,
+                text,
+                replyMarkup: replyMarkup,
+                replyParameters: ToReplyParameters(update));
+            return true;
         }
 
         public static async Task<bool> TrySendUserMarkdownReplyAsync(
@@ -66,43 +57,13 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             ILogger? logger = null,
             bool acknowledgeInGroup = true)
         {
-            try
-            {
-                await botClient.TrySendMarkdown2MessageAsync(update.ReplyChatId, text, replyToMessageId: null, logger: logger);
-                await AcknowledgePrivateReplyAsync(botClient, update, acknowledgeInGroup);
-                return true;
-            }
-            catch (ApiRequestException ex) when (ex.ErrorCode == 403 && update.IsGroupOrChannel)
-            {
-                await botClient.SendMessage(
-                    update.UserChatKey.ChatId,
-                    string.Format(BotResponse.OpenPrivateChatFirst, AppConfig.BotName.TrimStart('@')),
-                    replyParameters: ToReplyParameters(update));
-                return false;
-            }
-        }
-
-        private static async Task AcknowledgePrivateReplyAsync(
-            ITelegramBotClient botClient,
-            UpdateDecorator update,
-            bool acknowledgeInGroup)
-        {
-            if (!acknowledgeInGroup || !update.IsGroupOrChannel)
-            {
-                return;
-            }
-
-            try
-            {
-                await botClient.SendMessage(
-                    update.UserChatKey.ChatId,
-                    BotResponse.ReplySentPrivately,
-                    replyParameters: ToReplyParameters(update));
-            }
-            catch (ApiRequestException)
-            {
-                // Group ack is best-effort.
-            }
+            var replyTo = update.Message?.TelegramMessageId is long id ? (int?)id : null;
+            await botClient.TrySendMarkdown2MessageAsync(
+                update.UserChatKey.ChatId,
+                text,
+                replyToMessageId: replyTo,
+                logger: logger);
+            return true;
         }
 
         private static ReplyParameters? ToReplyParameters(UpdateDecorator update) =>

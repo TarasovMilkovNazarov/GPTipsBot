@@ -29,36 +29,37 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateDecorator update)
         {
             var userKey = update.UserChatKey;
+            var chatId = userKey.ChatId;
 
             if (update.Message.Text.Length > ImageTextDescriptionLimit)
             {
-                await botClient.SendUserReplyAsync(
-                    update,
+                await botClient.SendMessage(
+                    chatId,
                     string.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
-                    TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
+                    replyMarkup: TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
                 return;
             }
 
             await using var dbTransaction = await context.Database.BeginTransactionAsync();
-            var successPayment = await userService.PayForImageAsync(update.UserChatKey.Id);
+            var successPayment = await userService.PayForImageAsync(userKey.Id);
             if (!successPayment)
             {
                 await dbTransaction.RollbackAsync();
                 context.ChangeTracker.Clear();
 
                 var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
-                await botClient.SendOutOfFreeRequestsMessageAsync(update.ReplyChatId, nextExec);
+                await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExec);
                 return;
             }
 
-            var progressMessage = await botClient.SendMessage(update.ReplyChatId, BotResponse.PleaseWaitMsg);
+            var progressMessage = await botClient.SendMessage(chatId, BotResponse.PleaseWaitMsg);
             var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
             var isSquare = previousCommand?.Type == CommandType.ImageSquare;
 
             await imageGenerationWorkflowService.StartAsync(new ImageGenerationWorkflowData
             {
-                ChatId = userKey.ChatId,
-                ReplyChatId = update.ReplyChatId,
+                ChatId = chatId,
+                ReplyChatId = chatId,
                 UserId = userKey.Id,
                 Prompt = update.Message.Text,
                 IsSquare = isSquare,
@@ -69,13 +70,12 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.IsGroupOrChannel)
             {
-                await botClient.SendMessage(userKey.ChatId, BotResponse.ReplySentPrivately);
                 return;
             }
 
-            await gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
+            await gramadsAdvertisementClient.SendPostToChat(chatId);
             await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
-            await advertisementTracker.TrySendAdvertisement(update.UserChatKey.Id);
+            await advertisementTracker.TrySendAdvertisement(userKey.Id);
         }
     }
 }

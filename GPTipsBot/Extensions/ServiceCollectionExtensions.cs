@@ -98,13 +98,14 @@ namespace GPTipsBot.Extensions
                 var botClient = new TelegramBotClient(AppConfig.TelegramToken, httpClient);
 
                 CultureInfo.CurrentUICulture = LocalizationManager.Ru;
-                InitializeBot(botClient, "ru");
+                SetBotMenus(botClient, "ru");
 
                 CultureInfo.CurrentUICulture = LocalizationManager.En;
-                InitializeBot(botClient);
+                SetBotMenus(botClient);
 
                 return botClient;
             })
+            .AddSingleton<BotCommandMenuService>()
             .AddSingleton<InMemoryAdvertisementTracker>()
             ;
 
@@ -134,12 +135,17 @@ namespace GPTipsBot.Extensions
                 .AddScoped<InvoiceRepository>();
         }
 
-        static void InitializeBot(ITelegramBotClient botClient, string? langCode = null)
+        static void SetBotMenus(ITelegramBotClient botClient, string? langCode = null)
         {
             var botMenu = new BotMenu();
-            var commands = botMenu.GetBotCommands();
-            botClient.SetMyCommands(commands, languageCode: langCode);
-            botClient.SetMyCommands(commands, BotCommandScope.AllGroupChats(), languageCode: langCode);
+            var privateCommands = botMenu.GetBotCommands();
+            var groupCommands = botMenu.GetGroupBotCommands();
+
+            botClient.SetMyCommands(privateCommands, languageCode: langCode);
+            botClient.SetMyCommands(privateCommands, BotCommandScope.AllPrivateChats(), languageCode: langCode);
+            botClient.SetMyCommands(groupCommands, BotCommandScope.AllGroupChats(), languageCode: langCode);
+            botClient.SetMyCommands(groupCommands, BotCommandScope.AllChatAdministrators(), languageCode: langCode);
+
             botClient.SetMyName(AppConfig.IsProduction ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
             botClient.SetMyDescription(BotResponse.BotDescription, languageCode: langCode);
             botClient.SetMyShortDescription(AppConfig.IsProduction ? BotResponse.ShortDescription :

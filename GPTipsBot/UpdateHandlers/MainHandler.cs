@@ -8,6 +8,7 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -19,6 +20,7 @@ namespace GPTipsBot.UpdateHandlers
         private readonly RateLimiter _rateLimiter;
         private readonly ITelegramBotClient _botClient;
         private readonly ApplicationContext _context;
+        private readonly BotCommandMenuService _botCommandMenuService;
 
         public static DateTime Start { get; private set; }
 
@@ -28,7 +30,8 @@ namespace GPTipsBot.UpdateHandlers
             TelejetAdClient telejetAdClient,
             RateLimiter rateLimiter,
             ITelegramBotClient botClient,
-            ApplicationContext context)
+            ApplicationContext context,
+            BotCommandMenuService botCommandMenuService)
         {
             _dispatcher = dispatcher;
             _botClient = botClient;
@@ -36,6 +39,7 @@ namespace GPTipsBot.UpdateHandlers
             _speechToTextService = speechToTextService;
             _telejetAdClient = telejetAdClient;
             _rateLimiter = rateLimiter;
+            _botCommandMenuService = botCommandMenuService;
             Start = DateTime.UtcNow;
         }
 
@@ -45,6 +49,11 @@ namespace GPTipsBot.UpdateHandlers
             if (!needHandleUpd)
             {
                 return;
+            }
+
+            if (update.MyChatMember != null)
+            {
+                await TrySetGroupMenuOnJoinAsync(update.MyChatMember);
             }
 
             if (update.Ignore())
@@ -70,6 +79,11 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            if (extendedUpd.IsGroupOrChannel)
+            {
+                await _botCommandMenuService.EnsureGroupMenuAsync(extendedUpd.UserChatKey.ChatId);
+            }
+
             if (update.Message?.Voice != null)
             {
                 try
@@ -93,6 +107,21 @@ namespace GPTipsBot.UpdateHandlers
             {
                 await _context.SaveChangesAsync();
             }
+        }
+
+        private async Task TrySetGroupMenuOnJoinAsync(ChatMemberUpdated myChatMember)
+        {
+            if (myChatMember.Chat.Type is not (ChatType.Group or ChatType.Supergroup))
+            {
+                return;
+            }
+
+            if (myChatMember.NewChatMember.Status is not (ChatMemberStatus.Member or ChatMemberStatus.Administrator))
+            {
+                return;
+            }
+
+            await _botCommandMenuService.EnsureGroupMenuAsync(myChatMember.Chat.Id);
         }
     }
 }

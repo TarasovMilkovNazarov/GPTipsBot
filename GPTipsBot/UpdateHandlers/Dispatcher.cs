@@ -199,6 +199,15 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(imageGeneratorHandler);
             }
+            else if (update.IsGroupOrChannel &&
+                     lastCommand?.Type is CommandType.TextRecognition
+                         or CommandType.Deposit
+                         or CommandType.Donate
+                         or CommandType.AnimatePhoto)
+            {
+                await botClient.SendMessage(userKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                return;
+            }
             else if (lastCommand?.Type == CommandType.TextRecognition)
             {
                 SetNextHandler(imageTextRecognitionHandler);
@@ -297,10 +306,6 @@ namespace GPTipsBot.UpdateHandlers
         private static bool IsGroupFollowUp(UserCommand? lastCommand) =>
             lastCommand?.Type is CommandType.Image
                 or CommandType.ImageSquare
-                or CommandType.ImageRectangle
-                or CommandType.TextRecognition
-                or CommandType.Deposit
-                or CommandType.Donate
-                or CommandType.AnimatePhoto;
+                or CommandType.ImageRectangle;
     }
 }

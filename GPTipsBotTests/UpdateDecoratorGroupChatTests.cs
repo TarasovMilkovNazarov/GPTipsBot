@@ -17,14 +17,15 @@ public class UpdateDecoratorGroupChatTests
     }
 
     [Test]
-    public void GroupUpdate_ReplyChatId_IsUserPrivateChat()
+    public void GroupUpdate_ReplyChatId_IsSourceChat()
     {
         var update = CreateGroupTextUpdate("/help@GPTipsBot");
 
         var decorator = new UpdateDecorator(update);
 
-        Assert.That(decorator.ReplyChatId, Is.EqualTo(100));
+        Assert.That(decorator.ReplyChatId, Is.EqualTo(-100500));
         Assert.That(decorator.UserChatKey.ChatId, Is.EqualTo(-100500));
+        Assert.That(decorator.UserChatKey.Id, Is.EqualTo(100));
     }
 
     [Test]

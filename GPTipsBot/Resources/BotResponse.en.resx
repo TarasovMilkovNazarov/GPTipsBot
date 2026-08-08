@@ -359,4 +359,12 @@ In groups the bot only sees messages when privacy mode is off (@BotFather → /s
 Conversation:
 {0}</value>
   </data>
+  <data name="GroupCommandNotAvailable" xml:space="preserve">
+    <value>In group chats only these are available:
+• questions to the bot (mention / reply)
+• /image — image generation
+• /summary — today's chat summary
+
+Other commands work in a private chat with the bot.</value>
+  </data>
 </root>

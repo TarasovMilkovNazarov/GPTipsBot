@@ -103,10 +103,9 @@ namespace GPTipsBot.Dtos
         public bool IsGroupOrChannel { get; }
 
         /// <summary>
-        /// Chat where feature replies should be delivered.
-        /// In groups this is the user's private chat so other members do not see the answer.
+        /// Chat where feature replies should be delivered (always the source chat).
         /// </summary>
-        public long ReplyChatId => IsGroupOrChannel ? UserChatKey.Id : UserChatKey.ChatId;
+        public long ReplyChatId => UserChatKey.ChatId;
 
         public CallbackQuery? CallbackQuery => TelegramUpdate.CallbackQuery;
         public PreCheckoutQuery? PreCheckoutQuery => TelegramUpdate.PreCheckoutQuery;

@@ -73,4 +73,21 @@ public class BotMenu
             Summary
         ];
     }
+
+    public BotCommand[] GetGroupBotCommands()
+    {
+        return
+        [
+            Image,
+            Summary
+        ];
+    }
+
+    public static bool IsAllowedInGroup(CommandType type) =>
+        type is CommandType.Image
+            or CommandType.ImageSquare
+            or CommandType.ImageRectangle
+            or CommandType.Summary
+            or CommandType.CancelPreviousCommand
+            or CommandType.StopRequest;
 }

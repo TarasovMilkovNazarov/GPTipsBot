@@ -364,4 +364,12 @@
 Переписка:
 {0}</value>
   </data>
+  <data name="GroupCommandNotAvailable" xml:space="preserve">
+    <value>В групповом чате доступны только:
+• вопросы к боту (упоминание / reply)
+• /image — генерация картинок
+• /summary — краткое содержание за день
+
+Остальные команды — в личных сообщениях с ботом.</value>
+  </data>
 </root>

@@ -53,9 +53,20 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             Guard.Against.Null(update.Command);
+
+            if (update.IsGroupOrChannel && !BotMenu.IsAllowedInGroup(update.Command.Type))
+            {
+                await botClient.SendMessage(
+                    chatId,
+                    BotResponse.GroupCommandNotAvailable,
+                    replyParameters: update.Message.TelegramMessageId is long mid
+                        ? new ReplyParameters { MessageId = (int)mid }
+                        : null);
+                return;
+            }
+
             var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
             await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
-            await MirrorMultiStepCommandToPrivateChatAsync(update);
 
             var profile = await userService.GetUserProfile(update.UserChatKey.Id);
 
@@ -66,7 +77,10 @@ namespace GPTipsBot.UpdateHandlers
             switch (update!.Command.Command)
             {
                 case StartCommand:
-                    await botClient.SetMyCommands(new BotMenu().GetBotCommands(),
+                    await botClient.SetMyCommands(
+                        update.IsGroupOrChannel
+                            ? new BotMenu().GetGroupBotCommands()
+                            : new BotMenu().GetBotCommands(),
                         BotCommandScope.Chat(chatId));
                     reply = BotResponse.Greeting;
                     break;
@@ -86,11 +100,11 @@ namespace GPTipsBot.UpdateHandlers
                     var packagesKeyboard = moneyService.BuildDepositPackagesKeyboard();
                     if (update.CallbackQuery == null)
                     {
-                        await botClient.SendUserReplyAsync(update, depositText, packagesKeyboard);
+                        await botClient.SendMessage(chatId, depositText, replyMarkup: packagesKeyboard);
                     }
                     else
                     {
-                        await botClient.EditMessageText(update.UserChatKey.ChatId, (int)update.Message.TelegramMessageId!,
+                        await botClient.EditMessageText(chatId, (int)update.Message.TelegramMessageId!,
                             depositText,
                             replyMarkup: packagesKeyboard);
                     }
@@ -98,7 +112,7 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
                 case DonateCommand:
-                    await botClient.SendUserReplyAsync(update, BotResponse.DonateInstructions, CancelInlineKeyboard);
+                    await botClient.SendMessage(chatId, BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
                     return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;
@@ -128,7 +142,7 @@ namespace GPTipsBot.UpdateHandlers
                     replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
                 case AnimatePhotoCommand:
-                    await botClient.SendUserReplyAsync(update, BotResponse.SendPhotoToAnimate, CancelInlineKeyboard);
+                    await botClient.SendMessage(chatId, BotResponse.SendPhotoToAnimate, replyMarkup: CancelInlineKeyboard);
                     return;
                 case ImageSquareCommand:
                     if (previousCommand?.Type == CommandType.ImageSquare)
@@ -217,14 +231,18 @@ namespace GPTipsBot.UpdateHandlers
             Guard.Against.Null(reply);
 
             await messageRepository.AddAsync(update.Message);
-            await botClient.SendUserReplyAsync(update, reply, replyMarkup);
+            await botClient.SendMessage(chatId, reply, replyMarkup: replyMarkup);
             return;
 
             async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
             {
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
 
-                await botClient.SetMyCommands(new BotMenu().GetBotCommands(), BotCommandScope.Chat(chatId));
+                await botClient.SetMyCommands(
+                    update.IsGroupOrChannel
+                        ? new BotMenu().GetGroupBotCommands()
+                        : new BotMenu().GetBotCommands(),
+                    BotCommandScope.Chat(chatId));
                 replyMarkup = update.IsGroupOrChannel ? null : new ReplyKeyboardRemove();
 
                 var settings = botSettingsRepository.Get(userKey.Id);
@@ -241,31 +259,10 @@ namespace GPTipsBot.UpdateHandlers
             }
         }
 
-        private async Task MirrorMultiStepCommandToPrivateChatAsync(UpdateDecorator update)
-        {
-            if (!update.IsGroupOrChannel)
-            {
-                return;
-            }
-
-            if (update.Command?.Type is not (CommandType.Image
-                or CommandType.ImageSquare
-                or CommandType.ImageRectangle
-                or CommandType.TextRecognition
-                or CommandType.Deposit
-                or CommandType.Donate
-                or CommandType.AnimatePhoto))
-            {
-                return;
-            }
-
-            var privateKey = new UserChatKey(update.UserChatKey.Id, update.UserChatKey.Id);
-            await userCommandRepository.AddAsync(privateKey, update.Command.Type);
-        }
-
         private async Task HandleSummaryAsync(UpdateDecorator update)
         {
-            var dayMessages = messageRepository.GetChatMessagesForDay(update.UserChatKey.ChatId, DateTime.UtcNow);
+            var chatId = update.UserChatKey.ChatId;
+            var dayMessages = messageRepository.GetChatMessagesForDay(chatId, DateTime.UtcNow);
             dayMessages = dayMessages
                 .Where(m => m.Text is not null
                             && !m.Text.StartsWith(SummaryCommand, StringComparison.OrdinalIgnoreCase))
@@ -308,7 +305,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to build day summary for chat {ChatId}", update.UserChatKey.ChatId);
+                _logger.LogError(ex, "Failed to build day summary for chat {ChatId}", chatId);
                 await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
             }
         }
@@ -340,11 +337,7 @@ namespace GPTipsBot.UpdateHandlers
         private async Task SendNoFreeRequestsMessage(UpdateDecorator update)
         {
             var nextRefreshLimitExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
-            await botClient.SendOutOfFreeRequestsMessageAsync(update.ReplyChatId, nextRefreshLimitExec);
-            if (update.IsGroupOrChannel)
-            {
-                await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.ReplySentPrivately);
-            }
+            await botClient.SendOutOfFreeRequestsMessageAsync(update.UserChatKey.ChatId, nextRefreshLimitExec);
         }
     }
 }
