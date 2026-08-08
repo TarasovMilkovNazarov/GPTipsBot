@@ -1,78 +1,116 @@
-﻿using System.Collections.Concurrent;
-using GPTipsBot.Dtos;
-using GPTipsBot.Resources;
-using Telegram.Bot;
+﻿using GPTipsBot.Dtos;
 
 namespace GPTipsBot.Services
 {
+    public enum ChatGateResult
+    {
+        /// <summary>Process without occupying the per-chat slot (commands / group chatter).</summary>
+        Bypass,
+
+        /// <summary>Caller holds the slot and must Release when done.</summary>
+        ProcessNow,
+
+        /// <summary>Slot busy; this update is stored as the single pending item.</summary>
+        Queued,
+
+        /// <summary>Slot busy and pending already set; ignore silently.</summary>
+        Dropped
+    }
+
+    /// <summary>
+    /// Per-chat gate: at most one active update and one silently queued follow-up.
+    /// </summary>
     public class RateLimiter
     {
-        private readonly ITelegramBotClient _botClient;
-        private readonly Timer _resetMessageCountsPerMinuteTimer;
+        private readonly Dictionary<long, ChatGateState> _chats = new();
+        private readonly object _sync = new();
 
-        public const int MaxMessagesCountPerMinute = 5;
-
-        private TimeSpan MinuteResetInterval { get; } = TimeSpan.FromSeconds(60);
-
-        private ConcurrentDictionary<long, int> UserToDayMessageCount { get; } = new();
-        private ConcurrentDictionary<long, int> UserToMinuteMessageCount { get; } = new();
-        private readonly object _sync = new object();
-
-        public RateLimiter(ITelegramBotClient botClient)
+        private sealed class ChatGateState
         {
-            _botClient = botClient;
-
-            _resetMessageCountsPerMinuteTimer = new Timer(ResetMessageCountsPerMinute, null, TimeSpan.Zero,
-                MinuteResetInterval);
+            public bool Busy;
+            public UpdateDecorator? Pending;
         }
 
-        public bool IsAllowed(UpdateDecorator update)
+        public ChatGateResult TryEnter(UpdateDecorator update)
         {
             // In groups, non-addressed chatter is only archived for /summary and must not
-            // consume the rate limit or trigger "too many requests" for the whole chat.
+            // occupy the chat processing slot.
             if (update.IsGroupOrChannel && !update.IsAddressedToBot)
             {
-                return true;
+                return ChatGateResult.Bypass;
+            }
+
+            if (update.IsCommand)
+            {
+                return ChatGateResult.Bypass;
             }
 
             var chatId = update.UserChatKey.ChatId;
 
-            return update.IsCommand || TryIncrementMessageCount(chatId);
-        }
-
-        private bool IsMinuteLimitOk(long chatId)
-        {
-            var value = UserToMinuteMessageCount.GetOrAdd(chatId, 0);
-
-            var diff = value - MaxMessagesCountPerMinute;
-            var isBlockingRequest = diff > 0;
-            var telegramSpamLimitPass = diff < 2;
-            if (isBlockingRequest && telegramSpamLimitPass)
+            lock (_sync)
             {
-                _botClient.SendMessage(chatId, BotResponse.TooManyRequests);
+                if (!_chats.TryGetValue(chatId, out var state))
+                {
+                    state = new ChatGateState();
+                    _chats[chatId] = state;
+                }
+
+                if (!state.Busy)
+                {
+                    state.Busy = true;
+                    return ChatGateResult.ProcessNow;
+                }
+
+                if (state.Pending == null)
+                {
+                    state.Pending = update;
+                    return ChatGateResult.Queued;
+                }
+
+                return ChatGateResult.Dropped;
             }
-
-            return !isBlockingRequest;
         }
 
-        private void ResetMessageCountsPerMinute(object? o)
-        {
-            UserToMinuteMessageCount.Clear();
-        }
-
-        public bool TryIncrementMessageCount(long chatId)
+        /// <summary>
+        /// Ends the active slot. Returns the pending update (keeping busy) or null (slot freed).
+        /// </summary>
+        public UpdateDecorator? Release(long chatId)
         {
             lock (_sync)
             {
-                IncrementMinuteMessageCount(chatId);
-                return IsMinuteLimitOk(chatId);
+                if (!_chats.TryGetValue(chatId, out var state))
+                {
+                    return null;
+                }
+
+                if (state.Pending != null)
+                {
+                    var pending = state.Pending;
+                    state.Pending = null;
+                    return pending;
+                }
+
+                _chats.Remove(chatId);
+                return null;
             }
         }
-        private int IncrementMinuteMessageCount(long chatId)
-        {
-            var minuteCounter = UserToMinuteMessageCount.AddOrUpdate(chatId, 1, (k, v) => Interlocked.Increment(ref v));
 
-            return minuteCounter;
+        /// <summary>Drops busy/pending for the chat (error recovery).</summary>
+        public void ForceRelease(long chatId)
+        {
+            lock (_sync)
+            {
+                _chats.Remove(chatId);
+            }
+        }
+
+        /// <summary>Clears all chat gates (tests).</summary>
+        public void Reset()
+        {
+            lock (_sync)
+            {
+                _chats.Clear();
+            }
         }
     }
 }

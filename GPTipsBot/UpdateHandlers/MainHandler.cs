@@ -62,12 +62,58 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var extendedUpd = new UpdateDecorator(update);
-
-            if (!_rateLimiter.IsAllowed(extendedUpd))
+            var enter = _rateLimiter.TryEnter(extendedUpd);
+            if (enter is ChatGateResult.Queued or ChatGateResult.Dropped)
             {
                 return;
             }
 
+            var ownsSlot = enter == ChatGateResult.ProcessNow;
+            var chatId = extendedUpd.UserChatKey.ChatId;
+            var current = extendedUpd;
+            Exception? error = null;
+
+            try
+            {
+                while (current != null)
+                {
+                    try
+                    {
+                        await HandleAllowedUpdateAsync(current);
+                    }
+                    catch (Exception ex)
+                    {
+                        error ??= ex;
+                    }
+
+                    if (!ownsSlot)
+                    {
+                        break;
+                    }
+
+                    current = _rateLimiter.Release(chatId);
+                    if (current == null)
+                    {
+                        ownsSlot = false;
+                    }
+                }
+            }
+            finally
+            {
+                if (ownsSlot)
+                {
+                    _rateLimiter.ForceRelease(chatId);
+                }
+            }
+
+            if (error != null)
+            {
+                throw error;
+            }
+        }
+
+        private async Task HandleAllowedUpdateAsync(UpdateDecorator extendedUpd)
+        {
             if (AppConfig.IsOnMaintenance)
             {
                 await _botClient.SendMessage(extendedUpd.UserChatKey.ChatId, BotResponse.OnMaintenance);
@@ -84,11 +130,12 @@ namespace GPTipsBot.UpdateHandlers
                 await _botCommandMenuService.EnsureGroupMenuAsync(extendedUpd.UserChatKey.ChatId);
             }
 
-            if (update.Message?.Voice != null)
+            if (extendedUpd.TelegramUpdate.Message?.Voice != null)
             {
                 try
                 {
-                    extendedUpd.Message.Text = await _speechToTextService.RecognizeVoice(update.Message.Voice.FileId);
+                    extendedUpd.Message.Text =
+                        await _speechToTextService.RecognizeVoice(extendedUpd.TelegramUpdate.Message.Voice.FileId);
                 }
                 catch (Exception)
                 {

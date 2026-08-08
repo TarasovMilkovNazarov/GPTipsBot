@@ -190,13 +190,7 @@ namespace GPTipsBotTests
 
         private void ResetRequestsRateLimit()
         {
-            var descriptor = _serviceCollection.FirstOrDefault(d => d.ServiceType == typeof(RateLimiter));
-            if (descriptor != null)
-            {
-                _serviceCollection.Remove(descriptor);
-            }
-
-            _serviceCollection.AddSingleton<RateLimiter>();
+            _services.GetRequiredService<RateLimiter>().Reset();
         }
 
         [Test]
@@ -308,57 +302,103 @@ namespace GPTipsBotTests
         }
 
         [Test]
-        public async Task SendTextMessage_ManyRequestsPerMinute_LimitExceeded()
+        public async Task SendTextMessage_ParallelBurst_QueuesOneDropsRestWithoutLimitMessage()
         {
-            var prompt = "How much it would be add 2 to previous result";
-            var messageUpd = CreateTelegramUpdate(1, 2, prompt);
-
-            for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
-            {
-                await _mainHandler.HandleUpdateAsync(messageUpd);
-            }
-
-            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
-                    arg.ChatId == messageUpd.Message.Chat.Id &&
-                    arg.Text == BotResponse.TooManyRequests
-                ),
-                It.IsAny<CancellationToken>()), Times.Once);
-
-            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
-                It.IsAny<CancellationToken>()), Times.Exactly(RateLimiter.MaxMessagesCountPerMinute));
-        }
-
-        [Test]
-        public async Task SendTextMessage_ManyParallelRequestsPerMinute_LimitExceeded()
-        {
-            var prompt = "SendTextMessage_ManyParallelRequestsPerMinute_LimitExceeded";
-            var messageUpd = CreateTelegramUpdate(1, 2, prompt);
-
+            const string prompt = "SendTextMessage_ParallelBurst_QueuesOneDropsRestWithoutLimitMessage";
             var response = new ChatCompletionCreateResponse
             {
                 Choices = new() { new() { Message = new("system", "test") } }
             };
+
+            var concurrent = 0;
+            var maxConcurrent = 0;
+            var gate = new object();
+
             _gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
                     It.IsAny<CancellationToken>()))
-                .Returns(async (UpdateDecorator upd, CancellationToken token) =>
+                .Returns(async (UpdateDecorator _, CancellationToken token) =>
                 {
-                    // await Task.Delay(100, token);
+                    var now = Interlocked.Increment(ref concurrent);
+                    lock (gate)
+                    {
+                        if (now > maxConcurrent)
+                        {
+                            maxConcurrent = now;
+                        }
+                    }
+
+                    try
+                    {
+                        await Task.Delay(300, token);
+                        return response;
+                    }
+                    finally
+                    {
+                        Interlocked.Decrement(ref concurrent);
+                    }
+                });
+
+            var updates = Enumerable.Range(1, 3)
+                .Select(i => CreateTelegramUpdate(i, i + 10, prompt))
+                .ToList();
+
+            await Task.WhenAll(updates.Select(u => _mainHandler.HandleUpdateAsync(u)));
+
+            maxConcurrent.Should().Be(1);
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+                It.IsAny<CancellationToken>()), Times.Exactly(2));
+
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
+                    arg.Text == BotResponse.TooManyRequests
+                ),
+                It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Test]
+        public async Task SendTextMessage_WhileBusy_ThirdMessageDroppedSilently()
+        {
+            const string prompt = "SendTextMessage_WhileBusy_ThirdMessageDroppedSilently";
+            var response = new ChatCompletionCreateResponse
+            {
+                Choices = new() { new() { Message = new("system", "test") } }
+            };
+
+            var firstEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var releaseFirst = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var gptCalls = 0;
+
+            _gptMock.Setup(x => x.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(async (UpdateDecorator _, CancellationToken token) =>
+                {
+                    var call = Interlocked.Increment(ref gptCalls);
+                    if (call == 1)
+                    {
+                        firstEntered.TrySetResult();
+                        await releaseFirst.Task.WaitAsync(token);
+                    }
+
                     return response;
                 });
 
-            for (var i = 0; i < RateLimiter.MaxMessagesCountPerMinute + 1; i++)
-            {
-                await _mainHandler.HandleUpdateAsync(messageUpd);
-            }
+            var first = _mainHandler.HandleUpdateAsync(CreateTelegramUpdate(1, 11, prompt));
+            await firstEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
+            var second = _mainHandler.HandleUpdateAsync(CreateTelegramUpdate(2, 12, prompt));
+            var third = _mainHandler.HandleUpdateAsync(CreateTelegramUpdate(3, 13, prompt));
+
+            // Second is queued; third must be dropped before the first finishes.
+            await Task.Delay(100);
+            gptCalls.Should().Be(1);
+
+            releaseFirst.TrySetResult();
+            await Task.WhenAll(first, second, third);
+
+            gptCalls.Should().Be(2);
             _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
-                    arg.ChatId == messageUpd.Message!.Chat.Id &&
                     arg.Text == BotResponse.TooManyRequests
                 ),
-                It.IsAny<CancellationToken>()), Times.Once);
-
-            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg => arg.Message.Text.Equals(prompt)),
-                It.IsAny<CancellationToken>()), Times.Exactly(RateLimiter.MaxMessagesCountPerMinute));
+                It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Test]
