@@ -676,5 +676,11 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("GroupCommandNotAvailable", resourceCulture);
             }
         }
+        
+        public static string AskUsage {
+            get {
+                return ResourceManager.GetString("AskUsage", resourceCulture);
+            }
+        }
     }
 }

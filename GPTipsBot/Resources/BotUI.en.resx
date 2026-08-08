@@ -188,4 +188,7 @@
   <data name="Summary" xml:space="preserve">
     <value>Summarize today's messages</value>
   </data>
+  <data name="Ask" xml:space="preserve">
+    <value>Ask the AI</value>
+  </data>
 </root>

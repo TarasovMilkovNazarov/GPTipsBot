@@ -33,6 +33,7 @@ public enum CommandType
     ImageCartoonify = 19,
     AnimatePhoto = 20,
     Summary = 21,
+    Ask = 22,
 }
 
 public class Wallet: Entity

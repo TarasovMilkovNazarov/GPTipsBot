@@ -230,6 +230,7 @@
  -- генераций изображений: {4}
  -- распознаваний текста: {5}
  -- анимаций фото: {6}
+ -- summary за день: {7}
 </value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
@@ -366,10 +367,15 @@
   </data>
   <data name="GroupCommandNotAvailable" xml:space="preserve">
     <value>В групповом чате доступны только:
-• вопросы к боту (упоминание / reply)
+• /ask — вопрос к ИИ
 • /image — генерация картинок
 • /summary — краткое содержание за день
+• упоминание бота или reply на его сообщение
 
 Остальные команды — в личных сообщениях с ботом.</value>
+  </data>
+  <data name="AskUsage" xml:space="preserve">
+    <value>Напишите вопрос после команды, например:
+/ask Как работает фотосинтез?</value>
   </data>
 </root>

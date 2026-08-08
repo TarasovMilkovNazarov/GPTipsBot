@@ -223,6 +223,9 @@ namespace GPTipsBot.Migrations
                     b.Property<int>("FreePhotoAnimations")
                         .HasColumnType("integer");
 
+                    b.Property<int>("FreeSummaryRequests")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 

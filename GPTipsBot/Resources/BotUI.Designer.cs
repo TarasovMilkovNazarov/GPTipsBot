@@ -74,6 +74,12 @@ namespace GPTipsBot.Resources {
             }
         }
         
+        internal static string Ask {
+            get {
+                return ResourceManager.GetString("Ask", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Отмена.
         /// </summary>

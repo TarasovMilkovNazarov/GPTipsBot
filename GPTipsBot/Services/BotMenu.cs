@@ -28,6 +28,7 @@ public class BotMenu
     public const string DonateCommand = "/donate";
 
     public const string SummaryCommand = "/summary";
+    public const string AskCommand = "/ask";
     public const string FixCommand = "/fix";
     public const string VersionCommand = "/version";
     public const string VpnCheckCommand = "/vpn_check";
@@ -49,6 +50,7 @@ public class BotMenu
     public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
     public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
     public static CustomBotCommand Summary => new() { Command = SummaryCommand, Description = BotUI.Summary, Type = CommandType.Summary };
+    public static CustomBotCommand Ask => new() { Command = AskCommand, Description = BotUI.Ask, Type = CommandType.Ask };
 
     public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
     public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
@@ -70,7 +72,8 @@ public class BotMenu
             Deposit,
             Profile,
             Donate,
-            Summary
+            Summary,
+            Ask
         ];
     }
 
@@ -78,13 +81,15 @@ public class BotMenu
     {
         return
         [
+            Ask,
             Image,
             Summary
         ];
     }
 
     public static bool IsAllowedInGroup(CommandType type) =>
-        type is CommandType.Image
+        type is CommandType.Ask
+            or CommandType.Image
             or CommandType.ImageSquare
             or CommandType.ImageRectangle
             or CommandType.Summary

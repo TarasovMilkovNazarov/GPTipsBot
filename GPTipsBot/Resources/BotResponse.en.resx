@@ -225,6 +225,7 @@ Free requests:
  -- image generations: {4}
  -- image text recognitions: {5}
  -- photo animations: {6}
+ -- day summaries: {7}
 </value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
@@ -361,10 +362,15 @@ Conversation:
   </data>
   <data name="GroupCommandNotAvailable" xml:space="preserve">
     <value>In group chats only these are available:
-• questions to the bot (mention / reply)
+• /ask — ask the AI
 • /image — image generation
 • /summary — today's chat summary
+• mention the bot or reply to its message
 
 Other commands work in a private chat with the bot.</value>
+  </data>
+  <data name="AskUsage" xml:space="preserve">
+    <value>Write your question after the command, for example:
+/ask How does photosynthesis work?</value>
   </data>
 </root>

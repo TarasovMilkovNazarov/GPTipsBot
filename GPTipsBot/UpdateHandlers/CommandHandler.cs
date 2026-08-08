@@ -28,6 +28,7 @@ namespace GPTipsBot.UpdateHandlers
         MessageRepository messageRepository,
         UserCommandRepository userCommandRepository,
         ImageGeneratorHandler imageGeneratorHandler,
+        ChatGptHandler chatGptHandler,
         InvoiceRepository invoiceRepository,
         UserService userService,
         BotSettingsRepository botSettingsRepository,
@@ -87,7 +88,7 @@ namespace GPTipsBot.UpdateHandlers
                 case GetProfileCommand:
                     reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations);
+                        profile.PhotoAnimations, profile.Summaries);
                     replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, DepositCommand));
                     break;
@@ -120,6 +121,25 @@ namespace GPTipsBot.UpdateHandlers
                 case SummaryCommand:
                     await HandleSummaryAsync(update);
                     return;
+                case AskCommand:
+                {
+                    if (!UpdateDecorator.TryGetCommandArgument(messageText, AskCommand, out var question))
+                    {
+                        await botClient.SendMessage(
+                            chatId,
+                            BotResponse.AskUsage,
+                            replyParameters: update.Message.TelegramMessageId is long askMid
+                                ? new ReplyParameters { MessageId = (int)askMid }
+                                : null);
+                        return;
+                    }
+
+                    update.Message.Text = question;
+                    update.Message.ContextBound = true;
+                    SetNextHandler(chatGptHandler);
+                    await base.HandleAsync(update);
+                    return;
+                }
                 case ImageCommand:
                     if (profile is { Images: <= 0, Stars: <= 0 })
                     {
@@ -262,6 +282,7 @@ namespace GPTipsBot.UpdateHandlers
         private async Task HandleSummaryAsync(UpdateDecorator update)
         {
             var chatId = update.UserChatKey.ChatId;
+
             var dayMessages = messageRepository.GetChatMessagesForDay(chatId, DateTime.UtcNow);
             dayMessages = dayMessages
                 .Where(m => m.Text is not null
@@ -271,6 +292,19 @@ namespace GPTipsBot.UpdateHandlers
             if (dayMessages.Count == 0)
             {
                 await botClient.SendUserReplyAsync(update, BotResponse.SummaryEmpty);
+                return;
+            }
+
+            var successPayment = await userService.PayForSummaryAsync(update.UserChatKey.Id);
+            if (!successPayment)
+            {
+                await botClient.SendMessage(
+                    chatId,
+                    BotResponse.SimpleNoFreeRequests,
+                    replyMarkup: DepositInlineKeyboard,
+                    replyParameters: update.Message.TelegramMessageId is long mid
+                        ? new ReplyParameters { MessageId = (int)mid }
+                        : null);
                 return;
             }
 

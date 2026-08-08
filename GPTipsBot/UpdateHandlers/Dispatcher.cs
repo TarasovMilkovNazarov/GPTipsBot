@@ -170,7 +170,7 @@ namespace GPTipsBot.UpdateHandlers
                     var profile = await userService.GetUserProfile(update.UserChatKey.Id);
                     var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations);
+                        profile.PhotoAnimations, profile.Summaries);
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 

@@ -3,6 +3,8 @@
 public static class PaymentConfig
 {
     public const double Gpt = 0.1;
+    /// <summary>Day summary is a larger one-off prompt (~3× a normal GPT reply).</summary>
+    public const double Summary = 0.3;
     public const double Image = 0.5;
     public const double Animation = 0.5;
 
@@ -20,6 +22,8 @@ public static class PaymentConfig
     public const int NewbieFreeTextRecognitions = 10;
     public const int NewbieFreeChatGptRequests = 10;
     public const int NewbieFreePhotoAnimations = 2;
+    /// <summary>One-time free /summary uses (not refreshed by the daily limits job).</summary>
+    public const int NewbieFreeSummaries = 3;
 
     /// <summary>Minimum YooKassa top-up in rubles.</summary>
     public const int MinRechargeRub = 50;

@@ -21,6 +21,7 @@ namespace GPTipsBot.Db
             Database.EnsureCreated();
             EnsureYooKassaInvoiceColumns();
             EnsureFreePhotoAnimationsColumn();
+            EnsureFreeSummaryRequestsColumn();
             Guid = Guid.NewGuid();
         }
         
@@ -48,6 +49,13 @@ namespace GPTipsBot.Db
         {
             Database.ExecuteSqlRaw($"""
                 ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "FreePhotoAnimations" integer NOT NULL DEFAULT {PaymentConfig.NewbieFreePhotoAnimations};
+                """);
+        }
+
+        private void EnsureFreeSummaryRequestsColumn()
+        {
+            Database.ExecuteSqlRaw($"""
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "FreeSummaryRequests" integer NOT NULL DEFAULT {PaymentConfig.NewbieFreeSummaries};
                 """);
         }
     }

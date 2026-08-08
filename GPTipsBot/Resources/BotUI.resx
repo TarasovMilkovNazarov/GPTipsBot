@@ -188,4 +188,7 @@
   <data name="Summary" xml:space="preserve">
     <value>Краткое содержание сообщений за день</value>
   </data>
+  <data name="Ask" xml:space="preserve">
+    <value>Спросить у ИИ</value>
+  </data>
 </root>

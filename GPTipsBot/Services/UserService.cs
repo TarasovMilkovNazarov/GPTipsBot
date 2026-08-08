@@ -50,7 +50,8 @@ namespace GPTipsBot.Services
                 Images = user.FreeImageGenerations,
                 ImageTexts = user.FreeImageTextRecognitions,
                 GptRequests = user.FreeGptRequests,
-                PhotoAnimations = user.FreePhotoAnimations
+                PhotoAnimations = user.FreePhotoAnimations,
+                Summaries = user.FreeSummaryRequests
             };
 
             return profile;
@@ -144,6 +145,28 @@ namespace GPTipsBot.Services
             }
 
             user.Wallet!.Balance -= PaymentConfig.Animation;
+            return true;
+        }
+
+        public async Task<bool> PayForSummaryAsync(long userId)
+        {
+            var user = _userRepository.Get(userId);
+            Guard.Against.Null(user);
+
+            if (user.FreeSummaryRequests > 0)
+            {
+                user.FreeSummaryRequests -= 1;
+                _userRepository.Update(user);
+
+                return true;
+            }
+
+            if (user.Wallet == null || user.Wallet.Balance < PaymentConfig.Summary)
+            {
+                return false;
+            }
+
+            user.Wallet.Balance -= PaymentConfig.Summary;
             return true;
         }
 
