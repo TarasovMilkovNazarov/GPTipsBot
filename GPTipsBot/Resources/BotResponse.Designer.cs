@@ -640,5 +640,35 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("YooKassaPaymentSucceeded", resourceCulture);
             }
         }
+        
+        public static string ReplySentPrivately {
+            get {
+                return ResourceManager.GetString("ReplySentPrivately", resourceCulture);
+            }
+        }
+        
+        public static string OpenPrivateChatFirst {
+            get {
+                return ResourceManager.GetString("OpenPrivateChatFirst", resourceCulture);
+            }
+        }
+        
+        public static string SummaryEmpty {
+            get {
+                return ResourceManager.GetString("SummaryEmpty", resourceCulture);
+            }
+        }
+        
+        public static string SummaryHeader {
+            get {
+                return ResourceManager.GetString("SummaryHeader", resourceCulture);
+            }
+        }
+        
+        public static string SummaryPrompt {
+            get {
+                return ResourceManager.GetString("SummaryPrompt", resourceCulture);
+            }
+        }
     }
 }

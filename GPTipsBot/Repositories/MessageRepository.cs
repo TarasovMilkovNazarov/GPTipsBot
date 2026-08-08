@@ -83,5 +83,21 @@ namespace GPTipsBot.Repositories
 
             return imagesCount;
         }
+
+        public List<Message> GetChatMessagesForDay(long chatId, DateTime utcDay, int limit = 200)
+        {
+            var dayStart = utcDay.Date;
+            var dayEnd = dayStart.AddDays(1);
+
+            return context.Messages.AsNoTracking()
+                .Where(m => m.ChatId == chatId
+                            && m.CreatedAt >= dayStart
+                            && m.CreatedAt < dayEnd
+                            && m.Text != null
+                            && m.Text != "")
+                .OrderBy(m => m.CreatedAt)
+                .Take(limit)
+                .ToList();
+        }
     }
 }

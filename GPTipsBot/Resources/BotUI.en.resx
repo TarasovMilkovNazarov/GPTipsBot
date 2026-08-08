@@ -185,4 +185,7 @@
   <data name="AnimateButton" xml:space="preserve">
     <value>✨ Animate photo</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Summarize today's messages</value>
+  </data>
 </root>

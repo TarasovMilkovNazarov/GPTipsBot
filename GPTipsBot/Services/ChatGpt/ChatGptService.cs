@@ -52,6 +52,20 @@ namespace GPTipsBot.Services
             return await SendMessageInternal(textWithContext, token);
         }
 
+        public Task<ChatCompletionCreateResponse> SendOneOffAsync(
+            string systemPrompt,
+            string userPrompt,
+            CancellationToken token)
+        {
+            ChatMessage[] messages =
+            [
+                new ChatMessage("system", systemPrompt),
+                new ChatMessage("user", userPrompt)
+            ];
+
+            return SendMessageInternal(messages, token)!;
+        }
+
         public Task StartAnimatePhoto(
             string prompt,
             string imageFileId,
@@ -114,6 +128,10 @@ namespace GPTipsBot.Services
     public interface IGpt
     {
         Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token);
+        Task<ChatCompletionCreateResponse> SendOneOffAsync(
+            string systemPrompt,
+            string userPrompt,
+            CancellationToken token);
         Task StartAnimatePhoto(
             string prompt,
             string imageFileId,

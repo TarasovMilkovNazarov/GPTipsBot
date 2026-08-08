@@ -185,4 +185,7 @@
   <data name="AnimateButton" xml:space="preserve">
     <value>✨ Оживить фото</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Краткое содержание сообщений за день</value>
+  </data>
 </root>

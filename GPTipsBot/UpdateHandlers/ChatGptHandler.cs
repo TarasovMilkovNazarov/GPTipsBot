@@ -1,16 +1,18 @@
-﻿using GPTipsBot.Extensions;
-using GPTipsBot.Repositories;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
+using GPTipsBot.Config;
 using GPTipsBot.Db;
 using GPTipsBot.Dtos;
-using Telegram.Bot;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
-using GPTipsBot.Services;
+using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
+using GPTipsBot.Services;
+using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.ResponseModels;
+using System.Diagnostics;
+using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -31,18 +33,26 @@ namespace GPTipsBot.UpdateHandlers
         public override async Task HandleAsync(UpdateDecorator update)
         {
             var shortMessage = update.Message.Text.Truncate(30) + "...";
-            var chatId = update.UserChatKey.Id;
+            var replyChatId = update.ReplyChatId;
+            var userId = update.UserChatKey.Id;
 
             await using var dbTransaction = await context.Database.BeginTransactionAsync();
             var request = await messageRepository.AddAsync(update.Message);
-            var successPayment = await userService.PayForGpt(chatId);
+            var successPayment = await userService.PayForGpt(userId);
 
             if (!successPayment)
             {
                 await dbTransaction.RollbackAsync();
                 context.ChangeTracker.Clear();
                 var nextExecution = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
-                await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextExecution);
+                await botClient.SendOutOfFreeRequestsMessageAsync(replyChatId, nextExecution);
+                if (update.IsGroupOrChannel)
+                {
+                    await botClient.SendMessage(
+                        update.UserChatKey.ChatId,
+                        BotResponse.ReplySentPrivately,
+                        replyParameters: (int?)update.Message.TelegramMessageId);
+                }
                 return;
             }
 
@@ -50,7 +60,23 @@ namespace GPTipsBot.UpdateHandlers
 
             try
             {
-                var serviceMessageId = await typingStatus.Start(update.UserChatKey, Telegram.Bot.Types.Enums.ChatAction.Typing);
+                long serviceMessageId;
+                try
+                {
+                    serviceMessageId = await typingStatus.Start(
+                        update.UserChatKey,
+                        Telegram.Bot.Types.Enums.ChatAction.Typing,
+                        replyChatId);
+                }
+                catch (ApiRequestException ex) when (ex.ErrorCode == 403 && update.IsGroupOrChannel)
+                {
+                    await botClient.SendMessage(
+                        update.UserChatKey.ChatId,
+                        string.Format(BotResponse.OpenPrivateChatFirst, AppConfig.BotName.TrimStart('@')),
+                        replyParameters: (int)update.Message.TelegramMessageId);
+                    await dbTransaction.RollbackAsync();
+                    return;
+                }
 
                 var sw = Stopwatch.StartNew();
                 var token = Dispatcher.UserState[update.UserChatKey].MessageIdToCancellation[serviceMessageId].Token;
@@ -69,12 +95,7 @@ namespace GPTipsBot.UpdateHandlers
                 catch (ChatGptException ex)
                 {
                     log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                    await botClient.SendMessage(
-                        chatId,
-                        BotResponse.SomethingWentWrong,
-                        replyParameters: (int)update.Message.TelegramMessageId, cancellationToken: token
-                        );
-
+                    await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
                     return;
                 }
                 finally
@@ -94,13 +115,12 @@ namespace GPTipsBot.UpdateHandlers
                 Guard.Against.Null(gptResponse);
 
                 await messageRepository.AddAsync(gptResponse, request);
-                await botClient.TrySendMarkdown2MessageAsync(chatId, gptResponse.Text, (int)update.Message.TelegramMessageId);
+                await botClient.TrySendUserMarkdownReplyAsync(update, gptResponse.Text, log);
             }
             catch (ClientException ex)
             {
                 log.LogInformation(ex, shortMessage);
-                await botClient.SendMessage(chatId, ex.Message,
-                    replyParameters: (int)update.Message.TelegramMessageId);
+                await botClient.SendUserReplyAsync(update, ex.Message);
                 return;
             }
             finally
@@ -110,9 +130,14 @@ namespace GPTipsBot.UpdateHandlers
 
             await dbTransaction.CommitAsync();
 
-            await gramadsAdvertisementClient.SendPostToChat(chatId);
+            if (update.IsGroupOrChannel)
+            {
+                return;
+            }
+
+            await gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
             await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
-            await advertisementTracker.TrySendAdvertisement(update.UserChatKey.Id);
+            await advertisementTracker.TrySendAdvertisement(userId);
         }
     }
 }

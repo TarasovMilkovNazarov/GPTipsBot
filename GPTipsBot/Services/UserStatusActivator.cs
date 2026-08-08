@@ -15,18 +15,21 @@ namespace GPTipsBot.Services
     public class UserStatusActivator(ITelegramBotClient botClient, ILogger<UserStatusActivator> logger)
     {
         private int _serviceMessageId;
+        private long _targetChatId;
 
         /// <summary>
         ///  For status persistence action till the end of processing or choosing inline /stop_requests buttons
         /// </summary>
         private Timer? _timer;
 
-        public async Task<long> Start(UserChatKey userKey, ChatAction chatAction)
+        public async Task<long> Start(UserChatKey userKey, ChatAction chatAction, long? replyChatId = null)
         {
+            var targetChatId = replyChatId ?? userKey.ChatId;
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
             var serviceMessage = await botClient.SendMessage
-                (userKey.ChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
+                (targetChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
+            _targetChatId = targetChatId;
 
             var tokenSource = new CancellationTokenSource();
             Dispatcher.UserState[userKey].MessageIdToCancellation.Add(serviceMessage.MessageId, tokenSource);
@@ -41,7 +44,7 @@ namespace GPTipsBot.Services
                         return;
                     }
 
-                    botClient.SendChatAction(userKey.ChatId, chatAction, cancellationToken: tokenSource.Token);
+                    botClient.SendChatAction(targetChatId, chatAction, cancellationToken: tokenSource.Token);
                 }
                 catch (Exception ex)
                 {
@@ -58,7 +61,14 @@ namespace GPTipsBot.Services
         {
             if (_serviceMessageId != 0)
             {
-                await botClient.DeleteMessage(userKey.ChatId, _serviceMessageId);
+                try
+                {
+                    await botClient.DeleteMessage(_targetChatId != 0 ? _targetChatId : userKey.ChatId, _serviceMessageId);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogDebug(ex, "Failed to delete please-wait message");
+                }
             }
 
             Dispatcher.UserState[userKey].MessageIdToCancellation.Remove(_serviceMessageId);

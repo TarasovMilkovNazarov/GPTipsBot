@@ -122,7 +122,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             _log.LogError(e, "Unknown error while handling update" +
                                              Environment.NewLine + "{update}", updateStr);
 
-                            await _botClient.SendMessage(userId, BotResponse.SomethingWentWrong,
+                            await _botClient.SendMessage(chatId ?? userId, BotResponse.SomethingWentWrong,
                                 cancellationToken: stoppingToken);
                         }
                     }

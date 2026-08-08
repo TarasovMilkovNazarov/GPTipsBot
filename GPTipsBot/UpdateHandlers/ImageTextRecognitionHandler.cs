@@ -33,9 +33,10 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (ArgumentNullException e)
             {
-                await botClient.SendMessage(update.UserChatKey.ChatId,
+                await botClient.SendUserReplyAsync(
+                    update,
                     BotResponse.SendTextRecognitionImage,
-                    replyMarkup: TelegramBotUiService.CancelKeyboard);
+                    TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
 
                 return;
             }
@@ -46,21 +47,22 @@ namespace GPTipsBot.UpdateHandlers
 
             if (!isAdmin && lastCommand?.Type != CommandType.TextRecognition)
             {
-                await botClient.SendMessage(update.UserChatKey.ChatId,
+                await botClient.SendUserReplyAsync(
+                    update,
                     BotResponse.SendImageTextRecognitionCommandFirst,
-                    replyMarkup: TelegramBotUiService.CancelKeyboard);
+                    TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
 
                 return;
             }
 
             await using var dbTransaction = await context.Database.BeginTransactionAsync();
-            var isSuccessPayment = await userService.PayForTextRecognitions(update.UserChatKey.ChatId);
+            var isSuccessPayment = await userService.PayForTextRecognitions(update.UserChatKey.Id);
             if (!isSuccessPayment)
             {
                 await dbTransaction.RollbackAsync();
                 context.ChangeTracker.Clear();
-                await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg,
-                    replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                await botClient.SendUserReplyAsync(update, BotResponse.PleaseWaitMsg,
+                    TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
 
@@ -77,8 +79,12 @@ namespace GPTipsBot.UpdateHandlers
             await messageRepository.AddAsync(recognitionResultMessage);
             await dbTransaction.CommitAsync();
 
-            await botClient.SendMessage(update.UserChatKey.ChatId,
-                text, replyParameters: (int)update.Message.TelegramMessageId!);
+            await botClient.SendUserReplyAsync(update, text);
+
+            if (update.IsGroupOrChannel)
+            {
+                return;
+            }
 
             await gramadsAdvertisementClient.SendPostToChat(update.UserChatKey.ChatId);
             await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");

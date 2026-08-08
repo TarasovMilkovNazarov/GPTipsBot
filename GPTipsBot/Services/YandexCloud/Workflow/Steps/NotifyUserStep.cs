@@ -39,7 +39,7 @@ public class NotifyUserStep(
             }
             else
             {
-                await botClient.SendMessage(data.ChatId, BotResponse.SomethingWentWrong);
+                await botClient.SendMessage(data.DeliveryChatId, BotResponse.SomethingWentWrong);
             }
         }
         catch (Exception ex)
@@ -48,7 +48,7 @@ public class NotifyUserStep(
 
             try
             {
-                await botClient.SendMessage(data.ChatId, BotResponse.SomethingWentWrong);
+                await botClient.SendMessage(data.DeliveryChatId, BotResponse.SomethingWentWrong);
             }
             catch (Exception notifyEx)
             {
@@ -61,7 +61,7 @@ public class NotifyUserStep(
             {
                 try
                 {
-                    await botClient.DeleteMessage(data.ChatId, data.ProgressMessageId.Value);
+                    await botClient.DeleteMessage(data.DeliveryChatId, data.ProgressMessageId.Value);
                 }
                 catch (Exception deleteEx)
                 {
@@ -75,7 +75,7 @@ public class NotifyUserStep(
 
     private async Task SendSuccessAsync(ImageGenerationWorkflowData data, InputFile photo)
     {
-        await botClient.SendPhoto(data.ChatId, photo);
+        await botClient.SendPhoto(data.DeliveryChatId, photo);
 
         await using var scope = scopeFactory.CreateAsyncScope();
         var messageRepository = scope.ServiceProvider.GetRequiredService<MessageRepository>();
@@ -87,7 +87,7 @@ public class NotifyUserStep(
         });
 
         await botClient.SendMessage(
-            data.ChatId,
+            data.DeliveryChatId,
             string.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit),
             replyMarkup: TelegramBotUiService.GetImageInstructionInlineKeyboard(data.IsSquare));
     }

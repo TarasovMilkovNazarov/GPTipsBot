@@ -68,6 +68,12 @@ namespace GPTipsBot.Resources {
             }
         }
         
+        internal static string Summary {
+            get {
+                return ResourceManager.GetString("Summary", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Отмена.
         /// </summary>

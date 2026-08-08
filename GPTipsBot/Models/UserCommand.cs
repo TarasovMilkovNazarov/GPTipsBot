@@ -32,6 +32,7 @@ public enum CommandType
     ImageSquare = 18,
     ImageCartoonify = 19,
     AnimatePhoto = 20,
+    Summary = 21,
 }
 
 public class Wallet: Entity

@@ -27,6 +27,7 @@ public class BotMenu
     public const string GetProfileCommand = "/profile";
     public const string DonateCommand = "/donate";
 
+    public const string SummaryCommand = "/summary";
     public const string FixCommand = "/fix";
     public const string VersionCommand = "/version";
     public const string VpnCheckCommand = "/vpn_check";
@@ -47,6 +48,7 @@ public class BotMenu
     public static CustomBotCommand Deposit => new() { Command = DepositCommand, Description = BotUI.DepositButton, Type = CommandType.Deposit };
     public static CustomBotCommand Profile => new() { Command = GetProfileCommand, Description = BotUI.ProfileButton, Type = CommandType.GetProfile };
     public static CustomBotCommand Donate => new() { Command = DonateCommand, Description = BotUI.DonateButton, Type = CommandType.Donate };
+    public static CustomBotCommand Summary => new() { Command = SummaryCommand, Description = BotUI.Summary, Type = CommandType.Summary };
 
     public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
     public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
@@ -67,7 +69,8 @@ public class BotMenu
             Help,
             Deposit,
             Profile,
-            Donate
+            Donate,
+            Summary
         ];
     }
 }

@@ -68,6 +68,19 @@ namespace GPTipsBot.UpdateHandlers
             var language = botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
 
+            var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
+
+            if (update.IsGroupOrChannel && !update.IsAddressedToBot && !IsGroupFollowUp(lastCommand))
+            {
+                if (!string.IsNullOrWhiteSpace(update.Message?.Text))
+                {
+                    update.Message.ContextBound = false;
+                    await messageRepository.AddAsync(update.Message);
+                }
+
+                return;
+            }
+
             if (update.PreCheckoutQuery != null)
             {
                 if (moneyService.TryValidatePreCheckout(update.PreCheckoutQuery, out var errorMessage))
@@ -114,11 +127,11 @@ namespace GPTipsBot.UpdateHandlers
                 PaymentCallbacks.TryParsePackage(update.CallbackQuery.Data, out var packageStars))
             {
                 await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
-                await botClient.SendMessage(
-                    update.UserChatKey.Id,
+                await botClient.SendUserReplyAsync(
+                    update,
                     string.Format(BotResponse.ChoosePaymentMethod, packageStars,
                         MoneyService.FormatRubAmount(packageStars)),
-                    replyMarkup: moneyService.BuildPaymentMethodKeyboard(packageStars));
+                    moneyService.BuildPaymentMethodKeyboard(packageStars));
                 return;
             }
 
@@ -150,8 +163,7 @@ namespace GPTipsBot.UpdateHandlers
 
                 if (confirmResult == PaymentConfirmResult.DonateConfirmed)
                 {
-                    await botClient.SendMessage(update.UserChatKey.Id,
-                        BotResponse.DonateText, replyMarkup: null);
+                    await botClient.SendUserReplyAsync(update, BotResponse.DonateText);
                 }
                 else if (confirmResult == PaymentConfirmResult.DepositCredited)
                 {
@@ -162,15 +174,13 @@ namespace GPTipsBot.UpdateHandlers
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-                    await botClient.SendMessage(update.UserChatKey.Id, reply, replyMarkup: replyMarkup);
+                    await botClient.SendUserReplyAsync(update, reply, replyMarkup);
                 }
 
                 await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
 
                 return;
             }
-
-            var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
 
             if (update.IsAdminCommand())
             {
@@ -204,11 +214,11 @@ namespace GPTipsBot.UpdateHandlers
                             PaymentConfig.MinRechargeRub, PaymentConfig.MinRechargeStars));
                 }
 
-                await botClient.SendMessage(
-                    update.UserChatKey.Id,
+                await botClient.SendUserReplyAsync(
+                    update,
                     string.Format(BotResponse.ChoosePaymentMethod, starsCount,
                         MoneyService.FormatRubAmount(starsCount)),
-                    replyMarkup: moneyService.BuildPaymentMethodKeyboard(starsCount));
+                    moneyService.BuildPaymentMethodKeyboard(starsCount));
 
                 return;
             }
@@ -229,9 +239,8 @@ namespace GPTipsBot.UpdateHandlers
                 var imageId = update.FileId;
                 if (update.FileId == null && imageCache.TryGet(update.UserChatKey.ChatId, out imageId) == false)
                 {
-                    await botClient.SendMessage(update.UserChatKey.ChatId,
-                        BotResponse.SendPhotoToAnimate,
-                        replyMarkup: TelegramBotUiService.CancelInlineKeyboard);
+                    await botClient.SendUserReplyAsync(update, BotResponse.SendPhotoToAnimate,
+                        TelegramBotUiService.CancelInlineKeyboard);
 
                     return;
                 }
@@ -239,8 +248,8 @@ namespace GPTipsBot.UpdateHandlers
                 if (string.IsNullOrWhiteSpace(update.Message?.Text))
                 {
                     imageCache.Set(update.UserChatKey.ChatId, imageId!);
-                    await botClient.SendMessage(update.UserChatKey.ChatId,
-                        BotResponse.SendAnimatePrompt, replyMarkup: TelegramBotUiService.CancelInlineKeyboard);
+                    await botClient.SendUserReplyAsync(update, BotResponse.SendAnimatePrompt,
+                        TelegramBotUiService.CancelInlineKeyboard);
                     return;
                 }
 
@@ -252,16 +261,16 @@ namespace GPTipsBot.UpdateHandlers
                     context.ChangeTracker.Clear();
 
                     var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
-                    await botClient.SendOutOfFreeRequestsMessageAsync(userKey.Id, nextExec);
+                    await botClient.SendOutOfFreeRequestsMessageAsync(update.ReplyChatId, nextExec);
                     return;
                 }
 
-                var progressMessageId = await photoAnimationProgressNotifier.StartAsync(userKey.ChatId);
+                var progressMessageId = await photoAnimationProgressNotifier.StartAsync(update.ReplyChatId);
 
                 await gptService.StartAnimatePhoto(
                     update.Message.Text,
                     imageId!,
-                    userKey.ChatId,
+                    update.ReplyChatId,
                     userKey.Id,
                     progressMessageId);
 
@@ -273,6 +282,10 @@ namespace GPTipsBot.UpdateHandlers
             {
                 throw new NotSupportedMessageException(update.UserChatKey.ChatId, "Photo");
             }
+            else if (string.IsNullOrWhiteSpace(update.Message?.Text))
+            {
+                return;
+            }
             else
             {
                 SetNextHandler(chatGptHandler);
@@ -280,5 +293,14 @@ namespace GPTipsBot.UpdateHandlers
 
             await base.HandleAsync(update);
         }
+
+        private static bool IsGroupFollowUp(UserCommand? lastCommand) =>
+            lastCommand?.Type is CommandType.Image
+                or CommandType.ImageSquare
+                or CommandType.ImageRectangle
+                or CommandType.TextRecognition
+                or CommandType.Deposit
+                or CommandType.Donate
+                or CommandType.AnimatePhoto;
     }
 }

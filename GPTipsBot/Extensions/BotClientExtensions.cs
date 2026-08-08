@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Config;
+using GPTipsBot.Dtos;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.Utilities;
@@ -7,6 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.Extensions
 {
@@ -30,6 +32,84 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             }
         }
 
+        /// <summary>
+        /// Sends a user-facing reply to the private chat when the update came from a group.
+        /// On 403 (user never opened DM), falls back to the group with instructions.
+        /// </summary>
+        public static async Task<bool> SendUserReplyAsync(
+            this ITelegramBotClient botClient,
+            UpdateDecorator update,
+            string text,
+            ReplyMarkup? replyMarkup = null,
+            bool acknowledgeInGroup = true)
+        {
+            try
+            {
+                await botClient.SendMessage(update.ReplyChatId, text, replyMarkup: replyMarkup);
+                await AcknowledgePrivateReplyAsync(botClient, update, acknowledgeInGroup);
+                return true;
+            }
+            catch (ApiRequestException ex) when (ex.ErrorCode == 403 && update.IsGroupOrChannel)
+            {
+                await botClient.SendMessage(
+                    update.UserChatKey.ChatId,
+                    string.Format(BotResponse.OpenPrivateChatFirst, AppConfig.BotName.TrimStart('@')),
+                    replyParameters: ToReplyParameters(update));
+                return false;
+            }
+        }
+
+        public static async Task<bool> TrySendUserMarkdownReplyAsync(
+            this ITelegramBotClient botClient,
+            UpdateDecorator update,
+            string text,
+            ILogger? logger = null,
+            bool acknowledgeInGroup = true)
+        {
+            try
+            {
+                await botClient.TrySendMarkdown2MessageAsync(update.ReplyChatId, text, replyToMessageId: null, logger: logger);
+                await AcknowledgePrivateReplyAsync(botClient, update, acknowledgeInGroup);
+                return true;
+            }
+            catch (ApiRequestException ex) when (ex.ErrorCode == 403 && update.IsGroupOrChannel)
+            {
+                await botClient.SendMessage(
+                    update.UserChatKey.ChatId,
+                    string.Format(BotResponse.OpenPrivateChatFirst, AppConfig.BotName.TrimStart('@')),
+                    replyParameters: ToReplyParameters(update));
+                return false;
+            }
+        }
+
+        private static async Task AcknowledgePrivateReplyAsync(
+            ITelegramBotClient botClient,
+            UpdateDecorator update,
+            bool acknowledgeInGroup)
+        {
+            if (!acknowledgeInGroup || !update.IsGroupOrChannel)
+            {
+                return;
+            }
+
+            try
+            {
+                await botClient.SendMessage(
+                    update.UserChatKey.ChatId,
+                    BotResponse.ReplySentPrivately,
+                    replyParameters: ToReplyParameters(update));
+            }
+            catch (ApiRequestException)
+            {
+                // Group ack is best-effort.
+            }
+        }
+
+        private static ReplyParameters? ToReplyParameters(UpdateDecorator update) =>
+            update.Message?.TelegramMessageId is long id
+                ? new ReplyParameters { MessageId = (int)id }
+                : null;
+
         public static async Task SendMarkdown2MessageAsync(
             this ITelegramBotClient botClient,
             long chatId,
@@ -44,10 +124,13 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             foreach (var part in textParts.Take(partsCount))
             {
                 var escapedText = StringUtilities.EscapeTextForMarkdown2(part)!;
-                await botClient.SendMessage(chatId, escapedText, ParseMode.MarkdownV2, new ReplyParameters
-                {
-                    MessageId = replyToMessageId.Value
-                });
+                await botClient.SendMessage(
+                    chatId,
+                    escapedText,
+                    ParseMode.MarkdownV2,
+                    replyParameters: replyToMessageId.HasValue
+                        ? new ReplyParameters { MessageId = replyToMessageId.Value }
+                        : null);
             }
         }
 

@@ -10,6 +10,7 @@ using GPTipsBot.Config;
 using GPTipsBot.Jobs;
 using Telegram.Bot.Services;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
 using GPTipsBot.Services.YandexCloud;
@@ -136,7 +137,9 @@ namespace GPTipsBot.Extensions
         static void InitializeBot(ITelegramBotClient botClient, string? langCode = null)
         {
             var botMenu = new BotMenu();
-            botClient.SetMyCommands(botMenu.GetBotCommands(), languageCode: langCode);
+            var commands = botMenu.GetBotCommands();
+            botClient.SetMyCommands(commands, languageCode: langCode);
+            botClient.SetMyCommands(commands, BotCommandScope.AllGroupChats(), languageCode: langCode);
             botClient.SetMyName(AppConfig.IsProduction ? BotResponse.BotName : BotResponse.DevBotName, languageCode: langCode);
             botClient.SetMyDescription(BotResponse.BotDescription, languageCode: langCode);
             botClient.SetMyShortDescription(AppConfig.IsProduction ? BotResponse.ShortDescription :

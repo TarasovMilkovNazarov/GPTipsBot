@@ -4,8 +4,10 @@ using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
+using System.Text;
 using Ardalis.GuardClauses;
 using GPTipsBot.Config;
+using GPTipsBot.Enums;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
 using GPTipsBot.Models;
@@ -30,7 +32,8 @@ namespace GPTipsBot.UpdateHandlers
         UserService userService,
         BotSettingsRepository botSettingsRepository,
         MoneyService moneyService,
-        IJobService jobService)
+        IJobService jobService,
+        IGpt gptService)
         : BaseMessageHandler
     {
         private readonly ApplicationContext _context = context;
@@ -52,10 +55,11 @@ namespace GPTipsBot.UpdateHandlers
             Guard.Against.Null(update.Command);
             var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
             await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
+            await MirrorMultiStepCommandToPrivateChatAsync(update);
 
             var profile = await userService.GetUserProfile(update.UserChatKey.Id);
 
-            ReplyMarkup replyMarkup = StartKeyboard;
+            ReplyMarkup? replyMarkup = GetMenuMarkup(update.IsGroupOrChannel);
             update.Message.ContextBound = false;
             string? reply = null;
 
@@ -82,9 +86,7 @@ namespace GPTipsBot.UpdateHandlers
                     var packagesKeyboard = moneyService.BuildDepositPackagesKeyboard();
                     if (update.CallbackQuery == null)
                     {
-                        await botClient.SendMessage(update.UserChatKey.ChatId,
-                            depositText,
-                            replyMarkup: packagesKeyboard);
+                        await botClient.SendUserReplyAsync(update, depositText, packagesKeyboard);
                     }
                     else
                     {
@@ -96,22 +98,24 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
                 case DonateCommand:
-                    await botClient.SendMessage(update.UserChatKey.ChatId,
-                        BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
+                    await botClient.SendUserReplyAsync(update, BotResponse.DonateInstructions, CancelInlineKeyboard);
                     return;
                 case HelpCommand:
                     reply = BotResponse.BotDescription;
                     break;
+                case SummaryCommand:
+                    await HandleSummaryAsync(update);
+                    return;
                 case ImageCommand:
                     if (profile is { Images: <= 0, Stars: <= 0 })
                     {
-                        await SendNoFreeRequestsMessage(chatId);
+                        await SendNoFreeRequestsMessage(update);
                         return;
                     }
 
-                    if (messageText.StartsWith("/image "))
+                    if (UpdateDecorator.TryGetCommandArgument(messageText, ImageCommand, out var imagePrompt))
                     {
-                        update.Message.Text = messageText.Substring("/image ".Length);
+                        update.Message.Text = imagePrompt;
                         SetNextHandler(imageGeneratorHandler);
                         await messageRepository.AddAsync(update.Message);
                         await base.HandleAsync(update);
@@ -124,10 +128,7 @@ namespace GPTipsBot.UpdateHandlers
                     replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
                 case AnimatePhotoCommand:
-                    await botClient.SendMessage(update.UserChatKey.ChatId,
-                        BotResponse.SendPhotoToAnimate,
-                        replyMarkup: CancelInlineKeyboard);
-
+                    await botClient.SendUserReplyAsync(update, BotResponse.SendPhotoToAnimate, CancelInlineKeyboard);
                     return;
                 case ImageSquareCommand:
                     if (previousCommand?.Type == CommandType.ImageSquare)
@@ -150,7 +151,7 @@ namespace GPTipsBot.UpdateHandlers
                 case ImageTextRecognizeCommand:
                     if (profile is { ImageTexts: <= 0, Stars: <= 0 })
                     {
-                        await SendNoFreeRequestsMessage(chatId);
+                        await SendNoFreeRequestsMessage(update);
                         return;
                     }
 
@@ -163,7 +164,7 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case ChooseLangCommand:
                     reply = BotResponse.ChooseLanguagePlease;
-                    replyMarkup = ChooseLangKeyboard;
+                    replyMarkup = GetChooseLangMarkup(update.IsGroupOrChannel);
                     break;
                 case SetEngLangCommand:
                     reply = await UpdateLanguage(update.UserChatKey, "en");
@@ -193,11 +194,15 @@ namespace GPTipsBot.UpdateHandlers
 
                     if (previousCommand?.Type is CommandType.Image or CommandType.TextRecognition)
                     {
-                        replyMarkup = CancelKeyboard;
+                        replyMarkup = GetCancelMarkup(update.IsGroupOrChannel);
+                    }
+                    else if (!update.IsGroupOrChannel)
+                    {
+                        replyMarkup = new ReplyKeyboardRemove();
                     }
                     else
                     {
-                        replyMarkup = new ReplyKeyboardRemove();
+                        replyMarkup = null;
                     }
 
                     if (update.Message.TelegramMessageId.HasValue && state.MessageIdToCancellation
@@ -212,7 +217,7 @@ namespace GPTipsBot.UpdateHandlers
             Guard.Against.Null(reply);
 
             await messageRepository.AddAsync(update.Message);
-            await botClient.SendMessage(chatId, reply, replyMarkup: replyMarkup);
+            await botClient.SendUserReplyAsync(update, reply, replyMarkup);
             return;
 
             async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
@@ -220,7 +225,7 @@ namespace GPTipsBot.UpdateHandlers
                 CultureInfo.CurrentUICulture = new CultureInfo(langCode);
 
                 await botClient.SetMyCommands(new BotMenu().GetBotCommands(), BotCommandScope.Chat(chatId));
-                replyMarkup = new ReplyKeyboardRemove();
+                replyMarkup = update.IsGroupOrChannel ? null : new ReplyKeyboardRemove();
 
                 var settings = botSettingsRepository.Get(userKey.Id);
                 if (settings == null)
@@ -236,10 +241,110 @@ namespace GPTipsBot.UpdateHandlers
             }
         }
 
-        private async Task SendNoFreeRequestsMessage(long chatId)
+        private async Task MirrorMultiStepCommandToPrivateChatAsync(UpdateDecorator update)
+        {
+            if (!update.IsGroupOrChannel)
+            {
+                return;
+            }
+
+            if (update.Command?.Type is not (CommandType.Image
+                or CommandType.ImageSquare
+                or CommandType.ImageRectangle
+                or CommandType.TextRecognition
+                or CommandType.Deposit
+                or CommandType.Donate
+                or CommandType.AnimatePhoto))
+            {
+                return;
+            }
+
+            var privateKey = new UserChatKey(update.UserChatKey.Id, update.UserChatKey.Id);
+            await userCommandRepository.AddAsync(privateKey, update.Command.Type);
+        }
+
+        private async Task HandleSummaryAsync(UpdateDecorator update)
+        {
+            var dayMessages = messageRepository.GetChatMessagesForDay(update.UserChatKey.ChatId, DateTime.UtcNow);
+            dayMessages = dayMessages
+                .Where(m => m.Text is not null
+                            && !m.Text.StartsWith(SummaryCommand, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (dayMessages.Count == 0)
+            {
+                await botClient.SendUserReplyAsync(update, BotResponse.SummaryEmpty);
+                return;
+            }
+
+            var transcript = BuildTranscript(dayMessages);
+            var prompt = string.Format(BotResponse.SummaryPrompt, transcript);
+
+            try
+            {
+                var response = await gptService.SendOneOffAsync(
+                    "You are a helpful assistant that summarizes chat conversations.",
+                    prompt,
+                    CancellationToken.None);
+
+                var summaryText = response.Choices.FirstOrDefault()?.Message.Content;
+                if (string.IsNullOrWhiteSpace(summaryText))
+                {
+                    await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
+                    return;
+                }
+
+                await messageRepository.AddAsync(new MessageDto(update.UserChatKey)
+                {
+                    Text = summaryText,
+                    Role = MessageOwner.Assistant,
+                    ContextBound = false,
+                    BotMessageType = BotMessageType.ChatGptPrompt,
+                });
+
+                await botClient.SendUserReplyAsync(
+                    update,
+                    $"{BotResponse.SummaryHeader}\n\n{summaryText}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to build day summary for chat {ChatId}", update.UserChatKey.ChatId);
+                await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
+            }
+        }
+
+        private static string BuildTranscript(IReadOnlyList<Models.Message> messages)
+        {
+            var sb = new StringBuilder();
+            foreach (var message in messages)
+            {
+                var role = message.Role switch
+                {
+                    MessageOwner.User => $"user:{message.UserId}",
+                    MessageOwner.Assistant => "assistant",
+                    _ => message.Role.ToString().ToLowerInvariant()
+                };
+                var text = message.Text!.Length > 500 ? message.Text[..500] + "…" : message.Text;
+                sb.AppendLine($"[{message.CreatedAt:HH:mm}] {role}: {text}");
+            }
+
+            const int maxChars = 24000;
+            if (sb.Length > maxChars)
+            {
+                return sb.ToString(sb.Length - maxChars, maxChars);
+            }
+
+            return sb.ToString();
+        }
+
+        private async Task SendNoFreeRequestsMessage(UpdateDecorator update)
         {
             var nextRefreshLimitExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
-            await botClient.SendOutOfFreeRequestsMessageAsync(chatId, nextRefreshLimitExec);
+            await botClient.SendOutOfFreeRequestsMessageAsync(update.ReplyChatId, nextRefreshLimitExec);
+            if (update.IsGroupOrChannel)
+            {
+                await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.ReplySentPrivately);
+            }
         }
     }
 }

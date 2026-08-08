@@ -3,6 +3,7 @@ namespace GPTipsBot.Services.YandexCloud.Workflow;
 public class ImageGenerationWorkflowData
 {
     public long ChatId { get; set; }
+    public long ReplyChatId { get; set; }
     public long UserId { get; set; }
     public string Prompt { get; set; } = string.Empty;
     public bool IsSquare { get; set; }
@@ -12,4 +13,6 @@ public class ImageGenerationWorkflowData
     public bool UseDevPlaceholder { get; set; }
     public DateTime? DeadlineUtc { get; set; }
     public string? ErrorMessage { get; set; }
+
+    public long DeliveryChatId => ReplyChatId != 0 ? ReplyChatId : ChatId;
 }

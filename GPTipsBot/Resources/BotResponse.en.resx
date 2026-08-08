@@ -339,4 +339,24 @@ Every contribution counts, and we're so grateful for your support! 🤗</value>
   <data name="PhotoAnimationFailed" xml:space="preserve">
     <value>Could not animate the photo. Please try again later or choose a different image.</value>
   </data>
+  <data name="ReplySentPrivately" xml:space="preserve">
+    <value>✉️ Replied in private messages</value>
+  </data>
+  <data name="OpenPrivateChatFirst" xml:space="preserve">
+    <value>To receive private replies, open a chat with the bot and press Start first: https://t.me/{0}</value>
+  </data>
+  <data name="SummaryEmpty" xml:space="preserve">
+    <value>No messages to summarize for today yet.
+
+In groups the bot only sees messages when privacy mode is off (@BotFather → /setprivacy → Disable) or when it is addressed.</value>
+  </data>
+  <data name="SummaryHeader" xml:space="preserve">
+    <value>📋 Today's summary:</value>
+  </data>
+  <data name="SummaryPrompt" xml:space="preserve">
+    <value>Write a concise summary of today's conversation. Highlight main topics, decisions, and important facts. Use the language of the chat. Be structured and to the point.
+
+Conversation:
+{0}</value>
+  </data>
 </root>

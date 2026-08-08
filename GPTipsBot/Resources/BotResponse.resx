@@ -344,4 +344,24 @@
   <data name="PhotoAnimationFailed" xml:space="preserve">
     <value>Не удалось оживить фото. Попробуйте позже или выберите другое изображение.</value>
   </data>
+  <data name="ReplySentPrivately" xml:space="preserve">
+    <value>✉️ Ответ отправил в личные сообщения</value>
+  </data>
+  <data name="OpenPrivateChatFirst" xml:space="preserve">
+    <value>Чтобы получать ответы в личку, сначала откройте диалог с ботом и нажмите Start: https://t.me/{0}</value>
+  </data>
+  <data name="SummaryEmpty" xml:space="preserve">
+    <value>За сегодня пока нет сообщений для суммаризации.
+
+В группах бот видит сообщения при выключенном privacy mode (@BotFather → /setprivacy → Disable) или когда к нему обращаются.</value>
+  </data>
+  <data name="SummaryHeader" xml:space="preserve">
+    <value>📋 Краткое содержание за сегодня:</value>
+  </data>
+  <data name="SummaryPrompt" xml:space="preserve">
+    <value>Сделай краткое содержание переписки за день. Выдели основные темы, решения и важные факты. Пиши на языке переписки, структурировано и по делу.
+
+Переписка:
+{0}</value>
+  </data>
 </root>
