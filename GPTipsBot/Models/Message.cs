@@ -17,6 +17,8 @@ namespace GPTipsBot.Models
         public string? Text { get; set; }
         public long UserId { get; set; }
         public long ChatId { get; set; }
+        /// <summary>Telegram forum topic id; null outside topics / General without thread.</summary>
+        public long? MessageThreadId { get; set; }
         public DateTime CreatedAt { get; set; }
         public MessageOwner Role { get; set; }
         public bool ContextBound { get; set; }

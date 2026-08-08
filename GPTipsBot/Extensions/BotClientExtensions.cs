@@ -45,6 +45,7 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             await botClient.SendMessage(
                 update.UserChatKey.ChatId,
                 text,
+                messageThreadId: update.Message?.MessageThreadId is long tid ? (int)tid : null,
                 replyMarkup: replyMarkup,
                 replyParameters: ToReplyParameters(update));
             return true;

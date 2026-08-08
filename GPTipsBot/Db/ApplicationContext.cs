@@ -24,6 +24,7 @@ namespace GPTipsBot.Db
             EnsureFreePhotoAnimationsColumn();
             EnsureFreeSummaryRequestsColumn();
             EnsurePaymentHoldsTable();
+            EnsureMessageThreadIdColumn();
             Guid = Guid.NewGuid();
         }
         
@@ -75,6 +76,15 @@ namespace GPTipsBot.Db
                 );
                 CREATE INDEX IF NOT EXISTS "IX_PaymentHolds_Status_CreatedAt" ON "PaymentHolds" ("Status", "CreatedAt");
                 CREATE INDEX IF NOT EXISTS "IX_PaymentHolds_UserId" ON "PaymentHolds" ("UserId");
+                """);
+        }
+
+        private void EnsureMessageThreadIdColumn()
+        {
+            Database.ExecuteSqlRaw("""
+                ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "MessageThreadId" bigint NULL;
+                CREATE INDEX IF NOT EXISTS "IX_Messages_ChatId_MessageThreadId_CreatedAt"
+                    ON "Messages" ("ChatId", "MessageThreadId", "CreatedAt");
                 """);
         }
     }

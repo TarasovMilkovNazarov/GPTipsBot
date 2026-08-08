@@ -18,6 +18,7 @@ namespace GPTipsBot.Mappers
                 Type = tMessage.Type,
                 CreatedAt = tMessage.Date,
                 Role = role,
+                MessageThreadId = tMessage.MessageThreadId,
                 EntityValues = tMessage.EntityValues,
                 Entities = tMessage.Entities,
                 ReplyToMessage = tMessage.ReplyToMessage,

@@ -282,8 +282,9 @@ namespace GPTipsBot.UpdateHandlers
         private async Task HandleSummaryAsync(UpdateDecorator update)
         {
             var chatId = update.UserChatKey.ChatId;
+            var messageThreadId = update.Message.MessageThreadId;
 
-            var dayMessages = messageRepository.GetChatMessagesForDay(chatId, DateTime.UtcNow);
+            var dayMessages = messageRepository.GetChatMessagesForDay(chatId, DateTime.UtcNow, messageThreadId);
             dayMessages = dayMessages
                 .Where(m => m.Text is not null
                             && !m.Text.StartsWith(SummaryCommand, StringComparison.OrdinalIgnoreCase))
@@ -301,6 +302,7 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendMessage(
                     chatId,
                     BotResponse.SimpleNoFreeRequests,
+                    messageThreadId: messageThreadId is long tid ? (int)tid : null,
                     replyMarkup: DepositInlineKeyboard,
                     replyParameters: update.Message.TelegramMessageId is long mid
                         ? new ReplyParameters { MessageId = (int)mid }
@@ -332,6 +334,7 @@ namespace GPTipsBot.UpdateHandlers
                     Role = MessageOwner.Assistant,
                     ContextBound = false,
                     BotMessageType = BotMessageType.ChatGptPrompt,
+                    MessageThreadId = messageThreadId,
                 });
 
                 await botClient.SendUserReplyAsync(

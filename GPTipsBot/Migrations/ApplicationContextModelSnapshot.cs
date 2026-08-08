@@ -103,6 +103,9 @@ namespace GPTipsBot.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<long?>("MessageThreadId")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("ReplyToId")
                         .HasColumnType("bigint");
 
@@ -124,6 +127,8 @@ namespace GPTipsBot.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ReplyToId");
+
+                    b.HasIndex("ChatId", "MessageThreadId", "CreatedAt");
 
                     b.ToTable("Messages");
                 });

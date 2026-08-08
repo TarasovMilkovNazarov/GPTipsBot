@@ -13,6 +13,7 @@ namespace GPTipsBot.Dtos
         public long TelegramId { get; set; }
         public long? TelegramMessageId { get; set; }
         public long ChatId { get; set; } = userChatKey.ChatId;
+        public long? MessageThreadId { get; set; }
         public DateTime CreatedAt { get; set; }
         public MessageOwner Role { get; set; }
         public long UserId { get; internal set; } = userChatKey.Id;

@@ -25,6 +25,7 @@ namespace GPTipsBot.Repositories
                 ContextId = contextId,
                 ContextBound = messageDto.ContextBound,
                 TelegramMessageId = messageDto.TelegramMessageId,
+                MessageThreadId = messageDto.MessageThreadId,
                 ReplyTo = replyTo,
                 CreatedAt = DateTime.UtcNow,
                 Type = messageDto.BotMessageType
@@ -84,13 +85,18 @@ namespace GPTipsBot.Repositories
             return imagesCount;
         }
 
-        public List<Message> GetChatMessagesForDay(long chatId, DateTime utcDay, int limit = 200)
+        public List<Message> GetChatMessagesForDay(
+            long chatId,
+            DateTime utcDay,
+            long? messageThreadId = null,
+            int limit = 200)
         {
             var dayStart = utcDay.Date;
             var dayEnd = dayStart.AddDays(1);
 
             return context.Messages.AsNoTracking()
                 .Where(m => m.ChatId == chatId
+                            && m.MessageThreadId == messageThreadId
                             && m.CreatedAt >= dayStart
                             && m.CreatedAt < dayEnd
                             && m.Text != null
