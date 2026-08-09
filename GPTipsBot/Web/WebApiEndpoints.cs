@@ -7,6 +7,7 @@ using GPTipsBot.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 
 namespace GPTipsBot.Web;
 
@@ -57,7 +58,9 @@ public static class WebApiEndpoints
     private static async Task<IResult> TelegramLoginAsync(
         HttpContext http,
         TelegramLoginRequest body,
-        WebUserService webUsers)
+        WebUserService webUsers,
+        MessageRepository messages,
+        ApplicationContext db)
     {
         var payload = new TelegramLoginPayload(
             body.Id,
@@ -73,9 +76,31 @@ public static class WebApiEndpoints
             return Results.BadRequest(new { message = error });
         }
 
+        // Capture guest session before cookie is replaced by Telegram identity.
+        var previousId = WebUserService.TryGetUserId(http);
+        long? guestToMerge = null;
+        if (previousId is < 0)
+        {
+            guestToMerge = previousId;
+        }
+        else if (body.PreviousGuestId is < 0)
+        {
+            guestToMerge = body.PreviousGuestId;
+        }
+
         var lang = http.Request.Headers.AcceptLanguage.ToString();
         var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
         var (user, isGuest) = await webUsers.EnsureTelegramUserAsync(payload, language);
+
+        if (guestToMerge is long guestId && guestId != user.Id)
+        {
+            var guestUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == guestId);
+            if (guestUser?.Source == WebAuthConstants.GuestSource)
+            {
+                await messages.TransferWebConversationsAsync(guestId, user.Id);
+            }
+        }
+
         await webUsers.RecordLoginAsync(user.Id, AuthProvider.Telegram);
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
@@ -489,7 +514,8 @@ public static class WebApiEndpoints
         string? Username,
         string? PhotoUrl,
         long AuthDate,
-        string? Hash);
+        string? Hash,
+        long? PreviousGuestId = null);
 
     public sealed record SetModelRequest(string ModelId);
 

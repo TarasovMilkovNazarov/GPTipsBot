@@ -221,6 +221,60 @@ namespace GPTipsBot.Repositories
             return true;
         }
 
+        /// <summary>
+        /// Moves web guest conversations onto a Telegram (or other) account after login.
+        /// Web chats use ChatId == UserId; only those rows are reassigned.
+        /// </summary>
+        public async Task TransferWebConversationsAsync(long fromUserId, long toUserId)
+        {
+            if (fromUserId == toUserId || fromUserId >= 0)
+            {
+                return;
+            }
+
+            await context.Messages
+                .Where(m => m.UserId == fromUserId && m.ChatId == fromUserId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(m => m.UserId, toUserId)
+                    .SetProperty(m => m.ChatId, toUserId));
+
+            var guestMetas = await context.ConversationMetas
+                .Where(m => m.UserId == fromUserId)
+                .ToListAsync();
+
+            foreach (var meta in guestMetas)
+            {
+                var existing = await context.ConversationMetas
+                    .FirstOrDefaultAsync(m => m.UserId == toUserId && m.ContextId == meta.ContextId);
+
+                if (existing is null)
+                {
+                    context.ConversationMetas.Add(new ConversationMeta
+                    {
+                        UserId = toUserId,
+                        ContextId = meta.ContextId,
+                        CustomTitle = meta.CustomTitle,
+                        IsPinned = meta.IsPinned,
+                        IsDeleted = meta.IsDeleted,
+                    });
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(existing.CustomTitle))
+                    {
+                        existing.CustomTitle = meta.CustomTitle;
+                    }
+
+                    existing.IsPinned = existing.IsPinned || meta.IsPinned;
+                    existing.IsDeleted = existing.IsDeleted && meta.IsDeleted;
+                }
+
+                context.ConversationMetas.Remove(meta);
+            }
+
+            await context.SaveChangesAsync();
+        }
+
         private bool OwnsConversation(long userId, long contextId) =>
             context.Messages.AsNoTracking().Any(m =>
                 m.UserId == userId && m.ContextId == contextId && m.ContextBound);

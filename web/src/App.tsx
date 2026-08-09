@@ -16,11 +16,29 @@ declare global {
 }
 
 type Mode = 'chat' | 'image' | 'ocr'
+type Theme = 'light' | 'dark'
+
+const THEME_KEY = 'gptips_theme'
+
+function readStoredTheme(): Theme {
+  const stored = localStorage.getItem(THEME_KEY)
+  if (stored === 'light' || stored === 'dark') return stored
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.setAttribute('data-theme', theme)
+}
 
 export default function App() {
   const [lang, setLang] = useState<Lang>(() =>
     navigator.language.toLowerCase().startsWith('ru') ? 'ru' : 'en',
   )
+  const [theme, setTheme] = useState<Theme>(() => {
+    const initial = readStoredTheme()
+    applyTheme(initial)
+    return initial
+  })
   const [me, setMe] = useState<Me | null>(null)
   const [models, setModels] = useState<GptModel[]>([])
   const [conversations, setConversations] = useState<Conversation[]>([])
@@ -68,6 +86,11 @@ export default function App() {
           api.publicConfig(),
         ])
         setMe(guest)
+        if (guest.isGuest && guest.id < 0) {
+          localStorage.setItem('gptips_guest_id', String(guest.id))
+        } else {
+          localStorage.removeItem('gptips_guest_id')
+        }
         setModels(modelData.models)
         setPresets(presetData)
         setBotUsername(cfg.botUsername)
@@ -81,6 +104,11 @@ export default function App() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, busy])
+
+  useEffect(() => {
+    applyTheme(theme)
+    localStorage.setItem(THEME_KEY, theme)
+  }, [theme])
 
   useEffect(() => {
     if (menuOpenId == null) return
@@ -103,6 +131,7 @@ export default function App() {
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
       try {
+        const storedGuest = Number(localStorage.getItem('gptips_guest_id') || '')
         const profile = await api.telegramLogin({
           id: user.id,
           firstName: user.first_name,
@@ -111,7 +140,9 @@ export default function App() {
           photoUrl: user.photo_url,
           authDate: user.auth_date,
           hash: user.hash,
+          previousGuestId: Number.isFinite(storedGuest) && storedGuest < 0 ? storedGuest : undefined,
         })
+        localStorage.removeItem('gptips_guest_id')
         setMe(profile)
         await refreshConversations()
       } catch (e) {
@@ -359,6 +390,9 @@ export default function App() {
     await api.logout()
     const guest = await api.ensureGuest()
     setMe(guest)
+    if (guest.isGuest && guest.id < 0) {
+      localStorage.setItem('gptips_guest_id', String(guest.id))
+    }
     setMessages([])
     setContextId(null)
     await refreshConversations()
@@ -384,6 +418,15 @@ export default function App() {
             <strong>GPTipsBot</strong>
             <button className="ghost" type="button" onClick={() => setLang(lang === 'en' ? 'ru' : 'en')}>
               {lang.toUpperCase()}
+            </button>
+            <button
+              className="ghost theme-toggle"
+              type="button"
+              title={theme === 'dark' ? t(lang, 'themeLight') : t(lang, 'themeDark')}
+              aria-label={theme === 'dark' ? t(lang, 'themeLight') : t(lang, 'themeDark')}
+              onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))}
+            >
+              {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
           </div>
           <div className="topbar-right">

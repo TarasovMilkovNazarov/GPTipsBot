@@ -36,6 +36,8 @@ const dict = {
     renamePrompt: 'Enter a new name',
     deleteConfirm: 'Delete this chat?',
     chatMenu: 'Chat options',
+    themeLight: 'Light theme',
+    themeDark: 'Dark theme',
   },
   ru: {
     howCanIHelp: 'Чем могу помочь?',
@@ -72,6 +74,8 @@ const dict = {
     renamePrompt: 'Введите новое название',
     deleteConfirm: 'Удалить этот чат?',
     chatMenu: 'Действия с чатом',
+    themeLight: 'Светлая тема',
+    themeDark: 'Тёмная тема',
   },
 } as const
 

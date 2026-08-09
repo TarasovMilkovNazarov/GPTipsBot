@@ -14,7 +14,7 @@
 | Порт на бот-ВМ | `:80` → контейнер `:80` |
 | Публичный URL | **https://gptips.skolkokomu.ru** |
 | Postgres | `gptipsbot-bd`, хост `:5432` |
-| Watchtower | авто-pull/restart `gptipsbot-app` |
+| Watchtower | `coi-watchtower` (не `watchtower` — иначе orphan конфликтует с COI и боты остаются в `Created`) |
 
 **Web UI вшит в тот же Docker-образ** (`GPTipsBot/wwwroot` собирается в `Dockerfile`). Отдельный контейнер / static deploy для фронта **не нужен**.
 
@@ -164,6 +164,7 @@ Cookie сессии: `SameSite=Lax`, `Secure=SameAsRequest` — за HTTPS Caddy
 |---|---|
 | Деплоить фронт отдельно на `/var/www/...` как TripWeave | UI уже в образе бота |
 | Второй compose из `/opt/gptips...` рядом с COI | конфликт имён / recreate-луп |
+| Запускать отдельный контейнер с именем `watchtower` | COI не сможет recreate, боты застрянут в `Created` |
 | Коммитить полный COI compose с секретами | токены в git |
 | Вешать веб на другой порт без правки Caddy | DNS/Caddy сейчас → `:80` |
 
