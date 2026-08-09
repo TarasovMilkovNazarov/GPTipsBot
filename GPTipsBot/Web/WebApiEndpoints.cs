@@ -19,6 +19,10 @@ public static class WebApiEndpoints
 
         api.MapPost("/auth/guest", EnsureGuestAsync);
         api.MapPost("/auth/telegram", TelegramLoginAsync);
+        api.MapPost("/auth/email/register", EmailRegisterAsync);
+        api.MapPost("/auth/email/confirm", EmailConfirmAsync);
+        api.MapPost("/auth/email/resend", EmailResendAsync);
+        api.MapPost("/auth/email/login", EmailLoginAsync);
         api.MapPost("/auth/logout", LogoutAsync);
         api.MapGet("/me", GetMeAsync);
         api.MapGet("/models", GetModelsAsync);
@@ -107,6 +111,139 @@ public static class WebApiEndpoints
         await webUsers.RecordLoginAsync(user.Id, AuthProvider.Telegram);
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
+    }
+
+    private static async Task<IResult> EmailRegisterAsync(
+        HttpContext http,
+        EmailRegisterRequest body,
+        WebUserService webUsers)
+    {
+        try
+        {
+            var lang = http.Request.Headers.AcceptLanguage.ToString();
+            var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+            var (user, devCode) = await webUsers.RegisterEmailAsync(
+                body.Email ?? "",
+                body.Password ?? "",
+                body.FirstName,
+                language,
+                http.RequestAborted);
+
+            return Results.Ok(new
+            {
+                needsConfirmation = true,
+                email = user.Email,
+                message = "Confirmation code sent",
+                devCode,
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EmailConfirmAsync(
+        HttpContext http,
+        EmailConfirmRequest body,
+        WebUserService webUsers,
+        MessageRepository messages,
+        ApplicationContext db)
+    {
+        try
+        {
+            var previousId = WebUserService.TryGetUserId(http);
+            var user = await webUsers.ConfirmEmailAsync(body.Email ?? "", body.Code ?? "", http.RequestAborted);
+
+            if (previousId is < 0)
+            {
+                var guestUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == previousId);
+                if (guestUser?.Source == WebAuthConstants.GuestSource)
+                {
+                    await messages.TransferWebConversationsAsync(previousId.Value, user.Id);
+                }
+            }
+            else if (body.PreviousGuestId is < 0)
+            {
+                var guestUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == body.PreviousGuestId);
+                if (guestUser?.Source == WebAuthConstants.GuestSource)
+                {
+                    await messages.TransferWebConversationsAsync(body.PreviousGuestId.Value, user.Id);
+                }
+            }
+
+            await webUsers.RecordLoginAsync(user.Id, AuthProvider.Email);
+            await webUsers.SignInAsync(http, user.Id, isGuest: false);
+            return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EmailResendAsync(
+        HttpContext http,
+        EmailResendRequest body,
+        WebUserService webUsers)
+    {
+        try
+        {
+            var (_, devCode) = await webUsers.ResendEmailCodeAsync(body.Email ?? "", http.RequestAborted);
+            return Results.Ok(new { ok = true, message = "Confirmation code sent", devCode });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> EmailLoginAsync(
+        HttpContext http,
+        EmailLoginRequest body,
+        WebUserService webUsers,
+        MessageRepository messages,
+        ApplicationContext db)
+    {
+        try
+        {
+            var previousId = WebUserService.TryGetUserId(http);
+            var user = await webUsers.LoginEmailAsync(body.Email ?? "", body.Password ?? "", http.RequestAborted);
+
+            long? guestToMerge = previousId is < 0 ? previousId : body.PreviousGuestId is < 0 ? body.PreviousGuestId : null;
+            if (guestToMerge is long guestId)
+            {
+                var guestUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == guestId);
+                if (guestUser?.Source == WebAuthConstants.GuestSource)
+                {
+                    await messages.TransferWebConversationsAsync(guestId, user.Id);
+                }
+            }
+
+            await webUsers.RecordLoginAsync(user.Id, AuthProvider.Email);
+            await webUsers.SignInAsync(http, user.Id, isGuest: false);
+            return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
     }
 
     private static async Task<IResult> LogoutAsync(HttpContext http, WebUserService webUsers)
@@ -611,13 +748,17 @@ public static class WebApiEndpoints
     private static async Task<object> BuildMeAsync(long userId, WebUserService webUsers, HttpContext http)
     {
         var users = http.RequestServices.GetRequiredService<UserService>();
+        var db = http.RequestServices.GetRequiredService<ApplicationContext>();
         var profile = await users.GetUserProfile(userId);
+        var dbUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == userId);
         return new
         {
             id = userId,
             isGuest = WebUserService.IsGuest(http) || userId < 0,
             firstName = profile.FirstName,
             lastName = profile.LastName,
+            email = dbUser?.Email,
+            emailConfirmed = dbUser?.EmailConfirmed == true,
             stars = profile.Stars,
             free = new
             {
@@ -644,6 +785,11 @@ public static class WebApiEndpoints
         long AuthDate,
         string? Hash,
         long? PreviousGuestId = null);
+
+    public sealed record EmailRegisterRequest(string? Email, string? Password, string? FirstName);
+    public sealed record EmailConfirmRequest(string? Email, string? Code, long? PreviousGuestId = null);
+    public sealed record EmailResendRequest(string? Email);
+    public sealed record EmailLoginRequest(string? Email, string? Password, long? PreviousGuestId = null);
 
     public sealed record CreateYooKassaWebRequest(int Stars);
 

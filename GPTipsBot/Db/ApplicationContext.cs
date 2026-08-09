@@ -32,6 +32,7 @@ namespace GPTipsBot.Db
             EnsurePreferredGptModelColumn();
             EnsureConversationMetasTable();
             EnsureAuthLoginEventsTable();
+            EnsureEmailAuthColumns();
             Guid = Guid.NewGuid();
         }
 
@@ -157,6 +158,20 @@ namespace GPTipsBot.Db
                     ON "AuthLoginEvents" ("Provider", "CreatedAt");
                 CREATE INDEX IF NOT EXISTS "IX_AuthLoginEvents_UserId_CreatedAt"
                     ON "AuthLoginEvents" ("UserId", "CreatedAt");
+                """);
+        }
+
+        private void EnsureEmailAuthColumns()
+        {
+            Database.ExecuteSqlRaw("""
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "Email" text NULL;
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "PasswordHash" text NULL;
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "EmailConfirmed" boolean NOT NULL DEFAULT false;
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "EmailConfirmCode" text NULL;
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "EmailConfirmExpiresAt" timestamp with time zone NULL;
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_Email_Unique"
+                    ON "Users" ("Email")
+                    WHERE "Email" IS NOT NULL;
                 """);
         }
     }

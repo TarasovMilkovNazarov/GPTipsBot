@@ -60,6 +60,14 @@ export default function App() {
   const [paymentInfo, setPaymentInfo] = useState<PaymentPackages | null>(null)
   const [payingStars, setPayingStars] = useState<number | null>(null)
   const [paymentNotice, setPaymentNotice] = useState<'success' | 'pending' | 'failed' | null>(null)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authTab, setAuthTab] = useState<'login' | 'register' | 'confirm'>('login')
+  const [authEmail, setAuthEmail] = useState('')
+  const [authPassword, setAuthPassword] = useState('')
+  const [authName, setAuthName] = useState('')
+  const [authCode, setAuthCode] = useState('')
+  const [authBusy, setAuthBusy] = useState(false)
+  const [authHint, setAuthHint] = useState<string | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
@@ -485,6 +493,88 @@ export default function App() {
     }
   }
 
+  function guestIdForMerge(): number | undefined {
+    const stored = Number(localStorage.getItem('gptips_guest_id') || '')
+    return Number.isFinite(stored) && stored < 0 ? stored : undefined
+  }
+
+  async function afterEmailAuth(profile: Me) {
+    localStorage.removeItem('gptips_guest_id')
+    setMe(profile)
+    setAuthOpen(false)
+    setAuthPassword('')
+    setAuthCode('')
+    setAuthHint(null)
+    await refreshConversations()
+  }
+
+  async function submitEmailLogin() {
+    setAuthBusy(true)
+    setError(null)
+    setAuthHint(null)
+    try {
+      const profile = await api.emailLogin(authEmail.trim(), authPassword, guestIdForMerge())
+      await afterEmailAuth(profile)
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Login failed'
+      setError(message)
+      if (message.toLowerCase().includes('not confirmed')) {
+        setAuthTab('confirm')
+      }
+    } finally {
+      setAuthBusy(false)
+    }
+  }
+
+  async function submitEmailRegister() {
+    setAuthBusy(true)
+    setError(null)
+    setAuthHint(null)
+    try {
+      const res = await api.emailRegister(authEmail.trim(), authPassword, authName.trim() || undefined)
+      setAuthTab('confirm')
+      setAuthHint(
+        res.devCode
+          ? `${t(lang, 'codeSent')}: ${res.devCode}`
+          : t(lang, 'codeSent'),
+      )
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Register failed')
+    } finally {
+      setAuthBusy(false)
+    }
+  }
+
+  async function submitEmailConfirm() {
+    setAuthBusy(true)
+    setError(null)
+    try {
+      const profile = await api.emailConfirm(authEmail.trim(), authCode.trim(), guestIdForMerge())
+      await afterEmailAuth(profile)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Confirm failed')
+    } finally {
+      setAuthBusy(false)
+    }
+  }
+
+  async function resendEmailCode() {
+    setAuthBusy(true)
+    setError(null)
+    try {
+      const res = await api.emailResend(authEmail.trim())
+      setAuthHint(
+        res.devCode
+          ? `${t(lang, 'codeSent')}: ${res.devCode}`
+          : t(lang, 'codeSent'),
+      )
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Resend failed')
+    } finally {
+      setAuthBusy(false)
+    }
+  }
+
   const showHero = messages.length === 0 && mode !== 'cabinet'
   const telegramBotUrl = `https://t.me/${botUsername.replace(/^@/, '')}`
 
@@ -544,13 +634,118 @@ export default function App() {
                 </span>
               </>
             )}
-            {me?.isGuest ? <div id="tg-login-host" /> : (
+            {me?.isGuest ? (
+              <>
+                <button className="pill" type="button" onClick={() => { setAuthOpen(true); setAuthTab('login'); setError(null) }}>
+                  {t(lang, 'emailAuth')}
+                </button>
+                <div id="tg-login-host" />
+              </>
+            ) : (
               <button className="pill" type="button" onClick={logout}>
                 {t(lang, 'logout')}
               </button>
             )}
           </div>
         </header>
+
+        {authOpen && (
+          <div className="auth-backdrop" onClick={() => !authBusy && setAuthOpen(false)}>
+            <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="auth-tabs">
+                <button
+                  type="button"
+                  className={authTab === 'login' ? 'active' : ''}
+                  onClick={() => setAuthTab('login')}
+                >
+                  {t(lang, 'emailLogin')}
+                </button>
+                <button
+                  type="button"
+                  className={authTab === 'register' ? 'active' : ''}
+                  onClick={() => setAuthTab('register')}
+                >
+                  {t(lang, 'emailRegister')}
+                </button>
+                <button
+                  type="button"
+                  className={authTab === 'confirm' ? 'active' : ''}
+                  onClick={() => setAuthTab('confirm')}
+                >
+                  {t(lang, 'emailConfirm')}
+                </button>
+              </div>
+
+              {(authTab === 'login' || authTab === 'register') && (
+                <div className="auth-form">
+                  {authTab === 'register' && (
+                    <input
+                      value={authName}
+                      onChange={(e) => setAuthName(e.target.value)}
+                      placeholder={t(lang, 'namePlaceholder')}
+                      autoComplete="name"
+                    />
+                  )}
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    placeholder={t(lang, 'emailPlaceholder')}
+                    autoComplete="email"
+                  />
+                  <input
+                    type="password"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    placeholder={t(lang, 'passwordPlaceholder')}
+                    autoComplete={authTab === 'login' ? 'current-password' : 'new-password'}
+                  />
+                  <button
+                    className="primary"
+                    type="button"
+                    disabled={authBusy || !authEmail.trim() || authPassword.length < 6}
+                    onClick={() => void (authTab === 'login' ? submitEmailLogin() : submitEmailRegister())}
+                  >
+                    {authTab === 'login' ? t(lang, 'emailLogin') : t(lang, 'sendCode')}
+                  </button>
+                </div>
+              )}
+
+              {authTab === 'confirm' && (
+                <div className="auth-form">
+                  <input
+                    type="email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    placeholder={t(lang, 'emailPlaceholder')}
+                    autoComplete="email"
+                  />
+                  <input
+                    value={authCode}
+                    onChange={(e) => setAuthCode(e.target.value)}
+                    placeholder={t(lang, 'codePlaceholder')}
+                    inputMode="numeric"
+                    maxLength={6}
+                  />
+                  <button
+                    className="primary"
+                    type="button"
+                    disabled={authBusy || !authEmail.trim() || authCode.trim().length < 4}
+                    onClick={() => void submitEmailConfirm()}
+                  >
+                    {t(lang, 'confirmCode')}
+                  </button>
+                  <button className="ghost" type="button" disabled={authBusy || !authEmail.trim()} onClick={() => void resendEmailCode()}>
+                    {t(lang, 'resendCode')}
+                  </button>
+                </div>
+              )}
+
+              {authHint && <div className="auth-hint">{authHint}</div>}
+              {error && <div className="error">{error}</div>}
+            </div>
+          </div>
+        )}
 
         <div className={`drawer-backdrop ${historyOpen ? 'open' : ''}`} onClick={() => setHistoryOpen(false)} />
 

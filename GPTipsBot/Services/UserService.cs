@@ -267,7 +267,9 @@ namespace GPTipsBot.Services
 
         private void UserCreatedEventHandler(object? sender, User user)
         {
-            if (user.Source is Web.WebAuthConstants.GuestSource or Web.WebAuthConstants.TelegramSource)
+            if (user.Source is Web.WebAuthConstants.GuestSource
+                or Web.WebAuthConstants.TelegramSource
+                or Web.WebAuthConstants.EmailSource)
             {
                 return;
             }

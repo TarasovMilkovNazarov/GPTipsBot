@@ -93,6 +93,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<ContextWindow>()
             .AddRepositories()
             .AddScoped<MoneyService>()
+            .AddScoped<GPTipsBot.Services.Email.SmtpEmailSender>()
             .AddScoped<GPTipsBot.Web.WebUserService>()
             .AddScoped<GPTipsBot.Web.WebChatService>()
             .AddScoped<GPTipsBot.Web.WebMediaService>()

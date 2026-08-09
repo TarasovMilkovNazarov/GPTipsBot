@@ -3,6 +3,8 @@ export type Me = {
   isGuest: boolean
   firstName: string
   lastName?: string | null
+  email?: string | null
+  emailConfirmed?: boolean
   stars: number
   free: { gpt: number; images: number; ocr: number; animations: number; summaries: number }
   model: { id: string; name: string }
@@ -66,6 +68,40 @@ export const api = {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+    }).then((r) => json<Me>(r)),
+
+  emailRegister: (email: string, password: string, firstName?: string) =>
+    fetch('/api/auth/email/register', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, firstName }),
+    }).then((r) =>
+      json<{ needsConfirmation: boolean; email: string; message: string; devCode?: string | null }>(r),
+    ),
+
+  emailConfirm: (email: string, code: string, previousGuestId?: number) =>
+    fetch('/api/auth/email/confirm', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, previousGuestId }),
+    }).then((r) => json<Me>(r)),
+
+  emailResend: (email: string) =>
+    fetch('/api/auth/email/resend', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).then((r) => json<{ ok: boolean; message: string; devCode?: string | null }>(r)),
+
+  emailLogin: (email: string, password: string, previousGuestId?: number) =>
+    fetch('/api/auth/email/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, previousGuestId }),
     }).then((r) => json<Me>(r)),
 
   models: () =>

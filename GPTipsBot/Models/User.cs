@@ -25,5 +25,12 @@ namespace GPTipsBot.Models
         public Wallet? Wallet { get; set; }
         [ForeignKey("Wallet")]
         public long? WalletId { get; set; }
+
+        /// <summary>Normalized email for web email auth (unique when set).</summary>
+        public string? Email { get; set; }
+        public string? PasswordHash { get; set; }
+        public bool EmailConfirmed { get; set; }
+        public string? EmailConfirmCode { get; set; }
+        public DateTimeOffset? EmailConfirmExpiresAt { get; set; }
     }
 }
