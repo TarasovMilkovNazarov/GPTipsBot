@@ -5,6 +5,7 @@ using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Npgsql;
 using Telegram.Bot;
 
 namespace GPTipsBot.Services
@@ -251,19 +252,30 @@ namespace GPTipsBot.Services
                 return;
             }
 
-            var isExists = _userRepository.Any(user.Id);
-            if (isExists)
+            if (_userRepository.Any(user.Id))
             {
-                _userRepository.Update(user);
+                await _userRepository.Update(user);
             }
             else
             {
-                await _userRepository.Create(user);
-                UserCreated?.Invoke(this, user);
+                try
+                {
+                    await _userRepository.Create(user);
+                    UserCreated?.Invoke(this, user);
+                }
+                catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+                {
+                    // Concurrent create for the same Telegram id — treat as update.
+                    _context.Entry(user).State = EntityState.Detached;
+                    await _userRepository.Update(user);
+                }
             }
 
             _memoryCache.Set(cacheKey, user, _cacheOptions);
         }
+
+        private static bool IsUniqueViolation(DbUpdateException ex) =>
+            ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
 
         private void UserCreatedEventHandler(object? sender, User user)
         {

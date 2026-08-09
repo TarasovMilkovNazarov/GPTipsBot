@@ -43,16 +43,18 @@ namespace GPTipsBot.Repositories
             return user.Id;
         }
 
-        public void Update(User newUser)
+        public async Task Update(User newUser)
         {
             var dbUser = Get(newUser.Id);
 
             if (dbUser == null) { throw new ArgumentNullException($"Can't find user with Id {newUser.Id}"); }
 
-            dbUser.FirstName = newUser.FirstName; 
+            dbUser.FirstName = newUser.FirstName;
             dbUser.LastName = newUser.LastName;
             dbUser.IsActive = newUser.IsActive;
             dbUser.Source = newUser.Source ?? dbUser.Source;
+
+            await context.SaveChangesAsync();
         }
 
         public long GetActiveUsersCount()
