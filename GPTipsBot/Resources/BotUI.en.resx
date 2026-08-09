@@ -133,10 +133,10 @@
     <value>❔ Help</value>
   </data>
   <data name="Image" xml:space="preserve">
-    <value>Create image by text description</value>
+    <value>GPT IMAGE 1 — free generation</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
-    <value>🖼 Create image</value>
+    <value>🖼 GPT IMAGE 1</value>
   </data>
   <data name="ImagesMenu" xml:space="preserve">
     <value>Image tools menu</value>
@@ -204,13 +204,13 @@
     <value>🤖 Model</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT IMAGE 1 — generate</value>
+    <value>GPT Image 2 — generate</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT IMAGE 1</value>
+    <value>🎨 GPT Image 2</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT IMAGE 1 — edit photo</value>
+    <value>GPT Image 2 — edit photo</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 Edit photo</value>

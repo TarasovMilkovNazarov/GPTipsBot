@@ -118,14 +118,63 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BotDescription" xml:space="preserve">
-    <value>🤖Welcome to the ChatGPT bot! 🚀
+    <value>🤖 ChatGPT + images
 
-Ask ChatGPT — an artificial intelligence powered by GPT-4o mini from OpenAI. 💬
+Just type a question — the bot replies with conversation context.
+Menu: new chat, models, images (GPT IMAGE 1 / GPT Image 2), photo animation, account and ⭐ top-up.
 
-- To ask a question to the bot, simply send a text message
-- To generate an image, enter the command /image, or use the menu button
+Free daily limits apply — see /profile. Details: /help</value>
+  </data>
+  <data name="HelpText" xml:space="preserve">
+    <value>🤖 Full guide
 
-Note, that free requests amount is limited. Requests balance you can see in /profile</value>
+💬 Chat with AI
+Just send a text message — the bot replies using the current conversation context.
+• 💬 New chat — reset context and start fresh
+• 🤖 Model — choose a ChatGPT model
+  — GPT-4o mini: uses the free daily quota
+  — other models: Stars only
+
+🎨 Images
+Open “🎨 Images” in the menu:
+• 🖼 GPT IMAGE 1 — free text-to-image (within daily quota)
+• 🎨 GPT Image 2 — paid generation with size and quality options
+• 🛠 Edit photo — edit a photo from a text instruction (paid, GPT Image 2)
+• 📝 Text from photo — OCR / extract text from an image
+
+✨ Animate photo
+Turn a photo into a short animation (free within quota or paid with ⭐).
+
+👤 Account
+Shows your ⭐ balance, free quotas, and current model.
+From account you can:
+• choose a model
+• top up balance
+• switch interface language
+
+⭐ Balance and limits
+Free requests are limited and refresh daily.
+When the quota is used up, top up ⭐ in Account or via /deposit.
+Guide: 1⭐ ≈ 10 ChatGPT requests, 2 image generations, or 2 photo animations.
+
+Useful commands
+/start — main menu
+/help — this guide
+/profile — account
+/model — choose model
+/images — images menu
+/image — GPT IMAGE 1
+/gpt_image — GPT Image 2
+/edit_image — edit photo
+/animate — animate photo
+/get_image_text — OCR
+/deposit — top up
+/reset_context — new chat
+/donate — support the project
+
+In groups: /ask, /image, /summary
+
+Support: @my_super_ultra_smart_bot</value>
   </data>
   <data name="BotName" xml:space="preserve">
     <value>ChatGPT + DALL-E | FREE | Sora</value>
@@ -159,10 +208,12 @@ Pick an action from the menu below or just type your question.</value>
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>To continue please enter a text description of the image up to {0} characters in length
+    <value>🖼 GPT IMAGE 1 — free generation
 
-1:1 - square image
-2:1 - rectangular image (default)  </value>
+Enter a description up to {0} characters.
+
+1:1 — square image
+2:1 — rectangular image (default)</value>
   </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>English was set as interface language</value>

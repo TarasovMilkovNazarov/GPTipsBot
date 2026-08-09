@@ -84,18 +84,20 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 🤖 Добро пожаловать в бот ChatGPT! 🚀
-        ///
-        ///Задавайте вопросы ChatGPT — искусственному интеллекту на базе GPT-4o mini от OpenAI. 💬
-        ///
-        ///- чтобы задать вопрос боту, просто отправьте текст
-        ///- для генерации изображения введите команду /image, либо воспользуйтесь кнопкой меню
-        ///
-        ///Внимание, число бесплатных запросов ограничено. Команда для просмотра лимитов: /profile.
+        ///   Looks up a localized string similar to 🤖 ChatGPT + изображения....
         /// </summary>
         public static string BotDescription {
             get {
                 return ResourceManager.GetString("BotDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 🤖 Подробная инструкция....
+        /// </summary>
+        public static string HelpText {
+            get {
+                return ResourceManager.GetString("HelpText", resourceCulture);
             }
         }
         

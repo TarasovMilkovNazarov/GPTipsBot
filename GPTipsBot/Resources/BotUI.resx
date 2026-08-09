@@ -133,10 +133,10 @@
     <value>❔ Помощь</value>
   </data>
   <data name="Image" xml:space="preserve">
-    <value>Создать изображение по текстовому описанию</value>
+    <value>GPT IMAGE 1 — бесплатная генерация</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
-    <value>🖼 Создать изображение</value>
+    <value>🖼 GPT IMAGE 1</value>
   </data>
   <data name="ImagesMenu" xml:space="preserve">
     <value>Меню работы с изображениями</value>
@@ -204,13 +204,13 @@
     <value>🤖 Модель</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT IMAGE 1 — генерация</value>
+    <value>GPT Image 2 — генерация</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT IMAGE 1</value>
+    <value>🎨 GPT Image 2</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT IMAGE 1 — редактирование фото</value>
+    <value>GPT Image 2 — редактирование фото</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 Редактировать фото</value>

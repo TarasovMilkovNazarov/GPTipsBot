@@ -32,6 +32,7 @@ namespace GPTipsBot.Services
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
+        private static KeyboardButton ModelButton => new(BotUI.ModelButton);
 
         public static Dictionary<string, List<string>> ButtonToLocalizations { get; private set; }
 
@@ -106,8 +107,10 @@ namespace GPTipsBot.Services
                 "Get text on image");
             AddUnique(BotMenu.HelpCommand, "❔ Help");
             AddUnique(BotMenu.ChooseLangCommand, "Язык", "Language");
-            AddUnique(BotMenu.ImageCommand, "🖼 Сreate image");
-            AddUnique(BotMenu.GptImageCommand, "🎨 GPT Image 2");
+            AddUnique(BotMenu.ImageCommand,
+                "🖼 Создать изображение",
+                "🖼 Create image",
+                "🖼 Сreate image");
         }
 
         private static void AddUnique(string command, params string[] labels)
@@ -127,8 +130,8 @@ namespace GPTipsBot.Services
             var keyboardMarkup = new ReplyKeyboardMarkup(
             [
                 [ResetContextButton, ProfileButton],
-                [ImagesMenuButton, AnimatePhotoButton],
-                [HelpButton],
+                [ModelButton, ImagesMenuButton],
+                [AnimatePhotoButton, HelpButton],
             ]);
 
             keyboardMarkup.ResizeKeyboard = true;

@@ -150,7 +150,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendMessage(chatId, BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
                     return;
                 case HelpCommand:
-                    reply = BotResponse.BotDescription;
+                    reply = BotResponse.HelpText;
                     break;
                 case SummaryCommand:
                     await HandleSummaryAsync(update);
