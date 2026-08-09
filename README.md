@@ -3,6 +3,23 @@
 What is it?
 Free telegram bot with ChatGPT integration and DALL-E without any subscriptions
 
+## Web UI (bota.chat-style)
+
+Browser chat lives in [`web/`](web/) and is served from `GPTipsBot/wwwroot`.
+
+```bash
+cd web && npm install && npm run build   # → GPTipsBot/wwwroot
+# then run the ASP.NET host; open http://localhost:5000
+```
+
+Dev with hot reload: run the API on `:5000`, then `cd web && npm run dev` (Vite proxies `/api`).
+
+Optional env: `TELEGRAM_BOT_USERNAME` for the Login Widget (defaults to `AppConfig.BotName` / `GPTipsBot`).
+
+Prod: **https://gptips.skolkokomu.ru** — см. [deploy/README.md](deploy/README.md) (COI + Caddy, без отдельного фронт-деплоя).
+
+MVP: guest cookie sessions, Telegram Login (shared wallet), streaming chat, models, image gen, OCR, voice STT, RU/EN.
+
 * Board: https://trello.com/b/hyydi02P/chatgtp-telegram-bot
 * Telegram bot:
   * PROD https://t.me/GPTipsBot
@@ -150,12 +167,15 @@ cat /home/app/backup/full_backup_$DATE.sql | docker exec -i gptipsbot-bd psql -U
 ```
 
 ## Deploy
+
+Прод-чеклист (образ → Watchtower/COI → Caddy → web): **[deploy/README.md](deploy/README.md)**.
+
 * `docker login -u alanextar`
 * Пароль тут [DOCKER_HUB_ALANEXTAR](https://github.com/organizations/TarasovMilkovNazarov/settings/variables/actions)
 * `docker build -t alanextar/gptipsbot:latest -t alanextar/gptipsbot:%НоваяВерсию% .`
 * `docker image push alanextar/gptipsbot`
 * `docker image push alanextar/gptipsbot:%НоваяВерсию%`
-
+* Или push в ветку `release` — GitHub Actions соберёт образ **вместе с web UI**
 ### Tips
 #### 
 

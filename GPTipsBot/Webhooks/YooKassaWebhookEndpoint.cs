@@ -21,11 +21,9 @@ public static class YooKassaWebhookEndpoint
 
     public static void MapYooKassaWebhook(this WebApplication app)
     {
-        app.MapGet("/", () => Results.Ok("GPTipsBot"));
         app.MapGet("/health", () => Results.Ok("ok"));
         app.MapMethods("/webhooks/yookassa", ["GET", "HEAD"], () => Results.Ok("yookassa webhook ready"));
         app.MapPost("/webhooks/yookassa", HandleAsync);
-        app.MapFallback(() => Results.NotFound("not found"));
     }
 
     private static async Task<IResult> HandleAsync(

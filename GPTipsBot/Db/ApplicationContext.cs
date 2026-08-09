@@ -1,6 +1,8 @@
 ﻿using GPTipsBot.Config;
 using GPTipsBot.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GPTipsBot.Db
 {
@@ -19,7 +21,7 @@ namespace GPTipsBot.Db
 
         public ApplicationContext()
         {
-            Database.EnsureCreated();
+            EnsureAppSchema();
             EnsureYooKassaInvoiceColumns();
             EnsureFreePhotoAnimationsColumn();
             EnsureFreeSummaryRequestsColumn();
@@ -32,6 +34,24 @@ namespace GPTipsBot.Db
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(AppConfig.ConnectionString);
+        }
+
+        /// <summary>
+        /// EnsureCreated skips when any tables exist (e.g. Quartz). Create EF tables if missing.
+        /// </summary>
+        private void EnsureAppSchema()
+        {
+            Database.EnsureCreated();
+
+            try
+            {
+                _ = Users.AsNoTracking().Any();
+            }
+            catch
+            {
+                var creator = Database.GetService<IRelationalDatabaseCreator>();
+                creator.CreateTables();
+            }
         }
 
         /// <summary>

@@ -1,3 +1,11 @@
+FROM node:20-alpine AS web
+WORKDIR /web
+COPY web/package.json web/package-lock.json* ./
+RUN npm install
+COPY web/ ./
+ENV OUT_DIR=/web-dist
+RUN npm run build
+
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
@@ -9,6 +17,7 @@ RUN dotnet restore OpenAI.SDK/OpenAI.csproj
 
 COPY GPTipsBot/. ./GPTipsBot/
 COPY OpenAI.SDK/. ./OpenAI.SDK/
+COPY --from=web /web-dist ./GPTipsBot/wwwroot
 WORKDIR /src/GPTipsBot
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false --no-restore
 

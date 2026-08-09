@@ -1,0 +1,66 @@
+export type Lang = 'en' | 'ru'
+
+const dict = {
+  en: {
+    howCanIHelp: 'How can I help you?',
+    typeMessage: 'Type a message...',
+    newChat: 'New chat',
+    createImage: 'Create image',
+    talkByVoice: 'Talk by voice',
+    ocr: 'Extract text',
+    translate: 'Translate',
+    searchWeb: 'Search the web',
+    createImages: 'Create images',
+    quickTasks: 'Quick tasks',
+    login: 'Login with Telegram',
+    logout: 'Log out',
+    guest: 'Guest',
+    stars: 'Stars',
+    freeGpt: 'Free GPT',
+    model: 'Model',
+    history: 'Chats',
+    sending: 'Thinking…',
+    recording: 'Recording… stop to send',
+    imagePrompt: 'Describe the image…',
+    generate: 'Generate',
+    seoTitle: 'Free AI Chat Bot — Talk to a Smart AI Assistant Online',
+    seoBody:
+      'GPTipsBot is a free AI chat you can use in the browser. Sign in with Telegram to sync your Stars balance from the bot, or start as a guest.',
+    noHistory: 'No chats yet',
+    stop: 'Stop',
+    attach: 'Attach',
+  },
+  ru: {
+    howCanIHelp: 'Чем могу помочь?',
+    typeMessage: 'Напишите сообщение...',
+    newChat: 'Новый чат',
+    createImage: 'Создать изображение',
+    talkByVoice: 'Голосом',
+    ocr: 'Распознать текст',
+    translate: 'Перевести',
+    searchWeb: 'Поиск в интернете',
+    createImages: 'Создание изображений',
+    quickTasks: 'Быстрые задачи',
+    login: 'Войти через Telegram',
+    logout: 'Выйти',
+    guest: 'Гость',
+    stars: 'Звёзды',
+    freeGpt: 'Бесплатно GPT',
+    model: 'Модель',
+    history: 'Чаты',
+    sending: 'Думаю…',
+    recording: 'Запись… остановите, чтобы отправить',
+    imagePrompt: 'Опишите изображение…',
+    generate: 'Сгенерировать',
+    seoTitle: 'Бесплатный AI-чат — умный ассистент онлайн',
+    seoBody:
+      'GPTipsBot — бесплатный AI-чат в браузере. Войдите через Telegram, чтобы синхронизировать баланс Stars с ботом, или начните как гость.',
+    noHistory: 'Пока нет чатов',
+    stop: 'Стоп',
+    attach: 'Файл',
+  },
+} as const
+
+export function t(lang: Lang, key: keyof (typeof dict)['en']): string {
+  return dict[lang][key]
+}

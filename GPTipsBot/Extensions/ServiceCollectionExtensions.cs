@@ -93,6 +93,9 @@ namespace GPTipsBot.Extensions
             .AddScoped<ContextWindow>()
             .AddRepositories()
             .AddScoped<MoneyService>()
+            .AddScoped<GPTipsBot.Web.WebUserService>()
+            .AddScoped<GPTipsBot.Web.WebChatService>()
+            .AddScoped<GPTipsBot.Web.WebMediaService>()
             .AddSingleton<ITelegramBotClient>(_ =>
             {
                 // Отдельный HttpClient: HappHttpClient OpenAI мутирует BaseAddress/headers.

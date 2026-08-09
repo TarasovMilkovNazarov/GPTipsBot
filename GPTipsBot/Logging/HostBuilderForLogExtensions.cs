@@ -28,9 +28,13 @@ public static class HostBuilderForLogExtensions
     
             if (ctx.HostingEnvironment.IsProduction())
             {
-                var elasticUrl = ctx.Configuration["Elastic:Url"] ?? throw new InvalidOperationException("Elastic:Url не задан");
-                var esApiKey = ctx.Configuration["Elastic:ApiKey"] ?? throw new InvalidOperationException("Elastic:ApiKey не задан");
-                
+                var elasticUrl = ctx.Configuration["Elastic:Url"];
+                var esApiKey = ctx.Configuration["Elastic:ApiKey"];
+                if (string.IsNullOrWhiteSpace(elasticUrl) || string.IsNullOrWhiteSpace(esApiKey))
+                {
+                    return;
+                }
+
                 loggerConfiguration
                     .WriteTo.Elasticsearch(
                         [new Uri(elasticUrl)],
@@ -48,7 +52,7 @@ public static class HostBuilderForLogExtensions
                             };
                         },
                         transport => { transport.Authentication(new ApiKey(esApiKey)); })
-                    .WriteTo.Sink<TelegramSink>(LogEventLevel.Error);;
+                    .WriteTo.Sink<TelegramSink>(LogEventLevel.Error);
             }
         });
 }

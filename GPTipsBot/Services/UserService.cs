@@ -267,6 +267,11 @@ namespace GPTipsBot.Services
 
         private void UserCreatedEventHandler(object? sender, User user)
         {
+            if (user.Source is Web.WebAuthConstants.GuestSource or Web.WebAuthConstants.TelegramSource)
+            {
+                return;
+            }
+
             var fullName = user.FirstName;
             fullName += user.LastName == null ? "" : $" {user.LastName}";
 

@@ -11,10 +11,10 @@ namespace GPTipsBot.Repositories
     {
         private readonly ILogger<MessageRepository> _logger = logger;
 
-        public async Task<Message> AddAsync(MessageDto messageDto, Message? replyTo = null)
+        public async Task<Message> AddAsync(MessageDto messageDto, Message? replyTo = null, long? forceContextId = null)
         {
-            var contextId = messageDto is { ContextBound: true, NewContext: false } ?
-                GetLastContext(messageDto.UserId, messageDto.ChatId) : null;
+            var contextId = forceContextId ?? (messageDto is { ContextBound: true, NewContext: false } ?
+                GetLastContext(messageDto.UserId, messageDto.ChatId) : null);
 
             var newMessage = new Message()
             {
@@ -105,5 +105,58 @@ namespace GPTipsBot.Repositories
                 .Take(limit)
                 .ToList();
         }
+
+        public List<ConversationListItem> ListConversations(long userId, long chatId, int limit = 50)
+        {
+            var messages = context.Messages.AsNoTracking()
+                .Where(m => m.UserId == userId
+                            && m.ChatId == chatId
+                            && m.ContextId != null
+                            && m.ContextBound)
+                .OrderByDescending(m => m.CreatedAt)
+                .Take(500)
+                .ToList();
+
+            return messages
+                .GroupBy(m => m.ContextId!.Value)
+                .Select(g =>
+                {
+                    var firstUser = g
+                        .Where(x => x.Role == Enums.MessageOwner.User && !string.IsNullOrWhiteSpace(x.Text))
+                        .OrderBy(x => x.CreatedAt)
+                        .FirstOrDefault();
+                    return new ConversationListItem(
+                        g.Key,
+                        TruncateTitle(firstUser?.Text),
+                        g.Max(x => x.CreatedAt));
+                })
+                .OrderByDescending(x => x.UpdatedAt)
+                .Take(limit)
+                .ToList();
+        }
+
+        public List<Message> GetConversationMessages(long userId, long chatId, long contextId)
+        {
+            return context.Messages.AsNoTracking()
+                .Where(m => m.UserId == userId
+                            && m.ChatId == chatId
+                            && m.ContextId == contextId
+                            && m.ContextBound)
+                .OrderBy(m => m.CreatedAt)
+                .ToList();
+        }
+
+        private static string TruncateTitle(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return "New chat";
+            }
+
+            text = text.Trim();
+            return text.Length <= 60 ? text : text[..57] + "...";
+        }
     }
+
+    public sealed record ConversationListItem(long ContextId, string Title, DateTime UpdatedAt);
 }
