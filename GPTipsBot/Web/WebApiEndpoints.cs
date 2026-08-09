@@ -751,10 +751,14 @@ public static class WebApiEndpoints
         var db = http.RequestServices.GetRequiredService<ApplicationContext>();
         var profile = await users.GetUserProfile(userId);
         var dbUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == userId);
+        // Derive from account, not cookie claims — SignInAsync does not update HttpContext.User
+        // until the next request, so claim-based isGuest stays wrong right after login/confirm.
+        var isGuest = userId < 0 ||
+                      string.Equals(dbUser?.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal);
         return new
         {
             id = userId,
-            isGuest = WebUserService.IsGuest(http) || userId < 0,
+            isGuest,
             firstName = profile.FirstName,
             lastName = profile.LastName,
             email = dbUser?.Email,

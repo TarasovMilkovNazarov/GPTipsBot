@@ -61,6 +61,7 @@ export default function App() {
   const [payingStars, setPayingStars] = useState<number | null>(null)
   const [paymentNotice, setPaymentNotice] = useState<'success' | 'pending' | 'failed' | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
+  const [authView, setAuthView] = useState<'method' | 'telegram' | 'email'>('method')
   const [authTab, setAuthTab] = useState<'login' | 'register' | 'confirm'>('login')
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
@@ -187,7 +188,10 @@ export default function App() {
         })
         localStorage.removeItem('gptips_guest_id')
         setMe(profile)
-        await refreshConversations()
+        setAuthOpen(false)
+        setAuthView('method')
+        setError(null)
+        window.location.reload()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Telegram login failed')
       }
@@ -198,20 +202,29 @@ export default function App() {
   }, [refreshConversations])
 
   useEffect(() => {
-    const existing = document.getElementById('telegram-login-script')
-    if (existing) existing.remove()
+    if (!authOpen || authView !== 'telegram') return
+    const host = document.getElementById('tg-login-host')
+    if (!host) return
+    host.innerHTML = ''
     const script = document.createElement('script')
     script.id = 'telegram-login-script'
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
     script.async = true
     script.setAttribute('data-telegram-login', botUsername)
-    script.setAttribute('data-size', 'medium')
+    script.setAttribute('data-size', 'large')
     script.setAttribute('data-radius', '18')
     script.setAttribute('data-onauth', 'onTelegramAuth(user)')
     script.setAttribute('data-request-access', 'write')
-    const host = document.getElementById('tg-login-host')
-    host?.appendChild(script)
-  }, [botUsername, me?.isGuest])
+    host.appendChild(script)
+  }, [authOpen, authView, botUsername])
+
+  function openAuth(view: 'method' | 'telegram' | 'email' = 'method') {
+    setAuthOpen(true)
+    setAuthView(view)
+    setAuthTab('login')
+    setAuthHint(null)
+    setError(null)
+  }
 
   const preferredModel = useMemo(
     () => models.find((m) => m.id === me?.model.id) ?? models[0],
@@ -457,6 +470,7 @@ export default function App() {
 
   async function startTopUp(stars: number) {
     if (!me || me.isGuest) {
+      openAuth('method')
       setError(t(lang, 'loginToTopUp'))
       return
     }
@@ -502,10 +516,13 @@ export default function App() {
     localStorage.removeItem('gptips_guest_id')
     setMe(profile)
     setAuthOpen(false)
+    setAuthView('method')
     setAuthPassword('')
     setAuthCode('')
     setAuthHint(null)
-    await refreshConversations()
+    setError(null)
+    // Full reload so cookie session + topbar match the signed-in user.
+    window.location.reload()
   }
 
   async function submitEmailLogin() {
@@ -519,6 +536,7 @@ export default function App() {
       const message = e instanceof Error ? e.message : 'Login failed'
       setError(message)
       if (message.toLowerCase().includes('not confirmed')) {
+        setAuthView('email')
         setAuthTab('confirm')
       }
     } finally {
@@ -635,12 +653,9 @@ export default function App() {
               </>
             )}
             {me?.isGuest ? (
-              <>
-                <button className="pill" type="button" onClick={() => { setAuthOpen(true); setAuthTab('login'); setError(null) }}>
-                  {t(lang, 'emailAuth')}
-                </button>
-                <div id="tg-login-host" />
-              </>
+              <button className="pill primary" type="button" onClick={() => openAuth('method')}>
+                {t(lang, 'login')}
+              </button>
             ) : (
               <button className="pill" type="button" onClick={logout}>
                 {t(lang, 'logout')}
@@ -652,93 +667,125 @@ export default function App() {
         {authOpen && (
           <div className="auth-backdrop" onClick={() => !authBusy && setAuthOpen(false)}>
             <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="auth-tabs">
-                <button
-                  type="button"
-                  className={authTab === 'login' ? 'active' : ''}
-                  onClick={() => setAuthTab('login')}
-                >
-                  {t(lang, 'emailLogin')}
-                </button>
-                <button
-                  type="button"
-                  className={authTab === 'register' ? 'active' : ''}
-                  onClick={() => setAuthTab('register')}
-                >
-                  {t(lang, 'emailRegister')}
-                </button>
-                <button
-                  type="button"
-                  className={authTab === 'confirm' ? 'active' : ''}
-                  onClick={() => setAuthTab('confirm')}
-                >
-                  {t(lang, 'emailConfirm')}
-                </button>
+              <div className="auth-modal-head">
+                <h2>{t(lang, 'authTitle')}</h2>
+                {authView !== 'method' && (
+                  <button className="ghost" type="button" onClick={() => { setAuthView('method'); setAuthHint(null); setError(null) }}>
+                    {t(lang, 'authBack')}
+                  </button>
+                )}
               </div>
 
-              {(authTab === 'login' || authTab === 'register') && (
-                <div className="auth-form">
-                  {authTab === 'register' && (
-                    <input
-                      value={authName}
-                      onChange={(e) => setAuthName(e.target.value)}
-                      placeholder={t(lang, 'namePlaceholder')}
-                      autoComplete="name"
-                    />
-                  )}
-                  <input
-                    type="email"
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    placeholder={t(lang, 'emailPlaceholder')}
-                    autoComplete="email"
-                  />
-                  <input
-                    type="password"
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    placeholder={t(lang, 'passwordPlaceholder')}
-                    autoComplete={authTab === 'login' ? 'current-password' : 'new-password'}
-                  />
-                  <button
-                    className="primary"
-                    type="button"
-                    disabled={authBusy || !authEmail.trim() || authPassword.length < 6}
-                    onClick={() => void (authTab === 'login' ? submitEmailLogin() : submitEmailRegister())}
-                  >
-                    {authTab === 'login' ? t(lang, 'emailLogin') : t(lang, 'sendCode')}
+              {authView === 'method' && (
+                <div className="auth-methods">
+                  <p className="auth-choose">{t(lang, 'authChoose')}</p>
+                  <button className="auth-method telegram" type="button" onClick={() => setAuthView('telegram')}>
+                    {t(lang, 'authViaTelegram')}
+                  </button>
+                  <button className="auth-method email" type="button" onClick={() => { setAuthView('email'); setAuthTab('login') }}>
+                    {t(lang, 'authViaEmail')}
                   </button>
                 </div>
               )}
 
-              {authTab === 'confirm' && (
-                <div className="auth-form">
-                  <input
-                    type="email"
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    placeholder={t(lang, 'emailPlaceholder')}
-                    autoComplete="email"
-                  />
-                  <input
-                    value={authCode}
-                    onChange={(e) => setAuthCode(e.target.value)}
-                    placeholder={t(lang, 'codePlaceholder')}
-                    inputMode="numeric"
-                    maxLength={6}
-                  />
-                  <button
-                    className="primary"
-                    type="button"
-                    disabled={authBusy || !authEmail.trim() || authCode.trim().length < 4}
-                    onClick={() => void submitEmailConfirm()}
-                  >
-                    {t(lang, 'confirmCode')}
-                  </button>
-                  <button className="ghost" type="button" disabled={authBusy || !authEmail.trim()} onClick={() => void resendEmailCode()}>
-                    {t(lang, 'resendCode')}
-                  </button>
+              {authView === 'telegram' && (
+                <div className="auth-telegram">
+                  <p className="auth-choose">{t(lang, 'authViaTelegram')}</p>
+                  <div id="tg-login-host" className="tg-login-host" />
                 </div>
+              )}
+
+              {authView === 'email' && (
+                <>
+                  <div className="auth-tabs">
+                    <button
+                      type="button"
+                      className={authTab === 'login' ? 'active' : ''}
+                      onClick={() => setAuthTab('login')}
+                    >
+                      {t(lang, 'emailLogin')}
+                    </button>
+                    <button
+                      type="button"
+                      className={authTab === 'register' ? 'active' : ''}
+                      onClick={() => setAuthTab('register')}
+                    >
+                      {t(lang, 'emailRegister')}
+                    </button>
+                    <button
+                      type="button"
+                      className={authTab === 'confirm' ? 'active' : ''}
+                      onClick={() => setAuthTab('confirm')}
+                    >
+                      {t(lang, 'emailConfirm')}
+                    </button>
+                  </div>
+
+                  {(authTab === 'login' || authTab === 'register') && (
+                    <div className="auth-form">
+                      {authTab === 'register' && (
+                        <input
+                          value={authName}
+                          onChange={(e) => setAuthName(e.target.value)}
+                          placeholder={t(lang, 'namePlaceholder')}
+                          autoComplete="name"
+                        />
+                      )}
+                      <input
+                        type="email"
+                        value={authEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        placeholder={t(lang, 'emailPlaceholder')}
+                        autoComplete="email"
+                      />
+                      <input
+                        type="password"
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        placeholder={t(lang, 'passwordPlaceholder')}
+                        autoComplete={authTab === 'login' ? 'current-password' : 'new-password'}
+                      />
+                      <button
+                        className="primary"
+                        type="button"
+                        disabled={authBusy || !authEmail.trim() || authPassword.length < 6}
+                        onClick={() => void (authTab === 'login' ? submitEmailLogin() : submitEmailRegister())}
+                      >
+                        {authTab === 'login' ? t(lang, 'emailLogin') : t(lang, 'sendCode')}
+                      </button>
+                    </div>
+                  )}
+
+                  {authTab === 'confirm' && (
+                    <div className="auth-form">
+                      <input
+                        type="email"
+                        value={authEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        placeholder={t(lang, 'emailPlaceholder')}
+                        autoComplete="email"
+                      />
+                      <input
+                        value={authCode}
+                        onChange={(e) => setAuthCode(e.target.value)}
+                        placeholder={t(lang, 'codePlaceholder')}
+                        inputMode="numeric"
+                        maxLength={6}
+                      />
+                      <button
+                        className="primary"
+                        type="button"
+                        disabled={authBusy || !authEmail.trim() || authCode.trim().length < 4}
+                        onClick={() => void submitEmailConfirm()}
+                      >
+                        {t(lang, 'confirmCode')}
+                      </button>
+                      <button className="ghost" type="button" disabled={authBusy || !authEmail.trim()} onClick={() => void resendEmailCode()}>
+                        {t(lang, 'resendCode')}
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
 
               {authHint && <div className="auth-hint">{authHint}</div>}
@@ -912,7 +959,12 @@ export default function App() {
                   )}
 
                   {me?.isGuest ? (
-                    <div className="cabinet-hint">{t(lang, 'loginToTopUp')}</div>
+                    <div className="auth-methods">
+                      <div className="cabinet-hint">{t(lang, 'loginToTopUp')}</div>
+                      <button className="primary" type="button" onClick={() => openAuth('method')}>
+                        {t(lang, 'login')}
+                      </button>
+                    </div>
                   ) : !paymentInfo?.enabled ? (
                     <div className="cabinet-hint">{t(lang, 'paymentsDisabled')}</div>
                   ) : (
