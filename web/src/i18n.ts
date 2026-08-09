@@ -29,6 +29,13 @@ const dict = {
     noHistory: 'No chats yet',
     stop: 'Stop',
     attach: 'Attach',
+    rename: 'Rename',
+    pinChat: 'Pin chat',
+    unpinChat: 'Unpin chat',
+    deleteChat: 'Delete',
+    renamePrompt: 'Enter a new name',
+    deleteConfirm: 'Delete this chat?',
+    chatMenu: 'Chat options',
   },
   ru: {
     howCanIHelp: 'Чем могу помочь?',
@@ -58,6 +65,13 @@ const dict = {
     noHistory: 'Пока нет чатов',
     stop: 'Стоп',
     attach: 'Файл',
+    rename: 'Переименовать',
+    pinChat: 'Закрепить',
+    unpinChat: 'Открепить',
+    deleteChat: 'Удалить',
+    renamePrompt: 'Введите новое название',
+    deleteConfirm: 'Удалить этот чат?',
+    chatMenu: 'Действия с чатом',
   },
 } as const
 

@@ -16,7 +16,7 @@ export type GptModel = {
   emoji: string
 }
 
-export type Conversation = { id: number; title: string; updatedAt: string }
+export type Conversation = { id: number; title: string; updatedAt: string; pinned?: boolean }
 
 export type ChatMessage = {
   id?: number
@@ -78,6 +78,28 @@ export const api = {
     fetch(`/api/conversations/${id}`, { credentials: 'include' }).then((r) =>
       json<{ id: number; messages: { id: number; role: string; text: string }[] }>(r),
     ),
+
+  renameConversation: (id: number, title: string) =>
+    fetch(`/api/conversations/${id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+    }).then((r) => json<Conversation>(r)),
+
+  pinConversation: (id: number, pinned: boolean) =>
+    fetch(`/api/conversations/${id}/pin`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pinned }),
+    }).then((r) => json<Conversation>(r)),
+
+  deleteConversation: (id: number) =>
+    fetch(`/api/conversations/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    }).then((r) => json<{ ok: boolean }>(r)),
 
   publicConfig: () =>
     fetch('/api/config/public', { credentials: 'include' }).then((r) =>

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using GPTipsBot.Config;
 using GPTipsBot.Db;
+using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
 using Microsoft.AspNetCore.Builder;
@@ -23,6 +24,9 @@ public static class WebApiEndpoints
         api.MapPut("/models/preferred", SetPreferredModelAsync);
         api.MapGet("/conversations", ListConversationsAsync);
         api.MapGet("/conversations/{contextId:long}", GetConversationAsync);
+        api.MapPatch("/conversations/{contextId:long}", RenameConversationAsync);
+        api.MapPost("/conversations/{contextId:long}/pin", PinConversationAsync);
+        api.MapDelete("/conversations/{contextId:long}", DeleteConversationAsync);
         api.MapPost("/chat", ChatAsync);
         api.MapPost("/images/generate", GenerateImageAsync);
         api.MapPost("/ocr", OcrAsync);
@@ -45,6 +49,7 @@ public static class WebApiEndpoints
         var lang = http.Request.Headers.AcceptLanguage.ToString();
         var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
         var (user, isGuest) = await webUsers.EnsureGuestAsync(language);
+        await webUsers.RecordLoginAsync(user.Id, AuthProvider.Guest);
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
     }
@@ -71,6 +76,7 @@ public static class WebApiEndpoints
         var lang = http.Request.Headers.AcceptLanguage.ToString();
         var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
         var (user, isGuest) = await webUsers.EnsureTelegramUserAsync(payload, language);
+        await webUsers.RecordLoginAsync(user.Id, AuthProvider.Telegram);
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
     }
@@ -156,6 +162,7 @@ public static class WebApiEndpoints
             id = c.ContextId,
             title = c.Title,
             updatedAt = c.UpdatedAt,
+            pinned = c.IsPinned,
         }));
     }
 
@@ -172,6 +179,11 @@ public static class WebApiEndpoints
         }
 
         var items = messages.GetConversationMessages(userId.Value, userId.Value, contextId);
+        if (items.Count == 0)
+        {
+            return Results.NotFound(new { message = "Conversation not found" });
+        }
+
         return Results.Ok(new
         {
             id = contextId,
@@ -184,6 +196,88 @@ public static class WebApiEndpoints
                 type = m.Type?.ToString(),
             }),
         });
+    }
+
+    private static async Task<IResult> RenameConversationAsync(
+        long contextId,
+        HttpContext http,
+        RenameConversationRequest body,
+        WebUserService webUsers,
+        MessageRepository messages)
+    {
+        var userId = await RequireUserAsync(http, webUsers);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(body.Title))
+        {
+            return Results.BadRequest(new { message = "Title is required" });
+        }
+
+        var updated = await messages.RenameConversationAsync(userId.Value, contextId, body.Title);
+        if (updated is null)
+        {
+            return Results.NotFound(new { message = "Conversation not found" });
+        }
+
+        return Results.Ok(new
+        {
+            id = updated.ContextId,
+            title = updated.Title,
+            updatedAt = updated.UpdatedAt,
+            pinned = updated.IsPinned,
+        });
+    }
+
+    private static async Task<IResult> PinConversationAsync(
+        long contextId,
+        HttpContext http,
+        PinConversationRequest body,
+        WebUserService webUsers,
+        MessageRepository messages)
+    {
+        var userId = await RequireUserAsync(http, webUsers);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var updated = await messages.SetPinnedAsync(userId.Value, contextId, body.Pinned);
+        if (updated is null)
+        {
+            return Results.NotFound(new { message = "Conversation not found" });
+        }
+
+        return Results.Ok(new
+        {
+            id = updated.ContextId,
+            title = updated.Title,
+            updatedAt = updated.UpdatedAt,
+            pinned = updated.IsPinned,
+        });
+    }
+
+    private static async Task<IResult> DeleteConversationAsync(
+        long contextId,
+        HttpContext http,
+        WebUserService webUsers,
+        MessageRepository messages)
+    {
+        var userId = await RequireUserAsync(http, webUsers);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var deleted = await messages.DeleteConversationAsync(userId.Value, contextId);
+        if (!deleted)
+        {
+            return Results.NotFound(new { message = "Conversation not found" });
+        }
+
+        return Results.Ok(new { ok = true });
     }
 
     private static async Task ChatAsync(
@@ -400,6 +494,10 @@ public static class WebApiEndpoints
     public sealed record SetModelRequest(string ModelId);
 
     public sealed record ChatRequest(string? Text, bool NewConversation = false, long? ContextId = null);
+
+    public sealed record RenameConversationRequest(string? Title);
+
+    public sealed record PinConversationRequest(bool Pinned);
 
     public sealed record GenerateImageRequest(string? Prompt, string? Size, string? Quality);
 }

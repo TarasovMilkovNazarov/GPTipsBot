@@ -128,6 +128,11 @@ Free daily limits apply — see /profile. Details: /help</value>
   <data name="HelpText" xml:space="preserve">
     <value>🤖 Full guide
 
+🌐 Website
+The same ChatGPT chat and image tools are also available in the browser:
+https://gptips.skolkokomu.ru
+Sign in with Telegram — your ⭐ balance and quotas are shared with the bot.
+
 💬 Chat with AI
 Just send a text message — the bot replies using the current conversation context.
 • 💬 New chat — reset context and start fresh
@@ -199,7 +204,10 @@ Support: @my_super_ultra_smart_bot</value>
   </data>
   <data name="Greeting" xml:space="preserve">
     <value>Hello! How can I help?
-Pick an action from the menu below or just type your question.</value>
+Pick an action from the menu below or just type your question.
+
+🌐 Website with the same account and balance:
+https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
     <value>What would you like to do with an image?</value>

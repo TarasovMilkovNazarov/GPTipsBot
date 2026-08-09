@@ -117,26 +117,48 @@ namespace GPTipsBot.Repositories
                 .Take(500)
                 .ToList();
 
+            var metas = context.ConversationMetas.AsNoTracking()
+                .Where(m => m.UserId == userId)
+                .ToDictionary(m => m.ContextId);
+
             return messages
                 .GroupBy(m => m.ContextId!.Value)
                 .Select(g =>
                 {
+                    metas.TryGetValue(g.Key, out var meta);
+                    if (meta?.IsDeleted == true)
+                    {
+                        return null;
+                    }
+
                     var firstUser = g
                         .Where(x => x.Role == Enums.MessageOwner.User && !string.IsNullOrWhiteSpace(x.Text))
                         .OrderBy(x => x.CreatedAt)
                         .FirstOrDefault();
+                    var title = !string.IsNullOrWhiteSpace(meta?.CustomTitle)
+                        ? meta!.CustomTitle!.Trim()
+                        : TruncateTitle(firstUser?.Text);
                     return new ConversationListItem(
                         g.Key,
-                        TruncateTitle(firstUser?.Text),
-                        g.Max(x => x.CreatedAt));
+                        title,
+                        g.Max(x => x.CreatedAt),
+                        meta?.IsPinned == true);
                 })
-                .OrderByDescending(x => x.UpdatedAt)
+                .Where(x => x is not null)
+                .Cast<ConversationListItem>()
+                .OrderByDescending(x => x.IsPinned)
+                .ThenByDescending(x => x.UpdatedAt)
                 .Take(limit)
                 .ToList();
         }
 
         public List<Message> GetConversationMessages(long userId, long chatId, long contextId)
         {
+            if (IsConversationDeleted(userId, contextId))
+            {
+                return [];
+            }
+
             return context.Messages.AsNoTracking()
                 .Where(m => m.UserId == userId
                             && m.ChatId == chatId
@@ -144,6 +166,97 @@ namespace GPTipsBot.Repositories
                             && m.ContextBound)
                 .OrderBy(m => m.CreatedAt)
                 .ToList();
+        }
+
+        public async Task<ConversationListItem?> RenameConversationAsync(long userId, long contextId, string title)
+        {
+            if (!OwnsConversation(userId, contextId) || IsConversationDeleted(userId, contextId))
+            {
+                return null;
+            }
+
+            var trimmed = title.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                return null;
+            }
+
+            if (trimmed.Length > 80)
+            {
+                trimmed = trimmed[..80];
+            }
+
+            var meta = await GetOrCreateMetaAsync(userId, contextId);
+            meta.CustomTitle = trimmed;
+            await context.SaveChangesAsync();
+
+            return BuildListItem(userId, contextId, meta);
+        }
+
+        public async Task<ConversationListItem?> SetPinnedAsync(long userId, long contextId, bool pinned)
+        {
+            if (!OwnsConversation(userId, contextId) || IsConversationDeleted(userId, contextId))
+            {
+                return null;
+            }
+
+            var meta = await GetOrCreateMetaAsync(userId, contextId);
+            meta.IsPinned = pinned;
+            await context.SaveChangesAsync();
+
+            return BuildListItem(userId, contextId, meta);
+        }
+
+        public async Task<bool> DeleteConversationAsync(long userId, long contextId)
+        {
+            if (!OwnsConversation(userId, contextId))
+            {
+                return false;
+            }
+
+            var meta = await GetOrCreateMetaAsync(userId, contextId);
+            meta.IsDeleted = true;
+            meta.IsPinned = false;
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        private bool OwnsConversation(long userId, long contextId) =>
+            context.Messages.AsNoTracking().Any(m =>
+                m.UserId == userId && m.ContextId == contextId && m.ContextBound);
+
+        private bool IsConversationDeleted(long userId, long contextId) =>
+            context.ConversationMetas.AsNoTracking()
+                .Any(m => m.UserId == userId && m.ContextId == contextId && m.IsDeleted);
+
+        private async Task<ConversationMeta> GetOrCreateMetaAsync(long userId, long contextId)
+        {
+            var meta = await context.ConversationMetas
+                .FirstOrDefaultAsync(m => m.UserId == userId && m.ContextId == contextId);
+            if (meta is not null)
+            {
+                return meta;
+            }
+
+            meta = new ConversationMeta { UserId = userId, ContextId = contextId };
+            context.ConversationMetas.Add(meta);
+            return meta;
+        }
+
+        private ConversationListItem BuildListItem(long userId, long contextId, ConversationMeta meta)
+        {
+            var messages = context.Messages.AsNoTracking()
+                .Where(m => m.UserId == userId && m.ContextId == contextId && m.ContextBound)
+                .ToList();
+            var firstUser = messages
+                .Where(x => x.Role == Enums.MessageOwner.User && !string.IsNullOrWhiteSpace(x.Text))
+                .OrderBy(x => x.CreatedAt)
+                .FirstOrDefault();
+            var title = !string.IsNullOrWhiteSpace(meta.CustomTitle)
+                ? meta.CustomTitle!.Trim()
+                : TruncateTitle(firstUser?.Text);
+            var updatedAt = messages.Count == 0 ? DateTime.UtcNow : messages.Max(x => x.CreatedAt);
+            return new ConversationListItem(contextId, title, updatedAt, meta.IsPinned);
         }
 
         private static string TruncateTitle(string? text)
@@ -158,5 +271,5 @@ namespace GPTipsBot.Repositories
         }
     }
 
-    public sealed record ConversationListItem(long ContextId, string Title, DateTime UpdatedAt);
+    public sealed record ConversationListItem(long ContextId, string Title, DateTime UpdatedAt, bool IsPinned = false);
 }

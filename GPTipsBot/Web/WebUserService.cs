@@ -99,6 +99,17 @@ public class WebUserService(
     public Task SignOutAsync(HttpContext httpContext) =>
         httpContext.SignOutAsync(WebAuthConstants.Scheme);
 
+    public async Task RecordLoginAsync(long userId, AuthProvider provider)
+    {
+        context.AuthLoginEvents.Add(new AuthLoginEvent
+        {
+            UserId = userId,
+            Provider = provider,
+            CreatedAt = DateTimeOffset.UtcNow,
+        });
+        await context.SaveChangesAsync();
+    }
+
     private void EnsureSettings(long userId, string language)
     {
         if (botSettingsRepository.Get(userId) == null)

@@ -34,10 +34,15 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('chat')
   const [historyOpen, setHistoryOpen] = useState(false)
   const [recording, setRecording] = useState(false)
+  const [menuOpenId, setMenuOpenId] = useState<number | null>(null)
+  const [renamingId, setRenamingId] = useState<number | null>(null)
+  const [renameValue, setRenameValue] = useState('')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const skipRenameBlurRef = useRef(false)
 
   const refreshMe = useCallback(async () => {
     const profile = await api.me()
@@ -76,6 +81,24 @@ export default function App() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, busy])
+
+  useEffect(() => {
+    if (menuOpenId == null) return
+    const onPointerDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null)
+      }
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpenId(null)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [menuOpenId])
 
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
@@ -133,6 +156,7 @@ export default function App() {
   async function openConversation(id: number) {
     setBusy(true)
     setError(null)
+    setMenuOpenId(null)
     try {
       const data = await api.conversation(id)
       setContextId(id)
@@ -149,6 +173,54 @@ export default function App() {
       setError(e instanceof Error ? e.message : 'Failed to load chat')
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function renameConversation(id: number, title: string) {
+    const trimmed = title.trim()
+    if (!trimmed) return
+    try {
+      const updated = await api.renameConversation(id, trimmed)
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, title: updated.title } : c)),
+      )
+      setRenamingId(null)
+      setMenuOpenId(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Rename failed')
+    }
+  }
+
+  async function togglePin(c: Conversation) {
+    try {
+      const updated = await api.pinConversation(c.id, !c.pinned)
+      setConversations((prev) => {
+        const next = prev.map((item) =>
+          item.id === c.id ? { ...item, pinned: updated.pinned } : item,
+        )
+        return [...next].sort((a, b) => {
+          if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        })
+      })
+      setMenuOpenId(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Pin failed')
+    }
+  }
+
+  async function deleteConversation(id: number) {
+    if (!window.confirm(t(lang, 'deleteConfirm'))) return
+    try {
+      await api.deleteConversation(id)
+      setConversations((prev) => prev.filter((c) => c.id !== id))
+      if (contextId === id) {
+        setMessages([])
+        setContextId(null)
+      }
+      setMenuOpenId(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Delete failed')
     }
   }
 
@@ -340,15 +412,101 @@ export default function App() {
             <h3>{t(lang, 'history')}</h3>
             {conversations.length === 0 && <div className="stat">{t(lang, 'noHistory')}</div>}
             {conversations.map((c) => (
-              <button
+              <div
                 key={c.id}
-                type="button"
-                className={`history-item ${contextId === c.id ? 'active' : ''}`}
-                onClick={() => openConversation(c.id)}
+                className={`history-item ${contextId === c.id ? 'active' : ''} ${menuOpenId === c.id ? 'menu-open' : ''}`}
               >
-                {c.title}
-                <small>{new Date(c.updatedAt).toLocaleString()}</small>
-              </button>
+                {renamingId === c.id ? (
+                  <form
+                    className="history-rename"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      void renameConversation(c.id, renameValue)
+                    }}
+                  >
+                    <input
+                      autoFocus
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onBlur={() => {
+                        if (skipRenameBlurRef.current) {
+                          skipRenameBlurRef.current = false
+                          return
+                        }
+                        void renameConversation(c.id, renameValue)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          e.preventDefault()
+                          skipRenameBlurRef.current = true
+                          setRenamingId(null)
+                        }
+                      }}
+                      aria-label={t(lang, 'rename')}
+                    />
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    className="history-item-main"
+                    onClick={() => openConversation(c.id)}
+                  >
+                    <span className="history-title">{c.title}</span>
+                    <small>{new Date(c.updatedAt).toLocaleString()}</small>
+                  </button>
+                )}
+
+                <div className="history-item-actions" ref={menuOpenId === c.id ? menuRef : undefined}>
+                  {c.pinned && renamingId !== c.id && (
+                    <span className="history-pin-icon" aria-hidden title={t(lang, 'pinChat')}>
+                      <PinIcon />
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="history-ellipsis"
+                    aria-label={t(lang, 'chatMenu')}
+                    aria-expanded={menuOpenId === c.id}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMenuOpenId((id) => (id === c.id ? null : c.id))
+                    }}
+                  >
+                    <EllipsisIcon />
+                  </button>
+
+                  {menuOpenId === c.id && (
+                    <div className="chat-menu" role="menu">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setRenamingId(c.id)
+                          setRenameValue(c.title)
+                          setMenuOpenId(null)
+                        }}
+                      >
+                        <PencilIcon />
+                        {t(lang, 'rename')}
+                      </button>
+                      <div className="chat-menu-sep" />
+                      <button type="button" role="menuitem" onClick={() => void togglePin(c)}>
+                        <PinIcon />
+                        {c.pinned ? t(lang, 'unpinChat') : t(lang, 'pinChat')}
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="danger"
+                        onClick={() => void deleteConversation(c.id)}
+                      >
+                        <TrashIcon />
+                        {t(lang, 'deleteChat')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
           </aside>
 
@@ -538,5 +696,44 @@ export default function App() {
         }}
       />
     </div>
+  )
+}
+
+function EllipsisIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <circle cx="3" cy="8" r="1.5" />
+      <circle cx="8" cy="8" r="1.5" />
+      <circle cx="13" cy="8" r="1.5" />
+    </svg>
+  )
+}
+
+function PencilIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  )
+}
+
+function PinIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M12 17v5" />
+      <path d="M9 10.5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6.5l2.5 2.5V15H6.5v-2l2.5-2.5z" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
   )
 }
