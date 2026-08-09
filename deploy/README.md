@@ -100,7 +100,7 @@ curl -s https://gptips.skolkokomu.ru/api/config/public
 | `PG_CONNECTION_STRING` | Да (уже есть) | Shared Postgres |
 | `OPENAI_TOKEN` / `HAPP_PROXY_*` | Да (уже есть) | Как для Telegram-бота |
 | `YOOKASSA_*` | Если карта | Webhook уже на `https://gptips.skolkokomu.ru/webhooks/yookassa` |
-| `YOOKASSA_RETURN_URL` | Опционально | Можно `https://gptips.skolkokomu.ru/` вместо t.me |
+| `YOOKASSA_RETURN_URL` | Опционально | `https://gptips.skolkokomu.ru/?cabinet=1` — возврат в личный кабинет сайта |
 
 Пример фрагмента (секреты не коммитить):
 

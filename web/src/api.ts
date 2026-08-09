@@ -27,6 +27,16 @@ export type ChatMessage = {
 
 export type ImagePreset = { id: string; title: string; prompt: string }
 
+export type PaymentPackage = { stars: number; rub: string; rubPerStar: number }
+
+export type PaymentPackages = {
+  enabled: boolean
+  rubPerStar: number
+  minRub: number
+  minStars: number
+  packages: PaymentPackage[]
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = res.statusText
@@ -103,7 +113,28 @@ export const api = {
 
   publicConfig: () =>
     fetch('/api/config/public', { credentials: 'include' }).then((r) =>
-      json<{ botUsername: string; telegramLoginEnabled: boolean }>(r),
+      json<{ botUsername: string; telegramLoginEnabled: boolean; yookassaEnabled?: boolean }>(r),
+    ),
+
+  paymentPackages: () =>
+    fetch('/api/payments/packages', { credentials: 'include' }).then((r) => json<PaymentPackages>(r)),
+
+  createYooKassaPayment: (stars: number) =>
+    fetch('/api/payments/yookassa', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stars }),
+    }).then((r) =>
+      json<{ invoiceId: number; confirmationUrl: string; stars: number; rub: string }>(r),
+    ),
+
+  syncPayment: (invoiceId: number) =>
+    fetch(`/api/payments/${invoiceId}/sync`, {
+      method: 'POST',
+      credentials: 'include',
+    }).then((r) =>
+      json<{ status: string; credited: boolean; me: Me }>(r),
     ),
 
   presets: () =>

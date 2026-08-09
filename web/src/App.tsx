@@ -6,6 +6,7 @@ import {
   type GptModel,
   type ImagePreset,
   type Me,
+  type PaymentPackages,
 } from './api'
 import { t, type Lang } from './i18n'
 
@@ -15,10 +16,11 @@ declare global {
   }
 }
 
-type Mode = 'chat' | 'image' | 'ocr'
+type Mode = 'chat' | 'image' | 'ocr' | 'cabinet'
 type Theme = 'light' | 'dark'
 
 const THEME_KEY = 'gptips_theme'
+const PENDING_INVOICE_KEY = 'gptips_pending_invoice'
 
 function readStoredTheme(): Theme {
   const stored = localStorage.getItem(THEME_KEY)
@@ -55,6 +57,9 @@ export default function App() {
   const [menuOpenId, setMenuOpenId] = useState<number | null>(null)
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [paymentInfo, setPaymentInfo] = useState<PaymentPackages | null>(null)
+  const [payingStars, setPayingStars] = useState<number | null>(null)
+  const [paymentNotice, setPaymentNotice] = useState<'success' | 'pending' | 'failed' | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
@@ -79,11 +84,12 @@ export default function App() {
   useEffect(() => {
     ;(async () => {
       try {
-        const [guest, modelData, presetData, cfg] = await Promise.all([
+        const [guest, modelData, presetData, cfg, packages] = await Promise.all([
           api.ensureGuest(),
           api.models(),
           api.presets(),
           api.publicConfig(),
+          api.paymentPackages().catch(() => null),
         ])
         setMe(guest)
         if (guest.isGuest && guest.id < 0) {
@@ -94,7 +100,36 @@ export default function App() {
         setModels(modelData.models)
         setPresets(presetData)
         setBotUsername(cfg.botUsername)
+        setPaymentInfo(packages)
         await refreshConversations()
+
+        const params = new URLSearchParams(window.location.search)
+        const openCabinet = params.get('cabinet') === '1' || params.get('paid') === '1'
+        const pendingRaw = localStorage.getItem(PENDING_INVOICE_KEY)
+        const pendingId = pendingRaw ? Number(pendingRaw) : NaN
+        if (openCabinet || Number.isFinite(pendingId)) {
+          setMode('cabinet')
+        }
+        if (Number.isFinite(pendingId) && pendingId > 0 && !guest.isGuest) {
+          try {
+            const sync = await api.syncPayment(pendingId)
+            if (sync.credited) {
+              setMe(sync.me)
+              localStorage.removeItem(PENDING_INVOICE_KEY)
+              setPaymentNotice('success')
+            } else {
+              setPaymentNotice('pending')
+            }
+          } catch {
+            setPaymentNotice('pending')
+          }
+        }
+        if (openCabinet) {
+          const url = new URL(window.location.href)
+          url.searchParams.delete('cabinet')
+          url.searchParams.delete('paid')
+          window.history.replaceState({}, '', url.pathname + url.search + url.hash)
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to start session')
       }
@@ -395,10 +430,63 @@ export default function App() {
     }
     setMessages([])
     setContextId(null)
+    setMode('chat')
+    setPaymentNotice(null)
     await refreshConversations()
   }
 
-  const showHero = messages.length === 0
+  async function openCabinet() {
+    setMode('cabinet')
+    setHistoryOpen(false)
+    setError(null)
+    try {
+      setPaymentInfo(await api.paymentPackages())
+      await refreshMe()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load account')
+    }
+  }
+
+  async function startTopUp(stars: number) {
+    if (!me || me.isGuest) {
+      setError(t(lang, 'loginToTopUp'))
+      return
+    }
+    setPayingStars(stars)
+    setError(null)
+    setPaymentNotice(null)
+    try {
+      const checkout = await api.createYooKassaPayment(stars)
+      localStorage.setItem(PENDING_INVOICE_KEY, String(checkout.invoiceId))
+      window.location.href = checkout.confirmationUrl
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Payment failed')
+      setPayingStars(null)
+    }
+  }
+
+  async function checkPendingPayment() {
+    const pendingRaw = localStorage.getItem(PENDING_INVOICE_KEY)
+    const pendingId = pendingRaw ? Number(pendingRaw) : NaN
+    if (!Number.isFinite(pendingId) || pendingId <= 0) return
+    setPaymentNotice('pending')
+    try {
+      const sync = await api.syncPayment(pendingId)
+      if (sync.credited) {
+        setMe(sync.me)
+        localStorage.removeItem(PENDING_INVOICE_KEY)
+        setPaymentNotice('success')
+      } else {
+        setPaymentNotice('failed')
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Sync failed')
+      setPaymentNotice('failed')
+    }
+  }
+
+  const showHero = messages.length === 0 && mode !== 'cabinet'
+  const telegramBotUrl = `https://t.me/${botUsername.replace(/^@/, '')}`
 
   return (
     <div className="app">
@@ -409,6 +497,19 @@ export default function App() {
         <button title={t(lang, 'newChat')} onClick={startNewChat} type="button" aria-label={t(lang, 'newChat')}>
           +
         </button>
+        <button title={t(lang, 'cabinet')} onClick={() => void openCabinet()} type="button" aria-label={t(lang, 'cabinet')}>
+          ₽
+        </button>
+        <a
+          className="sidebar-link"
+          href={telegramBotUrl}
+          target="_blank"
+          rel="noreferrer"
+          title={t(lang, 'openTelegram')}
+          aria-label={t(lang, 'openTelegram')}
+        >
+          TG
+        </a>
         <div className="brand-dot">G</div>
       </aside>
 
@@ -428,13 +529,16 @@ export default function App() {
             >
               {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
+            <a className="pill telegram-link" href={telegramBotUrl} target="_blank" rel="noreferrer">
+              Telegram
+            </a>
           </div>
           <div className="topbar-right">
             {me && (
               <>
-                <span className="stat">
+                <button className="stat balance-chip" type="button" onClick={() => void openCabinet()}>
                   {me.isGuest ? t(lang, 'guest') : me.firstName} · {me.stars.toFixed(1)} {t(lang, 'stars')}
-                </span>
+                </button>
                 <span className="stat">
                   {t(lang, 'freeGpt')}: {me.free.gpt}
                 </span>
@@ -554,9 +658,101 @@ export default function App() {
           </aside>
 
           <section className="chat-pane">
+            {mode === 'cabinet' ? (
+              <div className="cabinet">
+                <div className="cabinet-head">
+                  <h1>{t(lang, 'cabinetTitle')}</h1>
+                  <button className="ghost" type="button" onClick={() => setMode('chat')}>
+                    {t(lang, 'backToChat')}
+                  </button>
+                </div>
+
+                {me && (
+                  <div className="cabinet-card">
+                    <div className="cabinet-label">{t(lang, 'balance')}</div>
+                    <div className="cabinet-balance">
+                      {me.stars.toFixed(1)} <span>{t(lang, 'stars')}</span>
+                    </div>
+                    <div className="cabinet-user">
+                      {me.isGuest ? t(lang, 'guest') : [me.firstName, me.lastName].filter(Boolean).join(' ')}
+                    </div>
+                  </div>
+                )}
+
+                {me && (
+                  <div className="cabinet-card">
+                    <h2>{t(lang, 'freeQuotas')}</h2>
+                    <div className="quota-grid">
+                      <div><strong>{me.free.gpt}</strong><span>{t(lang, 'freeGpt')}</span></div>
+                      <div><strong>{me.free.images}</strong><span>{t(lang, 'images')}</span></div>
+                      <div><strong>{me.free.ocr}</strong><span>{t(lang, 'ocr')}</span></div>
+                      <div><strong>{me.free.animations}</strong><span>{t(lang, 'animations')}</span></div>
+                      <div><strong>{me.free.summaries}</strong><span>{t(lang, 'summaries')}</span></div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="cabinet-card">
+                  <h2>{t(lang, 'topUp')}</h2>
+                  <p className="cabinet-hint">{t(lang, 'topUpHint')}</p>
+
+                  {paymentNotice === 'success' && (
+                    <div className="payment-banner ok">{t(lang, 'paymentSuccess')}</div>
+                  )}
+                  {paymentNotice === 'pending' && (
+                    <div className="payment-banner">
+                      {t(lang, 'paymentPending')}
+                      <button className="ghost" type="button" onClick={() => void checkPendingPayment()}>
+                        {t(lang, 'checkPayment')}
+                      </button>
+                    </div>
+                  )}
+                  {paymentNotice === 'failed' && (
+                    <div className="payment-banner warn">
+                      {t(lang, 'paymentFailed')}
+                      <button className="ghost" type="button" onClick={() => void checkPendingPayment()}>
+                        {t(lang, 'checkPayment')}
+                      </button>
+                    </div>
+                  )}
+
+                  {me?.isGuest ? (
+                    <div className="cabinet-hint">{t(lang, 'loginToTopUp')}</div>
+                  ) : !paymentInfo?.enabled ? (
+                    <div className="cabinet-hint">{t(lang, 'paymentsDisabled')}</div>
+                  ) : (
+                    <div className="package-grid">
+                      {paymentInfo.packages.map((p) => (
+                        <button
+                          key={p.stars}
+                          type="button"
+                          className="package-card"
+                          disabled={payingStars !== null}
+                          onClick={() => void startTopUp(p.stars)}
+                        >
+                          <strong>{p.stars} {t(lang, 'stars')}</strong>
+                          <span>{p.rub} ₽</span>
+                          <em>{payingStars === p.stars ? t(lang, 'paying') : t(lang, 'pay')}</em>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {error && <div className="error">{error}</div>}
+
+                <a className="pill telegram-link cabinet-telegram" href={telegramBotUrl} target="_blank" rel="noreferrer">
+                  {t(lang, 'openTelegram')} · @{botUsername.replace(/^@/, '')}
+                </a>
+              </div>
+            ) : (
+              <>
             {showHero && (
               <div className="hero">
                 <h1>{t(lang, 'howCanIHelp')}</h1>
+                <a className="pill telegram-link hero-telegram" href={telegramBotUrl} target="_blank" rel="noreferrer">
+                  {t(lang, 'openTelegram')}
+                </a>
               </div>
             )}
 
@@ -662,6 +858,9 @@ export default function App() {
                 >
                   {t(lang, 'translate')}
                 </button>
+                <button className="pill" type="button" onClick={() => void openCabinet()}>
+                  {t(lang, 'cabinet')}
+                </button>
               </div>
             </div>
 
@@ -721,6 +920,8 @@ export default function App() {
                   <h2>{t(lang, 'seoTitle')}</h2>
                   <p>{t(lang, 'seoBody')}</p>
                 </section>
+              </>
+            )}
               </>
             )}
           </section>

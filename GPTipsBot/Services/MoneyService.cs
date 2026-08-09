@@ -22,6 +22,13 @@ public enum PaymentConfirmResult
     DonateConfirmed
 }
 
+public sealed record YooKassaCheckoutResult(
+    long InvoiceId,
+    string ConfirmationUrl,
+    int Stars,
+    string RubAmount,
+    string ExternalPaymentId);
+
 public static class PaymentCallbacks
 {
     public const string StarsPrefix = "pay_stars_";
@@ -268,6 +275,42 @@ public class MoneyService
             return;
         }
 
+        var checkout = await CreateYooKassaCheckoutAsync(userId, starsCount, returnUrl: null, cancellationToken);
+        await SendYooKassaPaymentLinkAsync(
+            userId,
+            starsCount,
+            checkout.RubAmount,
+            checkout.ConfirmationUrl,
+            checkout.InvoiceId,
+            cancellationToken);
+        _logger.LogInformation(
+            "CreateYooKassa: link sent to userId={UserId} invoiceId={InvoiceId} paymentId={PaymentId}",
+            userId,
+            checkout.InvoiceId,
+            checkout.ExternalPaymentId);
+    }
+
+    /// <summary>
+    /// Creates a YooKassa redirect payment and returns the confirmation URL (shared by bot + web).
+    /// </summary>
+    public async Task<YooKassaCheckoutResult> CreateYooKassaCheckoutAsync(
+        long userId,
+        int starsCount,
+        string? returnUrl,
+        CancellationToken cancellationToken)
+    {
+        if (!YooKassaConfig.IsEnabled)
+        {
+            throw new InvalidOperationException("YooKassa is not configured");
+        }
+
+        if (starsCount < PaymentConfig.MinRechargeStars ||
+            ToKopecks(starsCount) < PaymentConfig.MinRechargeRub * 100L)
+        {
+            throw new InvalidOperationException(
+                $"Minimum YooKassa top-up is {PaymentConfig.MinRechargeRub} RUB");
+        }
+
         var fiatKopecks = ToKopecks(starsCount);
         var invoice = new Invoice
         {
@@ -287,10 +330,13 @@ public class MoneyService
             fiatKopecks);
 
         var rubValue = (fiatKopecks / 100m).ToString("0.00", CultureInfo.InvariantCulture);
+        var effectiveReturnUrl = string.IsNullOrWhiteSpace(returnUrl)
+            ? YooKassaConfig.ReturnUrl
+            : returnUrl.Trim();
         _logger.LogInformation(
             "CreateYooKassa: calling API amount={Amount} returnUrl={ReturnUrl} idempotence=invoice-{InvoiceId}",
             rubValue,
-            YooKassaConfig.ReturnUrl,
+            effectiveReturnUrl,
             invoice.Id);
 
         var payment = await _yooKassaClient.CreatePaymentAsync(
@@ -305,7 +351,7 @@ public class MoneyService
                 Confirmation = new YooKassaConfirmationRequest
                 {
                     Type = "redirect",
-                    ReturnUrl = YooKassaConfig.ReturnUrl
+                    ReturnUrl = effectiveReturnUrl
                 },
                 Description = string.Format(BotResponse.YooKassaPaymentDescription, starsCount),
                 Metadata = new Dictionary<string, string>
@@ -338,12 +384,11 @@ public class MoneyService
                 setters => setters.SetProperty(i => i.ExternalPaymentId, payment.Id),
                 cancellationToken);
 
-        await SendYooKassaPaymentLinkAsync(
-            userId, starsCount, rubValue, payment.Confirmation.ConfirmationUrl, invoice.Id, cancellationToken);
-        _logger.LogInformation(
-            "CreateYooKassa: link sent to userId={UserId} invoiceId={InvoiceId} paymentId={PaymentId}",
-            userId,
+        return new YooKassaCheckoutResult(
             invoice.Id,
+            payment.Confirmation.ConfirmationUrl,
+            starsCount,
+            rubValue,
             payment.Id);
     }
 

@@ -34,6 +34,9 @@ public static class WebApiEndpoints
         api.MapPost("/stt", SttAsync);
         api.MapGet("/presets/images", () => Results.Ok(ImagePresets.All));
         api.MapGet("/config/public", GetPublicConfigAsync);
+        api.MapGet("/payments/packages", GetPaymentPackagesAsync);
+        api.MapPost("/payments/yookassa", CreateYooKassaPaymentAsync);
+        api.MapPost("/payments/{invoiceId:long}/sync", SyncPaymentAsync);
     }
 
     private static async Task<IResult> EnsureGuestAsync(
@@ -461,7 +464,132 @@ public static class WebApiEndpoints
         {
             botUsername,
             telegramLoginEnabled = !string.IsNullOrWhiteSpace(AppConfig.TelegramToken),
+            yookassaEnabled = YooKassaConfig.IsEnabled,
         });
+    }
+
+    private static IResult GetPaymentPackagesAsync()
+    {
+        var packages = PaymentConfig.DepositStarPackages
+            .Where(stars =>
+                stars >= PaymentConfig.MinRechargeStars &&
+                MoneyService.ToKopecks(stars) >= PaymentConfig.MinRechargeRub * 100L)
+            .Select(stars => new
+            {
+                stars,
+                rub = MoneyService.FormatRubAmount(stars),
+                rubPerStar = YooKassaConfig.RubPerStar,
+            })
+            .ToList();
+
+        return Results.Ok(new
+        {
+            enabled = YooKassaConfig.IsEnabled,
+            rubPerStar = YooKassaConfig.RubPerStar,
+            minRub = PaymentConfig.MinRechargeRub,
+            minStars = PaymentConfig.MinRechargeStars,
+            packages,
+        });
+    }
+
+    private static async Task<IResult> CreateYooKassaPaymentAsync(
+        HttpContext http,
+        CreateYooKassaWebRequest body,
+        MoneyService money)
+    {
+        var userId = RequireTelegramUser(http);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (!YooKassaConfig.IsEnabled)
+        {
+            return Results.BadRequest(new { message = "YooKassa is not configured" });
+        }
+
+        if (body.Stars < PaymentConfig.MinRechargeStars)
+        {
+            return Results.BadRequest(new
+            {
+                message = $"Minimum top-up is {PaymentConfig.MinRechargeStars} Stars ({PaymentConfig.MinRechargeRub} RUB)",
+            });
+        }
+
+        try
+        {
+            var returnUrl = BuildCabinetReturnUrl(http);
+            var checkout = await money.CreateYooKassaCheckoutAsync(
+                userId.Value,
+                body.Stars,
+                returnUrl,
+                http.RequestAborted);
+
+            return Results.Ok(new
+            {
+                invoiceId = checkout.InvoiceId,
+                confirmationUrl = checkout.ConfirmationUrl,
+                stars = checkout.Stars,
+                rub = checkout.RubAmount,
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> SyncPaymentAsync(
+        long invoiceId,
+        HttpContext http,
+        WebUserService webUsers,
+        MoneyService money)
+    {
+        var userId = RequireTelegramUser(http);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await money.SyncYooKassaInvoiceAsync(invoiceId, userId.Value, http.RequestAborted);
+        var profile = await BuildMeAsync(userId.Value, webUsers, http);
+        return Results.Ok(new
+        {
+            status = result.ToString(),
+            credited = result == PaymentConfirmResult.DepositCredited,
+            me = profile,
+        });
+    }
+
+    private static string BuildCabinetReturnUrl(HttpContext http)
+    {
+        var configured = YooKassaConfig.ReturnUrl;
+        // Prefer configured site URL; append cabinet marker for frontend polling.
+        if (configured.Contains("t.me/", StringComparison.OrdinalIgnoreCase))
+        {
+            var request = http.Request;
+            var origin = $"{request.Scheme}://{request.Host}";
+            return $"{origin}/?cabinet=1";
+        }
+
+        var separator = configured.Contains('?', StringComparison.Ordinal) ? "&" : "?";
+        if (configured.Contains("cabinet=", StringComparison.OrdinalIgnoreCase))
+        {
+            return configured;
+        }
+
+        return $"{configured.TrimEnd('/')}{separator}cabinet=1";
+    }
+
+    private static long? RequireTelegramUser(HttpContext http)
+    {
+        var userId = WebUserService.TryGetUserId(http);
+        if (userId is null || userId < 0 || WebUserService.IsGuest(http))
+        {
+            return null;
+        }
+
+        return userId;
     }
 
     private static async Task<long?> RequireUserAsync(HttpContext http, WebUserService webUsers)
@@ -516,6 +644,8 @@ public static class WebApiEndpoints
         long AuthDate,
         string? Hash,
         long? PreviousGuestId = null);
+
+    public sealed record CreateYooKassaWebRequest(int Stars);
 
     public sealed record SetModelRequest(string ModelId);
 
