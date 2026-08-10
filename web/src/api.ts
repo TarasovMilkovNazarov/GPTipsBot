@@ -41,6 +41,8 @@ export type PaymentPackages = {
   packages: PaymentPackage[]
 }
 
+import { getVisitorId } from './fingerprint'
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = res.statusText
@@ -56,9 +58,18 @@ async function json<T>(res: Response): Promise<T> {
 }
 
 export const api = {
-  ensureGuest: () =>
-    fetch('/api/auth/guest', { method: 'POST', credentials: 'include' }).then((r) => json<Me>(r)),
-
+  ensureGuest: async (opts?: { grantFreeQuota?: boolean }) => {
+    const fingerprint = await getVisitorId()
+    return fetch('/api/auth/guest', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grantFreeQuota: opts?.grantFreeQuota ?? true,
+        fingerprint,
+      }),
+    }).then((r) => json<Me>(r))
+  },
   me: () => fetch('/api/me', { credentials: 'include' }).then((r) => json<Me>(r)),
 
   telegramLink: () =>

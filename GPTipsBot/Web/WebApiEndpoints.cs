@@ -48,7 +48,8 @@ public static class WebApiEndpoints
     private static async Task<IResult> EnsureGuestAsync(
         HttpContext http,
         WebUserService webUsers,
-        ApplicationContext db)
+        ApplicationContext db,
+        EnsureGuestRequest? body)
     {
         var existingId = WebUserService.TryGetUserId(http);
         if (existingId is not null && db.Users.Any(u => u.Id == existingId))
@@ -58,7 +59,14 @@ public static class WebApiEndpoints
 
         var lang = http.Request.Headers.AcceptLanguage.ToString();
         var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
-        var (user, isGuest) = await webUsers.EnsureGuestAsync(language);
+        // After logout we must not hand out a fresh guest quota (abuse vector).
+        // Free quota also requires a FingerprintJS visitorId that has never been granted.
+        var grantFreeQuota = body?.GrantFreeQuota ?? true;
+        var (user, isGuest) = await webUsers.EnsureGuestAsync(
+            language,
+            grantFreeQuota,
+            body?.Fingerprint,
+            GetClientIp(http));
         await webUsers.RecordLoginAsync(user.Id, AuthProvider.Guest);
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
@@ -397,6 +405,12 @@ public static class WebApiEndpoints
         }
 
         var list = messages.ListConversations(userId.Value, userId.Value);
+        // Guests keep a single thread — no multi-chat history in the UI.
+        if (userId.Value < 0 || WebUserService.IsGuest(http))
+        {
+            list = list.Take(1).ToList();
+        }
+
         return Results.Ok(list.Select(c => new
         {
             id = c.ContextId,
@@ -543,7 +557,7 @@ public static class WebApiEndpoints
                            body.Text ?? "",
                            body.NewConversation,
                            body.ContextId,
-                           WebUserService.IsGuest(http),
+                           userId.Value < 0 || WebUserService.IsGuest(http),
                            cancellationToken))
         {
             await http.Response.WriteAsync(chunk, cancellationToken);
@@ -863,11 +877,27 @@ public static class WebApiEndpoints
         }
 
         // Auto-provision guest so chat works without an explicit login step (bota.chat style).
+        // No free quota here — that requires FingerprintJS via POST /auth/guest.
         var lang = http.Request.Headers.AcceptLanguage.ToString();
         var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
-        var (user, isGuest) = await webUsers.EnsureGuestAsync(language);
+        var (user, isGuest) = await webUsers.EnsureGuestAsync(
+            language,
+            grantFreeQuota: false,
+            fingerprint: null,
+            clientIp: GetClientIp(http));
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return user.Id;
+    }
+
+    private static string? GetClientIp(HttpContext http)
+    {
+        var forwarded = http.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(forwarded))
+        {
+            return forwarded.Split(',', 2)[0].Trim();
+        }
+
+        return http.Connection.RemoteIpAddress?.ToString();
     }
 
     private static async Task<object> BuildMeAsync(long userId, WebUserService webUsers, HttpContext http)
@@ -921,6 +951,8 @@ public static class WebApiEndpoints
     public sealed record EmailConfirmRequest(string? Email, string? Code, long? PreviousGuestId = null);
     public sealed record EmailResendRequest(string? Email);
     public sealed record EmailLoginRequest(string? Email, string? Password, long? PreviousGuestId = null);
+
+    public sealed record EnsureGuestRequest(bool GrantFreeQuota = true, string? Fingerprint = null);
 
     public sealed record CreateYooKassaWebRequest(int Stars);
 

@@ -121,7 +121,24 @@ export default function App() {
         setBotUsername(cfg.botUsername)
         setTelegramBotUrl(`https://t.me/${cfg.botUsername.replace(/^@/, '')}`)
         setPaymentInfo(packages)
-        await refreshConversations()
+        try {
+          const list = await api.conversations()
+          setConversations(guest.isGuest ? list.slice(0, 1) : list)
+          // Guests have no chat history UI — restore the single active thread if any.
+          if (guest.isGuest && list[0]) {
+            const data = await api.conversation(list[0].id)
+            setContextId(list[0].id)
+            setMessages(
+              data.messages.map((m) => ({
+                id: m.id,
+                role: (m.role === 'assistant' ? 'assistant' : 'user') as ChatMessage['role'],
+                text: m.text,
+              })),
+            )
+          }
+        } catch {
+          /* first load / no chats */
+        }
         try {
           const link = await api.telegramLink()
           setTelegramBotUrl(link.url)
@@ -388,7 +405,9 @@ export default function App() {
         }
       })
       await refreshMe()
-      await refreshConversations()
+      if (!me?.isGuest) {
+        await refreshConversations()
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Chat failed')
     } finally {
@@ -513,7 +532,8 @@ export default function App() {
 
   async function logout() {
     await api.logout()
-    const guest = await api.ensureGuest()
+    // Do not grant a fresh guest free quota after logout (prevents farming).
+    const guest = await api.ensureGuest({ grantFreeQuota: false })
     setMe(guest)
     if (guest.isGuest && guest.id < 0) {
       localStorage.setItem('gptips_guest_id', String(guest.id))
@@ -667,12 +687,16 @@ export default function App() {
   return (
     <div className="app">
       <aside className="sidebar">
-        <button title={t(lang, 'history')} onClick={() => setHistoryOpen((v) => !v)} type="button">
-          ☰
-        </button>
-        <button title={t(lang, 'newChat')} onClick={startNewChat} type="button" aria-label={t(lang, 'newChat')}>
-          +
-        </button>
+        {!me?.isGuest && (
+          <button title={t(lang, 'history')} onClick={() => setHistoryOpen((v) => !v)} type="button">
+            ☰
+          </button>
+        )}
+        {!me?.isGuest && (
+          <button title={t(lang, 'newChat')} onClick={startNewChat} type="button" aria-label={t(lang, 'newChat')}>
+            +
+          </button>
+        )}
         <button title={t(lang, 'cabinet')} onClick={() => void openCabinet()} type="button" aria-label={t(lang, 'cabinet')}>
           ₽
         </button>
@@ -904,110 +928,114 @@ export default function App() {
           </div>
         )}
 
-        <div className={`drawer-backdrop ${historyOpen ? 'open' : ''}`} onClick={() => setHistoryOpen(false)} />
+        {!me?.isGuest && (
+          <div className={`drawer-backdrop ${historyOpen ? 'open' : ''}`} onClick={() => setHistoryOpen(false)} />
+        )}
 
         <div className="workspace">
-          <aside className={`history ${historyOpen ? 'open' : ''}`}>
-            <h3>{t(lang, 'history')}</h3>
-            {conversations.length === 0 && <div className="stat">{t(lang, 'noHistory')}</div>}
-            {conversations.map((c) => (
-              <div
-                key={c.id}
-                className={`history-item ${contextId === c.id ? 'active' : ''} ${menuOpenId === c.id ? 'menu-open' : ''}`}
-              >
-                {renamingId === c.id ? (
-                  <form
-                    className="history-rename"
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      void renameConversation(c.id, renameValue)
-                    }}
-                  >
-                    <input
-                      autoFocus
-                      value={renameValue}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      onBlur={() => {
-                        if (skipRenameBlurRef.current) {
-                          skipRenameBlurRef.current = false
-                          return
-                        }
+          {!me?.isGuest && (
+            <aside className={`history ${historyOpen ? 'open' : ''}`}>
+              <h3>{t(lang, 'history')}</h3>
+              {conversations.length === 0 && <div className="stat">{t(lang, 'noHistory')}</div>}
+              {conversations.map((c) => (
+                <div
+                  key={c.id}
+                  className={`history-item ${contextId === c.id ? 'active' : ''} ${menuOpenId === c.id ? 'menu-open' : ''}`}
+                >
+                  {renamingId === c.id ? (
+                    <form
+                      className="history-rename"
+                      onSubmit={(e) => {
+                        e.preventDefault()
                         void renameConversation(c.id, renameValue)
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Escape') {
-                          e.preventDefault()
-                          skipRenameBlurRef.current = true
-                          setRenamingId(null)
-                        }
-                      }}
-                      aria-label={t(lang, 'rename')}
-                    />
-                  </form>
-                ) : (
-                  <button
-                    type="button"
-                    className="history-item-main"
-                    onClick={() => openConversation(c.id)}
-                  >
-                    <span className="history-title">{c.title}</span>
-                    <small>{new Date(c.updatedAt).toLocaleString()}</small>
-                  </button>
-                )}
-
-                <div className="history-item-actions" ref={menuOpenId === c.id ? menuRef : undefined}>
-                  {c.pinned && renamingId !== c.id && (
-                    <span className="history-pin-icon" aria-hidden title={t(lang, 'pinChat')}>
-                      <PinIcon />
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    className="history-ellipsis"
-                    aria-label={t(lang, 'chatMenu')}
-                    aria-expanded={menuOpenId === c.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setMenuOpenId((id) => (id === c.id ? null : c.id))
-                    }}
-                  >
-                    <EllipsisIcon />
-                  </button>
-
-                  {menuOpenId === c.id && (
-                    <div className="chat-menu" role="menu">
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          setRenamingId(c.id)
-                          setRenameValue(c.title)
-                          setMenuOpenId(null)
+                    >
+                      <input
+                        autoFocus
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onBlur={() => {
+                          if (skipRenameBlurRef.current) {
+                            skipRenameBlurRef.current = false
+                            return
+                          }
+                          void renameConversation(c.id, renameValue)
                         }}
-                      >
-                        <PencilIcon />
-                        {t(lang, 'rename')}
-                      </button>
-                      <div className="chat-menu-sep" />
-                      <button type="button" role="menuitem" onClick={() => void togglePin(c)}>
-                        <PinIcon />
-                        {c.pinned ? t(lang, 'unpinChat') : t(lang, 'pinChat')}
-                      </button>
-                      <button
-                        type="button"
-                        role="menuitem"
-                        className="danger"
-                        onClick={() => void deleteConversation(c.id)}
-                      >
-                        <TrashIcon />
-                        {t(lang, 'deleteChat')}
-                      </button>
-                    </div>
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            e.preventDefault()
+                            skipRenameBlurRef.current = true
+                            setRenamingId(null)
+                          }
+                        }}
+                        aria-label={t(lang, 'rename')}
+                      />
+                    </form>
+                  ) : (
+                    <button
+                      type="button"
+                      className="history-item-main"
+                      onClick={() => openConversation(c.id)}
+                    >
+                      <span className="history-title">{c.title}</span>
+                      <small>{new Date(c.updatedAt).toLocaleString()}</small>
+                    </button>
                   )}
+
+                  <div className="history-item-actions" ref={menuOpenId === c.id ? menuRef : undefined}>
+                    {c.pinned && renamingId !== c.id && (
+                      <span className="history-pin-icon" aria-hidden title={t(lang, 'pinChat')}>
+                        <PinIcon />
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="history-ellipsis"
+                      aria-label={t(lang, 'chatMenu')}
+                      aria-expanded={menuOpenId === c.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setMenuOpenId((id) => (id === c.id ? null : c.id))
+                      }}
+                    >
+                      <EllipsisIcon />
+                    </button>
+
+                    {menuOpenId === c.id && (
+                      <div className="chat-menu" role="menu">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setRenamingId(c.id)
+                            setRenameValue(c.title)
+                            setMenuOpenId(null)
+                          }}
+                        >
+                          <PencilIcon />
+                          {t(lang, 'rename')}
+                        </button>
+                        <div className="chat-menu-sep" />
+                        <button type="button" role="menuitem" onClick={() => void togglePin(c)}>
+                          <PinIcon />
+                          {c.pinned ? t(lang, 'unpinChat') : t(lang, 'pinChat')}
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="danger"
+                          onClick={() => void deleteConversation(c.id)}
+                        >
+                          <TrashIcon />
+                          {t(lang, 'deleteChat')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </aside>
+              ))}
+            </aside>
+          )}
 
           <section className="chat-pane">
             {mode === 'cabinet' ? (

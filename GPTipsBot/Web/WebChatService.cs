@@ -66,6 +66,7 @@ public class WebChatService(
             text.Trim(),
             newConversation,
             continueContextId,
+            isGuest,
             model,
             hold.Id,
             cancellationToken);
@@ -84,6 +85,7 @@ public class WebChatService(
         string text,
         bool newConversation,
         long? continueContextId,
+        bool isGuest,
         GptModelOption model,
         long holdId,
         CancellationToken cancellationToken)
@@ -91,20 +93,30 @@ public class WebChatService(
         var confirmed = false;
         try
         {
-            var forceContextId = !newConversation && continueContextId is > 0
-                ? continueContextId
-                : null;
+            // Guests share one thread: always continue the existing context if present.
+            long? forceContextId;
+            if (isGuest)
+            {
+                forceContextId = continueContextId is > 0
+                    ? continueContextId
+                    : messageRepository.GetLastContext(userKey.Id, userKey.ChatId);
+            }
+            else
+            {
+                forceContextId = !newConversation && continueContextId is > 0
+                    ? continueContextId
+                    : null;
+            }
 
             var userMessage = new MessageDto(userKey)
             {
                 Text = text,
                 Role = MessageOwner.User,
                 ContextBound = true,
-                NewContext = newConversation || forceContextId is null,
+                NewContext = forceContextId is null,
                 BotMessageType = BotMessageType.ChatGptPrompt,
             };
 
-            // When continuing a specific thread, NewContext must be false and forceContextId set.
             if (forceContextId is not null)
             {
                 userMessage.NewContext = false;

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using GPTipsBot.Config;
 using GPTipsBot.Db;
@@ -27,12 +28,31 @@ public class WebUserService(
     public const int GuestFreeOcr = 3;
     public const int GuestFreeAnimations = 1;
 
+    /// <summary>
+    /// Soft cap: free guest grants per IP hash / 24h (mitigates random fingerprint farming).
+    /// Shared NAT may hit this; Fingerprint Pro reduces false sharing.
+    /// </summary>
+    public const int MaxFreeGuestGrantsPerIpPerDay = 8;
+
     private static readonly Regex EmailRegex = new(
         @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    public async Task<(User User, bool IsGuest)> EnsureGuestAsync(string? language = "en")
+    private static readonly Regex FingerprintRegex = new(
+        @"^[A-Za-z0-9_-]{8,128}$",
+        RegexOptions.Compiled);
+
+    public async Task<(User User, bool IsGuest)> EnsureGuestAsync(
+        string? language = "en",
+        bool grantFreeQuota = true,
+        string? fingerprint = null,
+        string? clientIp = null)
     {
+        var normalizedFp = NormalizeFingerprint(fingerprint);
+        var ipHash = HashIp(clientIp);
+        var allowFree = grantFreeQuota &&
+                        await CanGrantFreeGuestQuotaAsync(normalizedFp, ipHash);
+
         var guestId = await AllocateGuestUserIdAsync();
         var user = new User
         {
@@ -41,18 +61,104 @@ public class WebUserService(
             Source = WebAuthConstants.GuestSource,
             CreatedAt = DateTimeOffset.UtcNow,
             IsActive = true,
-            FreeGptRequests = GuestFreeGpt,
-            FreeImageGenerations = GuestFreeImages,
-            FreeImageTextRecognitions = GuestFreeOcr,
-            FreePhotoAnimations = GuestFreeAnimations,
+            FreeGptRequests = allowFree ? GuestFreeGpt : 0,
+            FreeImageGenerations = allowFree ? GuestFreeImages : 0,
+            FreeImageTextRecognitions = allowFree ? GuestFreeOcr : 0,
+            FreePhotoAnimations = allowFree ? GuestFreeAnimations : 0,
             FreeSummaryRequests = 0,
         };
 
         await userService.CreateUpdateUser(user);
         EnsureSettings(guestId, language ?? "en");
-        await context.SaveChangesAsync();
+
+        if (allowFree && normalizedFp is not null)
+        {
+            context.GuestFingerprintQuotas.Add(new GuestFingerprintQuota
+            {
+                Fingerprint = normalizedFp,
+                GuestUserId = guestId,
+                IpHash = ipHash,
+                CreatedAt = DateTimeOffset.UtcNow,
+            });
+        }
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateException) when (allowFree && normalizedFp is not null)
+        {
+            // Concurrent grant for the same fingerprint (PK collision) — strip free quota.
+            context.ChangeTracker.Clear();
+            var raced = await context.Users.FirstOrDefaultAsync(u => u.Id == guestId);
+            if (raced is not null)
+            {
+                raced.FreeGptRequests = 0;
+                raced.FreeImageGenerations = 0;
+                raced.FreeImageTextRecognitions = 0;
+                raced.FreePhotoAnimations = 0;
+                await context.SaveChangesAsync();
+                userRepository.InvalidateCache(guestId);
+            }
+        }
 
         return (userRepository.Get(guestId)!, true);
+    }
+
+    /// <summary>FingerprintJS / Pro visitorId shape check.</summary>
+    public static string? NormalizeFingerprint(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        var value = raw.Trim();
+        return FingerprintRegex.IsMatch(value) ? value : null;
+    }
+
+    public static string? HashIp(string? ip)
+    {
+        if (string.IsNullOrWhiteSpace(ip))
+        {
+            return null;
+        }
+
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(ip.Trim()));
+        return Convert.ToHexString(bytes).ToLowerInvariant();
+    }
+
+    private async Task<bool> CanGrantFreeGuestQuotaAsync(string? fingerprint, string? ipHash)
+    {
+        // No fingerprint → no free quota (cleared cookies alone must not mint a new grant).
+        if (fingerprint is null)
+        {
+            return false;
+        }
+
+        if (await context.GuestFingerprintQuotas.AsNoTracking()
+                .AnyAsync(x => x.Fingerprint == fingerprint))
+        {
+            return false;
+        }
+
+        // Soft IP limit against spoofed/rotated visitorIds (and collision farming).
+        if (ipHash is not null)
+        {
+            var since = DateTimeOffset.UtcNow.AddDays(-1);
+            var grantsFromIp = await context.GuestFingerprintQuotas.AsNoTracking()
+                .CountAsync(x => x.IpHash == ipHash && x.CreatedAt >= since);
+            if (grantsFromIp >= MaxFreeGuestGrantsPerIpPerDay)
+            {
+                logger.LogInformation(
+                    "Guest free quota denied: IP hash soft limit ({Count}/{Max})",
+                    grantsFromIp,
+                    MaxFreeGuestGrantsPerIpPerDay);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public async Task<(User User, bool IsGuest)> EnsureTelegramUserAsync(

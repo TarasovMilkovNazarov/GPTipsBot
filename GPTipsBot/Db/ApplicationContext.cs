@@ -21,6 +21,7 @@ namespace GPTipsBot.Db
         public DbSet<PaymentHold> PaymentHolds { get; set; } = null!;
         public DbSet<ConversationMeta> ConversationMetas { get; set; } = null!;
         public DbSet<AuthLoginEvent> AuthLoginEvents { get; set; } = null!;
+        public DbSet<GuestFingerprintQuota> GuestFingerprintQuotas { get; set; } = null!;
 
         public ApplicationContext()
         {
@@ -35,6 +36,7 @@ namespace GPTipsBot.Db
             EnsureAuthLoginEventsTable();
             EnsureEmailAuthColumns();
             EnsureTelegramIdColumn();
+            EnsureGuestFingerprintQuotasTable();
             Guid = Guid.NewGuid();
         }
 
@@ -43,6 +45,10 @@ namespace GPTipsBot.Db
             modelBuilder.Entity<ConversationMeta>(e =>
             {
                 e.HasKey(x => new { x.UserId, x.ContextId });
+            });
+            modelBuilder.Entity<GuestFingerprintQuota>(e =>
+            {
+                e.HasKey(x => x.Fingerprint);
             });
         }
         
@@ -201,6 +207,20 @@ namespace GPTipsBot.Db
                       SELECT 1 FROM "Users" AS x
                       WHERE x."TelegramId" = u."Id"
                   );
+                """);
+        }
+
+        private void EnsureGuestFingerprintQuotasTable()
+        {
+            Database.ExecuteSqlRaw("""
+                CREATE TABLE IF NOT EXISTS "GuestFingerprintQuotas" (
+                    "Fingerprint" text NOT NULL PRIMARY KEY,
+                    "GuestUserId" bigint NOT NULL,
+                    "IpHash" text NULL,
+                    "CreatedAt" timestamp with time zone NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS "IX_GuestFingerprintQuotas_IpHash_CreatedAt"
+                    ON "GuestFingerprintQuotas" ("IpHash", "CreatedAt");
                 """);
         }
     }
