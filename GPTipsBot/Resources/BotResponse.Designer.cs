@@ -739,6 +739,90 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        public static string InlineAskTitle {
+            get {
+                return ResourceManager.GetString("InlineAskTitle", resourceCulture);
+            }
+        }
+
+        public static string InlineAskDescription {
+            get {
+                return ResourceManager.GetString("InlineAskDescription", resourceCulture);
+            }
+        }
+
+        public static string InlineAskPending {
+            get {
+                return ResourceManager.GetString("InlineAskPending", resourceCulture);
+            }
+        }
+
+        public static string InlineImageTitle {
+            get {
+                return ResourceManager.GetString("InlineImageTitle", resourceCulture);
+            }
+        }
+
+        public static string InlineImageTitleShort {
+            get {
+                return ResourceManager.GetString("InlineImageTitleShort", resourceCulture);
+            }
+        }
+
+        public static string InlineImageDescription {
+            get {
+                return ResourceManager.GetString("InlineImageDescription", resourceCulture);
+            }
+        }
+
+        public static string InlineImagePending {
+            get {
+                return ResourceManager.GetString("InlineImagePending", resourceCulture);
+            }
+        }
+
+        public static string InlineHelpAskTitle {
+            get {
+                return ResourceManager.GetString("InlineHelpAskTitle", resourceCulture);
+            }
+        }
+
+        public static string InlineHelpAskDescription {
+            get {
+                return ResourceManager.GetString("InlineHelpAskDescription", resourceCulture);
+            }
+        }
+
+        public static string InlineHelpAskMessage {
+            get {
+                return ResourceManager.GetString("InlineHelpAskMessage", resourceCulture);
+            }
+        }
+
+        public static string InlineHelpImageTitle {
+            get {
+                return ResourceManager.GetString("InlineHelpImageTitle", resourceCulture);
+            }
+        }
+
+        public static string InlineHelpImageDescription {
+            get {
+                return ResourceManager.GetString("InlineHelpImageDescription", resourceCulture);
+            }
+        }
+
+        public static string InlineHelpImageMessage {
+            get {
+                return ResourceManager.GetString("InlineHelpImageMessage", resourceCulture);
+            }
+        }
+
+        public static string InlineResultExpired {
+            get {
+                return ResourceManager.GetString("InlineResultExpired", resourceCulture);
+            }
+        }
+
         public static string ChooseModel {
             get {
                 return ResourceManager.GetString("ChooseModel", resourceCulture);

@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -37,12 +38,12 @@ public class NotifyUserStep(
             else if (!string.IsNullOrEmpty(data.ImageBase64))
             {
                 await using var imageStream = new MemoryStream(Convert.FromBase64String(data.ImageBase64));
-                await SendSuccessAsync(data, InputFile.FromStream(imageStream));
+                await SendSuccessAsync(data, InputFile.FromStream(imageStream, "image.png"));
                 success = true;
             }
             else
             {
-                await botClient.SendMessage(data.DeliveryChatId, BotResponse.SomethingWentWrong);
+                await SendFailureAsync(data, BotResponse.SomethingWentWrong);
             }
         }
         catch (Exception ex)
@@ -52,7 +53,7 @@ public class NotifyUserStep(
 
             try
             {
-                await botClient.SendMessage(data.DeliveryChatId, BotResponse.SomethingWentWrong);
+                await SendFailureAsync(data, BotResponse.SomethingWentWrong);
             }
             catch (Exception notifyEx)
             {
@@ -63,7 +64,7 @@ public class NotifyUserStep(
         {
             await FinalizePaymentAsync(data.PaymentHoldId, success);
 
-            if (data.ProgressMessageId.HasValue)
+            if (data.ProgressMessageId.HasValue && !data.IsInlineDelivery)
             {
                 try
                 {
@@ -81,7 +82,19 @@ public class NotifyUserStep(
 
     private async Task SendSuccessAsync(ImageGenerationWorkflowData data, InputFile photo)
     {
-        await botClient.SendPhoto(data.DeliveryChatId, photo);
+        if (data.IsInlineDelivery)
+        {
+            await botClient.EditMessageMedia(
+                data.InlineMessageId!,
+                new InputMediaPhoto(photo)
+                {
+                    Caption = TruncateCaption(data.Prompt),
+                });
+        }
+        else
+        {
+            await botClient.SendPhoto(data.DeliveryChatId, photo);
+        }
 
         await using var scope = scopeFactory.CreateAsyncScope();
         var messageRepository = scope.ServiceProvider.GetRequiredService<MessageRepository>();
@@ -92,10 +105,26 @@ public class NotifyUserStep(
             BotMessageType = BotMessageType.ImageGenerated,
         });
 
+        if (data.IsInlineDelivery)
+        {
+            return;
+        }
+
         await botClient.SendMessage(
             data.DeliveryChatId,
             string.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit),
             replyMarkup: TelegramBotUiService.GetImageInstructionInlineKeyboard(data.IsSquare));
+    }
+
+    private async Task SendFailureAsync(ImageGenerationWorkflowData data, string text)
+    {
+        if (data.IsInlineDelivery)
+        {
+            await botClient.EditMessageText(data.InlineMessageId!, text);
+            return;
+        }
+
+        await botClient.SendMessage(data.DeliveryChatId, text);
     }
 
     private async Task FinalizePaymentAsync(long? paymentHoldId, bool success)
@@ -115,5 +144,16 @@ public class NotifyUserStep(
         {
             await userService.ReleaseAsync(paymentHoldId.Value);
         }
+    }
+
+    private static string TruncateCaption(string prompt)
+    {
+        const int limit = 1024;
+        if (string.IsNullOrEmpty(prompt) || prompt.Length <= limit)
+        {
+            return prompt;
+        }
+
+        return prompt[..(limit - 1)] + "…";
     }
 }

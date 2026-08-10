@@ -15,7 +15,9 @@ namespace GPTipsBot.Extensions
         public static string GetLanguageOrDefault(this Update update, string language = "ru")
         {
             return update.Message?.From?.LanguageCode ??
-                   update.CallbackQuery?.Message?.From?.LanguageCode ??
+                   update.CallbackQuery?.From?.LanguageCode ??
+                   update.InlineQuery?.From?.LanguageCode ??
+                   update.ChosenInlineResult?.From?.LanguageCode ??
                    update.ChatMember?.From?.LanguageCode ??
                    update.ChannelPost?.From?.LanguageCode ?? language;
         }

@@ -40,7 +40,7 @@ namespace GPTipsBot.Services
                 return ChatGateResult.Bypass;
             }
 
-            if (update.IsCommand)
+            if (update.IsCommand || update.IsInline)
             {
                 return ChatGateResult.Bypass;
             }

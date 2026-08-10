@@ -185,6 +185,13 @@ Useful commands
 
 In groups: /ask, /image, /summary
 
+🔎 Inline (any chat)
+Type @GPTipsBot and a command:
+• ask your question — ChatGPT answer
+• image description — generate an image
+Example: @GPTipsBot ask What is a neutrino?
+Example: @GPTipsBot image a cat in space
+
 Support: @my_super_ultra_smart_bot</value>
   </data>
   <data name="BotName" xml:space="preserve">
@@ -459,6 +466,56 @@ Other commands work in a private chat with the bot.</value>
   <data name="AskUsage" xml:space="preserve">
     <value>Write your question after the command, for example:
 /ask How does photosynthesis work?</value>
+  </data>
+  <data name="InlineAskTitle" xml:space="preserve">
+    <value>💬 Ask GPT: {0}</value>
+  </data>
+  <data name="InlineAskDescription" xml:space="preserve">
+    <value>Send a ChatGPT question to this chat</value>
+  </data>
+  <data name="InlineAskPending" xml:space="preserve">
+    <value>⏳ GPTipsBot is thinking…
+Question: {0}</value>
+  </data>
+  <data name="InlineImageTitle" xml:space="preserve">
+    <value>🖼 Image: {0}</value>
+  </data>
+  <data name="InlineImageTitleShort" xml:space="preserve">
+    <value>🖼 Image generation</value>
+  </data>
+  <data name="InlineImageDescription" xml:space="preserve">
+    <value>Generate an image from a prompt</value>
+  </data>
+  <data name="InlineImagePending" xml:space="preserve">
+    <value>⏳ GPTipsBot is drawing…
+Prompt: {0}</value>
+  </data>
+  <data name="InlineHelpAskTitle" xml:space="preserve">
+    <value>💬 Ask ChatGPT</value>
+  </data>
+  <data name="InlineHelpAskDescription" xml:space="preserve">
+    <value>Format: ask your question</value>
+  </data>
+  <data name="InlineHelpAskMessage" xml:space="preserve">
+    <value>To ask via inline mode, type:
+@GPTipsBot ask your question
+
+Example: @GPTipsBot ask How does photosynthesis work?</value>
+  </data>
+  <data name="InlineHelpImageTitle" xml:space="preserve">
+    <value>🖼 Generate an image</value>
+  </data>
+  <data name="InlineHelpImageDescription" xml:space="preserve">
+    <value>Format: image description</value>
+  </data>
+  <data name="InlineHelpImageMessage" xml:space="preserve">
+    <value>To generate an image via inline mode, type:
+@GPTipsBot image description
+
+Example: @GPTipsBot image a cat in space</value>
+  </data>
+  <data name="InlineResultExpired" xml:space="preserve">
+    <value>⏳ This result expired. Type @GPTipsBot again.</value>
   </data>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Choose a ChatGPT model

@@ -83,6 +83,21 @@ namespace GPTipsBot.Dtos
                             TelegramUserId);
                     }
                     break;
+                case UpdateType.InlineQuery:
+                    Guard.Against.Null(telegramUpdate.InlineQuery);
+                    Guard.Against.Null(telegramUpdate.InlineQuery.From);
+                    TelegramUserId = telegramUpdate.InlineQuery.From.Id;
+                    User = UserMapper.Map(telegramUpdate.InlineQuery.From);
+                    // Inline queries have no chat — use the user id as a stable key.
+                    UserChatKey = new UserChatKey(TelegramUserId, TelegramUserId, TelegramUserId);
+                    break;
+                case UpdateType.ChosenInlineResult:
+                    Guard.Against.Null(telegramUpdate.ChosenInlineResult);
+                    Guard.Against.Null(telegramUpdate.ChosenInlineResult.From);
+                    TelegramUserId = telegramUpdate.ChosenInlineResult.From.Id;
+                    User = UserMapper.Map(telegramUpdate.ChosenInlineResult.From);
+                    UserChatKey = new UserChatKey(TelegramUserId, TelegramUserId, TelegramUserId);
+                    break;
                 default:
                     throw new IgnoreMessageTypeException(telegramUpdate.Type);
             }
@@ -135,6 +150,9 @@ namespace GPTipsBot.Dtos
 
         public CallbackQuery? CallbackQuery => TelegramUpdate.CallbackQuery;
         public PreCheckoutQuery? PreCheckoutQuery => TelegramUpdate.PreCheckoutQuery;
+        public InlineQuery? InlineQuery => TelegramUpdate.InlineQuery;
+        public ChosenInlineResult? ChosenInlineResult => TelegramUpdate.ChosenInlineResult;
+        public bool IsInline => InlineQuery != null || ChosenInlineResult != null;
 
         public string Language { get; }
 

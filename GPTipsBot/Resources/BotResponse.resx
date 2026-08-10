@@ -185,6 +185,13 @@ https://gptips.skolkokomu.ru
 
 В группах доступны: /ask, /image, /summary
 
+🔎 Inline (в любом чате)
+Наберите @GPTipsBot и команду:
+• ask ваш вопрос — ответ ChatGPT
+• image описание — генерация картинки
+Пример: @GPTipsBot ask Что такое нейтрино?
+Пример: @GPTipsBot image кот в космосе
+
 Поддержка: @my_super_ultra_smart_bot</value>
   </data>
   <data name="BotName" xml:space="preserve">
@@ -464,6 +471,56 @@ https://gptips.skolkokomu.ru</value>
   <data name="AskUsage" xml:space="preserve">
     <value>Напишите вопрос после команды, например:
 /ask Как работает фотосинтез?</value>
+  </data>
+  <data name="InlineAskTitle" xml:space="preserve">
+    <value>💬 Спросить GPT: {0}</value>
+  </data>
+  <data name="InlineAskDescription" xml:space="preserve">
+    <value>Отправить вопрос ChatGPT в этот чат</value>
+  </data>
+  <data name="InlineAskPending" xml:space="preserve">
+    <value>⏳ GPTipsBot думает…
+Вопрос: {0}</value>
+  </data>
+  <data name="InlineImageTitle" xml:space="preserve">
+    <value>🖼 Картинка: {0}</value>
+  </data>
+  <data name="InlineImageTitleShort" xml:space="preserve">
+    <value>🖼 Генерация изображения</value>
+  </data>
+  <data name="InlineImageDescription" xml:space="preserve">
+    <value>Сгенерировать изображение по промпту</value>
+  </data>
+  <data name="InlineImagePending" xml:space="preserve">
+    <value>⏳ GPTipsBot рисует…
+Промпт: {0}</value>
+  </data>
+  <data name="InlineHelpAskTitle" xml:space="preserve">
+    <value>💬 Спросить ChatGPT</value>
+  </data>
+  <data name="InlineHelpAskDescription" xml:space="preserve">
+    <value>Формат: ask ваш вопрос</value>
+  </data>
+  <data name="InlineHelpAskMessage" xml:space="preserve">
+    <value>Чтобы задать вопрос через inline, напишите:
+@GPTipsBot ask ваш вопрос
+
+Пример: @GPTipsBot ask Как работает фотосинтез?</value>
+  </data>
+  <data name="InlineHelpImageTitle" xml:space="preserve">
+    <value>🖼 Сгенерировать картинку</value>
+  </data>
+  <data name="InlineHelpImageDescription" xml:space="preserve">
+    <value>Формат: image описание</value>
+  </data>
+  <data name="InlineHelpImageMessage" xml:space="preserve">
+    <value>Чтобы сгенерировать картинку через inline, напишите:
+@GPTipsBot image описание
+
+Пример: @GPTipsBot image кот в космосе</value>
+  </data>
+  <data name="InlineResultExpired" xml:space="preserve">
+    <value>⏳ Результат устарел. Наберите @GPTipsBot снова.</value>
   </data>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Выберите модель ChatGPT

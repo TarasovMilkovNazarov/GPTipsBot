@@ -31,6 +31,7 @@ namespace GPTipsBot.UpdateHandlers
         CommandHandler commandHandler,
         ChatGptHandler chatGptHandler,
         AdminCommandHandler adminCommandHandler,
+        InlineQueryHandler inlineQueryHandler,
         ILogger<Dispatcher> logger,
         UserService userService,
         UserCommandRepository userCommandRepository,
@@ -71,6 +72,12 @@ namespace GPTipsBot.UpdateHandlers
 
             var language = botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
             CultureInfo.CurrentUICulture = new CultureInfo(language);
+
+            if (update.IsInline)
+            {
+                await inlineQueryHandler.HandleAsync(update);
+                return;
+            }
 
             var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
 

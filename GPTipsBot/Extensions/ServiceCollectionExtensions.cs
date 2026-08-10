@@ -13,6 +13,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
+using GPTipsBot.Services.Inline;
 using GPTipsBot.Services.YandexCloud;
 using GPTipsBot.Services.YandexCloud.Workflow;
 using GPTipsBot.Services.YandexCloud.Workflow.Steps;
@@ -75,6 +76,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<PromptFromImageHandler>()
             .AddScoped<ChatGptHandler>()
             .AddScoped<GptImageHandler>()
+            .AddScoped<InlineQueryHandler>()
             // services
             .AddScoped<UserService>()
             .AddSingleton<TelejetAdClient>()
@@ -86,6 +88,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<UserStatusActivator>()
             .AddSingleton<SpeechToTextService>()
             .AddSingleton<RateLimiter>()
+            .AddSingleton<InlinePendingStore>()
             .AddScoped<IGpt, ChatGptService>()
             .AddSingleton<OpenAiVpnConnectivityService>()
             .AddSingleton<IJobService, JobService>()

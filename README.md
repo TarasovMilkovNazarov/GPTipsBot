@@ -45,6 +45,20 @@ MVP: guest cookie sessions, Telegram Login (shared wallet), streaming chat, mode
 
 В меню группы Telegram показывает только `/ask`, `/image` и `/summary`. Полный список команд — в личке.
 
+## Inline-режим
+
+В любом чате можно набрать `@GPTipsBot` (или `@GPTipBot` на cloud):
+
+* `ask вопрос` — ответ ChatGPT в этот чат;
+* `image описание` — генерация картинки по промпту.
+
+Примеры: `@GPTipsBot ask Что такое нейтрино?`, `@GPTipsBot image кот в космосе`.
+
+В BotFather нужно включить:
+
+1. `/setinline` — Inline Mode;
+2. `/setinlinefeedback` — Enabled (иначе бот не получит `chosen_inline_result` и не подставит ответ/картинку).
+
 При **включённом privacy mode** Telegram присылает боту только команды, упоминания и reply. Чтобы бот видел все сообщения группы для `/summary`, выключите Group Privacy: `@BotFather` → `/setprivacy` → Disable.
 
 ## VPN / OpenAI (mihomo)

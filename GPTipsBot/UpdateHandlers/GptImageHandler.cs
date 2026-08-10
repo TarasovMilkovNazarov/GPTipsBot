@@ -125,15 +125,6 @@ public class GptImageHandler(
                     ? new ReplyParameters { MessageId = (int)mid }
                     : null);
 
-            try
-            {
-                await botClient.DeleteMessage(chatId, progress.MessageId);
-            }
-            catch
-            {
-                // ignore delete failures
-            }
-
             await userService.ConfirmAsync(hold.Id);
             confirmed = true;
             sessionCache.Remove(userId);
@@ -141,18 +132,27 @@ public class GptImageHandler(
         catch (ClientException ex)
         {
             log.LogInformation(ex, "GPT Image 2 client error");
-            await botClient.SendMessage(chatId, ex.Message);
+            await botClient.SendMessage(chatId, ex.Message, messageThreadId: threadId);
         }
         catch (Exception ex)
         {
             log.LogError(ex, "GPT Image 2 failed");
-            await botClient.SendMessage(chatId, BotResponse.SomethingWentWrong);
+            await botClient.SendMessage(chatId, BotResponse.SomethingWentWrong, messageThreadId: threadId);
         }
         finally
         {
             if (!confirmed)
             {
                 await userService.ReleaseAsync(hold.Id);
+            }
+
+            try
+            {
+                await botClient.DeleteMessage(chatId, progress.MessageId);
+            }
+            catch (Exception ex)
+            {
+                log.LogDebug(ex, "Failed to delete GPT Image progress message {MessageId}", progress.MessageId);
             }
         }
 
