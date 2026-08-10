@@ -48,6 +48,10 @@ namespace GPTipsBot.Dtos
                         Guard.Against.Null(telegramUpdate.Message.Photo);
                         FileId = telegramUpdate.Message.Photo[^1].FileId;
                     }
+                    else
+                    {
+                        FileId = ResolveReplyImageFileId(telegramUpdate.Message.ReplyToMessage);
+                    }
 
                     Message.SuccessfulPayment = telegramUpdate.Message.SuccessfulPayment;
                     break;
@@ -203,6 +207,22 @@ namespace GPTipsBot.Dtos
 
         private static bool IsSupportedChat(ChatType? chatType) =>
             chatType is ChatType.Private or ChatType.Group or ChatType.Supergroup;
+
+        private static string? ResolveReplyImageFileId(Message? replyTo)
+        {
+            if (replyTo?.Photo is { Length: > 0 } photo)
+            {
+                return photo[^1].FileId;
+            }
+
+            if (replyTo?.Document is { } document &&
+                document.MimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return document.FileId;
+            }
+
+            return null;
+        }
 
         private bool IsReplyToThisBot()
         {

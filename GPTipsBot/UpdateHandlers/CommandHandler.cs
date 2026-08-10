@@ -30,6 +30,7 @@ namespace GPTipsBot.UpdateHandlers
         UserCommandRepository userCommandRepository,
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
+        PromptFromImageHandler promptFromImageHandler,
         ChatGptHandler chatGptHandler,
         InvoiceRepository invoiceRepository,
         UserService userService,
@@ -116,8 +117,41 @@ namespace GPTipsBot.UpdateHandlers
                     await HandleGptImageStartAsync(update, GptImageMode.Generate);
                     return;
                 case EditImageCommand:
+                {
+                    var session = gptImageSessionCache.GetOrCreate(update.UserChatKey.Id);
+                    session.Mode = GptImageMode.Edit;
+                    if (update.FileId != null)
+                    {
+                        session.ImageFileId = update.FileId;
+                    }
+
+                    gptImageSessionCache.Set(update.UserChatKey.Id, session);
+
+                    var hasEditPrompt = UpdateDecorator.TryGetCommandArgument(
+                        messageText,
+                        EditImageCommand,
+                        out var editPrompt);
+
+                    if (hasEditPrompt && !string.IsNullOrWhiteSpace(session.ImageFileId))
+                    {
+                        update.Message.Text = editPrompt;
+                        SetNextHandler(gptImageHandler);
+                        await base.HandleAsync(update);
+                        return;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(session.ImageFileId))
+                    {
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost),
+                            GetGptImageOptionsKeyboard(session));
+                        return;
+                    }
+
                     await HandleGptImageStartAsync(update, GptImageMode.Edit);
                     return;
+                }
                 case GptImageSizeSquareCommand:
                 case GptImageSizeLandscapeCommand:
                 case GptImageSizePortraitCommand:
@@ -230,6 +264,14 @@ namespace GPTipsBot.UpdateHandlers
                     if (profile is { GptRequests: <= 0, Stars: <= 0 })
                     {
                         await SendNoFreeRequestsMessage(update);
+                        return;
+                    }
+
+                    if (update.FileId != null)
+                    {
+                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(promptFromImageHandler);
+                        await base.HandleAsync(update);
                         return;
                     }
 

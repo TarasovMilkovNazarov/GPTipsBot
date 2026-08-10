@@ -109,6 +109,8 @@ public class BotMenu
         [
             Ask,
             Image,
+            PromptFromImage,
+            EditImage,
             Summary
         ];
     }
@@ -118,6 +120,8 @@ public class BotMenu
             or CommandType.Image
             or CommandType.ImageSquare
             or CommandType.ImageRectangle
+            or CommandType.PromptFromImage
+            or CommandType.EditImage
             or CommandType.Summary
             or CommandType.CancelPreviousCommand
             or CommandType.StopRequest;

@@ -71,7 +71,11 @@ public class GptImageHandler(
         }
 
         var confirmed = false;
-        var progress = await botClient.SendMessage(chatId, BotResponse.PleaseWaitMsg);
+        var threadId = update.Message?.MessageThreadId is long tid ? (int?)tid : null;
+        var progress = await botClient.SendMessage(
+            chatId,
+            BotResponse.PleaseWaitMsg,
+            messageThreadId: threadId);
 
         try
         {
@@ -116,6 +120,7 @@ public class GptImageHandler(
                     session.Quality,
                     session.Size,
                     session.StarsCost),
+                messageThreadId: threadId,
                 replyParameters: update.Message.TelegramMessageId is long mid
                     ? new ReplyParameters { MessageId = (int)mid }
                     : null);

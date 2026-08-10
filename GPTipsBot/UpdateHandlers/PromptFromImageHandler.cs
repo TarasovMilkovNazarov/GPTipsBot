@@ -63,7 +63,10 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var confirmed = false;
-            var progress = await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.PleaseWaitMsg);
+            var progress = await botClient.SendMessage(
+                update.UserChatKey.ChatId,
+                BotResponse.PleaseWaitMsg,
+                messageThreadId: update.Message?.MessageThreadId is long tid ? (int)tid : null);
 
             try
             {

@@ -144,12 +144,13 @@ Just send a text message — the bot replies using the current conversation cont
 Open “🎨 Images” in the menu:
 • 🖼 GPT IMAGE 1 — free text-to-image (within daily quota)
 • 🎨 GPT Image 2 — paid generation with size and quality options
-• 🛠 Edit photo — edit a photo from a text instruction (paid, GPT Image 2)
+• 🛠 Edit photo — edit a photo from a text instruction (paid, GPT Image 2); in groups: reply `/edit_image …` to a photo
 • 📝 Text from photo — OCR / extract text from an image
 • 🪄 Prompt from photo — create a text-to-image prompt from an uploaded picture
 
 🪄 Prompt from photo
 Send an image — the bot writes a prompt that can generate a similar picture (uses ChatGPT quota or ⭐).
+In groups and comments: reply to a photo with /prompt_from_image.
 
 ✨ Animate photo
 Turn a photo into a short animation (free within quota or paid with ⭐).
@@ -277,7 +278,9 @@ Enter a description up to {0} characters.
     <value>For image text recognition choose command from bot menu first</value>
   </data>
   <data name="SendPromptFromImagePhoto" xml:space="preserve">
-    <value>Send an image — I will create a prompt that can generate a similar picture</value>
+    <value>Send an image — I will create a prompt that can generate a similar picture
+
+You can also reply with /prompt_from_image to a photo message (including in comments).</value>
   </data>
   <data name="SendPromptFromImageCommandFirst" xml:space="preserve">
     <value>To create a prompt from an image, choose the command from the bot menu first</value>
@@ -492,6 +495,7 @@ Cost: {0:0.##}⭐ (no free quota)</value>
     <value>🛠 GPT Image 2 — edit
 
 Send a photo, then choose size/quality and describe the changes.
+Or reply to a photo: /edit_image make the sky pink
 Cost: {0:0.##}⭐ (no free quota)</value>
   </data>
   <data name="GptImageSendPhotoFirst" xml:space="preserve">

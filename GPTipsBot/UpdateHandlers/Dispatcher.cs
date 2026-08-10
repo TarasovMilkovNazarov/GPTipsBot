@@ -265,12 +265,10 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (update.IsGroupOrChannel &&
                      lastCommand?.Type is CommandType.TextRecognition
-                         or CommandType.PromptFromImage
                          or CommandType.Deposit
                          or CommandType.Donate
                          or CommandType.AnimatePhoto
-                         or CommandType.GptImage
-                         or CommandType.EditImage)
+                         or CommandType.GptImage)
             {
                 await botClient.SendMessage(userKey.ChatId, BotResponse.GroupCommandNotAvailable);
                 return;
@@ -384,7 +382,9 @@ namespace GPTipsBot.UpdateHandlers
         private static bool IsGroupFollowUp(UserCommand? lastCommand) =>
             lastCommand?.Type is CommandType.Image
                 or CommandType.ImageSquare
-                or CommandType.ImageRectangle;
+                or CommandType.ImageRectangle
+                or CommandType.PromptFromImage
+                or CommandType.EditImage;
 
         private Task ResolveInternalUserAsync(UpdateDecorator update)
         {
