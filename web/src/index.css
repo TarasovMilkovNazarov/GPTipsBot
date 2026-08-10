@@ -220,6 +220,10 @@ a.pill {
   min-height: 0;
 }
 
+.workspace.no-history {
+  grid-template-columns: 1fr;
+}
+
 .history {
   border-right: 1px solid var(--line);
   padding: 12px;

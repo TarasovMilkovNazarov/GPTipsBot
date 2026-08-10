@@ -932,7 +932,7 @@ export default function App() {
           <div className={`drawer-backdrop ${historyOpen ? 'open' : ''}`} onClick={() => setHistoryOpen(false)} />
         )}
 
-        <div className="workspace">
+        <div className={`workspace ${me?.isGuest ? 'no-history' : ''}`}>
           {!me?.isGuest && (
             <aside className={`history ${historyOpen ? 'open' : ''}`}>
               <h3>{t(lang, 'history')}</h3>
