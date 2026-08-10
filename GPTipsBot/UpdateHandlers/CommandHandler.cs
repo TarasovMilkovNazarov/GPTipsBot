@@ -226,6 +226,16 @@ namespace GPTipsBot.UpdateHandlers
                     reply = BotResponse.SendTextRecognitionImage;
                     replyMarkup = CancelInlineKeyboard;
                     break;
+                case PromptFromImageCommand:
+                    if (profile is { GptRequests: <= 0, Stars: <= 0 })
+                    {
+                        await SendNoFreeRequestsMessage(update);
+                        return;
+                    }
+
+                    reply = BotResponse.SendPromptFromImagePhoto;
+                    replyMarkup = CancelInlineKeyboard;
+                    break;
                 case ResetContextCommand:
                     reply = BotResponse.ContextUpdated;
                     update.Message.NewContext = true;
@@ -260,7 +270,7 @@ namespace GPTipsBot.UpdateHandlers
                         break;
                     }
 
-                    if (previousCommand?.Type is CommandType.Image or CommandType.TextRecognition)
+                    if (previousCommand?.Type is CommandType.Image or CommandType.TextRecognition or CommandType.PromptFromImage)
                     {
                         replyMarkup = GetCancelMarkup(update.IsGroupOrChannel);
                     }

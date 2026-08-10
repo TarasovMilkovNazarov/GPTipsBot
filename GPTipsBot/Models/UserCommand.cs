@@ -38,6 +38,7 @@ public enum CommandType
     GptImage = 24,
     EditImage = 25,
     ImagesMenu = 26,
+    PromptFromImage = 27,
 }
 
 public class Wallet: Entity

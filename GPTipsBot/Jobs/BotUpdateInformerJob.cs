@@ -27,30 +27,30 @@ public class BotUpdateInformerJob(ApplicationContext context, ITelegramBotClient
 
         for (var skip = 0; ; skip += batchSize)
         {
-            var userIdBatch = await context.Users
-                .Where(u => u.IsActive)
+            var userBatch = await context.Users
+                .Where(u => u.IsActive && u.TelegramId != null)
                 .OrderBy(u => u.Id)
-                .Select(u => u.Id)
+                .Select(u => new { u.Id, TelegramId = u.TelegramId!.Value })
                 .Skip(skip)
                 .Take(batchSize)
                 .ToListAsync();
 
-            if (!userIdBatch.Any())
+            if (!userBatch.Any())
                 break;
 
-            await Parallel.ForEachAsync(userIdBatch, parallelOptions, async (userId, token) =>
+            await Parallel.ForEachAsync(userBatch, parallelOptions, async (user, token) =>
             {
                 try
                 {
-                    await botClient.SendMessage(userId, message, ParseMode.MarkdownV2, cancellationToken: token);
+                    await botClient.SendMessage(user.TelegramId, message, ParseMode.MarkdownV2, cancellationToken: token);
                 }
                 catch (ApiRequestException ex) when (ex.ErrorCode is 403 or 400)
                 {
-                    kickedBotUserIds.Add(userId);
+                    kickedBotUserIds.Add(user.Id);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Unexpected error while sending advertisement for user: '{userId}'", userId);
+                    logger.LogError(ex, "Unexpected error while sending advertisement for user: '{userId}'", user.Id);
                 }
             });
 

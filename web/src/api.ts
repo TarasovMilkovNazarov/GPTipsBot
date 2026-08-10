@@ -192,6 +192,16 @@ export const api = {
     )
   },
 
+  promptFromImage: async (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return fetch('/api/images/prompt-from-image', {
+      method: 'POST',
+      credentials: 'include',
+      body: form,
+    }).then((r) => json<{ text: string }>(r))
+  },
+
   stt: async (file: Blob) => {
     const form = new FormData()
     form.append('file', file, 'voice.webm')

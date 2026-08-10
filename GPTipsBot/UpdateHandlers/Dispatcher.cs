@@ -25,6 +25,7 @@ namespace GPTipsBot.UpdateHandlers
         ITelegramBotClient botClient,
         RecoveryNotificationHandler recoveryNotificationHandler,
         ImageTextRecognitionHandler imageTextRecognitionHandler,
+        PromptFromImageHandler promptFromImageHandler,
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
         CommandHandler commandHandler,
@@ -48,6 +49,8 @@ namespace GPTipsBot.UpdateHandlers
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
+            await ResolveInternalUserAsync(update);
+
             var userKey = update.UserChatKey;
 
             if (!UserState.ContainsKey(userKey))
@@ -62,7 +65,8 @@ namespace GPTipsBot.UpdateHandlers
             }
             catch (DbUpdateException ex)
             {
-                logger.LogError(ex, "Couldn't create user with telegramId {userId} in database", newUser.Id);
+                logger.LogError(ex, "Couldn't create user with telegramId {userId} in database",
+                    update.TelegramUserId);
             }
 
             var language = botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
@@ -142,12 +146,18 @@ namespace GPTipsBot.UpdateHandlers
 
                 if (paymentProvider == PaymentCallbacks.StarsPrefix)
                 {
-                    await moneyService.SendInvoice(update.UserChatKey.Id, payStarsCount);
+                    await moneyService.SendInvoice(
+                        update.UserChatKey.Id,
+                        update.TelegramUserId,
+                        payStarsCount);
                 }
                 else if (paymentProvider == PaymentCallbacks.YooKassaPrefix)
                 {
                     await moneyService.CreateYooKassaPaymentAsync(
-                        update.UserChatKey.Id, payStarsCount, CancellationToken.None);
+                        update.UserChatKey.Id,
+                        update.TelegramUserId,
+                        payStarsCount,
+                        CancellationToken.None);
                 }
 
                 await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
@@ -255,6 +265,7 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (update.IsGroupOrChannel &&
                      lastCommand?.Type is CommandType.TextRecognition
+                         or CommandType.PromptFromImage
                          or CommandType.Deposit
                          or CommandType.Donate
                          or CommandType.AnimatePhoto
@@ -267,6 +278,10 @@ namespace GPTipsBot.UpdateHandlers
             else if (lastCommand?.Type == CommandType.TextRecognition)
             {
                 SetNextHandler(imageTextRecognitionHandler);
+            }
+            else if (lastCommand?.Type == CommandType.PromptFromImage)
+            {
+                SetNextHandler(promptFromImageHandler);
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
@@ -295,7 +310,10 @@ namespace GPTipsBot.UpdateHandlers
                     throw new ClientCanceledException(update.UserChatKey.ChatId, BotResponse.StarsDonationHint);
                 }
 
-                await moneyService.SendDonateInvoice(update.UserChatKey.Id, starsCount);
+                await moneyService.SendDonateInvoice(
+                    update.UserChatKey.Id,
+                    update.TelegramUserId,
+                    starsCount);
 
                 return;
             }
@@ -367,5 +385,16 @@ namespace GPTipsBot.UpdateHandlers
             lastCommand?.Type is CommandType.Image
                 or CommandType.ImageSquare
                 or CommandType.ImageRectangle;
+
+        private Task ResolveInternalUserAsync(UpdateDecorator update)
+        {
+            var existing = userService.GetByTelegramId(update.TelegramUserId);
+            if (existing != null && existing.Id != update.UserChatKey.Id)
+            {
+                update.BindInternalUserId(existing.Id);
+            }
+
+            return Task.CompletedTask;
+        }
     }
 }

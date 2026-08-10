@@ -177,6 +177,12 @@
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>Текст на изображении</value>
   </data>
+  <data name="PromptFromImageButton" xml:space="preserve">
+    <value>🪄 Промпт по фото</value>
+  </data>
+  <data name="PromptFromImage" xml:space="preserve">
+    <value>Составить промпт по изображению</value>
+  </data>
   <data name="DepositButton" xml:space="preserve">
     <value>⭐ Пополнить</value>
   </data>

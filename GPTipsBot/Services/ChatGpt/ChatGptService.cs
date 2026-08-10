@@ -73,6 +73,27 @@ namespace GPTipsBot.Services
             return SendMessageInternal(messages, modelId ?? GptModelCatalog.DefaultModelId, token)!;
         }
 
+        public Task<ChatCompletionCreateResponse> SendVisionOneOffAsync(
+            string systemPrompt,
+            string userPrompt,
+            byte[] imageBytes,
+            string imageMimeSubtype,
+            CancellationToken token,
+            string? modelId = null)
+        {
+            ChatMessage[] messages =
+            [
+                ChatMessage.FromSystem(systemPrompt),
+                ChatMessage.FromUser(
+                [
+                    MessageContent.TextContent(userPrompt),
+                    MessageContent.ImageBinaryContent(imageBytes, imageMimeSubtype),
+                ])
+            ];
+
+            return SendMessageInternal(messages, modelId ?? GptModelCatalog.DefaultModelId, token)!;
+        }
+
         public Task StartAnimatePhoto(
             string prompt,
             string imageFileId,
@@ -105,7 +126,7 @@ namespace GPTipsBot.Services
             _log.LogInformation(
                 "Send request to OpenAi service model={ModelId}: {messages}",
                 modelId,
-                messages.Last().Content);
+                messages.Last().Content ?? "[multimodal]");
 
             ChatCompletionCreateResponse? response = null;
 
@@ -151,6 +172,13 @@ namespace GPTipsBot.Services
         Task<ChatCompletionCreateResponse> SendOneOffAsync(
             string systemPrompt,
             string userPrompt,
+            CancellationToken token,
+            string? modelId = null);
+        Task<ChatCompletionCreateResponse> SendVisionOneOffAsync(
+            string systemPrompt,
+            string userPrompt,
+            byte[] imageBytes,
+            string imageMimeSubtype,
             CancellationToken token,
             string? modelId = null);
         Task StartAnimatePhoto(

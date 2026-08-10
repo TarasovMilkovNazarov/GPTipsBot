@@ -72,6 +72,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<CommandHandler>()
             .AddScoped<ImageGeneratorHandler>()
             .AddScoped<ImageTextRecognitionHandler>()
+            .AddScoped<PromptFromImageHandler>()
             .AddScoped<ChatGptHandler>()
             .AddScoped<GptImageHandler>()
             // services

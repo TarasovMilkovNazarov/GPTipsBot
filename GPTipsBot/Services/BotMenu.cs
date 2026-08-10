@@ -23,6 +23,7 @@ public class BotMenu
     public const string CancelCommand = "/cancel";
     public const string StopRequestCommand = "/stopRequest";
     public const string ImageTextRecognizeCommand = "/get_image_text";
+    public const string PromptFromImageCommand = "/prompt_from_image";
     public const string DepositCommand = "/deposit";
     public const string GetProfileCommand = "/profile";
     public const string DonateCommand = "/donate";
@@ -49,6 +50,7 @@ public class BotMenu
     public static CustomBotCommand ImageRectangle => new() { Command = ImageRectangleCommand, Type = CommandType.ImageRectangle };
     public static CustomBotCommand ImageSquare => new() { Command = ImageSquareCommand, Type = CommandType.ImageSquare };
     public static CustomBotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize, Type = CommandType.TextRecognition};
+    public static CustomBotCommand PromptFromImage => new() { Command = PromptFromImageCommand, Description = BotUI.PromptFromImage, Type = CommandType.PromptFromImage };
     public static CustomBotCommand ResetContext => new() { Command = ResetContextCommand, Description = BotUI.ResetContext, Type = CommandType.ResetContext};
     public static CustomBotCommand Help => new() { Command = HelpCommand, Description = BotUI.Help, Type = CommandType.Help};
     public static CustomBotCommand ChooseLang => new() { Command = ChooseLangCommand, Description = BotUI.SetLang, Type = CommandType.ChooseLanguage};
@@ -86,6 +88,7 @@ public class BotMenu
             Start,
             Image,
             ImageRecText,
+            PromptFromImage,
             AnimatePhoto,
             ResetContext,
             Help,

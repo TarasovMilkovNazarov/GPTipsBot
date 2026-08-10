@@ -408,6 +408,51 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Чтобы составить промпт по изображению, сначала выберите команду из меню.
+        /// </summary>
+        public static string SendPromptFromImageCommandFirst {
+            get {
+                return ResourceManager.GetString("SendPromptFromImageCommandFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Отправьте изображение — я составлю по нему промпт для генерации похожей картинки.
+        /// </summary>
+        public static string SendPromptFromImagePhoto {
+            get {
+                return ResourceManager.GetString("SendPromptFromImagePhoto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 🪄 Промпт по изображению:.
+        /// </summary>
+        public static string PromptFromImageHeader {
+            get {
+                return ResourceManager.GetString("PromptFromImageHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are an expert prompt engineer....
+        /// </summary>
+        public static string PromptFromImageSystemPrompt {
+            get {
+                return ResourceManager.GetString("PromptFromImageSystemPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create a detailed text-to-image prompt for this image..
+        /// </summary>
+        public static string PromptFromImageUserPrompt {
+            get {
+                return ResourceManager.GetString("PromptFromImageUserPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Отправьте фото для оживления. Опишите кратко, какие действия должны происходить. Например: &quot;смеются&quot;, &quot;танцуют&quot;, &quot;пишет&quot; и тд.
         /// </summary>
         public static string SendPhotoToAnimate {

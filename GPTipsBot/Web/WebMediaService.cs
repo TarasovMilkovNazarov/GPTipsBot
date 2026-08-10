@@ -2,6 +2,7 @@ using GPTipsBot.Config;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Repositories;
+using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.Services.YandexCloud;
 
@@ -12,7 +13,8 @@ public class WebMediaService(
     MessageRepository messageRepository,
     ImageCreatorService imageCreatorService,
     ITextRecognizer textRecognizer,
-    SpeechToTextService speechToTextService)
+    SpeechToTextService speechToTextService,
+    IGpt gptService)
 {
     public async Task<WebImageResult> GenerateImageAsync(
         long userId,
@@ -104,8 +106,81 @@ public class WebMediaService(
         }
     }
 
+    public async Task<string> PromptFromImageAsync(
+        long userId,
+        byte[] imageBytes,
+        string? contentType,
+        CancellationToken cancellationToken)
+    {
+        if (imageBytes.Length == 0)
+        {
+            throw new InvalidOperationException("Empty image");
+        }
+
+        var hold = await userService.TryReserveGptAsync(userId, GptModelCatalog.Default);
+        if (hold is null)
+        {
+            throw new InsufficientQuotaException("GPT free quota exhausted or insufficient Stars.");
+        }
+
+        try
+        {
+            var imageSubtype = ResolveImageSubtype(contentType);
+            var response = await gptService.SendVisionOneOffAsync(
+                BotResponse.PromptFromImageSystemPrompt,
+                BotResponse.PromptFromImageUserPrompt,
+                imageBytes,
+                imageSubtype,
+                cancellationToken,
+                GptModelCatalog.DefaultModelId);
+
+            var promptText = response.Choices.FirstOrDefault()?.Message.Content;
+            if (string.IsNullOrWhiteSpace(promptText))
+            {
+                throw new InvalidOperationException("Empty vision response");
+            }
+
+            await messageRepository.AddAsync(new MessageDto(new UserChatKey(userId, userId))
+            {
+                Text = promptText,
+                Role = MessageOwner.Assistant,
+                ContextBound = false,
+                BotMessageType = BotMessageType.ChatGptPrompt,
+            });
+            await userService.ConfirmAsync(hold.Id);
+            return promptText;
+        }
+        catch
+        {
+            await userService.ReleaseAsync(hold.Id);
+            throw;
+        }
+    }
+
     public Task<string> TranscribeAsync(byte[] audioBytes, CancellationToken cancellationToken) =>
         speechToTextService.RecognizeAudioAsync(audioBytes, cancellationToken);
+
+    private static string ResolveImageSubtype(string? contentType)
+    {
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            return "jpeg";
+        }
+
+        var slash = contentType.IndexOf('/');
+        if (slash < 0 || slash == contentType.Length - 1)
+        {
+            return "jpeg";
+        }
+
+        var subtype = contentType[(slash + 1)..].ToLowerInvariant();
+        return subtype switch
+        {
+            "jpg" => "jpeg",
+            "jpeg" or "png" or "webp" or "gif" => subtype,
+            _ => "jpeg",
+        };
+    }
 }
 
 public sealed record WebImageResult(string Base64, string MimeType, double StarsCharged);

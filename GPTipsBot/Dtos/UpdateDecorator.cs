@@ -27,7 +27,8 @@ namespace GPTipsBot.Dtos
             {
                 case UpdateType.PreCheckoutQuery:
                     Guard.Against.Null(telegramUpdate.PreCheckoutQuery);
-                    UserChatKey = telegramUpdate.PreCheckoutQuery.From.Id;
+                    TelegramUserId = telegramUpdate.PreCheckoutQuery.From.Id;
+                    UserChatKey = new UserChatKey(TelegramUserId, TelegramUserId, TelegramUserId);
                     User = UserMapper.Map(telegramUpdate.PreCheckoutQuery.From);
                     break;
                 case UpdateType.Message when IsSupportedChat(telegramUpdate.Message?.Chat.Type):
@@ -35,11 +36,12 @@ namespace GPTipsBot.Dtos
                     Guard.Against.Null(telegramUpdate.Message.From);
 
                     chatId = telegramUpdate.Message.Chat.Id;
+                    TelegramUserId = telegramUpdate.Message.From.Id;
 
                     User = UserMapper.Map(telegramUpdate.Message.From);
                     User.Source = TelegramService.GetSource(telegramUpdate.Message.Text);
                     Message = MessageMapper.Map(telegramUpdate.Message, chatId, Enums.MessageOwner.User);
-                    UserChatKey = new UserChatKey(telegramUpdate.Message.From.Id, chatId);
+                    UserChatKey = new UserChatKey(TelegramUserId, chatId, TelegramUserId);
 
                     if (telegramUpdate.Message.Type == MessageType.Photo)
                     {
@@ -54,10 +56,11 @@ namespace GPTipsBot.Dtos
                     Guard.Against.Null(telegramUpdate.CallbackQuery.Message);
                     Guard.Against.Null(telegramUpdate.CallbackQuery.Data);
                     chatId = telegramUpdate.CallbackQuery.Message.Chat.Id;
+                    TelegramUserId = telegramUpdate.CallbackQuery.From.Id;
                     Message = MessageMapper.Map(telegramUpdate.CallbackQuery.Message, chatId, Enums.MessageOwner.User);
-                    Message.UserId = telegramUpdate.CallbackQuery.From.Id;
+                    Message.UserId = TelegramUserId;
                     User = UserMapper.Map(telegramUpdate.CallbackQuery.From);
-                    UserChatKey = new UserChatKey(telegramUpdate.CallbackQuery.From.Id, chatId);
+                    UserChatKey = new UserChatKey(TelegramUserId, chatId, TelegramUserId);
                     Message.Text = telegramUpdate.CallbackQuery.Data;
                     break;
                 case UpdateType.MyChatMember:
@@ -67,9 +70,13 @@ namespace GPTipsBot.Dtos
                     if (oldChatMemberStatus == ChatMemberStatus.Kicked &&
                         newChatMemberStatus == ChatMemberStatus.Member)
                     {
+                        TelegramUserId = telegramUpdate.MyChatMember.From.Id;
                         User = UserMapper.Map(telegramUpdate.MyChatMember.From);
                         IsRecovered = true;
-                        UserChatKey = new UserChatKey(telegramUpdate.MyChatMember.From.Id, telegramUpdate.MyChatMember.Chat.Id);
+                        UserChatKey = new UserChatKey(
+                            TelegramUserId,
+                            telegramUpdate.MyChatMember.Chat.Id,
+                            TelegramUserId);
                     }
                     break;
                 default:
@@ -94,13 +101,28 @@ namespace GPTipsBot.Dtos
 
         public string? FileId { get; }
 
-        public UserChatKey UserChatKey { get; }
-        public UserDto User { get; }
+        public long TelegramUserId { get; private set; }
+        public UserChatKey UserChatKey { get; private set; }
+        public UserDto User { get; private set; }
 
         public MessageDto Message { get; }
         public bool IsRecovered { get; }
         public bool IsCommand => Command != null;
         public bool IsGroupOrChannel { get; }
+
+        /// <summary>
+        /// Rewrites internal user id after resolving by TelegramId (email-linked accounts).
+        /// </summary>
+        public void BindInternalUserId(long internalUserId)
+        {
+            User.Id = internalUserId;
+            User.TelegramId = TelegramUserId;
+            UserChatKey = new UserChatKey(internalUserId, UserChatKey.ChatId, TelegramUserId);
+            if (Message != null)
+            {
+                Message.UserId = internalUserId;
+            }
+        }
 
         /// <summary>
         /// Chat where feature replies should be delivered (always the source chat).

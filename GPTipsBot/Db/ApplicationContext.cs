@@ -1,5 +1,6 @@
 ﻿using GPTipsBot.Config;
 using GPTipsBot.Models;
+using GPTipsBot.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -33,6 +34,7 @@ namespace GPTipsBot.Db
             EnsureConversationMetasTable();
             EnsureAuthLoginEventsTable();
             EnsureEmailAuthColumns();
+            EnsureTelegramIdColumn();
             Guid = Guid.NewGuid();
         }
 
@@ -172,6 +174,21 @@ namespace GPTipsBot.Db
                 CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_Email_Unique"
                     ON "Users" ("Email")
                     WHERE "Email" IS NOT NULL;
+                """);
+        }
+
+        private void EnsureTelegramIdColumn()
+        {
+            Database.ExecuteSqlRaw($"""
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "TelegramId" bigint NULL;
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_TelegramId_Unique"
+                    ON "Users" ("TelegramId")
+                    WHERE "TelegramId" IS NOT NULL;
+                UPDATE "Users" SET "TelegramId" = "Id"
+                WHERE "TelegramId" IS NULL
+                  AND "Id" > 0
+                  AND "Id" < {WebAuthConstants.EmailIdBase}
+                  AND ("Email" IS NULL OR "Source" IS DISTINCT FROM 'web-email');
                 """);
         }
     }

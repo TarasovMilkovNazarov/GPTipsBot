@@ -26,6 +26,7 @@ namespace GPTipsBot.Services
 
         private static KeyboardButton ImagesMenuButton => new(BotUI.ImagesMenuButton);
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
+        private static KeyboardButton PromptFromImageButton => new(BotUI.PromptFromImageButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
         private static KeyboardButton CancelButton => new(BotUI.CancelButton);
@@ -53,6 +54,7 @@ namespace GPTipsBot.Services
                 { BotMenu.SetRuLangCommand, new() },
                 { BotMenu.SetEngLangCommand, new() },
                 { BotMenu.ImageTextRecognizeCommand, new() },
+                { BotMenu.PromptFromImageCommand, new() },
                 { BotMenu.DepositCommand, new() },
                 { BotMenu.GetProfileCommand, new() },
                 { BotMenu.AnimatePhotoCommand, new() },
@@ -76,6 +78,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.SetRuLangCommand].Add(BotUI.RussianButton);
                 ButtonToLocalizations[BotMenu.SetEngLangCommand].Add(BotUI.EnglishButton);
                 ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
+                ButtonToLocalizations[BotMenu.PromptFromImageCommand].Add(BotUI.PromptFromImageButton);
                 ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
                 ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
                 ButtonToLocalizations[BotMenu.AnimatePhotoCommand].Add(BotUI.AnimateButton);
@@ -131,7 +134,8 @@ namespace GPTipsBot.Services
             [
                 [ResetContextButton, ProfileButton],
                 [ModelButton, ImagesMenuButton],
-                [AnimatePhotoButton, HelpButton],
+                [PromptFromImageButton, AnimatePhotoButton],
+                [HelpButton],
             ]);
 
             keyboardMarkup.ResizeKeyboard = true;
@@ -234,6 +238,7 @@ namespace GPTipsBot.Services
                 [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageButton, BotMenu.ImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.PromptFromImageButton, BotMenu.PromptFromImageCommand)],
             ]);
         }
 

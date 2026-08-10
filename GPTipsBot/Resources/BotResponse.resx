@@ -146,6 +146,10 @@ https://gptips.skolkokomu.ru
 • 🎨 GPT Image 2 — платная генерация с выбором размера и качества
 • 🛠 Редактировать фото — изменить фото по инструкции (платно, GPT Image 2)
 • 📝 Текст с фото — распознать текст на изображении
+• 🪄 Промпт по фото — составить текстовый промпт по загруженному изображению
+
+🪄 Промпт по фото
+Отправьте картинку — бот опишет её промптом для генерации похожего изображения (в рамках лимита ChatGPT или за ⭐).
 
 ✨ Оживить фото
 Анимация загруженного фото (бесплатно в рамках лимита или за ⭐).
@@ -171,6 +175,7 @@ https://gptips.skolkokomu.ru
 /image — GPT IMAGE 1
 /gpt_image — GPT Image 2
 /edit_image — редактирование фото
+/prompt_from_image — промпт по фото
 /animate — оживить фото
 /get_image_text — распознать текст
 /deposit — пополнить баланс
@@ -282,6 +287,21 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
     <value>Для распознавания текста на изображении сначала выберите команду из меню</value>
+  </data>
+  <data name="SendPromptFromImagePhoto" xml:space="preserve">
+    <value>Отправьте изображение — я составлю по нему промпт для генерации похожей картинки</value>
+  </data>
+  <data name="SendPromptFromImageCommandFirst" xml:space="preserve">
+    <value>Чтобы составить промпт по изображению, сначала выберите команду из меню</value>
+  </data>
+  <data name="PromptFromImageHeader" xml:space="preserve">
+    <value>🪄 Промпт по изображению:</value>
+  </data>
+  <data name="PromptFromImageSystemPrompt" xml:space="preserve">
+    <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
+  </data>
+  <data name="PromptFromImageUserPrompt" xml:space="preserve">
+    <value>Create a detailed text-to-image prompt for this image.</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Профиль: {0} {1}

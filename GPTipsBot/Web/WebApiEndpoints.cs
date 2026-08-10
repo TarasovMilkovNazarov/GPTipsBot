@@ -34,6 +34,7 @@ public static class WebApiEndpoints
         api.MapDelete("/conversations/{contextId:long}", DeleteConversationAsync);
         api.MapPost("/chat", ChatAsync);
         api.MapPost("/images/generate", GenerateImageAsync);
+        api.MapPost("/images/prompt-from-image", PromptFromImageAsync);
         api.MapPost("/ocr", OcrAsync);
         api.MapPost("/stt", SttAsync);
         api.MapGet("/presets/images", () => Results.Ok(ImagePresets.All));
@@ -83,21 +84,38 @@ public static class WebApiEndpoints
             return Results.BadRequest(new { message = error });
         }
 
-        // Capture guest session before cookie is replaced by Telegram identity.
+        // Capture guest / link session before cookie is replaced by Telegram identity.
         var previousId = WebUserService.TryGetUserId(http);
-        long? guestToMerge = null;
-        if (previousId is < 0)
+        long? guestToMerge = previousId is < 0 ? previousId : null;
+        long? linkToUserId = null;
+        if (previousId is > 0)
         {
-            guestToMerge = previousId;
+            var sessionUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == previousId);
+            if (sessionUser is not null &&
+                !string.Equals(sessionUser.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                linkToUserId = previousId;
+            }
         }
-        else if (body.PreviousGuestId is < 0)
+
+        if (guestToMerge is null && body.PreviousGuestId is < 0)
         {
             guestToMerge = body.PreviousGuestId;
         }
 
         var lang = http.Request.Headers.AcceptLanguage.ToString();
         var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
-        var (user, isGuest) = await webUsers.EnsureTelegramUserAsync(payload, language);
+
+        User user;
+        bool isGuest;
+        try
+        {
+            (user, isGuest) = await webUsers.EnsureTelegramUserAsync(payload, language, linkToUserId);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
 
         if (guestToMerge is long guestId && guestId != user.Id)
         {
@@ -122,12 +140,15 @@ public static class WebApiEndpoints
         {
             var lang = http.Request.Headers.AcceptLanguage.ToString();
             var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+            var previousId = WebUserService.TryGetUserId(http);
+            long? linkToUserId = previousId is > 0 ? previousId : null;
             var (user, devCode) = await webUsers.RegisterEmailAsync(
                 body.Email ?? "",
                 body.Password ?? "",
                 body.FirstName,
                 language,
-                http.RequestAborted);
+                http.RequestAborted,
+                linkToUserId);
 
             return Results.Ok(new
             {
@@ -157,7 +178,12 @@ public static class WebApiEndpoints
         try
         {
             var previousId = WebUserService.TryGetUserId(http);
-            var user = await webUsers.ConfirmEmailAsync(body.Email ?? "", body.Code ?? "", http.RequestAborted);
+            long? linkToUserId = previousId is > 0 ? previousId : null;
+            var user = await webUsers.ConfirmEmailAsync(
+                body.Email ?? "",
+                body.Code ?? "",
+                http.RequestAborted,
+                linkToUserId);
 
             if (previousId is < 0)
             {
@@ -220,7 +246,12 @@ public static class WebApiEndpoints
         try
         {
             var previousId = WebUserService.TryGetUserId(http);
-            var user = await webUsers.LoginEmailAsync(body.Email ?? "", body.Password ?? "", http.RequestAborted);
+            long? linkToUserId = previousId is > 0 ? previousId : null;
+            var user = await webUsers.LoginEmailAsync(
+                body.Email ?? "",
+                body.Password ?? "",
+                http.RequestAborted,
+                linkToUserId);
 
             long? guestToMerge = previousId is < 0 ? previousId : body.PreviousGuestId is < 0 ? body.PreviousGuestId : null;
             if (guestToMerge is long guestId)
@@ -468,6 +499,7 @@ public static class WebApiEndpoints
                            body.Text ?? "",
                            body.NewConversation,
                            body.ContextId,
+                           WebUserService.IsGuest(http),
                            cancellationToken))
         {
             await http.Response.WriteAsync(chunk, cancellationToken);
@@ -542,6 +574,52 @@ public static class WebApiEndpoints
         try
         {
             var text = await media.RecognizeTextAsync(userId.Value, ms.ToArray(), http.RequestAborted);
+            return Results.Ok(new { text });
+        }
+        catch (InsufficientQuotaException ex)
+        {
+            return Results.Json(new { message = ex.Message }, statusCode: StatusCodes.Status402PaymentRequired);
+        }
+        catch (Exception ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> PromptFromImageAsync(
+        HttpContext http,
+        WebUserService webUsers,
+        WebMediaService media)
+    {
+        var userId = await RequireUserAsync(http, webUsers);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (!http.Request.HasFormContentType)
+        {
+            return Results.BadRequest(new { message = "multipart/form-data expected" });
+        }
+
+        var form = await http.Request.ReadFormAsync();
+        var file = form.Files.GetFile("file") ?? form.Files.FirstOrDefault();
+        if (file is null || file.Length == 0)
+        {
+            return Results.BadRequest(new { message = "file is required" });
+        }
+
+        await using var stream = file.OpenReadStream();
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+
+        try
+        {
+            var text = await media.PromptFromImageAsync(
+                userId.Value,
+                ms.ToArray(),
+                file.ContentType,
+                http.RequestAborted);
             return Results.Ok(new { text });
         }
         catch (InsufficientQuotaException ex)
@@ -763,6 +841,8 @@ public static class WebApiEndpoints
             lastName = profile.LastName,
             email = dbUser?.Email,
             emailConfirmed = dbUser?.EmailConfirmed == true,
+            telegramId = dbUser?.TelegramId,
+            telegramLinked = dbUser?.TelegramId is not null,
             stars = profile.Stars,
             free = new
             {

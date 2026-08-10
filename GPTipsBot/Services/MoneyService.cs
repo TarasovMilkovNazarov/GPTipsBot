@@ -131,9 +131,13 @@ public class MoneyService
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
             var response = string.Format(BotResponse.InsufficientBalance, amount);
+            var chatId = ResolveTelegramChatId(userId);
+            if (chatId is long telegramChatId)
+            {
+                await _botClient.SendMessage(telegramChatId, response,
+                    replyMarkup: inlineKeyboard);
+            }
 
-            await _botClient.SendMessage(userId, response,
-                replyMarkup: inlineKeyboard);
             return false;
         }
 
@@ -195,7 +199,7 @@ public class MoneyService
         return new InlineKeyboardMarkup(rows);
     }
 
-    public async Task SendInvoice(long userId, int starsCount = 100)
+    public async Task SendInvoice(long userId, long telegramChatId, int starsCount = 100)
     {
         var invoice = new Invoice
         {
@@ -211,7 +215,7 @@ public class MoneyService
         await _context.SaveChangesAsync();
 
         await _botClient.SendInvoice(
-            chatId: userId,
+            chatId: telegramChatId,
             title: BotResponse.InvoiceTitle,
             description: BotResponse.InvoiceText,
             payload: invoice.Id.ToString(),
@@ -224,7 +228,7 @@ public class MoneyService
 
     }
 
-    public async Task SendDonateInvoice(long userId, int starsCount = 100)
+    public async Task SendDonateInvoice(long userId, long telegramChatId, int starsCount = 100)
     {
         var invoice = new Invoice
         {
@@ -240,7 +244,7 @@ public class MoneyService
         await _context.SaveChangesAsync();
 
         await _botClient.SendInvoice(
-            chatId: userId,
+            chatId: telegramChatId,
             title: string.Format(BotResponse.DonateTitle, starsCount),
             description: BotResponse.DonateText,
             payload: $"{DonatePayloadPrefix}{invoice.Id}",
@@ -251,7 +255,11 @@ public class MoneyService
 
     }
 
-    public async Task CreateYooKassaPaymentAsync(long userId, int starsCount, CancellationToken cancellationToken)
+    public async Task CreateYooKassaPaymentAsync(
+        long userId,
+        long telegramChatId,
+        int starsCount,
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "CreateYooKassa: start userId={UserId} stars={Stars} enabled={Enabled} rubPerStar={RubPerStar}",
@@ -271,13 +279,13 @@ public class MoneyService
         if (!YooKassaConfig.IsEnabled)
         {
             _logger.LogInformation("CreateYooKassa: keys missing → sending UI stub");
-            await SendYooKassaPaymentStubAsync(userId, starsCount, cancellationToken);
+            await SendYooKassaPaymentStubAsync(telegramChatId, starsCount, cancellationToken);
             return;
         }
 
         var checkout = await CreateYooKassaCheckoutAsync(userId, starsCount, returnUrl: null, cancellationToken);
         await SendYooKassaPaymentLinkAsync(
-            userId,
+            telegramChatId,
             starsCount,
             checkout.RubAmount,
             checkout.ConfirmationUrl,
@@ -393,7 +401,7 @@ public class MoneyService
     }
 
     private async Task SendYooKassaPaymentStubAsync(
-        long userId, int starsCount, CancellationToken cancellationToken)
+        long telegramChatId, int starsCount, CancellationToken cancellationToken)
     {
         var rubValue = FormatRubAmount(starsCount);
         // Placeholder URL so the "Pay" button renders for screenshots.
@@ -401,11 +409,11 @@ public class MoneyService
             ? "https://yookassa.ru/"
             : $"https://t.me/{AppConfig.BotName.TrimStart('@')}";
 
-        await SendYooKassaPaymentLinkAsync(userId, starsCount, rubValue, stubUrl, invoiceId: null, cancellationToken);
+        await SendYooKassaPaymentLinkAsync(telegramChatId, starsCount, rubValue, stubUrl, invoiceId: null, cancellationToken);
     }
 
     private async Task SendYooKassaPaymentLinkAsync(
-        long userId,
+        long telegramChatId,
         int starsCount,
         string rubValue,
         string paymentUrl,
@@ -431,7 +439,7 @@ public class MoneyService
         }
 
         await _botClient.SendMessage(
-            userId,
+            telegramChatId,
             string.Format(BotResponse.YooKassaPaymentLinkResponse, starsCount, rubValue),
             replyMarkup: new InlineKeyboardMarkup(rows),
             cancellationToken: cancellationToken);
@@ -538,8 +546,12 @@ public class MoneyService
 
         if (invoice.UserId != query.From.Id)
         {
-            errorMessage = "Invoice user mismatch";
-            return false;
+            var payer = _userRepository.GetByTelegramId(query.From.Id);
+            if (payer is null || invoice.UserId != payer.Id)
+            {
+                errorMessage = "Invoice user mismatch";
+                return false;
+            }
         }
 
         if (invoice.Amount != query.TotalAmount || query.Currency != Currency.Stars)
@@ -751,11 +763,21 @@ public class MoneyService
             var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-            await _botClient.SendMessage(invoice.UserId,
-                BotResponse.YooKassaPaymentSucceeded + Environment.NewLine + Environment.NewLine + reply,
-                replyMarkup: replyMarkup,
-                cancellationToken: cancellationToken);
-            _logger.LogInformation("ConfirmYooKassa: user {UserId} notified", invoice.UserId);
+            var telegramChatId = ResolveTelegramChatId(invoice.UserId);
+            if (telegramChatId is null)
+            {
+                _logger.LogWarning(
+                    "ConfirmYooKassa: no TelegramId for user {UserId}, skip notify",
+                    invoice.UserId);
+            }
+            else
+            {
+                await _botClient.SendMessage(telegramChatId.Value,
+                    BotResponse.YooKassaPaymentSucceeded + Environment.NewLine + Environment.NewLine + reply,
+                    replyMarkup: replyMarkup,
+                    cancellationToken: cancellationToken);
+                _logger.LogInformation("ConfirmYooKassa: user {UserId} notified", invoice.UserId);
+            }
         }
         catch (Exception ex)
         {
@@ -828,6 +850,9 @@ public class MoneyService
 
     public static string FormatRubAmount(int starsCount) =>
         (ToKopecks(starsCount) / 100m).ToString("0.##", CultureInfo.InvariantCulture);
+
+    private long? ResolveTelegramChatId(long userId) =>
+        _userRepository.Get(userId)?.TelegramId;
 
     private static bool TryParseRubToKopecks(string? value, out long kopecks)
     {

@@ -233,6 +233,24 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Составить промпт по изображению.
+        /// </summary>
+        internal static string PromptFromImage {
+            get {
+                return ResourceManager.GetString("PromptFromImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 🪄 Промпт по фото.
+        /// </summary>
+        internal static string PromptFromImageButton {
+            get {
+                return ResourceManager.GetString("PromptFromImageButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 🌐 Язык.
         /// </summary>
         internal static string LangButton {

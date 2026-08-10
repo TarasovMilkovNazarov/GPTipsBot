@@ -158,6 +158,6 @@ public class GptImageHandler(
 
         await gramadsAdvertisementClient.SendPostToChat(chatId);
         await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
-        await advertisementTracker.TrySendAdvertisement(userId);
+        await advertisementTracker.TrySendAdvertisement(update.TelegramUserId);
     }
 }

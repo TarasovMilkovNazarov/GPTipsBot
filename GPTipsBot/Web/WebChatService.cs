@@ -30,6 +30,7 @@ public class WebChatService(
         string text,
         bool newConversation,
         long? continueContextId,
+        bool isGuest,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -44,11 +45,15 @@ public class WebChatService(
         var hold = await userService.TryReserveGptAsync(userId, model);
         if (hold is null)
         {
+            var freeQuotaExhausted = model.AllowFreeQuota;
             yield return Event("error", new
             {
                 code = "quota",
-                message = model.AllowFreeQuota
-                    ? "Free GPT quota exhausted. Top up Stars or wait for daily reset."
+                suggestRegister = isGuest && freeQuotaExhausted,
+                message = freeQuotaExhausted
+                    ? isGuest
+                        ? "Free GPT quota exhausted. Sign up to restore free limits."
+                        : "Free GPT quota exhausted. Top up Stars or wait for daily reset."
                     : $"Model {model.DisplayName} requires {model.StarsCost} Stars.",
             });
             yield break;

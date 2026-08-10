@@ -40,31 +40,31 @@ public class DeactivateKickedUsersJob(
 
         for (var skip = 0; ; skip += batchSize)
         {
-            var userIdBatch = await context.Users
-                .Where(u => u.IsActive)
+            var userBatch = await context.Users
+                .Where(u => u.IsActive && u.TelegramId != null)
                 .OrderBy(u => u.Id)
-                .Select(u => u.Id)
+                .Select(u => new { u.Id, TelegramId = u.TelegramId!.Value })
                 .Skip(skip)
                 .Take(batchSize)
                 .ToListAsync();
 
-            if (!userIdBatch.Any())
+            if (!userBatch.Any())
                 break;
 
-            await Parallel.ForEachAsync(userIdBatch, parallelOptions, async (userId, token) =>
+            await Parallel.ForEachAsync(userBatch, parallelOptions, async (user, token) =>
             {
                 var cts = new CancellationTokenSource();
                 try
                 {
-                    await botClient.SendChatAction(userId, ChatAction.Typing, cancellationToken: cts.Token);
+                    await botClient.SendChatAction(user.TelegramId, ChatAction.Typing, cancellationToken: cts.Token);
                 }
                 catch (ApiRequestException ex) when (ex.ErrorCode is 403 or 400)
                 {
-                    kickedBotUserIds.Add(userId);
+                    kickedBotUserIds.Add(user.Id);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Unexpected error while performing of deactivation user: '{userId}'", userId);
+                    logger.LogError(ex, "Unexpected error while performing of deactivation user: '{userId}'", user.Id);
                 }
                 finally
                 {

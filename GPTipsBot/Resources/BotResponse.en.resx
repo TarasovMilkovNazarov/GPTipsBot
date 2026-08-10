@@ -146,6 +146,10 @@ Open “🎨 Images” in the menu:
 • 🎨 GPT Image 2 — paid generation with size and quality options
 • 🛠 Edit photo — edit a photo from a text instruction (paid, GPT Image 2)
 • 📝 Text from photo — OCR / extract text from an image
+• 🪄 Prompt from photo — create a text-to-image prompt from an uploaded picture
+
+🪄 Prompt from photo
+Send an image — the bot writes a prompt that can generate a similar picture (uses ChatGPT quota or ⭐).
 
 ✨ Animate photo
 Turn a photo into a short animation (free within quota or paid with ⭐).
@@ -171,6 +175,7 @@ Useful commands
 /image — GPT IMAGE 1
 /gpt_image — GPT Image 2
 /edit_image — edit photo
+/prompt_from_image — prompt from photo
 /animate — animate photo
 /get_image_text — OCR
 /deposit — top up
@@ -270,6 +275,21 @@ Enter a description up to {0} characters.
   </data>
   <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
     <value>For image text recognition choose command from bot menu first</value>
+  </data>
+  <data name="SendPromptFromImagePhoto" xml:space="preserve">
+    <value>Send an image — I will create a prompt that can generate a similar picture</value>
+  </data>
+  <data name="SendPromptFromImageCommandFirst" xml:space="preserve">
+    <value>To create a prompt from an image, choose the command from the bot menu first</value>
+  </data>
+  <data name="PromptFromImageHeader" xml:space="preserve">
+    <value>🪄 Prompt from image:</value>
+  </data>
+  <data name="PromptFromImageSystemPrompt" xml:space="preserve">
+    <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
+  </data>
+  <data name="PromptFromImageUserPrompt" xml:space="preserve">
+    <value>Create a detailed text-to-image prompt for this image.</value>
   </data>
   <data name="InvoiceTitle" xml:space="preserve">
     <value>Add stars to account</value>

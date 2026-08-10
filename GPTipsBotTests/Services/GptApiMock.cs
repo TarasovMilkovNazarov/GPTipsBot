@@ -23,6 +23,14 @@ namespace GPTipsBotTests.Services
                     It.IsAny<CancellationToken>(),
                     It.IsAny<string?>()))
                 .ReturnsAsync(response);
+            mock.Setup(m => m.SendVisionOneOffAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<byte[]>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(response);
 
             return mock;
         }

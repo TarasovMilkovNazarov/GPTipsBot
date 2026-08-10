@@ -7,9 +7,11 @@ namespace GPTipsBot.Mapper
     {
         public static User Map(UserDto userDto)
         {
+            var telegramId = userDto.TelegramId ?? userDto.Id;
             var user = new User()
             {
                 Id = userDto.Id,
+                TelegramId = telegramId,
                 FirstName = userDto.FirstName,
                 LastName = userDto.LastName,
                 Source = userDto.Source,
@@ -25,6 +27,7 @@ namespace GPTipsBot.Mapper
             var user = new UserDto()
             {
                 Id = telegramUser.Id,
+                TelegramId = telegramUser.Id,
                 FirstName = telegramUser.FirstName,
                 LastName = telegramUser.LastName,
                 CreatedAt = DateTime.UtcNow,

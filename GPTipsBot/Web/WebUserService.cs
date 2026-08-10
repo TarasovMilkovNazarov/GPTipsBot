@@ -57,23 +57,53 @@ public class WebUserService(
 
     public async Task<(User User, bool IsGuest)> EnsureTelegramUserAsync(
         TelegramLoginPayload payload,
-        string? language = "en")
+        string? language = "en",
+        long? linkToUserId = null)
     {
+        if (linkToUserId is long survivorId && survivorId > 0)
+        {
+            var survivor = userRepository.Get(survivorId);
+            if (survivor is not null &&
+                !string.Equals(survivor.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                var linked = await LinkTelegramToUserAsync(survivor, payload, language ?? "en");
+                return (linked, false);
+            }
+        }
+
+        var existing = userRepository.GetByTelegramId(payload.Id);
+        if (existing is not null)
+        {
+            existing.FirstName = payload.FirstName;
+            existing.LastName = payload.LastName;
+            existing.IsActive = true;
+            await context.SaveChangesAsync();
+            EnsureSettings(existing.Id, language ?? "en");
+            return (userRepository.Get(existing.Id)!, false);
+        }
+
         var user = new User
         {
             Id = payload.Id,
+            TelegramId = payload.Id,
             FirstName = payload.FirstName,
             LastName = payload.LastName,
             Source = WebAuthConstants.TelegramSource,
             CreatedAt = DateTimeOffset.UtcNow,
             IsActive = true,
+            FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests,
+            FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations,
+            FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions,
+            FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations,
+            FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries,
         };
 
         await userService.CreateUpdateUser(user);
-        EnsureSettings(payload.Id, language ?? "en");
+        EnsureSettings(user.Id, language ?? "en");
         await context.SaveChangesAsync();
+        await GrantNewbieFreeQuotasAsync(user.Id);
 
-        return (userRepository.Get(payload.Id)!, false);
+        return (userRepository.GetByTelegramId(payload.Id)!, false);
     }
 
     public async Task<(User User, string? DevCode)> RegisterEmailAsync(
@@ -81,7 +111,8 @@ public class WebUserService(
         string password,
         string? firstName,
         string? language,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        long? linkToUserId = null)
     {
         var normalized = NormalizeEmail(email);
         if (normalized is null)
@@ -95,7 +126,8 @@ public class WebUserService(
         }
 
         var existing = await context.Users.FirstOrDefaultAsync(u => u.Email == normalized, cancellationToken);
-        if (existing is { EmailConfirmed: true })
+        if (existing is { EmailConfirmed: true } &&
+            (linkToUserId is null || existing.Id != linkToUserId))
         {
             throw new InvalidOperationException("Email already registered");
         }
@@ -106,6 +138,39 @@ public class WebUserService(
         var displayName = string.IsNullOrWhiteSpace(firstName)
             ? normalized.Split('@')[0]
             : firstName.Trim();
+
+        if (linkToUserId is long currentId && currentId > 0)
+        {
+            var current = userRepository.Get(currentId);
+            if (current is not null &&
+                current.TelegramId is not null &&
+                !string.Equals(current.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                if (existing is not null && existing.Id != currentId)
+                {
+                    // Drop unconfirmed email placeholder so we can attach to telegram account.
+                    existing.Email = null;
+                    existing.PasswordHash = null;
+                    existing.EmailConfirmCode = null;
+                    existing.EmailConfirmExpiresAt = null;
+                    existing.EmailConfirmed = false;
+                    await context.SaveChangesAsync(cancellationToken);
+                }
+
+                current.FirstName = displayName;
+                current.Email = normalized;
+                current.PasswordHash = hash;
+                current.EmailConfirmed = false;
+                current.EmailConfirmCode = code;
+                current.EmailConfirmExpiresAt = expires;
+                current.IsActive = true;
+                await context.SaveChangesAsync(cancellationToken);
+                userRepository.InvalidateCache(current.Id, current.TelegramId);
+
+                var devCodeLinked = await SendConfirmCodeAsync(normalized, code, cancellationToken);
+                return (userRepository.Get(current.Id)!, devCodeLinked);
+            }
+        }
 
         User user;
         if (existing is null)
@@ -140,6 +205,11 @@ public class WebUserService(
             existing.EmailConfirmExpiresAt = expires;
             existing.Source = WebAuthConstants.EmailSource;
             existing.IsActive = true;
+            existing.FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests;
+            existing.FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations;
+            existing.FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions;
+            existing.FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations;
+            existing.FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries;
             user = existing;
         }
 
@@ -170,34 +240,11 @@ public class WebUserService(
         return (user, devCode);
     }
 
-    public async Task<User> ConfirmEmailAsync(string email, string code, CancellationToken cancellationToken)
-    {
-        var normalized = NormalizeEmail(email)
-            ?? throw new ArgumentException("Invalid email");
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == normalized, cancellationToken)
-            ?? throw new InvalidOperationException("Account not found");
-
-        if (user.EmailConfirmed)
-        {
-            return user;
-        }
-
-        if (string.IsNullOrWhiteSpace(user.EmailConfirmCode) ||
-            user.EmailConfirmExpiresAt is null ||
-            user.EmailConfirmExpiresAt < DateTimeOffset.UtcNow ||
-            !string.Equals(user.EmailConfirmCode.Trim(), code.Trim(), StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException("Invalid or expired confirmation code");
-        }
-
-        user.EmailConfirmed = true;
-        user.EmailConfirmCode = null;
-        user.EmailConfirmExpiresAt = null;
-        await context.SaveChangesAsync(cancellationToken);
-        return userRepository.Get(user.Id)!;
-    }
-
-    public async Task<User> LoginEmailAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<User> LoginEmailAsync(
+        string email,
+        string password,
+        CancellationToken cancellationToken,
+        long? linkToUserId = null)
     {
         var normalized = NormalizeEmail(email)
             ?? throw new ArgumentException("Invalid email");
@@ -219,7 +266,93 @@ public class WebUserService(
             throw new InvalidOperationException("Account is disabled");
         }
 
+        if (linkToUserId is long currentId &&
+            currentId > 0 &&
+            currentId != user.Id)
+        {
+            var current = userRepository.Get(currentId);
+            if (current is not null &&
+                current.TelegramId is not null &&
+                !string.Equals(current.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                return await userService.MergeUsersAsync(currentId, user.Id);
+            }
+        }
+
         return userRepository.Get(user.Id)!;
+    }
+
+    public async Task<User> ConfirmEmailAsync(
+        string email,
+        string code,
+        CancellationToken cancellationToken,
+        long? linkToUserId = null)
+    {
+        var normalized = NormalizeEmail(email)
+            ?? throw new ArgumentException("Invalid email");
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == normalized, cancellationToken)
+            ?? throw new InvalidOperationException("Account not found");
+
+        if (!user.EmailConfirmed)
+        {
+            if (string.IsNullOrWhiteSpace(user.EmailConfirmCode) ||
+                user.EmailConfirmExpiresAt is null ||
+                user.EmailConfirmExpiresAt < DateTimeOffset.UtcNow ||
+                !string.Equals(user.EmailConfirmCode.Trim(), code.Trim(), StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Invalid or expired confirmation code");
+            }
+
+            user.EmailConfirmed = true;
+            user.EmailConfirmCode = null;
+            user.EmailConfirmExpiresAt = null;
+            await context.SaveChangesAsync(cancellationToken);
+            await GrantNewbieFreeQuotasAsync(user.Id);
+        }
+
+        if (linkToUserId is long currentId &&
+            currentId > 0 &&
+            currentId != user.Id)
+        {
+            var current = userRepository.Get(currentId);
+            if (current is not null &&
+                current.TelegramId is not null &&
+                !string.Equals(current.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                return await userService.MergeUsersAsync(currentId, user.Id);
+            }
+        }
+
+        return userRepository.Get(user.Id)!;
+    }
+
+    private async Task<User> LinkTelegramToUserAsync(
+        User survivor,
+        TelegramLoginPayload payload,
+        string language)
+    {
+        if (survivor.TelegramId is long existingTid && existingTid != payload.Id)
+        {
+            throw new InvalidOperationException("Account already linked to another Telegram");
+        }
+
+        var telegramAccount = userRepository.GetByTelegramId(payload.Id);
+        if (telegramAccount is not null && telegramAccount.Id != survivor.Id)
+        {
+            survivor = await userService.MergeUsersAsync(survivor.Id, telegramAccount.Id);
+        }
+        else if (survivor.TelegramId is null)
+        {
+            survivor.TelegramId = payload.Id;
+        }
+
+        survivor.FirstName = payload.FirstName;
+        survivor.LastName = payload.LastName;
+        survivor.IsActive = true;
+        await context.SaveChangesAsync();
+        userRepository.InvalidateCache(survivor.Id, payload.Id);
+        EnsureSettings(survivor.Id, language);
+        return userRepository.Get(survivor.Id)!;
     }
 
     public static long? TryGetUserId(HttpContext httpContext)
@@ -264,6 +397,23 @@ public class WebUserService(
             CreatedAt = DateTimeOffset.UtcNow,
         });
         await context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Sets free quotas to registered-newbie amounts (e.g. after email confirmation / first Telegram signup).
+    /// </summary>
+    public async Task GrantNewbieFreeQuotasAsync(long userId)
+    {
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(u => u.FreeGptRequests, PaymentConfig.NewbieFreeChatGptRequests)
+                .SetProperty(u => u.FreeImageGenerations, PaymentConfig.NewbieFreeImageGenerations)
+                .SetProperty(u => u.FreeImageTextRecognitions, PaymentConfig.NewbieFreeTextRecognitions)
+                .SetProperty(u => u.FreePhotoAnimations, PaymentConfig.NewbieFreePhotoAnimations)
+                .SetProperty(u => u.FreeSummaryRequests, PaymentConfig.NewbieFreeSummaries));
+
+        userRepository.InvalidateCache(userId);
     }
 
     private async Task<string?> SendConfirmCodeAsync(

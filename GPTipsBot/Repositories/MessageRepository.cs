@@ -222,12 +222,11 @@ namespace GPTipsBot.Repositories
         }
 
         /// <summary>
-        /// Moves web guest conversations onto a Telegram (or other) account after login.
-        /// Web chats use ChatId == UserId; only those rows are reassigned.
+        /// Moves web conversations (ChatId == UserId) from one account onto another after login/merge.
         /// </summary>
         public async Task TransferWebConversationsAsync(long fromUserId, long toUserId)
         {
-            if (fromUserId == toUserId || fromUserId >= 0)
+            if (fromUserId == toUserId)
             {
                 return;
             }

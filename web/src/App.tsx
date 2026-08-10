@@ -17,6 +17,7 @@ declare global {
 }
 
 type Mode = 'chat' | 'image' | 'ocr' | 'cabinet'
+type UploadIntent = 'ocr' | 'promptFromImage'
 type Theme = 'light' | 'dark'
 
 const THEME_KEY = 'gptips_theme'
@@ -63,6 +64,7 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false)
   const [authView, setAuthView] = useState<'method' | 'telegram' | 'email'>('method')
   const [authTab, setAuthTab] = useState<'login' | 'register' | 'confirm'>('login')
+  const [quotaUpsell, setQuotaUpsell] = useState(false)
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
   const [authName, setAuthName] = useState('')
@@ -72,6 +74,7 @@ export default function App() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
+  const uploadIntentRef = useRef<UploadIntent>('ocr')
   const bottomRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const skipRenameBlurRef = useRef(false)
@@ -218,12 +221,29 @@ export default function App() {
     host.appendChild(script)
   }, [authOpen, authView, botUsername])
 
-  function openAuth(view: 'method' | 'telegram' | 'email' = 'method') {
+  function openAuth(
+    view: 'method' | 'telegram' | 'email' = 'method',
+    options?: { preferRegister?: boolean; restoreHint?: boolean },
+  ) {
     setAuthOpen(true)
     setAuthView(view)
-    setAuthTab('login')
-    setAuthHint(null)
+    setAuthTab(options?.preferRegister ? 'register' : 'login')
+    setAuthHint(options?.restoreHint ? t(lang, 'authRestoreHint') : null)
     setError(null)
+  }
+
+  function promptGuestRegister() {
+    setError(null)
+    setQuotaUpsell(true)
+  }
+
+  function closeQuotaUpsell() {
+    setQuotaUpsell(false)
+  }
+
+  function continueFromQuotaUpsell(view: 'telegram' | 'email') {
+    setQuotaUpsell(false)
+    openAuth(view, { preferRegister: true, restoreHint: true })
   }
 
   const preferredModel = useMemo(
@@ -237,6 +257,7 @@ export default function App() {
     setMode('chat')
     setInput('')
     setError(null)
+    setQuotaUpsell(false)
     setHistoryOpen(false)
   }
 
@@ -321,6 +342,7 @@ export default function App() {
     if (!trimmed || busy) return
     setBusy(true)
     setError(null)
+    setQuotaUpsell(false)
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', text: trimmed }, { role: 'assistant', text: '' }])
     const newConversation = contextId == null
@@ -343,7 +365,12 @@ export default function App() {
           setContextId(payload.contextId)
         }
         if (type === 'error') {
-          setError(String(payload.message || 'Chat error'))
+          if (payload.code === 'quota' && payload.suggestRegister === true) {
+            promptGuestRegister()
+          } else {
+            setError(String(payload.message || 'Chat error'))
+            setQuotaUpsell(false)
+          }
         }
       })
       await refreshMe()
@@ -394,6 +421,34 @@ export default function App() {
       setBusy(false)
       setMode('chat')
     }
+  }
+
+  async function onPromptFromImageFile(file: File) {
+    setBusy(true)
+    setError(null)
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', text: `${t(lang, 'promptFromImage')}: ${file.name}` },
+    ])
+    try {
+      const { text } = await api.promptFromImage(file)
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', text: text || '(empty prompt)' },
+      ])
+      await refreshMe()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Prompt from image failed')
+    } finally {
+      setBusy(false)
+      setMode('chat')
+    }
+  }
+
+  function openImageUpload(intent: UploadIntent) {
+    uploadIntentRef.current = intent
+    setMode('ocr')
+    fileRef.current?.click()
   }
 
   async function toggleVoice() {
@@ -664,6 +719,40 @@ export default function App() {
           </div>
         </header>
 
+        {quotaUpsell && me?.isGuest && (
+          <div className="auth-backdrop upsell-backdrop" onClick={closeQuotaUpsell}>
+            <div className="auth-modal upsell-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+              <div className="upsell-badge">{lang === 'ru' ? 'Лимит исчерпан' : 'Limit reached'}</div>
+              <h2 className="upsell-title">{t(lang, 'quotaUpsellTitle')}</h2>
+              <p className="upsell-lead">{t(lang, 'quotaUpsellLead')}</p>
+              <ul className="upsell-benefits">
+                <li>{t(lang, 'quotaUpsellBenefitGpt')}</li>
+                <li>{t(lang, 'quotaUpsellBenefitImages')}</li>
+                <li>{t(lang, 'quotaUpsellBenefitSync')}</li>
+              </ul>
+              <div className="auth-methods">
+                <button
+                  className="auth-method telegram"
+                  type="button"
+                  onClick={() => continueFromQuotaUpsell('telegram')}
+                >
+                  {t(lang, 'authViaTelegram')}
+                </button>
+                <button
+                  className="auth-method email"
+                  type="button"
+                  onClick={() => continueFromQuotaUpsell('email')}
+                >
+                  {t(lang, 'authViaEmail')}
+                </button>
+              </div>
+              <button className="ghost upsell-dismiss" type="button" onClick={closeQuotaUpsell}>
+                {t(lang, 'quotaUpsellContinue')}
+              </button>
+            </div>
+          </div>
+        )}
+
         {authOpen && (
           <div className="auth-backdrop" onClick={() => !authBusy && setAuthOpen(false)}>
             <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
@@ -678,11 +767,19 @@ export default function App() {
 
               {authView === 'method' && (
                 <div className="auth-methods">
+                  {authHint && <p className="auth-choose">{authHint}</p>}
                   <p className="auth-choose">{t(lang, 'authChoose')}</p>
                   <button className="auth-method telegram" type="button" onClick={() => setAuthView('telegram')}>
                     {t(lang, 'authViaTelegram')}
                   </button>
-                  <button className="auth-method email" type="button" onClick={() => { setAuthView('email'); setAuthTab('login') }}>
+                  <button
+                    className="auth-method email"
+                    type="button"
+                    onClick={() => {
+                      setAuthView('email')
+                      setAuthTab(authTab === 'register' ? 'register' : 'login')
+                    }}
+                  >
                     {t(lang, 'authViaEmail')}
                   </button>
                 </div>
@@ -1040,10 +1137,7 @@ export default function App() {
                     className="icon-btn"
                     type="button"
                     title={t(lang, 'attach')}
-                    onClick={() => {
-                      setMode('ocr')
-                      fileRef.current?.click()
-                    }}
+                    onClick={() => openImageUpload('ocr')}
                   >
                     +
                   </button>
@@ -1088,12 +1182,16 @@ export default function App() {
                 <button
                   className="pill"
                   type="button"
-                  onClick={() => {
-                    setMode('ocr')
-                    fileRef.current?.click()
-                  }}
+                  onClick={() => openImageUpload('ocr')}
                 >
                   {t(lang, 'ocr')}
+                </button>
+                <button
+                  className="pill"
+                  type="button"
+                  onClick={() => openImageUpload('promptFromImage')}
+                >
+                  {t(lang, 'promptFromImage')}
                 </button>
                 <button
                   className="pill"
@@ -1136,6 +1234,18 @@ export default function App() {
                 <div className="presets">
                   <h2>{t(lang, 'quickTasks')}</h2>
                   <div className="preset-grid">
+                    <button
+                      type="button"
+                      className="preset-card"
+                      onClick={() => openImageUpload('promptFromImage')}
+                    >
+                      <strong>{t(lang, 'promptFromImage')}</strong>
+                      <span>
+                        {lang === 'ru'
+                          ? 'Составить промпт по загруженному изображению'
+                          : 'Create a text-to-image prompt from a photo'}
+                      </span>
+                    </button>
                     <button
                       type="button"
                       className="preset-card"
@@ -1182,7 +1292,13 @@ export default function App() {
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0]
-          if (file) void onOcrFile(file)
+          if (file) {
+            if (uploadIntentRef.current === 'promptFromImage') {
+              void onPromptFromImageFile(file)
+            } else {
+              void onOcrFile(file)
+            }
+          }
           e.target.value = ''
         }}
       />

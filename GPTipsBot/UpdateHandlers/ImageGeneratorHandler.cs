@@ -76,7 +76,7 @@ namespace GPTipsBot.UpdateHandlers
 
             await gramadsAdvertisementClient.SendPostToChat(chatId);
             await telejetAdClient.SendToBapAsync(update.TelegramUpdate, "activity");
-            await advertisementTracker.TrySendAdvertisement(userKey.Id);
+            await advertisementTracker.TrySendAdvertisement(update.TelegramUserId);
         }
     }
 }

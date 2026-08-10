@@ -3,6 +3,7 @@
     public class UserDto
     {
         public long Id { get; set; }
+        public long? TelegramId { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Source { get; set; }

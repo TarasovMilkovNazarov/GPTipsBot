@@ -6,6 +6,8 @@ namespace GPTipsBot.Models
     public class User
     {
         public long Id { get; set; }
+        /// <summary>Telegram user id when linked; null for email/guest-only accounts.</summary>
+        public long? TelegramId { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Source { get; set; }
