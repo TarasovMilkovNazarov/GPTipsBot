@@ -47,6 +47,7 @@ export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [presets, setPresets] = useState<ImagePreset[]>([])
   const [botUsername, setBotUsername] = useState('GPTipsBot')
+  const [telegramBotUrl, setTelegramBotUrl] = useState('https://t.me/GPTipsBot')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [contextId, setContextId] = useState<number | null>(null)
@@ -82,6 +83,12 @@ export default function App() {
   const refreshMe = useCallback(async () => {
     const profile = await api.me()
     setMe(profile)
+    try {
+      const link = await api.telegramLink()
+      setTelegramBotUrl(link.url)
+    } catch {
+      /* keep previous url */
+    }
     return profile
   }, [])
 
@@ -112,8 +119,15 @@ export default function App() {
         setModels(modelData.models)
         setPresets(presetData)
         setBotUsername(cfg.botUsername)
+        setTelegramBotUrl(`https://t.me/${cfg.botUsername.replace(/^@/, '')}`)
         setPaymentInfo(packages)
         await refreshConversations()
+        try {
+          const link = await api.telegramLink()
+          setTelegramBotUrl(link.url)
+        } catch {
+          /* guest / unauthorized — keep plain bot url */
+        }
 
         const params = new URLSearchParams(window.location.search)
         const openCabinet = params.get('cabinet') === '1' || params.get('paid') === '1'
@@ -649,7 +663,6 @@ export default function App() {
   }
 
   const showHero = messages.length === 0 && mode !== 'cabinet'
-  const telegramBotUrl = `https://t.me/${botUsername.replace(/^@/, '')}`
 
   return (
     <div className="app">

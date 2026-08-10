@@ -25,6 +25,7 @@ public static class WebApiEndpoints
         api.MapPost("/auth/email/login", EmailLoginAsync);
         api.MapPost("/auth/logout", LogoutAsync);
         api.MapGet("/me", GetMeAsync);
+        api.MapGet("/me/telegram-link", GetTelegramLinkAsync);
         api.MapGet("/models", GetModelsAsync);
         api.MapPut("/models/preferred", SetPreferredModelAsync);
         api.MapGet("/conversations", ListConversationsAsync);
@@ -292,6 +293,49 @@ public static class WebApiEndpoints
         }
 
         return Results.Ok(await BuildMeAsync(userId.Value, webUsers, http));
+    }
+
+    private static async Task<IResult> GetTelegramLinkAsync(
+        HttpContext http,
+        WebUserService webUsers,
+        ApplicationContext db,
+        AccountLinkTokenService linkTokens)
+    {
+        var userId = await RequireUserAsync(http, webUsers);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var botUsername = ResolveBotUsername();
+        var baseUrl = $"https://t.me/{botUsername}";
+        var dbUser = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId.Value);
+        var isGuest = userId < 0 ||
+                      string.Equals(dbUser?.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal);
+
+        // Deep-link only for confirmed email accounts that still need Telegram attached
+        // (or already linked — idempotent token still useful for open-bot UX).
+        var needsLinkToken = !isGuest &&
+                             dbUser?.EmailConfirmed == true &&
+                             !string.IsNullOrWhiteSpace(dbUser.Email);
+
+        if (!needsLinkToken)
+        {
+            return Results.Ok(new
+            {
+                url = baseUrl,
+                deepLink = false,
+                telegramLinked = dbUser?.TelegramId is not null,
+            });
+        }
+
+        var token = linkTokens.Create(userId.Value);
+        return Results.Ok(new
+        {
+            url = $"{baseUrl}?start={token}",
+            deepLink = true,
+            telegramLinked = dbUser?.TelegramId is not null,
+        });
     }
 
     private static IResult GetModelsAsync(UserService users, HttpContext http, WebUserService webUsers)
@@ -672,9 +716,7 @@ public static class WebApiEndpoints
 
     private static IResult GetPublicConfigAsync()
     {
-        var botUsername = Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME")
-                          ?? AppConfig.BotName?.TrimStart('@')
-                          ?? "GPTipsBot";
+        var botUsername = ResolveBotUsername();
         return Results.Ok(new
         {
             botUsername,
@@ -682,6 +724,11 @@ public static class WebApiEndpoints
             yookassaEnabled = YooKassaConfig.IsEnabled,
         });
     }
+
+    private static string ResolveBotUsername() =>
+        Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME")?.TrimStart('@')
+        ?? AppConfig.BotName?.TrimStart('@')
+        ?? "GPTipsBot";
 
     private static IResult GetPaymentPackagesAsync()
     {

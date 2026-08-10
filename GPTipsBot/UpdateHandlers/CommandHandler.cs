@@ -38,13 +38,15 @@ namespace GPTipsBot.UpdateHandlers
         MoneyService moneyService,
         IJobService jobService,
         IGpt gptService,
-        IGptImageSessionCache gptImageSessionCache)
+        IGptImageSessionCache gptImageSessionCache,
+        AccountLinkTokenService accountLinkTokenService)
         : BaseMessageHandler
     {
         private readonly ApplicationContext _context = context;
         private readonly ILogger<CommandHandler> _logger = logger;
         private readonly InvoiceRepository _invoiceRepository = invoiceRepository;
         private readonly MoneyService _moneyService = moneyService;
+        private readonly AccountLinkTokenService _accountLinkTokenService = accountLinkTokenService;
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
@@ -87,7 +89,7 @@ namespace GPTipsBot.UpdateHandlers
                             ? new BotMenu().GetGroupBotCommands()
                             : new BotMenu().GetBotCommands(),
                         BotCommandScope.Chat(chatId));
-                    reply = BotResponse.Greeting;
+                    reply = await HandleStartDeepLinkAsync(update);
                     break;
                 case GetProfileCommand:
                     reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
@@ -666,6 +668,60 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             return sb.ToString();
+        }
+
+        private async Task<string> HandleStartDeepLinkAsync(UpdateDecorator update)
+        {
+            var greeting = BotResponse.Greeting;
+            if (!UpdateDecorator.TryGetCommandArgument(
+                    update.Message?.Text,
+                    StartCommand,
+                    out var startPayload))
+            {
+                return greeting;
+            }
+
+            if (!_accountLinkTokenService.IsLinkToken(startPayload))
+            {
+                // Legacy /start referral payloads etc. — keep greeting only.
+                return greeting;
+            }
+
+            if (!_accountLinkTokenService.TryValidate(startPayload, out var emailUserId))
+            {
+                return $"{greeting}\n\n{BotResponse.AccountLinkTokenInvalid}";
+            }
+
+            var emailUser = userService.GetById(emailUserId);
+            if (emailUser is null ||
+                string.IsNullOrWhiteSpace(emailUser.Email) ||
+                !emailUser.EmailConfirmed)
+            {
+                return $"{greeting}\n\n{BotResponse.AccountLinkTokenInvalid}";
+            }
+
+            try
+            {
+                var linked = await userService.LinkTelegramIdToUserAsync(
+                    emailUserId,
+                    update.TelegramUserId,
+                    update.User.FirstName,
+                    update.User.LastName);
+
+                update.BindInternalUserId(linked.Id);
+                return $"{greeting}\n\n{BotResponse.AccountLinkSuccess}";
+            }
+            catch (InvalidOperationException ex) when (
+                ex.Message.Contains("already linked to another Telegram", StringComparison.Ordinal))
+            {
+                return $"{greeting}\n\n{BotResponse.AccountLinkAlreadyLinked}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to link Telegram {TelegramId} to user {UserId}",
+                    update.TelegramUserId, emailUserId);
+                return $"{greeting}\n\n{BotResponse.AccountLinkFailed}";
+            }
         }
 
         private async Task SendNoFreeRequestsMessage(UpdateDecorator update)

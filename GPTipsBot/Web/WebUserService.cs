@@ -331,28 +331,13 @@ public class WebUserService(
         TelegramLoginPayload payload,
         string language)
     {
-        if (survivor.TelegramId is long existingTid && existingTid != payload.Id)
-        {
-            throw new InvalidOperationException("Account already linked to another Telegram");
-        }
-
-        var telegramAccount = userRepository.GetByTelegramId(payload.Id);
-        if (telegramAccount is not null && telegramAccount.Id != survivor.Id)
-        {
-            survivor = await userService.MergeUsersAsync(survivor.Id, telegramAccount.Id);
-        }
-        else if (survivor.TelegramId is null)
-        {
-            survivor.TelegramId = payload.Id;
-        }
-
-        survivor.FirstName = payload.FirstName;
-        survivor.LastName = payload.LastName;
-        survivor.IsActive = true;
-        await context.SaveChangesAsync();
-        userRepository.InvalidateCache(survivor.Id, payload.Id);
-        EnsureSettings(survivor.Id, language);
-        return userRepository.Get(survivor.Id)!;
+        var linked = await userService.LinkTelegramIdToUserAsync(
+            survivor.Id,
+            payload.Id,
+            payload.FirstName,
+            payload.LastName);
+        EnsureSettings(linked.Id, language);
+        return userRepository.Get(linked.Id)!;
     }
 
     public static long? TryGetUserId(HttpContext httpContext)

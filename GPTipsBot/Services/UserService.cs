@@ -484,6 +484,50 @@ namespace GPTipsBot.Services
             return _userRepository.Get(survivorId)!;
         }
 
+        /// <summary>
+        /// Attaches <paramref name="telegramId"/> to <paramref name="survivorId"/>, merging a separate
+        /// Telegram-only account into the survivor when needed.
+        /// </summary>
+        public async Task<User> LinkTelegramIdToUserAsync(
+            long survivorId,
+            long telegramId,
+            string? firstName = null,
+            string? lastName = null)
+        {
+            var survivor = _userRepository.Get(survivorId)
+                           ?? throw new InvalidOperationException("Survivor user not found");
+
+            if (survivor.TelegramId is long existingTid && existingTid != telegramId)
+            {
+                throw new InvalidOperationException("Account already linked to another Telegram");
+            }
+
+            var telegramAccount = _userRepository.GetByTelegramId(telegramId);
+            if (telegramAccount is not null && telegramAccount.Id != survivor.Id)
+            {
+                survivor = await MergeUsersAsync(survivor.Id, telegramAccount.Id);
+            }
+            else if (survivor.TelegramId is null)
+            {
+                survivor.TelegramId = telegramId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(firstName))
+            {
+                survivor.FirstName = firstName;
+            }
+
+            if (lastName is not null)
+            {
+                survivor.LastName = lastName;
+            }
+
+            survivor.IsActive = true;
+            await _context.SaveChangesAsync();
+            _userRepository.InvalidateCache(survivor.Id, telegramId);
+            return _userRepository.Get(survivor.Id)!;
+        }
+
         private static bool IsUniqueViolation(DbUpdateException ex) =>
             ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
 

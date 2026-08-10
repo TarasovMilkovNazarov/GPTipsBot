@@ -829,6 +829,30 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        public static string AccountLinkSuccess {
+            get {
+                return ResourceManager.GetString("AccountLinkSuccess", resourceCulture);
+            }
+        }
+
+        public static string AccountLinkTokenInvalid {
+            get {
+                return ResourceManager.GetString("AccountLinkTokenInvalid", resourceCulture);
+            }
+        }
+
+        public static string AccountLinkAlreadyLinked {
+            get {
+                return ResourceManager.GetString("AccountLinkAlreadyLinked", resourceCulture);
+            }
+        }
+
+        public static string AccountLinkFailed {
+            get {
+                return ResourceManager.GetString("AccountLinkFailed", resourceCulture);
+            }
+        }
+
         public static string ChooseModel {
             get {
                 return ResourceManager.GetString("ChooseModel", resourceCulture);

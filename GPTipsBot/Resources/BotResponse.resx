@@ -529,6 +529,18 @@ https://gptips.skolkokomu.ru</value>
   <data name="InlineRunButton" xml:space="preserve">
     <value>▶️ Получить</value>
   </data>
+  <data name="AccountLinkSuccess" xml:space="preserve">
+    <value>✅ Telegram привязан к вашему аккаунту на сайте. Баланс ⭐ и лимиты теперь общие.</value>
+  </data>
+  <data name="AccountLinkTokenInvalid" xml:space="preserve">
+    <value>⚠️ Ссылка для привязки недействительна или устарела. Откройте бота снова с сайта.</value>
+  </data>
+  <data name="AccountLinkAlreadyLinked" xml:space="preserve">
+    <value>⚠️ Этот аккаунт на сайте уже привязан к другому Telegram.</value>
+  </data>
+  <data name="AccountLinkFailed" xml:space="preserve">
+    <value>⚠️ Не удалось привязать Telegram. Попробуйте позже или войдите через Telegram Login на сайте.</value>
+  </data>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Выберите модель ChatGPT
 

@@ -524,6 +524,18 @@ Example: @GPTipsBot image a cat in space</value>
   <data name="InlineRunButton" xml:space="preserve">
     <value>▶️ Get</value>
   </data>
+  <data name="AccountLinkSuccess" xml:space="preserve">
+    <value>✅ Telegram is linked to your website account. Stars and free quotas are now shared.</value>
+  </data>
+  <data name="AccountLinkTokenInvalid" xml:space="preserve">
+    <value>⚠️ This link is invalid or expired. Open the bot again from the website.</value>
+  </data>
+  <data name="AccountLinkAlreadyLinked" xml:space="preserve">
+    <value>⚠️ That website account is already linked to another Telegram.</value>
+  </data>
+  <data name="AccountLinkFailed" xml:space="preserve">
+    <value>⚠️ Could not link Telegram. Try again later or use Telegram Login on the website.</value>
+  </data>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Choose a ChatGPT model
 

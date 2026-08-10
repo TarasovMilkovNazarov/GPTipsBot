@@ -89,6 +89,7 @@ namespace GPTipsBot.Extensions
             .AddSingleton<SpeechToTextService>()
             .AddSingleton<RateLimiter>()
             .AddSingleton<InlinePendingStore>()
+            .AddSingleton<AccountLinkTokenService>()
             .AddScoped<IGpt, ChatGptService>()
             .AddSingleton<OpenAiVpnConnectivityService>()
             .AddSingleton<IJobService, JobService>()

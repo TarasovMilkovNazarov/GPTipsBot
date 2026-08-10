@@ -5,6 +5,8 @@ export type Me = {
   lastName?: string | null
   email?: string | null
   emailConfirmed?: boolean
+  telegramId?: number | null
+  telegramLinked?: boolean
   stars: number
   free: { gpt: number; images: number; ocr: number; animations: number; summaries: number }
   model: { id: string; name: string }
@@ -58,6 +60,11 @@ export const api = {
     fetch('/api/auth/guest', { method: 'POST', credentials: 'include' }).then((r) => json<Me>(r)),
 
   me: () => fetch('/api/me', { credentials: 'include' }).then((r) => json<Me>(r)),
+
+  telegramLink: () =>
+    fetch('/api/me/telegram-link', { credentials: 'include' }).then((r) =>
+      json<{ url: string; deepLink: boolean; telegramLinked: boolean }>(r),
+    ),
 
   logout: () =>
     fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then((r) => json<{ ok: boolean }>(r)),

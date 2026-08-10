@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Web;
+using GPTipsBot.Services;
 
 namespace GPTipsBot.Services
 {
@@ -15,12 +16,35 @@ namespace GPTipsBot.Services
         }
 
         public static string? GetSource(string? text){
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text) ||
+                !text.StartsWith("/start", StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
 
-            return text.StartsWith("/start") ? text.Substring("/start".Length).Trim() : null;
+            var rest = text["/start".Length..].TrimStart();
+            if (rest.StartsWith('@'))
+            {
+                var space = rest.IndexOf(' ');
+                rest = space < 0 ? string.Empty : rest[(space + 1)..].Trim();
+            }
+            else
+            {
+                rest = rest.Trim();
+            }
+
+            if (string.IsNullOrEmpty(rest))
+            {
+                return null;
+            }
+
+            // Account-link deep links are not referral sources.
+            if (rest.StartsWith(AccountLinkTokenService.Prefix, StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            return rest;
         }
     }
 }
