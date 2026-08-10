@@ -57,7 +57,9 @@ MVP: guest cookie sessions, Telegram Login (shared wallet), streaming chat, mode
 В BotFather нужно включить:
 
 1. `/setinline` — Inline Mode;
-2. `/setinlinefeedback` — Enabled (иначе бот не получит `chosen_inline_result` и не подставит ответ/картинку).
+2. `/setinlinefeedback` — Enabled (тогда ответ подставится сам после выбора результата).
+
+Если feedback выключен — после отправки нажмите кнопку **▶️ Получить** под сообщением.
 
 При **включённом privacy mode** Telegram присылает боту только команды, упоминания и reply. Чтобы бот видел все сообщения группы для `/summary`, выключите Group Privacy: `@BotFather` → `/setprivacy` → Disable.
 

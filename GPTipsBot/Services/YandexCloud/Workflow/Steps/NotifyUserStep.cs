@@ -89,7 +89,8 @@ public class NotifyUserStep(
                 new InputMediaPhoto(photo)
                 {
                     Caption = TruncateCaption(data.Prompt),
-                });
+                },
+                replyMarkup: null);
         }
         else
         {

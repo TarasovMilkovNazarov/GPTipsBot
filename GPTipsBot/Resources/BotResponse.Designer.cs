@@ -823,6 +823,12 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        public static string InlineRunButton {
+            get {
+                return ResourceManager.GetString("InlineRunButton", resourceCulture);
+            }
+        }
+
         public static string ChooseModel {
             get {
                 return ResourceManager.GetString("ChooseModel", resourceCulture);

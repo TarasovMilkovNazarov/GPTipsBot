@@ -57,15 +57,38 @@ namespace GPTipsBot.Dtos
                     break;
                 case UpdateType.CallbackQuery:
                     Guard.Against.Null(telegramUpdate.CallbackQuery);
-                    Guard.Against.Null(telegramUpdate.CallbackQuery.Message);
                     Guard.Against.Null(telegramUpdate.CallbackQuery.Data);
-                    chatId = telegramUpdate.CallbackQuery.Message.Chat.Id;
+                    Guard.Against.Null(telegramUpdate.CallbackQuery.From);
                     TelegramUserId = telegramUpdate.CallbackQuery.From.Id;
-                    Message = MessageMapper.Map(telegramUpdate.CallbackQuery.Message, chatId, Enums.MessageOwner.User);
-                    Message.UserId = TelegramUserId;
                     User = UserMapper.Map(telegramUpdate.CallbackQuery.From);
-                    UserChatKey = new UserChatKey(TelegramUserId, chatId, TelegramUserId);
-                    Message.Text = telegramUpdate.CallbackQuery.Data;
+
+                    if (telegramUpdate.CallbackQuery.Message != null)
+                    {
+                        chatId = telegramUpdate.CallbackQuery.Message.Chat.Id;
+                        Message = MessageMapper.Map(telegramUpdate.CallbackQuery.Message, chatId, Enums.MessageOwner.User);
+                        Message.UserId = TelegramUserId;
+                        Message.Text = telegramUpdate.CallbackQuery.Data;
+                        UserChatKey = new UserChatKey(TelegramUserId, chatId, TelegramUserId);
+                    }
+                    else if (!string.IsNullOrEmpty(telegramUpdate.CallbackQuery.InlineMessageId))
+                    {
+                        // Inline via-bot messages have no chat Message — only inline_message_id.
+                        UserChatKey = new UserChatKey(TelegramUserId, TelegramUserId, TelegramUserId);
+                        Message = new MessageDto(UserChatKey)
+                        {
+                            Text = telegramUpdate.CallbackQuery.Data,
+                            TelegramId = TelegramUserId,
+                            UserId = TelegramUserId,
+                            Role = Enums.MessageOwner.User,
+                            ChatType = ChatType.Private,
+                            Type = MessageType.Text,
+                            CreatedAt = DateTime.UtcNow,
+                        };
+                    }
+                    else
+                    {
+                        throw new IgnoreMessageTypeException(telegramUpdate.Type);
+                    }
                     break;
                 case UpdateType.MyChatMember:
                     Guard.Against.Null(telegramUpdate.MyChatMember);

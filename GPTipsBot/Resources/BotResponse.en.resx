@@ -475,7 +475,9 @@ Other commands work in a private chat with the bot.</value>
   </data>
   <data name="InlineAskPending" xml:space="preserve">
     <value>⏳ GPTipsBot is thinking…
-Question: {0}</value>
+Question: {0}
+
+Tap “▶️ Get” to show the answer.</value>
   </data>
   <data name="InlineImageTitle" xml:space="preserve">
     <value>🖼 Image: {0}</value>
@@ -488,7 +490,9 @@ Question: {0}</value>
   </data>
   <data name="InlineImagePending" xml:space="preserve">
     <value>⏳ GPTipsBot is drawing…
-Prompt: {0}</value>
+Prompt: {0}
+
+Tap “▶️ Get” to start generation.</value>
   </data>
   <data name="InlineHelpAskTitle" xml:space="preserve">
     <value>💬 Ask ChatGPT</value>
@@ -516,6 +520,9 @@ Example: @GPTipsBot image a cat in space</value>
   </data>
   <data name="InlineResultExpired" xml:space="preserve">
     <value>⏳ This result expired. Type @GPTipsBot again.</value>
+  </data>
+  <data name="InlineRunButton" xml:space="preserve">
+    <value>▶️ Get</value>
   </data>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Choose a ChatGPT model

@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Dtos;
+using GPTipsBot.UpdateHandlers;
 
 namespace GPTipsBot.Services
 {
@@ -40,7 +41,8 @@ namespace GPTipsBot.Services
                 return ChatGateResult.Bypass;
             }
 
-            if (update.IsCommand || update.IsInline)
+            if (update.IsCommand || update.IsInline ||
+                InlineQueryHandler.IsInlineCallback(update.CallbackQuery?.Data))
             {
                 return ChatGateResult.Bypass;
             }

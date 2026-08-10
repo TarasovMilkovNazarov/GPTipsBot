@@ -480,7 +480,9 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="InlineAskPending" xml:space="preserve">
     <value>⏳ GPTipsBot думает…
-Вопрос: {0}</value>
+Вопрос: {0}
+
+Нажмите «▶️ Получить», чтобы показать ответ.</value>
   </data>
   <data name="InlineImageTitle" xml:space="preserve">
     <value>🖼 Картинка: {0}</value>
@@ -493,7 +495,9 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="InlineImagePending" xml:space="preserve">
     <value>⏳ GPTipsBot рисует…
-Промпт: {0}</value>
+Промпт: {0}
+
+Нажмите «▶️ Получить», чтобы начать генерацию.</value>
   </data>
   <data name="InlineHelpAskTitle" xml:space="preserve">
     <value>💬 Спросить ChatGPT</value>
@@ -521,6 +525,9 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="InlineResultExpired" xml:space="preserve">
     <value>⏳ Результат устарел. Наберите @GPTipsBot снова.</value>
+  </data>
+  <data name="InlineRunButton" xml:space="preserve">
+    <value>▶️ Получить</value>
   </data>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Выберите модель ChatGPT

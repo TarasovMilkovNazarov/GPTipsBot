@@ -79,6 +79,13 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            if (update.CallbackQuery != null &&
+                InlineQueryHandler.IsInlineCallback(update.CallbackQuery.Data))
+            {
+                await inlineQueryHandler.HandleCallbackAsync(update);
+                return;
+            }
+
             var lastCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
 
             if (update.IsGroupOrChannel && !update.IsAddressedToBot && !IsGroupFollowUp(lastCommand))

@@ -25,10 +25,15 @@ public class InlineQueryHandler(
     ImageGenerationWorkflowService imageGenerationWorkflowService,
     ILogger<InlineQueryHandler> logger)
 {
+    public const string CallbackPrefix = "iq:";
+
     private const string AskPrefix = "ask";
     private const string ImagePrefix = "image";
     private const string AskSystemPrompt =
         "Answer the user question clearly and concisely. Match the user's language.";
+
+    public static bool IsInlineCallback(string? data) =>
+        !string.IsNullOrEmpty(data) && data.StartsWith(CallbackPrefix, StringComparison.Ordinal);
 
     public async Task HandleAsync(UpdateDecorator update)
     {
@@ -42,6 +47,34 @@ public class InlineQueryHandler(
         {
             await HandleChosenAsync(update);
         }
+    }
+
+    public async Task HandleCallbackAsync(UpdateDecorator update)
+    {
+        var callback = update.CallbackQuery!;
+        var data = callback.Data ?? string.Empty;
+        if (!data.StartsWith(CallbackPrefix, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var pendingId = data[CallbackPrefix.Length..];
+        var inlineMessageId = callback.InlineMessageId;
+
+        if (string.IsNullOrEmpty(inlineMessageId))
+        {
+            await botClient.AnswerCallbackQuery(callback.Id, BotResponse.SomethingWentWrong, showAlert: true);
+            return;
+        }
+
+        if (!pendingStore.TryTake(pendingId, update.TelegramUserId, out var pending) || pending is null)
+        {
+            await botClient.AnswerCallbackQuery(callback.Id, BotResponse.InlineResultExpired, showAlert: true);
+            return;
+        }
+
+        await botClient.AnswerCallbackQuery(callback.Id);
+        await RunPendingAsync(update, inlineMessageId, pending);
     }
 
     private async Task AnswerQueryAsync(UpdateDecorator update)
@@ -118,22 +151,23 @@ public class InlineQueryHandler(
             return;
         }
 
+        // Prefer auto-start when BotFather inline feedback is enabled.
+        // If the user already pressed the callback button, TryTake returns false — ignore.
         if (!pendingStore.TryTake(chosen.ResultId, update.TelegramUserId, out var pending) || pending is null)
         {
-            await botClient.EditMessageText(chosen.InlineMessageId, BotResponse.InlineResultExpired);
             return;
         }
 
-        switch (pending.Kind)
-        {
-            case InlinePendingKind.Ask:
-                await HandleAskChosenAsync(update, chosen.InlineMessageId, pending.Payload);
-                break;
-            case InlinePendingKind.Image:
-                await HandleImageChosenAsync(update, chosen.InlineMessageId, pending.Payload);
-                break;
-        }
+        await RunPendingAsync(update, chosen.InlineMessageId, pending);
     }
+
+    private Task RunPendingAsync(UpdateDecorator update, string inlineMessageId, InlinePendingRequest pending) =>
+        pending.Kind switch
+        {
+            InlinePendingKind.Ask => HandleAskChosenAsync(update, inlineMessageId, pending.Payload),
+            InlinePendingKind.Image => HandleImageChosenAsync(update, inlineMessageId, pending.Payload),
+            _ => Task.CompletedTask
+        };
 
     private async Task HandleAskChosenAsync(UpdateDecorator update, string inlineMessageId, string question)
     {
@@ -150,7 +184,7 @@ public class InlineQueryHandler(
                     model.StarsCost,
                     GptModelCatalog.Default.DisplayName);
 
-            await botClient.EditMessageText(inlineMessageId, message);
+            await botClient.EditMessageText(inlineMessageId, message, replyMarkup: null);
             return;
         }
 
@@ -168,7 +202,7 @@ public class InlineQueryHandler(
             var answer = response.Choices.FirstOrDefault()?.Message.Content?.Trim();
             if (string.IsNullOrWhiteSpace(answer))
             {
-                await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong);
+                await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong, replyMarkup: null);
                 return;
             }
 
@@ -184,12 +218,12 @@ public class InlineQueryHandler(
         catch (ChatGptException ex)
         {
             logger.LogError(ex, "Inline ask failed");
-            await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong);
+            await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong, replyMarkup: null);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Inline ask failed unexpectedly");
-            await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong);
+            await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong, replyMarkup: null);
         }
         finally
         {
@@ -206,7 +240,7 @@ public class InlineQueryHandler(
         var hold = await userService.TryReserveImageAsync(userId);
         if (hold is null)
         {
-            await botClient.EditMessageText(inlineMessageId, await FormatOutOfQuotaAsync());
+            await botClient.EditMessageText(inlineMessageId, await FormatOutOfQuotaAsync(), replyMarkup: null);
             return;
         }
 
@@ -227,7 +261,7 @@ public class InlineQueryHandler(
         {
             logger.LogError(ex, "Failed to start inline image generation");
             await userService.ReleaseAsync(hold.Id);
-            await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong);
+            await botClient.EditMessageText(inlineMessageId, BotResponse.SomethingWentWrong, replyMarkup: null);
         }
     }
 
@@ -249,12 +283,12 @@ public class InlineQueryHandler(
         var first = parts[0];
         try
         {
-            await botClient.EditMessageText(inlineMessageId, first);
+            await botClient.EditMessageText(inlineMessageId, first, replyMarkup: null);
         }
         catch (Exception ex)
         {
             logger.LogDebug(ex, "Failed to edit inline text; retrying truncated");
-            await botClient.EditMessageText(inlineMessageId, Truncate(first, 4000));
+            await botClient.EditMessageText(inlineMessageId, Truncate(first, 4000), replyMarkup: null);
         }
     }
 
@@ -270,7 +304,7 @@ public class InlineQueryHandler(
             new InputTextMessageContent(pendingMessage))
         {
             Description = description,
-            ReplyMarkup = BotLinkKeyboard(),
+            ReplyMarkup = ActionKeyboard(pending.Id),
         };
     }
 
@@ -288,6 +322,12 @@ public class InlineQueryHandler(
             Description = description,
             ReplyMarkup = BotLinkKeyboard(),
         };
+    }
+
+    private static InlineKeyboardMarkup ActionKeyboard(string pendingId)
+    {
+        return new InlineKeyboardMarkup(
+            InlineKeyboardButton.WithCallbackData(BotResponse.InlineRunButton, CallbackPrefix + pendingId));
     }
 
     private static InlineKeyboardMarkup BotLinkKeyboard()
