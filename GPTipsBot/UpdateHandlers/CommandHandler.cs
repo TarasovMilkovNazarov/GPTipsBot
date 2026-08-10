@@ -73,7 +73,12 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var previousCommand = await userCommandRepository.GetLastAsync(update.UserChatKey);
-            await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
+            // Persist Start after deep-link binding so UserId matches the email survivor account.
+            var deferCommandPersist = update.Command.Command == StartCommand;
+            if (!deferCommandPersist)
+            {
+                await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
+            }
 
             var profile = await userService.GetUserProfile(update.UserChatKey.Id);
 
@@ -90,6 +95,7 @@ namespace GPTipsBot.UpdateHandlers
                             : new BotMenu().GetBotCommands(),
                         BotCommandScope.Chat(chatId));
                     reply = await HandleStartDeepLinkAsync(update);
+                    await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
                     break;
                 case GetProfileCommand:
                     reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
@@ -714,12 +720,14 @@ namespace GPTipsBot.UpdateHandlers
             catch (InvalidOperationException ex) when (
                 ex.Message.Contains("already linked to another Telegram", StringComparison.Ordinal))
             {
+                _context.ChangeTracker.Clear();
                 return $"{greeting}\n\n{BotResponse.AccountLinkAlreadyLinked}";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to link Telegram {TelegramId} to user {UserId}",
                     update.TelegramUserId, emailUserId);
+                _context.ChangeTracker.Clear();
                 return $"{greeting}\n\n{BotResponse.AccountLinkFailed}";
             }
         }

@@ -342,24 +342,44 @@ namespace GPTipsBot.Services
                 .FirstOrDefaultAsync(u => u.Id == loserId)
                 ?? throw new InvalidOperationException("Loser user not found");
 
-            survivor.TelegramId ??= loser.TelegramId;
-            if (survivor.Email is null && loser.Email is not null)
+            // Snapshot unique fields, then clear loser FIRST and flush so partial unique indexes
+            // (TelegramId / Email) are free before assigning them to survivor.
+            var loserTelegramId = loser.TelegramId;
+            var moveEmail = survivor.Email is null && loser.Email is not null;
+            var replaceUnconfirmedEmail = survivor.Email is not null && loser.Email is not null
+                && !string.Equals(survivor.Email, loser.Email, StringComparison.OrdinalIgnoreCase)
+                && !survivor.EmailConfirmed && loser.EmailConfirmed;
+
+            string? emailToMove = null;
+            string? passwordHashToMove = null;
+            var emailConfirmedToMove = false;
+            string? emailConfirmCodeToMove = null;
+            DateTimeOffset? emailConfirmExpiresToMove = null;
+            if (moveEmail || replaceUnconfirmedEmail)
             {
-                survivor.Email = loser.Email;
-                survivor.PasswordHash = loser.PasswordHash;
-                survivor.EmailConfirmed = loser.EmailConfirmed;
-                survivor.EmailConfirmCode = loser.EmailConfirmCode;
-                survivor.EmailConfirmExpiresAt = loser.EmailConfirmExpiresAt;
+                emailToMove = loser.Email;
+                passwordHashToMove = loser.PasswordHash;
+                emailConfirmedToMove = loser.EmailConfirmed;
+                emailConfirmCodeToMove = replaceUnconfirmedEmail ? null : loser.EmailConfirmCode;
+                emailConfirmExpiresToMove = replaceUnconfirmedEmail ? null : loser.EmailConfirmExpiresAt;
             }
-            else if (survivor.Email is not null && loser.Email is not null
-                     && !string.Equals(survivor.Email, loser.Email, StringComparison.OrdinalIgnoreCase)
-                     && !survivor.EmailConfirmed && loser.EmailConfirmed)
+
+            loser.TelegramId = null;
+            loser.Email = null;
+            loser.PasswordHash = null;
+            loser.EmailConfirmCode = null;
+            loser.EmailConfirmExpiresAt = null;
+            loser.EmailConfirmed = false;
+            await _context.SaveChangesAsync();
+
+            survivor.TelegramId ??= loserTelegramId;
+            if (emailToMove is not null)
             {
-                survivor.Email = loser.Email;
-                survivor.PasswordHash = loser.PasswordHash;
-                survivor.EmailConfirmed = loser.EmailConfirmed;
-                survivor.EmailConfirmCode = null;
-                survivor.EmailConfirmExpiresAt = null;
+                survivor.Email = emailToMove;
+                survivor.PasswordHash = passwordHashToMove;
+                survivor.EmailConfirmed = emailConfirmedToMove;
+                survivor.EmailConfirmCode = emailConfirmCodeToMove;
+                survivor.EmailConfirmExpiresAt = emailConfirmExpiresToMove;
             }
 
             survivor.FreeGptRequests += loser.FreeGptRequests;
@@ -394,15 +414,6 @@ namespace GPTipsBot.Services
                 }
             }
 
-            // Clear unique fields on loser before reassignment so unique indexes stay valid.
-            var loserTelegramId = loser.TelegramId;
-            var loserEmail = loser.Email;
-            loser.TelegramId = null;
-            loser.Email = null;
-            loser.PasswordHash = null;
-            loser.EmailConfirmCode = null;
-            loser.EmailConfirmExpiresAt = null;
-            loser.EmailConfirmed = false;
             loser.IsActive = false;
             loser.FreeGptRequests = 0;
             loser.FreeImageGenerations = 0;

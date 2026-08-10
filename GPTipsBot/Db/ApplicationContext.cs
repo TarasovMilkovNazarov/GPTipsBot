@@ -179,16 +179,28 @@ namespace GPTipsBot.Db
 
         private void EnsureTelegramIdColumn()
         {
-            Database.ExecuteSqlRaw($"""
+            // One-time schema + safe backfill. After account merge the deactivated Telegram row
+            // keeps Id=telegramId with TelegramId=NULL; never re-assign that Id if another row
+            // already owns the TelegramId (linked email survivor).
+            Database.ExecuteSqlRaw("""
                 ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "TelegramId" bigint NULL;
                 CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_TelegramId_Unique"
                     ON "Users" ("TelegramId")
                     WHERE "TelegramId" IS NOT NULL;
-                UPDATE "Users" SET "TelegramId" = "Id"
-                WHERE "TelegramId" IS NULL
-                  AND "Id" > 0
-                  AND "Id" < {WebAuthConstants.EmailIdBase}
-                  AND ("Email" IS NULL OR "Source" IS DISTINCT FROM 'web-email');
+                """);
+
+            Database.ExecuteSqlRaw($"""
+                UPDATE "Users" AS u
+                SET "TelegramId" = u."Id"
+                WHERE u."TelegramId" IS NULL
+                  AND u."IsActive" = true
+                  AND u."Id" > 0
+                  AND u."Id" < {WebAuthConstants.EmailIdBase}
+                  AND (u."Email" IS NULL OR u."Source" IS DISTINCT FROM 'web-email')
+                  AND NOT EXISTS (
+                      SELECT 1 FROM "Users" AS x
+                      WHERE x."TelegramId" = u."Id"
+                  );
                 """);
         }
     }
