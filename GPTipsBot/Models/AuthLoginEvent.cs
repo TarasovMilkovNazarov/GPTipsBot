@@ -6,6 +6,7 @@ public enum AuthProvider
     Telegram = 1,
     Email = 2,
     Vkid = 3,
+    Yandex = 4,
 }
 
 public class AuthLoginEvent

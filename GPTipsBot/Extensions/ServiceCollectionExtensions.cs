@@ -123,6 +123,7 @@ namespace GPTipsBot.Extensions
             services.AddDbContext<ApplicationContext>();
 
             services.AddHttpClient(nameof(OpenAiVpnConnectivityService));
+            services.AddHttpClient<GPTipsBot.Web.YandexOAuthClient>();
             services.AddHttpClient<YooKassaClient>(client =>
             {
                 client.BaseAddress = new Uri("https://api.yookassa.ru/v3/");

@@ -59,6 +59,7 @@ public class DailyStatisticsJob(
         var guestLogins = GetLoginStat(loginStats, AuthProvider.Guest);
         var emailLogins = GetLoginStat(loginStats, AuthProvider.Email);
         var vkidLogins = GetLoginStat(loginStats, AuthProvider.Vkid);
+        var yandexLogins = GetLoginStat(loginStats, AuthProvider.Yandex);
         var totalLogins = loginEvents.Count;
 
         var summaryUserIds = await context.UserCommands.AsNoTracking()
@@ -78,9 +79,10 @@ public class DailyStatisticsJob(
         message += Environment.NewLine + $"Web logins: {totalLogins}";
         message += Environment.NewLine + $"  telegram: {telegramLogins.Count} ({telegramLogins.UniqueUsers} users)";
         message += Environment.NewLine + $"  guest: {guestLogins.Count} ({guestLogins.UniqueUsers} users)";
-        if (emailLogins.Count > 0 || vkidLogins.Count > 0)
+        if (emailLogins.Count > 0 || vkidLogins.Count > 0 || yandexLogins.Count > 0)
         {
             message += Environment.NewLine + $"  email: {emailLogins.Count} ({emailLogins.UniqueUsers} users)";
+            message += Environment.NewLine + $"  yandex: {yandexLogins.Count} ({yandexLogins.UniqueUsers} users)";
             message += Environment.NewLine + $"  vkid: {vkidLogins.Count} ({vkidLogins.UniqueUsers} users)";
         }
         message += Environment.NewLine + $"Monthly users: {mau}";

@@ -7,6 +7,8 @@ export type Me = {
   emailConfirmed?: boolean
   telegramId?: number | null
   telegramLinked?: boolean
+  yandexId?: string | null
+  yandexLinked?: boolean
   stars: number
   free: { gpt: number; images: number; ocr: number; animations: number; summaries: number }
   model: { id: string; name: string }
@@ -88,6 +90,9 @@ export const api = {
       body: JSON.stringify(payload),
     }).then((r) => json<Me>(r)),
 
+  /** Full-page redirect to Yandex OAuth. */
+  yandexLoginStartUrl: '/api/auth/yandex/start',
+
   emailRegister: (email: string, password: string, firstName?: string) =>
     fetch('/api/auth/email/register', {
       method: 'POST',
@@ -167,7 +172,12 @@ export const api = {
 
   publicConfig: () =>
     fetch('/api/config/public', { credentials: 'include' }).then((r) =>
-      json<{ botUsername: string; telegramLoginEnabled: boolean; yookassaEnabled?: boolean }>(r),
+      json<{
+        botUsername: string
+        telegramLoginEnabled: boolean
+        yandexLoginEnabled?: boolean
+        yookassaEnabled?: boolean
+      }>(r),
     ),
 
   paymentPackages: () =>

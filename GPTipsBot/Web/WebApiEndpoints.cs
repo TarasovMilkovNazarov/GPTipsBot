@@ -19,6 +19,8 @@ public static class WebApiEndpoints
 
         api.MapPost("/auth/guest", EnsureGuestAsync);
         api.MapPost("/auth/telegram", TelegramLoginAsync);
+        api.MapGet("/auth/yandex/start", YandexLoginStartAsync);
+        api.MapGet("/auth/yandex/callback", YandexLoginCallbackAsync);
         api.MapPost("/auth/email/register", EmailRegisterAsync);
         api.MapPost("/auth/email/confirm", EmailConfirmAsync);
         api.MapPost("/auth/email/resend", EmailResendAsync);
@@ -138,6 +140,148 @@ public static class WebApiEndpoints
         await webUsers.RecordLoginAsync(user.Id, AuthProvider.Telegram);
         await webUsers.SignInAsync(http, user.Id, isGuest);
         return Results.Ok(await BuildMeAsync(user.Id, webUsers, http));
+    }
+
+    private static IResult YandexLoginStartAsync(HttpContext http)
+    {
+        if (!YandexOAuthConfig.IsEnabled)
+        {
+            return Results.BadRequest(new { message = "Yandex login is not configured" });
+        }
+
+        var state = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
+        var previousId = WebUserService.TryGetUserId(http);
+        var payload = $"{state}|{previousId?.ToString() ?? ""}";
+        http.Response.Cookies.Append(
+            WebAuthConstants.YandexOAuthStateCookie,
+            payload,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = http.Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                MaxAge = TimeSpan.FromMinutes(10),
+                IsEssential = true,
+                Path = "/",
+            });
+
+        var redirectUri = ResolveYandexRedirectUri(http);
+        var url =
+            $"{YandexOAuthConfig.AuthorizeUrl}" +
+            $"?response_type=code" +
+            $"&client_id={Uri.EscapeDataString(YandexOAuthConfig.ClientId!)}" +
+            $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+            $"&scope={Uri.EscapeDataString(YandexOAuthConfig.Scopes)}" +
+            $"&state={Uri.EscapeDataString(state)}";
+
+        return Results.Redirect(url);
+    }
+
+    private static async Task<IResult> YandexLoginCallbackAsync(
+        HttpContext http,
+        WebUserService webUsers,
+        YandexOAuthClient yandex,
+        MessageRepository messages,
+        ApplicationContext db)
+    {
+        if (!YandexOAuthConfig.IsEnabled)
+        {
+            return Results.Redirect("/?auth_error=yandex_disabled");
+        }
+
+        var error = http.Request.Query["error"].ToString();
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            ClearYandexOAuthCookie(http);
+            return Results.Redirect($"/?auth_error={Uri.EscapeDataString(error)}");
+        }
+
+        var code = http.Request.Query["code"].ToString();
+        var state = http.Request.Query["state"].ToString();
+        if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state))
+        {
+            ClearYandexOAuthCookie(http);
+            return Results.Redirect("/?auth_error=yandex_missing_code");
+        }
+
+        if (!http.Request.Cookies.TryGetValue(WebAuthConstants.YandexOAuthStateCookie, out var cookie) ||
+            string.IsNullOrWhiteSpace(cookie))
+        {
+            return Results.Redirect("/?auth_error=yandex_state");
+        }
+
+        var parts = cookie.Split('|', 2);
+        var expectedState = parts[0];
+        long? previousId = null;
+        if (parts.Length > 1 && long.TryParse(parts[1], out var parsedPrevious))
+        {
+            previousId = parsedPrevious;
+        }
+
+        ClearYandexOAuthCookie(http);
+        if (!string.Equals(expectedState, state, StringComparison.Ordinal))
+        {
+            return Results.Redirect("/?auth_error=yandex_state");
+        }
+
+        long? guestToMerge = previousId is < 0 ? previousId : null;
+        long? linkToUserId = null;
+        if (previousId is > 0)
+        {
+            var sessionUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == previousId);
+            if (sessionUser is not null &&
+                !string.Equals(sessionUser.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                linkToUserId = previousId;
+            }
+        }
+
+        var lang = http.Request.Headers.AcceptLanguage.ToString();
+        var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+        var redirectUri = ResolveYandexRedirectUri(http);
+
+        User user;
+        try
+        {
+            var token = await yandex.ExchangeCodeAsync(code, redirectUri, http.RequestAborted);
+            var info = await yandex.GetUserInfoAsync(token.AccessToken!, http.RequestAborted);
+            (user, _) = await webUsers.EnsureYandexUserAsync(info, language, linkToUserId);
+        }
+        catch (Exception)
+        {
+            return Results.Redirect("/?auth_error=yandex_failed");
+        }
+
+        if (guestToMerge is long guestId && guestId != user.Id)
+        {
+            var guestUser = db.Users.AsNoTracking().FirstOrDefault(u => u.Id == guestId);
+            if (guestUser?.Source == WebAuthConstants.GuestSource)
+            {
+                await messages.TransferWebConversationsAsync(guestId, user.Id);
+            }
+        }
+
+        await webUsers.RecordLoginAsync(user.Id, AuthProvider.Yandex);
+        await webUsers.SignInAsync(http, user.Id, isGuest: false);
+        return Results.Redirect("/");
+    }
+
+    private static string ResolveYandexRedirectUri(HttpContext http)
+    {
+        if (!string.IsNullOrWhiteSpace(YandexOAuthConfig.RedirectUri))
+        {
+            return YandexOAuthConfig.RedirectUri!;
+        }
+
+        return $"{http.Request.Scheme}://{http.Request.Host}/api/auth/yandex/callback";
+    }
+
+    private static void ClearYandexOAuthCookie(HttpContext http)
+    {
+        http.Response.Cookies.Delete(WebAuthConstants.YandexOAuthStateCookie, new CookieOptions
+        {
+            Path = "/",
+        });
     }
 
     private static async Task<IResult> EmailRegisterAsync(
@@ -735,6 +879,7 @@ public static class WebApiEndpoints
         {
             botUsername,
             telegramLoginEnabled = !string.IsNullOrWhiteSpace(AppConfig.TelegramToken),
+            yandexLoginEnabled = YandexOAuthConfig.IsEnabled,
             yookassaEnabled = YooKassaConfig.IsEnabled,
         });
     }
@@ -920,6 +1065,8 @@ public static class WebApiEndpoints
             emailConfirmed = dbUser?.EmailConfirmed == true,
             telegramId = dbUser?.TelegramId,
             telegramLinked = dbUser?.TelegramId is not null,
+            yandexId = dbUser?.YandexId,
+            yandexLinked = dbUser?.YandexId is not null,
             stars = profile.Stars,
             free = new
             {

@@ -36,6 +36,7 @@ namespace GPTipsBot.Db
             EnsureAuthLoginEventsTable();
             EnsureEmailAuthColumns();
             EnsureTelegramIdColumn();
+            EnsureYandexIdColumn();
             EnsureGuestFingerprintQuotasTable();
             Guid = Guid.NewGuid();
         }
@@ -207,6 +208,16 @@ namespace GPTipsBot.Db
                       SELECT 1 FROM "Users" AS x
                       WHERE x."TelegramId" = u."Id"
                   );
+                """);
+        }
+
+        private void EnsureYandexIdColumn()
+        {
+            Database.ExecuteSqlRaw("""
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "YandexId" text NULL;
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_YandexId_Unique"
+                    ON "Users" ("YandexId")
+                    WHERE "YandexId" IS NOT NULL;
                 """);
         }
 

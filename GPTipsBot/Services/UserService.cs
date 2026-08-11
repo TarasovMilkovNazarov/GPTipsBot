@@ -343,8 +343,9 @@ namespace GPTipsBot.Services
                 ?? throw new InvalidOperationException("Loser user not found");
 
             // Snapshot unique fields, then clear loser FIRST and flush so partial unique indexes
-            // (TelegramId / Email) are free before assigning them to survivor.
+            // (TelegramId / Email / YandexId) are free before assigning them to survivor.
             var loserTelegramId = loser.TelegramId;
+            var loserYandexId = loser.YandexId;
             var moveEmail = survivor.Email is null && loser.Email is not null;
             var replaceUnconfirmedEmail = survivor.Email is not null && loser.Email is not null
                 && !string.Equals(survivor.Email, loser.Email, StringComparison.OrdinalIgnoreCase)
@@ -365,6 +366,7 @@ namespace GPTipsBot.Services
             }
 
             loser.TelegramId = null;
+            loser.YandexId = null;
             loser.Email = null;
             loser.PasswordHash = null;
             loser.EmailConfirmCode = null;
@@ -373,6 +375,7 @@ namespace GPTipsBot.Services
             await _context.SaveChangesAsync();
 
             survivor.TelegramId ??= loserTelegramId;
+            survivor.YandexId ??= loserYandexId;
             if (emailToMove is not null)
             {
                 survivor.Email = emailToMove;
@@ -539,6 +542,64 @@ namespace GPTipsBot.Services
             return _userRepository.Get(survivor.Id)!;
         }
 
+        /// <summary>
+        /// Attaches <paramref name="yandexId"/> to <paramref name="survivorId"/>, merging a separate
+        /// Yandex-only account into the survivor when needed.
+        /// </summary>
+        public async Task<User> LinkYandexIdToUserAsync(
+            long survivorId,
+            string yandexId,
+            string? firstName = null,
+            string? lastName = null,
+            string? email = null)
+        {
+            if (string.IsNullOrWhiteSpace(yandexId))
+            {
+                throw new ArgumentException("Yandex id is required", nameof(yandexId));
+            }
+
+            var normalizedYandexId = yandexId.Trim();
+            var survivor = _userRepository.Get(survivorId)
+                           ?? throw new InvalidOperationException("Survivor user not found");
+
+            if (!string.IsNullOrWhiteSpace(survivor.YandexId) &&
+                !string.Equals(survivor.YandexId, normalizedYandexId, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Account already linked to another Yandex ID");
+            }
+
+            var yandexAccount = _userRepository.GetByYandexId(normalizedYandexId);
+            if (yandexAccount is not null && yandexAccount.Id != survivor.Id)
+            {
+                survivor = await MergeUsersAsync(survivor.Id, yandexAccount.Id);
+            }
+            else if (survivor.YandexId is null)
+            {
+                survivor.YandexId = normalizedYandexId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(firstName))
+            {
+                survivor.FirstName = firstName;
+            }
+
+            if (lastName is not null)
+            {
+                survivor.LastName = lastName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(email) && survivor.Email is null)
+            {
+                survivor.Email = email.Trim().ToLowerInvariant();
+                survivor.EmailConfirmed = true;
+            }
+
+            survivor.IsActive = true;
+            await _context.SaveChangesAsync();
+            _userRepository.InvalidateCache(survivor.Id, survivor.TelegramId);
+            return _userRepository.Get(survivor.Id)!;
+        }
+
         private static bool IsUniqueViolation(DbUpdateException ex) =>
             ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
 
@@ -546,7 +607,8 @@ namespace GPTipsBot.Services
         {
             if (user.Source is Web.WebAuthConstants.GuestSource
                 or Web.WebAuthConstants.TelegramSource
-                or Web.WebAuthConstants.EmailSource)
+                or Web.WebAuthConstants.EmailSource
+                or Web.WebAuthConstants.YandexSource)
             {
                 return;
             }

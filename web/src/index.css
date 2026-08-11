@@ -978,6 +978,10 @@ a.pill {
   border-color: #2aabee;
 }
 
+.auth-method.yandex {
+  border-color: #fc3f1d;
+}
+
 .auth-telegram {
   display: flex;
   flex-direction: column;

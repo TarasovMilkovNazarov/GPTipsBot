@@ -47,6 +47,7 @@ export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [presets, setPresets] = useState<ImagePreset[]>([])
   const [botUsername, setBotUsername] = useState('GPTipsBot')
+  const [yandexLoginEnabled, setYandexLoginEnabled] = useState(false)
   const [telegramBotUrl, setTelegramBotUrl] = useState('https://t.me/GPTipsBot')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -119,6 +120,7 @@ export default function App() {
         setModels(modelData.models)
         setPresets(presetData)
         setBotUsername(cfg.botUsername)
+        setYandexLoginEnabled(Boolean(cfg.yandexLoginEnabled))
         setTelegramBotUrl(`https://t.me/${cfg.botUsername.replace(/^@/, '')}`)
         setPaymentInfo(packages)
         try {
@@ -147,6 +149,13 @@ export default function App() {
         }
 
         const params = new URLSearchParams(window.location.search)
+        const authError = params.get('auth_error')
+        if (authError) {
+          setError(t(lang, 'authYandexError'))
+          const url = new URL(window.location.href)
+          url.searchParams.delete('auth_error')
+          window.history.replaceState({}, '', url.pathname + url.search + url.hash)
+        }
         const openCabinet = params.get('cabinet') === '1' || params.get('paid') === '1'
         const pendingRaw = localStorage.getItem(PENDING_INVOICE_KEY)
         const pendingId = pendingRaw ? Number(pendingRaw) : NaN
@@ -272,9 +281,17 @@ export default function App() {
     setQuotaUpsell(false)
   }
 
-  function continueFromQuotaUpsell(view: 'telegram' | 'email') {
+  function continueFromQuotaUpsell(view: 'telegram' | 'email' | 'yandex') {
     setQuotaUpsell(false)
+    if (view === 'yandex') {
+      window.location.href = api.yandexLoginStartUrl
+      return
+    }
     openAuth(view, { preferRegister: true, restoreHint: true })
+  }
+
+  function startYandexLogin() {
+    window.location.href = api.yandexLoginStartUrl
   }
 
   const preferredModel = useMemo(
@@ -775,6 +792,15 @@ export default function App() {
                 >
                   {t(lang, 'authViaTelegram')}
                 </button>
+                {yandexLoginEnabled && (
+                  <button
+                    className="auth-method yandex"
+                    type="button"
+                    onClick={() => continueFromQuotaUpsell('yandex')}
+                  >
+                    {t(lang, 'authViaYandex')}
+                  </button>
+                )}
                 <button
                   className="auth-method email"
                   type="button"
@@ -809,6 +835,11 @@ export default function App() {
                   <button className="auth-method telegram" type="button" onClick={() => setAuthView('telegram')}>
                     {t(lang, 'authViaTelegram')}
                   </button>
+                  {yandexLoginEnabled && (
+                    <button className="auth-method yandex" type="button" onClick={startYandexLogin}>
+                      {t(lang, 'authViaYandex')}
+                    </button>
+                  )}
                   <button
                     className="auth-method email"
                     type="button"

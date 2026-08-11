@@ -8,6 +8,8 @@ namespace GPTipsBot.Models
         public long Id { get; set; }
         /// <summary>Telegram user id when linked; null for email/guest-only accounts.</summary>
         public long? TelegramId { get; set; }
+        /// <summary>Yandex ID (login.yandex.ru/info id) when linked; null otherwise.</summary>
+        public string? YandexId { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Source { get; set; }

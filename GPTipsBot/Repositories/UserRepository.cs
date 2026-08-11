@@ -35,6 +35,13 @@ namespace GPTipsBot.Repositories
                 .SingleOrDefault(x => x.TelegramId == telegramId);
         }
 
+        public User? GetByYandexId(string yandexId)
+        {
+            return context.Users
+                .Include(u => u.Wallet)
+                .SingleOrDefault(x => x.YandexId == yandexId);
+        }
+
         public void Delete(long id)
         {
             var user = context.Users.FirstOrDefault(x => x.Id == id);
@@ -69,6 +76,10 @@ namespace GPTipsBot.Repositories
             if (newUser.TelegramId is not null)
             {
                 dbUser.TelegramId = newUser.TelegramId;
+            }
+            if (newUser.YandexId is not null)
+            {
+                dbUser.YandexId = newUser.YandexId;
             }
 
             await context.SaveChangesAsync();

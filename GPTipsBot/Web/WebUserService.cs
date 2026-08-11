@@ -212,6 +212,91 @@ public class WebUserService(
         return (userRepository.GetByTelegramId(payload.Id)!, false);
     }
 
+    public async Task<(User User, bool IsGuest)> EnsureYandexUserAsync(
+        YandexUserInfo info,
+        string? language = "en",
+        long? linkToUserId = null)
+    {
+        var yandexId = info.Id?.Trim()
+            ?? throw new ArgumentException("Yandex id is required");
+
+        var firstName = !string.IsNullOrWhiteSpace(info.FirstName)
+            ? info.FirstName.Trim()
+            : !string.IsNullOrWhiteSpace(info.DisplayName)
+                ? info.DisplayName.Trim()
+                : !string.IsNullOrWhiteSpace(info.Login)
+                    ? info.Login.Trim()
+                    : "Yandex User";
+        var lastName = string.IsNullOrWhiteSpace(info.LastName) ? null : info.LastName.Trim();
+        var email = NormalizeEmail(info.DefaultEmail);
+
+        if (linkToUserId is long survivorId && survivorId > 0)
+        {
+            var survivor = userRepository.Get(survivorId);
+            if (survivor is not null &&
+                !string.Equals(survivor.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                var linked = await LinkYandexToUserAsync(survivor, yandexId, firstName, lastName, email, language ?? "en");
+                return (linked, false);
+            }
+        }
+
+        var existing = userRepository.GetByYandexId(yandexId);
+        if (existing is not null)
+        {
+            existing.FirstName = firstName;
+            existing.LastName = lastName;
+            existing.IsActive = true;
+            if (email is not null && existing.Email is null)
+            {
+                existing.Email = email;
+                existing.EmailConfirmed = true;
+            }
+
+            await context.SaveChangesAsync();
+            EnsureSettings(existing.Id, language ?? "en");
+            return (userRepository.Get(existing.Id)!, false);
+        }
+
+        // Same email already registered → attach Yandex to that account.
+        if (email is not null)
+        {
+            var byEmail = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (byEmail is not null &&
+                !string.Equals(byEmail.Source, WebAuthConstants.GuestSource, StringComparison.Ordinal))
+            {
+                var linked = await LinkYandexToUserAsync(byEmail, yandexId, firstName, lastName, email, language ?? "en");
+                return (linked, false);
+            }
+        }
+
+        var id = await AllocateEmailUserIdAsync();
+        var user = new User
+        {
+            Id = id,
+            YandexId = yandexId,
+            FirstName = firstName,
+            LastName = lastName,
+            Source = WebAuthConstants.YandexSource,
+            CreatedAt = DateTimeOffset.UtcNow,
+            IsActive = true,
+            Email = email,
+            EmailConfirmed = email is not null,
+            FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests,
+            FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations,
+            FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions,
+            FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations,
+            FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries,
+        };
+
+        await userService.CreateUpdateUser(user);
+        EnsureSettings(user.Id, language ?? "en");
+        await context.SaveChangesAsync();
+        await GrantNewbieFreeQuotasAsync(user.Id);
+
+        return (userRepository.GetByYandexId(yandexId)!, false);
+    }
+
     public async Task<(User User, string? DevCode)> RegisterEmailAsync(
         string email,
         string password,
@@ -442,6 +527,24 @@ public class WebUserService(
             payload.Id,
             payload.FirstName,
             payload.LastName);
+        EnsureSettings(linked.Id, language);
+        return userRepository.Get(linked.Id)!;
+    }
+
+    private async Task<User> LinkYandexToUserAsync(
+        User survivor,
+        string yandexId,
+        string firstName,
+        string? lastName,
+        string? email,
+        string language)
+    {
+        var linked = await userService.LinkYandexIdToUserAsync(
+            survivor.Id,
+            yandexId,
+            firstName,
+            lastName,
+            email);
         EnsureSettings(linked.Id, language);
         return userRepository.Get(linked.Id)!;
     }
