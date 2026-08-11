@@ -20,43 +20,82 @@ namespace GPTipsBot.Services
         private readonly ContextWindow _contextWindow;
         private readonly PhotoAnimationWorkflowService _photoAnimationWorkflowService;
         private readonly BotSettingsRepository _botSettingsRepository;
+        private readonly ChatToolExecutor _chatToolExecutor;
         private readonly AsyncRetryPolicy _policy;
 
         private const int MaxRetryCount = 4;
+
+        /// <summary>
+        /// Tool-call rounds allowed per user message before we force a text-only final answer.
+        /// Bounds the extra latency/cost a real agent loop adds (each round is +1 model call).
+        /// </summary>
+        private const int MaxToolRounds = 2;
 
         public ChatGptService(
             ILogger<ChatGptService> log,
             IOpenAIService openAiService,
             ContextWindow contextWindow,
             PhotoAnimationWorkflowService photoAnimationWorkflowService,
-            BotSettingsRepository botSettingsRepository)
+            BotSettingsRepository botSettingsRepository,
+            ChatToolExecutor chatToolExecutor)
         {
             _log = log;
             _openAiService = openAiService;
             _contextWindow = contextWindow;
             _photoAnimationWorkflowService = photoAnimationWorkflowService;
             _botSettingsRepository = botSettingsRepository;
+            _chatToolExecutor = chatToolExecutor;
             _policy = Policy
                 .Handle<ChatGptException>()
                 .WaitAndRetryAsync(MaxRetryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         }
 
+        /// <summary>
+        /// True agent loop: the model decides whether to answer directly or call a tool (e.g.
+        /// image generation). When it calls one, we execute it for real, append the outcome via
+        /// <see cref="ChatMessage.FromTool"/>, and ask the model again so it can weave the result
+        /// into one final reply instead of us pre-deciding the intent before the model ever sees it.
+        /// </summary>
         public async Task<ChatCompletionCreateResponse> SendMessage(UpdateDecorator update, CancellationToken token)
         {
-            ChatMessage[] textWithContext;
+            List<ChatMessage> messages;
 
             if (update.Message.NewContext)
             {
-                textWithContext = [new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text)];
+                messages = [new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text)];
             }
             else
             {
-                textWithContext = _contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value);
+                messages = [.. _contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value)];
             }
 
             var modelId = ResolveModelId(update.UserChatKey.Id);
-            return await SendMessageInternal(textWithContext, modelId, token);
+            var toolsEnabled = _chatToolExecutor.IsEnabledFor(update);
+
+            var response = await SendMessageInternal(
+                messages.ToArray(), modelId, token, toolsEnabled ? ChatToolExecutor.Definitions : null);
+
+            for (var round = 0; toolsEnabled && HasToolCalls(response) && round < MaxToolRounds; round++)
+            {
+                var assistantMessage = response!.Choices[0].Message;
+                messages.Add(assistantMessage);
+
+                foreach (var toolCall in assistantMessage.ToolCalls!)
+                {
+                    var result = await _chatToolExecutor.ExecuteAsync(toolCall, update, token);
+                    messages.Add(ChatMessage.FromTool(result, toolCall.Id ?? string.Empty));
+                }
+
+                var allowAnotherRound = round + 1 < MaxToolRounds;
+                response = await SendMessageInternal(
+                    messages.ToArray(), modelId, token, allowAnotherRound ? ChatToolExecutor.Definitions : null);
+            }
+
+            return response!;
         }
+
+        private static bool HasToolCalls(ChatCompletionCreateResponse? response) =>
+            response?.Choices.FirstOrDefault()?.Message.ToolCalls is { Count: > 0 };
 
         public Task<ChatCompletionCreateResponse> SendOneOffAsync(
             string systemPrompt,
@@ -121,7 +160,8 @@ namespace GPTipsBot.Services
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(
             ChatMessage[] messages,
             string modelId,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            IList<ToolDefinition>? tools = null)
         {
             _log.LogInformation(
                 "Send request to OpenAi service model={ModelId}: {messages}",
@@ -138,7 +178,13 @@ namespace GPTipsBot.Services
                 try
                 {
                     response = await _openAiService.ChatCompletion.CreateCompletion(
-                        new ChatCompletionCreateRequest { Messages = messages, Model = modelId },
+                        new ChatCompletionCreateRequest
+                        {
+                            Messages = messages,
+                            Model = modelId,
+                            Tools = tools,
+                            ToolChoice = tools != null ? ToolChoice.Auto : null,
+                        },
                         modelId,
                         cancellationToken: cancellationToken);
 
