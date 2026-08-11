@@ -69,29 +69,11 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1️⃣ Фото.
+        ///   Looks up a localized string similar to Пример: фото → «Дети радостно прыгают и обнимаются» → результат.
         /// </summary>
-        public static string AnimateExampleBeforeCaption {
+        public static string SendPhotoToAnimate {
             get {
-                return ResourceManager.GetString("AnimateExampleBeforeCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 2️⃣ Промпт: «Дети радостно прыгают и обнимаются».
-        /// </summary>
-        public static string AnimateExamplePromptCaption {
-            get {
-                return ResourceManager.GetString("AnimateExamplePromptCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 3️⃣ Результат.
-        /// </summary>
-        public static string AnimateExampleResultCaption {
-            get {
-                return ResourceManager.GetString("AnimateExampleResultCaption", resourceCulture);
+                return ResourceManager.GetString("SendPhotoToAnimate", resourceCulture);
             }
         }
         
@@ -476,15 +458,6 @@ namespace GPTipsBot.Resources {
         public static string PromptFromImageUserPrompt {
             get {
                 return ResourceManager.GetString("PromptFromImageUserPrompt", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Отправьте своё фото для оживления и кратко опишите действие. Например: «смеются», «танцует», «пишет».
-        /// </summary>
-        public static string SendPhotoToAnimate {
-            get {
-                return ResourceManager.GetString("SendPhotoToAnimate", resourceCulture);
             }
         }
         

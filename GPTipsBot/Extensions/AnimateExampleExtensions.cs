@@ -14,10 +14,9 @@ public static class AnimateExampleExtensions
 
     private static string BeforePath => Path.Combine(AssetsDir, "before.jpg");
     private static string ResultMp4Path => Path.Combine(AssetsDir, "result.mp4");
-    private static string ResultGifPath => Path.Combine(AssetsDir, "result.gif");
 
     /// <summary>
-    /// Sends a visual before → prompt → result example (from Alice demos), then the instructions.
+    /// Sends a single album message: before photo + result video with instructions caption.
     /// </summary>
     public static async Task SendAnimatePhotoInstructionsAsync(
         this ITelegramBotClient botClient,
@@ -26,38 +25,36 @@ public static class AnimateExampleExtensions
         int? messageThreadId = null,
         CancellationToken cancellationToken = default)
     {
-        var resultPath = File.Exists(ResultMp4Path) ? ResultMp4Path
-            : File.Exists(ResultGifPath) ? ResultGifPath
-            : null;
-
-        if (File.Exists(BeforePath) && resultPath is not null)
+        if (File.Exists(BeforePath) && File.Exists(ResultMp4Path))
         {
-            await using (var beforeStream = File.OpenRead(BeforePath))
-            {
-                await botClient.SendPhoto(
-                    chatId,
-                    InputFile.FromStream(beforeStream, "before.jpg"),
-                    caption: BotResponse.AnimateExampleBeforeCaption,
-                    messageThreadId: messageThreadId,
-                    cancellationToken: cancellationToken);
-            }
+            await using var beforeStream = File.OpenRead(BeforePath);
+            await using var resultStream = File.OpenRead(ResultMp4Path);
 
-            await botClient.SendMessage(
+            IAlbumInputMedia[] media =
+            [
+                new InputMediaPhoto(InputFile.FromStream(beforeStream, "before.jpg"))
+                {
+                    Caption = BotResponse.SendPhotoToAnimate,
+                },
+                new InputMediaVideo(InputFile.FromStream(resultStream, "result.mp4")),
+            ];
+
+            var messages = await botClient.SendMediaGroup(
                 chatId,
-                BotResponse.AnimateExamplePromptCaption,
+                media,
                 messageThreadId: messageThreadId,
                 cancellationToken: cancellationToken);
 
-            var fileName = Path.GetFileName(resultPath);
-            await using (var resultStream = File.OpenRead(resultPath))
+            if (replyMarkup is InlineKeyboardMarkup inlineKeyboard && messages.Length > 0)
             {
-                await botClient.SendAnimation(
+                await botClient.EditMessageReplyMarkup(
                     chatId,
-                    InputFile.FromStream(resultStream, fileName),
-                    caption: BotResponse.AnimateExampleResultCaption,
-                    messageThreadId: messageThreadId,
+                    messages[0].Id,
+                    replyMarkup: inlineKeyboard,
                     cancellationToken: cancellationToken);
             }
+
+            return;
         }
 
         await botClient.SendMessage(

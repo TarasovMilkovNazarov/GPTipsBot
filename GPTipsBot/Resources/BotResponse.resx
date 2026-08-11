@@ -418,17 +418,10 @@ https://gptips.skolkokomu.ru</value>
   <data name="YooKassaPaymentSucceeded" xml:space="preserve">
     <value>✅ Оплата прошла успешно! Баланс пополнен.</value>
   </data>
-  <data name="AnimateExampleBeforeCaption" xml:space="preserve">
-    <value>1️⃣ Фото</value>
-  </data>
-  <data name="AnimateExamplePromptCaption" xml:space="preserve">
-    <value>2️⃣ Промпт: «Дети радостно прыгают и обнимаются»</value>
-  </data>
-  <data name="AnimateExampleResultCaption" xml:space="preserve">
-    <value>3️⃣ Результат</value>
-  </data>
   <data name="SendPhotoToAnimate" xml:space="preserve">
-    <value>Отправьте своё фото для оживления и кратко опишите действие. Например: «смеются», «танцует», «пишет»</value>
+    <value>Пример: фото → «Дети радостно прыгают и обнимаются» → результат
+
+Отправьте своё фото для оживления и кратко опишите действие. Например: «смеются», «танцует», «пишет»</value>
   </data>
   <data name="SendAnimatePrompt" xml:space="preserve">
     <value>Введите промпт для анимации, используйте глаголы</value>
