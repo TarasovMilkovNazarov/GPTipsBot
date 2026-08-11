@@ -739,6 +739,24 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        public static string HumanUsage {
+            get {
+                return ResourceManager.GetString("HumanUsage", resourceCulture);
+            }
+        }
+
+        public static string HumanHeader {
+            get {
+                return ResourceManager.GetString("HumanHeader", resourceCulture);
+            }
+        }
+
+        public static string HumanSystemPrompt {
+            get {
+                return ResourceManager.GetString("HumanSystemPrompt", resourceCulture);
+            }
+        }
+
         public static string InlineAskTitle {
             get {
                 return ResourceManager.GetString("InlineAskTitle", resourceCulture);

@@ -492,7 +492,7 @@ namespace GPTipsBotTests
         }
 
         [Test]
-        public async Task RecognizeImageTextRequest_ImageMessageWithoutCommandRequest_ChooseCommandFirstResponse()
+        public async Task PhotoWithoutCommand_ShowsImagesMenu()
         {
             var update = CreateTelegramUpdate(2, 2, null);
             update.Message!.Photo = new[]
@@ -503,9 +503,12 @@ namespace GPTipsBotTests
                 }
             };
 
-            var imageUpdateFunc = async() => await _mainHandler.HandleUpdateAsync(update);
+            await _mainHandler.HandleUpdateAsync(update);
 
-            await imageUpdateFunc.Should().ThrowExactlyAsync<NotSupportedMessageException>();
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
+                    arg.Text == BotResponse.ChooseImagesPlease
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]

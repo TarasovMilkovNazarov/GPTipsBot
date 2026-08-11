@@ -216,6 +216,9 @@ namespace GPTipsBot.UpdateHandlers
                     await base.HandleAsync(update);
                     return;
                 }
+                case HumanCommand:
+                    await HandleHumanAsync(update, messageText);
+                    return;
                 case ImageCommand:
                     if (profile is { Images: <= 0, Stars: <= 0 })
                     {
@@ -299,6 +302,15 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case SetRuLangCommand:
                     reply = await UpdateLanguage(update.UserChatKey, "ru");
+                    break;
+                case SetEsLangCommand:
+                    reply = await UpdateLanguage(update.UserChatKey, "es");
+                    break;
+                case SetFaLangCommand:
+                    reply = await UpdateLanguage(update.UserChatKey, "fa");
+                    break;
+                case SetArLangCommand:
+                    reply = await UpdateLanguage(update.UserChatKey, "ar");
                     break;
                 case CancelCommand:
                     if (update.CallbackQuery == null)
@@ -650,6 +662,84 @@ namespace GPTipsBot.UpdateHandlers
                     await userService.ReleaseAsync(hold.Id);
                 }
             }
+        }
+
+        private async Task HandleHumanAsync(UpdateDecorator update, string? messageText)
+        {
+            var sourceText = ResolveHumanSourceText(update, messageText);
+            if (string.IsNullOrWhiteSpace(sourceText))
+            {
+                await botClient.SendUserReplyAsync(update, BotResponse.HumanUsage);
+                return;
+            }
+
+            var hold = await userService.TryReserveGptAsync(update.UserChatKey.Id, GptModelCatalog.Default);
+            if (hold is null)
+            {
+                await SendNoFreeRequestsMessage(update);
+                return;
+            }
+
+            var confirmed = false;
+            try
+            {
+                await botClient.SendUserReplyAsync(update, BotResponse.PleaseWaitMsg);
+
+                var response = await gptService.SendOneOffAsync(
+                    BotResponse.HumanSystemPrompt,
+                    sourceText,
+                    CancellationToken.None);
+
+                var rewritten = response.Choices.FirstOrDefault()?.Message.Content;
+                if (string.IsNullOrWhiteSpace(rewritten))
+                {
+                    await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
+                    return;
+                }
+
+                update.Message.Text = sourceText;
+                update.Message.ContextBound = false;
+                await messageRepository.AddAsync(update.Message);
+                await messageRepository.AddAsync(new MessageDto(update.UserChatKey)
+                {
+                    Text = rewritten,
+                    Role = MessageOwner.Assistant,
+                    ContextBound = false,
+                    BotMessageType = BotMessageType.ChatGptPrompt,
+                    MessageThreadId = update.Message.MessageThreadId,
+                });
+
+                await botClient.SendUserReplyAsync(
+                    update,
+                    $"{BotResponse.HumanHeader}\n\n{rewritten}");
+
+                await userService.ConfirmAsync(hold.Id);
+                confirmed = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed /human rewrite for user {UserId}", update.UserChatKey.Id);
+                await botClient.SendUserReplyAsync(update, BotResponse.SomethingWentWrong);
+            }
+            finally
+            {
+                if (!confirmed)
+                {
+                    await userService.ReleaseAsync(hold.Id);
+                }
+            }
+        }
+
+        private static string? ResolveHumanSourceText(UpdateDecorator update, string? messageText)
+        {
+            if (UpdateDecorator.TryGetCommandArgument(messageText, HumanCommand, out var argument))
+            {
+                return argument;
+            }
+
+            var replyText = update.Message?.ReplyToMessage?.Text
+                            ?? update.Message?.ReplyToMessage?.Caption;
+            return string.IsNullOrWhiteSpace(replyText) ? null : replyText.Trim();
         }
 
         private static string BuildTranscript(IReadOnlyList<Models.Message> messages)

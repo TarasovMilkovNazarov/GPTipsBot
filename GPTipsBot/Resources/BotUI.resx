@@ -126,6 +126,15 @@
   <data name="EnglishButton" xml:space="preserve">
     <value>English</value>
   </data>
+  <data name="SpanishButton" xml:space="preserve">
+    <value>Español</value>
+  </data>
+  <data name="PersianButton" xml:space="preserve">
+    <value>فارسی</value>
+  </data>
+  <data name="ArabicButton" xml:space="preserve">
+    <value>العربية</value>
+  </data>
   <data name="Help" xml:space="preserve">
     <value>Инструкция по применению</value>
   </data>
@@ -158,6 +167,15 @@
   </data>
   <data name="SetEngLang" xml:space="preserve">
     <value>English</value>
+  </data>
+  <data name="SetEsLang" xml:space="preserve">
+    <value>Español</value>
+  </data>
+  <data name="SetFaLang" xml:space="preserve">
+    <value>فارسی</value>
+  </data>
+  <data name="SetArLang" xml:space="preserve">
+    <value>العربية</value>
   </data>
   <data name="SetLang" xml:space="preserve">
     <value>Установить язык интерфейса бота</value>
@@ -202,6 +220,9 @@
   </data>
   <data name="Ask" xml:space="preserve">
     <value>Спросить у ИИ</value>
+  </data>
+  <data name="Human" xml:space="preserve">
+    <value>Переписать простым естественным English</value>
   </data>
   <data name="Model" xml:space="preserve">
     <value>Выбрать модель ChatGPT</value>

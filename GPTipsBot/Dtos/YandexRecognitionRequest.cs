@@ -11,5 +11,5 @@ public class YandexRecognitionRequest
     [JsonPropertyName("model")]
     public string Model { get; set; } = "handwritten";
     [JsonPropertyName("languageCodes")]
-    public string[] LanguageCodes { get; set; } = {"ru", "en"};
+    public string[] LanguageCodes { get; set; } = {"ru", "en", "es"};
 }

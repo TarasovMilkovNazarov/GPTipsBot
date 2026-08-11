@@ -1,64 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -118,10 +59,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CancelButton" xml:space="preserve">
-    <value>Cancel</value>
+    <value>إلغاء</value>
   </data>
   <data name="ContinueButton" xml:space="preserve">
-    <value>Continue</value>
+    <value>متابعة</value>
   </data>
   <data name="EnglishButton" xml:space="preserve">
     <value>English</value>
@@ -136,31 +77,31 @@
     <value>العربية</value>
   </data>
   <data name="Help" xml:space="preserve">
-    <value>How to use bot</value>
+    <value>كيفية استخدام البوت</value>
   </data>
   <data name="HelpButton" xml:space="preserve">
-    <value>❔ Help</value>
+    <value>❔ مساعدة</value>
   </data>
   <data name="Image" xml:space="preserve">
-    <value>GPT IMAGE 1 — free generation</value>
+    <value>GPT IMAGE 1 — توليد مجاني</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
     <value>🖼 GPT IMAGE 1</value>
   </data>
   <data name="ImagesMenu" xml:space="preserve">
-    <value>Image tools menu</value>
+    <value>قائمة أدوات الصور</value>
   </data>
   <data name="ImagesMenuButton" xml:space="preserve">
-    <value>🎨 Images</value>
+    <value>🎨 الصور</value>
   </data>
   <data name="LangButton" xml:space="preserve">
-    <value>🌐 Language</value>
+    <value>🌐 اللغة</value>
   </data>
   <data name="ResetContext" xml:space="preserve">
-    <value>Start new dialog with ChatGPT (reset context)</value>
+    <value>بدء حوار جديد مع ChatGPT (إعادة تعيين السياق)</value>
   </data>
   <data name="ResetContextButton" xml:space="preserve">
-    <value>💬 New chat</value>
+    <value>💬 دردشة جديدة</value>
   </data>
   <data name="RussianButton" xml:space="preserve">
     <value>Русский</value>
@@ -178,68 +119,68 @@
     <value>العربية</value>
   </data>
   <data name="SetLang" xml:space="preserve">
-    <value>Set bot interface language</value>
+    <value>تعيين لغة واجهة البوت</value>
   </data>
   <data name="SetRuLang" xml:space="preserve">
     <value>Русский</value>
   </data>
   <data name="Start" xml:space="preserve">
-    <value>Start</value>
+    <value>بدء</value>
   </data>
   <data name="StopRequestButton" xml:space="preserve">
-    <value>cancel request</value>
+    <value>إلغاء الطلب</value>
   </data>
   <data name="ImageTextRecognizeButton" xml:space="preserve">
-    <value>📝 Text from photo</value>
+    <value>📝 نص من الصورة</value>
   </data>
   <data name="ImageTextRecognize" xml:space="preserve">
-    <value>Get text on image</value>
+    <value>استخراج النص من الصورة</value>
   </data>
   <data name="PromptFromImageButton" xml:space="preserve">
-    <value>🪄 Prompt from photo</value>
+    <value>🪄 برومبت من صورة</value>
   </data>
   <data name="PromptFromImage" xml:space="preserve">
-    <value>Create a prompt from an image</value>
+    <value>إنشاء برومبت من صورة</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
-    <value>⭐ Top up</value>
+    <value>⭐ شحن</value>
   </data>
   <data name="DonateButton" xml:space="preserve">
-    <value>🌟 Support our project! 💪
+    <value>🌟 ادعم مشروعنا! 💪
 
-💖 Every donation helps us develop and improve the service. 🤝 We appreciate your support and are working to make our product even better. 🚀💡</value>
+💖 كل تبرع يساعدنا على التطوير وتحسين الخدمة. 🤝 نقدر دعمك ونعمل لجعل منتجنا أفضل. 🚀💡</value>
   </data>
   <data name="ProfileButton" xml:space="preserve">
-    <value>👤 Account</value>
+    <value>👤 الحساب</value>
   </data>
   <data name="AnimateButton" xml:space="preserve">
-    <value>✨ Animate photo</value>
+    <value>✨ تحريك الصورة</value>
   </data>
   <data name="Summary" xml:space="preserve">
-    <value>Summarize today's messages — a handy feature for groups</value>
+    <value>تلخيص رسائل اليوم — مفيد للمجموعات</value>
   </data>
   <data name="Ask" xml:space="preserve">
-    <value>Ask the AI</value>
+    <value>اسأل الذكاء الاصطناعي</value>
   </data>
   <data name="Human" xml:space="preserve">
-    <value>Rewrite into simple natural English</value>
+    <value>إعادة الصياغة إلى إنجليزية بسيطة وطبيعية</value>
   </data>
   <data name="Model" xml:space="preserve">
-    <value>Choose ChatGPT model</value>
+    <value>اختيار نموذج ChatGPT</value>
   </data>
   <data name="ModelButton" xml:space="preserve">
-    <value>🤖 Model</value>
+    <value>🤖 النموذج</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT Image 2 — generate</value>
+    <value>GPT Image 2 — توليد</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
     <value>🎨 GPT Image 2</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT Image 2 — edit photo</value>
+    <value>GPT Image 2 — تعديل صورة</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 Edit photo</value>
+    <value>🛠 تعديل صورة</value>
   </data>
 </root>

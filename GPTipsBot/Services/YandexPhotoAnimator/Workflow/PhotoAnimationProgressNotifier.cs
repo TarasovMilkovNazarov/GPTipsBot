@@ -53,8 +53,8 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
 
     private static string FormatRemainingTime(int remainingSeconds)
     {
-        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en"
-            ? PhotoAnimationWaitPolicy.FormatRemainingTimeEn(remainingSeconds)
-            : PhotoAnimationWaitPolicy.FormatRemainingTime(remainingSeconds);
+        return PhotoAnimationWaitPolicy.FormatRemainingTimeForCulture(
+            remainingSeconds,
+            CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
     }
 }

@@ -379,9 +379,14 @@ namespace GPTipsBot.UpdateHandlers
                 imageCache.Remove(userKey.ChatId);
                 return;
             }
-            else if (update.FileId != null)
+            else if (TryGetMediaToolRoute(update, out var mediaRoute))
             {
-                throw new NotSupportedMessageException(update.UserChatKey.ChatId, "Photo");
+                if (await TryRouteMediaToolAsync(update, mediaRoute))
+                {
+                    return;
+                }
+
+                SetNextHandler(chatGptHandler);
             }
             else if (string.IsNullOrWhiteSpace(update.Message?.Text))
             {
@@ -393,6 +398,159 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             await base.HandleAsync(update);
+        }
+
+        private static bool TryGetMediaToolRoute(UpdateDecorator update, out MediaToolRoute route)
+        {
+            route = MediaToolRoute.None;
+            if (update.Message == null)
+            {
+                return false;
+            }
+
+            var hasPhoto = update.FileId != null;
+            var hasText = !string.IsNullOrWhiteSpace(update.Message.Text);
+            if (!hasPhoto && !hasText)
+            {
+                return false;
+            }
+
+            route = NaturalLanguageToolRouter.TryMatch(update.Message.Text, hasPhoto);
+            return route.Intent != MediaToolIntent.None;
+        }
+
+        /// <summary>
+        /// Hands NL media asks off to existing command flows. Returns true when the update
+        /// was fully handled (or a follow-up handler was invoked); false to fall through to chat.
+        /// </summary>
+        private async Task<bool> TryRouteMediaToolAsync(UpdateDecorator update, MediaToolRoute route)
+        {
+            update.Message.ContextBound = false;
+            var profile = await userService.GetUserProfile(update.UserChatKey.Id);
+
+            switch (route.Intent)
+            {
+                case MediaToolIntent.GenerateImage:
+                    if (update.IsGroupOrChannel && !BotMenu.IsAllowedInGroup(CommandType.Image))
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    if (profile is { Images: <= 0, Stars: <= 0 })
+                    {
+                        await SendNoFreeRequestsMessageAsync(update);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.Image);
+
+                    if (!string.IsNullOrWhiteSpace(route.Prompt))
+                    {
+                        update.Message.Text = route.Prompt;
+                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(imageGeneratorHandler);
+                        await base.HandleAsync(update);
+                        return true;
+                    }
+
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        string.Format(
+                            BotResponse.InputImageDescriptionText,
+                            ImageGeneratorHandler.ImageTextDescriptionLimit),
+                        TelegramBotUiService.GetImageInstructionInlineKeyboard(false));
+                    return true;
+
+                case MediaToolIntent.RecognizeText:
+                    if (update.IsGroupOrChannel)
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    if (profile is { ImageTexts: <= 0, Stars: <= 0 })
+                    {
+                        await SendNoFreeRequestsMessageAsync(update);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.TextRecognition);
+
+                    if (update.FileId != null)
+                    {
+                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(imageTextRecognitionHandler);
+                        await base.HandleAsync(update);
+                        return true;
+                    }
+
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendTextRecognitionImage,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return true;
+
+                case MediaToolIntent.PromptFromImage:
+                    if (update.IsGroupOrChannel && !BotMenu.IsAllowedInGroup(CommandType.PromptFromImage))
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    if (profile is { GptRequests: <= 0, Stars: <= 0 })
+                    {
+                        await SendNoFreeRequestsMessageAsync(update);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.PromptFromImage);
+
+                    if (update.FileId != null)
+                    {
+                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(promptFromImageHandler);
+                        await base.HandleAsync(update);
+                        return true;
+                    }
+
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendPromptFromImagePhoto,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return true;
+
+                case MediaToolIntent.ImagesMenu:
+                    if (update.IsGroupOrChannel)
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.ImagesMenu);
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.ChooseImagesPlease,
+                        TelegramBotUiService.GetImagesMenuInlineKeyboard());
+                    return true;
+
+                case MediaToolIntent.Onboarding:
+                    await messageRepository.AddAsync(update.Message);
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.Greeting,
+                        TelegramBotUiService.GetOnboardingInlineKeyboard());
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        private async Task SendNoFreeRequestsMessageAsync(UpdateDecorator update)
+        {
+            var nextRefreshLimitExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
+            await botClient.SendOutOfFreeRequestsMessageAsync(update.UserChatKey.ChatId, nextRefreshLimitExec);
         }
 
         private static bool IsGroupFollowUp(UserCommand? lastCommand) =>

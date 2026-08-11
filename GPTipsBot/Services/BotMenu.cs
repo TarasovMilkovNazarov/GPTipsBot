@@ -20,6 +20,9 @@ public class BotMenu
     public const string ChooseLangCommand = "/setLang";
     public const string SetRuLangCommand = "/setRuLang";
     public const string SetEngLangCommand = "/setEngLang";
+    public const string SetEsLangCommand = "/setEsLang";
+    public const string SetFaLangCommand = "/setFaLang";
+    public const string SetArLangCommand = "/setArLang";
     public const string CancelCommand = "/cancel";
     public const string StopRequestCommand = "/stopRequest";
     public const string ImageTextRecognizeCommand = "/get_image_text";
@@ -40,6 +43,7 @@ public class BotMenu
     public const string GptImageQualityHighCommand = "/gpt_image_q_high";
     public const string SummaryCommand = "/summary";
     public const string AskCommand = "/ask";
+    public const string HumanCommand = "/human";
     public const string FixCommand = "/fix";
     public const string VersionCommand = "/version";
     public const string VpnCheckCommand = "/vpn_check";
@@ -56,6 +60,9 @@ public class BotMenu
     public static CustomBotCommand ChooseLang => new() { Command = ChooseLangCommand, Description = BotUI.SetLang, Type = CommandType.ChooseLanguage};
     public static CustomBotCommand SetRuLang => new() { Command = SetRuLangCommand, Description = BotUI.SetRuLang, Type = CommandType.SetRuLang };
     public static CustomBotCommand SetEngLang => new() { Command = SetEngLangCommand, Description = BotUI.SetEngLang, Type = CommandType.SetEngLang };
+    public static CustomBotCommand SetEsLang => new() { Command = SetEsLangCommand, Description = BotUI.SetEsLang, Type = CommandType.SetEsLang };
+    public static CustomBotCommand SetFaLang => new() { Command = SetFaLangCommand, Description = BotUI.SetFaLang, Type = CommandType.SetFaLang };
+    public static CustomBotCommand SetArLang => new() { Command = SetArLangCommand, Description = BotUI.SetArLang, Type = CommandType.SetArLang };
     public static CustomBotCommand StopRequest => new() { Command = StopRequestCommand, Type = CommandType.StopRequest };
     public static CustomBotCommand Cancel => new() { Command = CancelCommand, Type = CommandType.CancelPreviousCommand };
     public static CustomBotCommand Deposit => new() { Command = DepositCommand, Description = BotUI.DepositButton, Type = CommandType.Deposit };
@@ -73,6 +80,7 @@ public class BotMenu
     public static CustomBotCommand GptImageQualityHigh => new() { Command = GptImageQualityHighCommand, Type = CommandType.GptImage };
     public static CustomBotCommand Summary => new() { Command = SummaryCommand, Description = BotUI.Summary, Type = CommandType.Summary };
     public static CustomBotCommand Ask => new() { Command = AskCommand, Description = BotUI.Ask, Type = CommandType.Ask };
+    public static CustomBotCommand Human => new() { Command = HumanCommand, Description = BotUI.Human, Type = CommandType.Human };
 
     public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
     public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
@@ -99,7 +107,8 @@ public class BotMenu
             GptImage,
             EditImage,
             Summary,
-            Ask
+            Ask,
+            Human
         ];
     }
 
@@ -108,6 +117,7 @@ public class BotMenu
         return
         [
             Ask,
+            Human,
             Image,
             PromptFromImage,
             EditImage,
@@ -117,6 +127,7 @@ public class BotMenu
 
     public static bool IsAllowedInGroup(CommandType type) =>
         type is CommandType.Ask
+            or CommandType.Human
             or CommandType.Image
             or CommandType.ImageSquare
             or CommandType.ImageRectangle

@@ -70,6 +70,13 @@ public class DailyStatisticsJob(
         var summaryCommands = summaryUserIds.Count;
         var summaryUniqueUsers = summaryUserIds.Distinct().Count();
 
+        var humanUserIds = await context.UserCommands.AsNoTracking()
+            .Where(c => c.CreatedAt > today && c.Type == CommandType.Human)
+            .Select(c => c.UserId)
+            .ToListAsync();
+        var humanCommands = humanUserIds.Count;
+        var humanUniqueUsers = humanUserIds.Distinct().Count();
+
         var message = "#statistics" + Environment.NewLine +
                       $"New users created: {newUsersCount} for {today:dd.MM.yyyy}" + Environment.NewLine;
         message += Environment.NewLine + $"Images generated: {counts.ImagesCount}";
@@ -78,6 +85,7 @@ public class DailyStatisticsJob(
         message += Environment.NewLine + $"Text recognitions: {counts.RecognitionsCount}";
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
         message += Environment.NewLine + $"/summary uses: {summaryCommands} ({summaryUniqueUsers} users)";
+        message += Environment.NewLine + $"/human uses: {humanCommands} ({humanUniqueUsers} users)";
         message += Environment.NewLine + $"Web logins: {totalLogins}";
         message += Environment.NewLine + $"  telegram: {telegramLogins.Count} ({telegramLogins.UniqueUsers} users)";
         message += Environment.NewLine + $"  guest: {guestLogins.Count} ({guestLogins.UniqueUsers} users)";

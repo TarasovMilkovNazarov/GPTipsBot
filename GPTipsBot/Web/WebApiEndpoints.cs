@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using GPTipsBot.Config;
 using GPTipsBot.Db;
+using GPTipsBot.Localization;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services;
@@ -60,7 +61,7 @@ public static class WebApiEndpoints
         }
 
         var lang = http.Request.Headers.AcceptLanguage.ToString();
-        var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+        var language = LocalizationManager.NormalizeLanguage(lang);
         // After logout we must not hand out a fresh guest quota (abuse vector).
         // Free quota also requires a FingerprintJS visitorId that has never been granted.
         var grantFreeQuota = body?.GrantFreeQuota ?? true;
@@ -115,7 +116,7 @@ public static class WebApiEndpoints
         }
 
         var lang = http.Request.Headers.AcceptLanguage.ToString();
-        var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+        var language = LocalizationManager.NormalizeLanguage(lang);
 
         User user;
         bool isGuest;
@@ -237,7 +238,7 @@ public static class WebApiEndpoints
         }
 
         var lang = http.Request.Headers.AcceptLanguage.ToString();
-        var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+        var language = LocalizationManager.NormalizeLanguage(lang);
         var redirectUri = ResolveYandexRedirectUri(http);
 
         User user;
@@ -292,7 +293,7 @@ public static class WebApiEndpoints
         try
         {
             var lang = http.Request.Headers.AcceptLanguage.ToString();
-            var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+            var language = LocalizationManager.NormalizeLanguage(lang);
             var previousId = WebUserService.TryGetUserId(http);
             long? linkToUserId = previousId is > 0 ? previousId : null;
             var (user, devCode) = await webUsers.RegisterEmailAsync(
@@ -1024,7 +1025,7 @@ public static class WebApiEndpoints
         // Auto-provision guest so chat works without an explicit login step (bota.chat style).
         // No free quota here — that requires FingerprintJS via POST /auth/guest.
         var lang = http.Request.Headers.AcceptLanguage.ToString();
-        var language = lang.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en";
+        var language = LocalizationManager.NormalizeLanguage(lang);
         var (user, isGuest) = await webUsers.EnsureGuestAsync(
             language,
             grantFreeQuota: false,

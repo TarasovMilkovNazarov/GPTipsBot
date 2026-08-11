@@ -39,6 +39,10 @@ public enum CommandType
     EditImage = 25,
     ImagesMenu = 26,
     PromptFromImage = 27,
+    Human = 28,
+    SetEsLang = 29,
+    SetFaLang = 30,
+    SetArLang = 31,
 }
 
 public class Wallet: Entity

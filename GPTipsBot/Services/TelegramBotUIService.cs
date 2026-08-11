@@ -32,6 +32,9 @@ namespace GPTipsBot.Services
         private static KeyboardButton CancelButton => new(BotUI.CancelButton);
         private static KeyboardButton RuLangButton => new(BotUI.RussianButton);
         private static KeyboardButton EngLangButton => new(BotUI.EnglishButton);
+        private static KeyboardButton EsLangButton => new(BotUI.SpanishButton);
+        private static KeyboardButton FaLangButton => new(BotUI.PersianButton);
+        private static KeyboardButton ArLangButton => new(BotUI.ArabicButton);
         private static KeyboardButton ProfileButton => new(BotUI.ProfileButton);
         private static KeyboardButton ModelButton => new(BotUI.ModelButton);
 
@@ -53,6 +56,9 @@ namespace GPTipsBot.Services
                 { BotMenu.ChooseLangCommand, new() },
                 { BotMenu.SetRuLangCommand, new() },
                 { BotMenu.SetEngLangCommand, new() },
+                { BotMenu.SetEsLangCommand, new() },
+                { BotMenu.SetFaLangCommand, new() },
+                { BotMenu.SetArLangCommand, new() },
                 { BotMenu.ImageTextRecognizeCommand, new() },
                 { BotMenu.PromptFromImageCommand, new() },
                 { BotMenu.DepositCommand, new() },
@@ -77,6 +83,9 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ChooseLangCommand].Add(BotUI.LangButton);
                 ButtonToLocalizations[BotMenu.SetRuLangCommand].Add(BotUI.RussianButton);
                 ButtonToLocalizations[BotMenu.SetEngLangCommand].Add(BotUI.EnglishButton);
+                ButtonToLocalizations[BotMenu.SetEsLangCommand].Add(BotUI.SpanishButton);
+                ButtonToLocalizations[BotMenu.SetFaLangCommand].Add(BotUI.PersianButton);
+                ButtonToLocalizations[BotMenu.SetArLangCommand].Add(BotUI.ArabicButton);
                 ButtonToLocalizations[BotMenu.ImageTextRecognizeCommand].Add(BotUI.ImageTextRecognizeButton);
                 ButtonToLocalizations[BotMenu.PromptFromImageCommand].Add(BotUI.PromptFromImageButton);
                 ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
@@ -109,7 +118,7 @@ namespace GPTipsBot.Services
                 "Распознать текст на изображении",
                 "Get text on image");
             AddUnique(BotMenu.HelpCommand, "❔ Help");
-            AddUnique(BotMenu.ChooseLangCommand, "Язык", "Language");
+            AddUnique(BotMenu.ChooseLangCommand, "Язык", "Language", "Idioma", "زبان", "اللغة");
             AddUnique(BotMenu.ImageCommand,
                 "🖼 Создать изображение",
                 "🖼 Create image",
@@ -162,6 +171,9 @@ namespace GPTipsBot.Services
             {
                 InlineKeyboardButton.WithCallbackData(BotUI.RussianButton, BotMenu.SetRuLangCommand),
                 InlineKeyboardButton.WithCallbackData(BotUI.EnglishButton, BotMenu.SetEngLangCommand),
+                InlineKeyboardButton.WithCallbackData(BotUI.SpanishButton, BotMenu.SetEsLangCommand),
+                InlineKeyboardButton.WithCallbackData(BotUI.PersianButton, BotMenu.SetFaLangCommand),
+                InlineKeyboardButton.WithCallbackData(BotUI.ArabicButton, BotMenu.SetArLangCommand),
             });
         }
 
@@ -242,6 +254,19 @@ namespace GPTipsBot.Services
             ]);
         }
 
+        /// <summary>One-tap CTAs for greetings / “what can you do”.</summary>
+        public static InlineKeyboardMarkup GetOnboardingInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton.WithCallbackData(BotUI.ImagesMenuButton, BotMenu.ImagesMenuCommand),
+                    InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand),
+                ],
+                [InlineKeyboardButton.WithCallbackData(BotUI.HelpButton, BotMenu.HelpCommand)],
+            ]);
+        }
+
         public static InlineKeyboardMarkup GetGptImageOptionsKeyboard(GptImageSession session)
         {
             var sizeRow = GptImageConfig.Sizes.Select(size =>
@@ -290,7 +315,12 @@ namespace GPTipsBot.Services
 
         private static ReplyKeyboardMarkup GetLanguageKeyboardMarkup()
         {
-            var keyboardMarkup = new ReplyKeyboardMarkup(new[] { RuLangButton, EngLangButton });
+            var keyboardMarkup = new ReplyKeyboardMarkup(new[]
+            {
+                new[] { RuLangButton, EngLangButton },
+                new[] { EsLangButton, FaLangButton },
+                new[] { ArLangButton },
+            });
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = true;

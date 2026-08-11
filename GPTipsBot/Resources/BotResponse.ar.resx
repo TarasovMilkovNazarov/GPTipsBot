@@ -1,0 +1,612 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BotDescription" xml:space="preserve">
+    <value>🤖 ChatGPT + صور
+
+ما عليك سوى كتابة سؤال - يقوم الروبوت بالرد بسياق المحادثة.
+القائمة: دردشة جديدة، نماذج، صور (GPT صورة 1 / GPT Image 2)، صور متحركة، حساب و⭐ تعبئة رصيد.
+
+تنطبق الحدود اليومية المجانية - راجع /profile. التفاصيل: /help</value>
+  </data>
+  <data name="HelpText" xml:space="preserve">
+    <value>🤖 الدليل الكامل
+
+🌐 موقع الكتروني
+تتوفر أيضًا نفس أدوات الدردشة ChatGPT وأدوات صورة في المتصفح:
+https://gptips.skolkokomu.ru
+قم بتسجيل الدخول باستخدام Telegram - تتم مشاركة رصيدك وحصصك مع الروبوت.
+
+💬 الدردشة مع الذكاء الاصطناعي
+ما عليك سوى إرسال رسالة نصية - يقوم الروبوت بالرد باستخدام سياق المحادثة الحالي.
+• 💬 دردشة جديدة — أعد ضبط السياق وابدأ من جديد
+• 🤖 الطراز — اختر طراز ChatGPT
+  — GPT-4o mini: يستخدم الحصة اليومية المجانية
+  — نماذج أخرى: Stars فقط
+
+🎨 الصور
+افتح "🎨 الصور" في القائمة:
+• 🖼 GPT صورة 1 — إرسال رسالة نصية مجانية إلى صورة (ضمن الحصة اليومية)
+• 🎨 GPT Image 2 — جيل مدفوع مع خيارات الحجم والجودة
+• 🛠 تحرير الصورة — تحرير صورة من تعليمات نصية (مدفوعة، GPT Image 2)؛ في المجموعات: قم بالرد بـ "/edit_image ..." على صورة
+• 📝 نص من الصورة — OCR / استخراج النص من صورة
+• 🪄 مطالبة من الصورة - أنشئ رسالة نصية إلى صورة من صورة تم تحميلها
+
+🪄 موجه من الصورة
+أرسل صورة - يكتب الروبوت مطالبة يمكنها إنشاء صورة مماثلة (يستخدم حصة ChatGPT أو ⭐).
+في المجموعات والتعليقات: قم بالرد على الصورة باستخدام /prompt_from_image.
+
+✨ تحريك الصورة
+قم بتحويل الصورة إلى رسم متحرك قصير (مجانًا ضمن الحصة النسبية أو مدفوعًا بـ ⭐).
+
+👤 الحساب
+يُظهر رصيدك ⭐ والحصص المجانية والنموذج الحالي.
+من الحساب يمكنك:
+• اختيار النموذج
+• تعبئة الرصيد
+• تبديل لغة الواجهة
+
+⭐التوازن والحدود
+الطلبات المجانية محدودة ويتم تحديثها يوميًا.
+عند نفاذ الحصة، قم بالتعبئة ⭐ في الحساب أو عبر /deposit.
+الدليل: 1⭐ ≈ 10 طلبات ChatGPT، أو جيلين من صورة، أو صورتين متحركتين.
+
+أوامر مفيدة
+/start — القائمة الرئيسية
+/help - هذا الدليل
+/profile — الحساب
+/model - اختر الطراز
+/images — قائمة صورة
+/image — GPT صورة 1
+/gpt_image — GPT Image 2
+/edit_image - تحرير الصورة
+/prompt_from_image - موجه من الصورة
+/animate — صورة متحركة
+/get_image_text — OCR
+/deposit - قم بتعبئة الرصيد
+/reset_context — دردشة جديدة
+/human - أعد الكتابة إلى اللغة الإنجليزية الطبيعية البسيطة
+/donate — دعم المشروع
+
+في مجموعات: /ask، /human، /image، /summary
+
+🔎 مضمن (أي دردشة)
+اكتب @GPTipsBot والأمر:
+• ask سؤالك - الإجابة على ChatGPT
+• وصف صورة — قم بإنشاء صورة
+مثال: @GPTipsBot ask ما هو النيوترينو؟
+مثال: @GPTipsBot image قطة في الفضاء
+
+الدعم: @my_super_ultra_smart_bot</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>ChatGPT + DALL-E | مجاني | Sora</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>تم إلغاء العملية</value>
+  </data>
+  <data name="ContinueConversation" xml:space="preserve">
+    <value>أرسل رسالة لمواصلة المحادثة</value>
+  </data>
+  <data name="ChooseLanguagePlease" xml:space="preserve">
+    <value>اختر لغة واجهة المستخدم من فضلك</value>
+  </data>
+  <data name="ContextUpdated" xml:space="preserve">
+    <value>تمت إعادة ضبط السياق بنجاح. Start حوار جديد.</value>
+  </data>
+  <data name="CookiesUpdated" xml:space="preserve">
+    <value>تم تحديث ملفات تعريف الارتباط Bing صورة</value>
+  </data>
+  <data name="DevBotName" xml:space="preserve">
+    <value>GPTipDev</value>
+  </data>
+  <data name="Greeting" xml:space="preserve">
+    <value>أهلاً! أنا GPTipsBot — دردشة الذكاء الاصطناعي وimage وأدوات الصور.
+
+ما عليك سوى كتابة سؤال — أو اختيار إجراء:
+• 🎨 الصور — إنشاء وتحرير OCR
+• ✨ تحريك الصورة
+• ✍️ /human — إعادة كتابة بسيطة باللغة الإنجليزية بشكل طبيعي
+• 💬 دردشة جديدة — إعادة ضبط السياق
+
+التفاصيل: /help
+
+🌐 موقع بنفس الحساب والرصيد:
+https://gptips.skolkokomu.ru</value>
+  </data>
+  <data name="ChooseImagesPlease" xml:space="preserve">
+    <value>ماذا تريد أن تفعل مع صورة؟</value>
+  </data>
+  <data name="ImageDescriptionLimitWarning" xml:space="preserve">
+    <value>يجب ألا يتجاوز الوصف النصي لـ صورة أحرف {0}. يرجى اختصار الوصف وإرساله مرة أخرى</value>
+  </data>
+  <data name="InputImageDescriptionText" xml:space="preserve">
+    <value>🖼 GPT صورة 1 — جيل مجاني
+
+أدخل وصفًا يصل إلى أحرف {0}.
+
+1:1 — مربع صورة
+2:1 - صورة مستطيلة (افتراضي)</value>
+  </data>
+  <data name="LanguageWasSetSuccessfully" xml:space="preserve">
+    <value>تم تعيين العربية كلغة للواجهة</value>
+  </data>
+  <data name="UnsupportedMessageType" xml:space="preserve">
+    <value>عذرًا، لا يتم دعم سوى الرسائل النصية أو الصوتية حاليًا</value>
+  </data>
+  <data name="OnMaintenance" xml:space="preserve">
+    <value>⚙️ جاري الصيانة الفنية. شكرا لتفهمك.</value>
+  </data>
+  <data name="PleaseSetLanguage" xml:space="preserve">
+    <value>الرجاء اختيار لغة الواجهة</value>
+  </data>
+  <data name="PleaseWaitMsg" xml:space="preserve">
+    <value>⌛️ برجاء الإنتظار جاري تجهيز الرد...</value>
+  </data>
+  <data name="Recovered" xml:space="preserve">
+    <value>آسف على غيابي لفترة من الوقت، لكني الآن عدت إلى العمل.</value>
+  </data>
+  <data name="SendFeedback" xml:space="preserve">
+    <value>أدخل رسالتك أدناه. نحن نقدر أي ردود فعل.</value>
+  </data>
+  <data name="ShortDescription" xml:space="preserve">
+    <value>يجيب الروبوت على أسئلتك وينشئ صورة 🤖👋 (دعم @my_super_ultra_smart_bot)</value>
+  </data>
+  <data name="ShortDevDescription" xml:space="preserve">
+    <value>إنه لغرض تصحيح الأخطاء للروبوت الرئيسي (@GPTipsBot)</value>
+  </data>
+  <data name="SomethingWentWrong" xml:space="preserve">
+    <value>حدث خطأ ما، يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="TokensLimitExceeded" xml:space="preserve">
+    <value>عدد الرموز المميزة في رسالتك {1} يتجاوز الحد الأقصى لعدد الرموز المميزة {0}. يرجى اختصار طلبك. ضع في اعتبارك أن كلمة واحدة تحتوي تقريبًا على رمز واحد.</value>
+  </data>
+  <data name="TooManyRequests" xml:space="preserve">
+    <value>❗️ هناك عدد كبير جدًا من الطلبات في الدقيقة، يرجى المحاولة مرة أخرى لاحقًا</value>
+  </data>
+  <data name="DailyLimitViolation" xml:space="preserve">
+    <value>❗️تم الوصول إلى الحد اليومي لطلبات {0}. ونحن نتطلع إلى رؤيتكم غدا.</value>
+  </data>
+  <data name="SendTextRecognitionImage" xml:space="preserve">
+    <value>أرسل صورة للتعرف على النص</value>
+  </data>
+  <data name="CantRecognizeText" xml:space="preserve">
+    <value>فشل في التعرف على النص على صورة</value>
+  </data>
+  <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
+    <value>للتعرف على النص صورة، اختر الأمر من قائمة الروبوت أولاً</value>
+  </data>
+  <data name="SendPromptFromImagePhoto" xml:space="preserve">
+    <value>أرسل صورة - سأقوم بإنشاء مطالبة يمكنها إنشاء صورة مماثلة
+
+يمكنك أيضًا الرد باستخدام /prompt_from_image على رسالة مصورة (بما في ذلك التعليقات).</value>
+  </data>
+  <data name="SendPromptFromImageCommandFirst" xml:space="preserve">
+    <value>لإنشاء مطالبة من صورة، اختر الأمر من قائمة الروبوت أولاً</value>
+  </data>
+  <data name="PromptFromImageHeader" xml:space="preserve">
+    <value>🪄 موجه من صورة:</value>
+  </data>
+  <data name="PromptFromImageSystemPrompt" xml:space="preserve">
+    <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
+  </data>
+  <data name="PromptFromImageUserPrompt" xml:space="preserve">
+    <value>Create a detailed text-to-image prompt for this image.</value>
+  </data>
+  <data name="InvoiceTitle" xml:space="preserve">
+    <value>إضافة النجوم إلى الحساب</value>
+  </data>
+  <data name="InvalidDepositAmountResponse" xml:space="preserve">
+    <value>❗️الحد الأدنى للتعبئة هو {0} RUB ({1}⭐)
+اختر الحزمة أو أدخل المبلغ مرة أخرى:</value>
+  </data>
+  <data name="ProfileResponse" xml:space="preserve">
+    <value>👤 الملف الشخصي: {0} {1}
+
+
+💵 الرصيد : {2} Stars 💵
+🤖 الموديل: {8}
+الطلبات المجانية:
+ --ChatGpt: {3}
+ - أجيال صورة: {4}
+ - التعرف على النص صورة: {5}
+ - الصور المتحركة: {6}
+ -- ملخصات اليوم : {7}</value>
+  </data>
+  <data name="InvoiceText" xml:space="preserve">
+    <value>نجمة واحدة = 10 طلبات ChatGPT أو جيلين من صورة أو صورتين رسوم متحركة</value>
+  </data>
+  <data name="DepositResponse" xml:space="preserve">
+    <value>1⭐ = 10 طلبات ChatGPT، جيلين صورة أو 2 صورة متحركة
+
+الحد الأدنى للتعبئة: {0} RUB ({1}⭐)
+اختر حزمة أو أدخل مبلغ Stars كاملاً:</value>
+  </data>
+  <data name="AddMoneyResponse" xml:space="preserve">
+    <value>قم بتعبئة رصيدك</value>
+  </data>
+  <data name="InsufficientBalance" xml:space="preserve">
+    <value>يجب أن يكون لديك نجوم {0} لتنفيذ هذه العملية.
+
+بعد التعبئة، أدخل الأمر مرة أخرى.</value>
+  </data>
+  <data name="ChoosePaymentMethod" xml:space="preserve">
+    <value>قم بتعبئة {0}⭐ ({1} RUB)
+
+اختر طريقة الدفع:</value>
+  </data>
+  <data name="PayWithStarsButton" xml:space="preserve">
+    <value>⭐Telegram Stars</value>
+  </data>
+  <data name="DepositPackageButton" xml:space="preserve">
+    <value>{0}⭐ · {1} RUB</value>
+  </data>
+  <data name="PayWithYooKassaButton" xml:space="preserve">
+    <value>💳 البطاقة / SBP / SberPay · {0} RUB</value>
+  </data>
+  <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
+    <value>الدفع مقابل {0}⭐ ({1} RUB)
+
+اضغط على الزر أدناه لفتح نموذج الدفع YooKassa.
+سيتم تحديث رصيدك تلقائيًا بعد إتمام عملية الدفع بنجاح.</value>
+  </data>
+  <data name="OpenYooKassaPaymentButton" xml:space="preserve">
+    <value>ادفع الآن</value>
+  </data>
+  <data name="CheckYooKassaPaymentButton" xml:space="preserve">
+    <value>التحقق من الدفع</value>
+  </data>
+  <data name="YooKassaPaymentCheckPending" xml:space="preserve">
+    <value>لم يتم استلام الدفعة بعد. إذا كنت قد دفعت بالفعل، انتظر دقيقة وحاول مرة أخرى.</value>
+  </data>
+  <data name="YooKassaPaymentCheckOk" xml:space="preserve">
+    <value>تم العثور على الدفع، وتم تحديث الرصيد ✅</value>
+  </data>
+  <data name="YooKassaPaymentDescription" xml:space="preserve">
+    <value>تعبئة رصيد GPTipsBot: نجوم {0}</value>
+  </data>
+  <data name="YooKassaPaymentSucceeded" xml:space="preserve">
+    <value>✅ تم الدفع بنجاح! لقد تمت تعبئة رصيدك.</value>
+  </data>
+  <data name="PleaseWaitVideoMsg" xml:space="preserve">
+    <value>⌛️ يستغرق إنشاء الفيديو عادةً ما بين 5 إلى 10 دقائق. برجاء الإنتظار، جاري إعداد الرد...</value>
+  </data>
+  <data name="SimpleNoFreeRequests" xml:space="preserve">
+    <value>❗️لقد تم الوصول إلى الحد الأقصى للطلب المجاني لهذا اليوم.
+قم بتعبئة رصيدك أو انتظر إعادة ضبط الحدود المجانية.
+
+1⭐ = 10 طلبات ChatGPT، جيلين صورة أو 2 صورة متحركة.</value>
+  </data>
+  <data name="TimeNoFreeRequests" xml:space="preserve">
+    <value>❗️لقد استخدمت جميع طلباتك المجانية لهذا اليوم.
+قم بإضافة الأموال الآن أو انتظر {0:%d} d {0:%h} h {0:%m} min حتى يتم تحديث طلباتك المجانية.
+
+1⭐ = 10 طلبات ChatGPT، جيلين صورة أو 2 صورة متحركة</value>
+  </data>
+  <data name="DonateResponse" xml:space="preserve">
+    <value>🌟 ادعم مشروعنا! 💪
+
+💖 كل تبرع يساعدنا على النمو وتحسين الخدمة.
+🤝 نحن نقدر بشدة دعمكم ونعمل بجد لجعل منتجنا أفضل! 🚀💡</value>
+  </data>
+  <data name="DonateText" xml:space="preserve">
+    <value>🌱بفضلكم نستطيع أن ننمو ونتحسن. شكرًا لك!</value>
+  </data>
+  <data name="DonateTitle" xml:space="preserve">
+    <value>ادعمونا بنجوم {0}</value>
+  </data>
+  <data name="DonateInstructions" xml:space="preserve">
+    <value>✨ ادعم مشروعنا!
+
+👇 أدخل عدد النجوم التي ترغب في التبرع بها.
+كل مساهمة مهمة، ونحن ممتنون جدًا لدعمكم! 🤗</value>
+  </data>
+  <data name="StarsDonationHint" xml:space="preserve">
+    <value>✨ أوشكت على الوصول! ما عليك سوى إدخال رقم (مثل 5 أو 10 أو 50) – كل نجمة لها أهميتها! 🌟 شكرا لك!</value>
+  </data>
+  <data name="SendPhotoToAnimate" xml:space="preserve">
+    <value>مثال: صورة ← "الأطفال يقفزون ويعانقون بسعادة" ← النتيجة
+
+أرسل صورتك لإضفاء الحيوية عليها ووصف الإجراء بإيجاز. على سبيل المثال: "يضحك"، "يرقص"، "يكتب"</value>
+  </data>
+  <data name="SendAnimatePrompt" xml:space="preserve">
+    <value>موجه الرسوم المتحركة الإدخال</value>
+  </data>
+  <data name="PhotoAnimationDownloading" xml:space="preserve">
+    <value>📥 جاري تنزيل الصورة...</value>
+  </data>
+  <data name="PhotoAnimationUploading" xml:space="preserve">
+    <value>📤 جاري رفع الصورة على خادم الجيل...</value>
+  </data>
+  <data name="PhotoAnimationGenerating" xml:space="preserve">
+    <value>🎬 إنشاء الفيديوهات Starting...</value>
+  </data>
+  <data name="PhotoAnimationWaiting" xml:space="preserve">
+    <value>⏳ جارٍ إنشاء الفيديو... بقي حوالي {0}</value>
+  </data>
+  <data name="PhotoAnimationFailed" xml:space="preserve">
+    <value>لا يمكن تحريك الصورة. يرجى المحاولة مرة أخرى لاحقًا أو اختيار صورة مختلف.</value>
+  </data>
+  <data name="ReplySentPrivately" xml:space="preserve">
+    <value>✉️ تم الرد في الرسائل الخاصة</value>
+  </data>
+  <data name="OpenPrivateChatFirst" xml:space="preserve">
+    <value>لتلقي ردود خاصة، افتح محادثة مع البوت واضغط على Start أولاً: https://t.me/{0}</value>
+  </data>
+  <data name="SummaryEmpty" xml:space="preserve">
+    <value>لا توجد رسائل لتلخيصها لهذا اليوم حتى الآن.
+
+في المجموعات، يرى الروبوت الرسائل فقط عندما يكون وضع الخصوصية متوقفًا (@BotFather → /setprivacy → Disable) أو عندما تتم معالجتها.</value>
+  </data>
+  <data name="SummaryHeader" xml:space="preserve">
+    <value>📋 ملخص اليوم :</value>
+  </data>
+  <data name="SummaryPrompt" xml:space="preserve">
+    <value>اكتب ملخصًا موجزًا ​​لمحادثة اليوم. تسليط الضوء على الموضوعات الرئيسية والقرارات والحقائق الهامة. استخدم لغة الدردشة. كن منظمًا وفي صلب الموضوع.
+
+المحادثة:
+{0}</value>
+  </data>
+  <data name="GroupCommandNotAvailable" xml:space="preserve">
+    <value>في الدردشات الجماعية تتوفر هذه فقط:
+• /ask — ask الذكاء الاصطناعي
+• /human — إعادة الكتابة إلى اللغة الإنجليزية الطبيعية البسيطة
+• /image — جيل صورة
+• /summary — ملخص دردشة اليوم
+• ذكر البوت أو الرد على رسالته
+
+تعمل الأوامر الأخرى في محادثة خاصة مع الروبوت.</value>
+  </data>
+  <data name="AskUsage" xml:space="preserve">
+    <value>اكتب سؤالك بعد الأمر مثلاً:
+/ask كيف تتم عملية التمثيل الضوئي؟</value>
+  </data>
+  <data name="HumanUsage" xml:space="preserve">
+    <value>أرسل النص لإعادة كتابته بعد الأمر، أو قم بالرد على رسالة باستخدام /human.
+
+مثال:
+/human تم تخطيط أنبوب التوصيل أو المخرج من المضخات كيفية توصيله بقناة المياه</value>
+  </data>
+  <data name="HumanHeader" xml:space="preserve">
+    <value>✍️ اللغة الإنجليزية البشرية:</value>
+  </data>
+  <data name="HumanSystemPrompt" xml:space="preserve">
+    <value>You rewrite text into clear, simple, natural English that sounds human — not robotic or overly formal. Keep the original meaning and important details. Fix grammar and awkward phrasing. Do not add explanations, quotes, labels, or commentary — output only the rewritten text.</value>
+  </data>
+  <data name="InlineAskTitle" xml:space="preserve">
+    <value>💬 اسأل GPT: {0}</value>
+  </data>
+  <data name="InlineAskDescription" xml:space="preserve">
+    <value>أرسل سؤال ChatGPT إلى هذه الدردشة</value>
+  </data>
+  <data name="InlineAskPending" xml:space="preserve">
+    <value>⏳ يفكر GPTipsBot…
+السؤال: {0}
+
+اضغط على "◀️ احصل على" لإظهار الإجابة.</value>
+  </data>
+  <data name="InlineImageTitle" xml:space="preserve">
+    <value>🖼 الصورة: {0}</value>
+  </data>
+  <data name="InlineImageTitleShort" xml:space="preserve">
+    <value>🖼 توليد الصور</value>
+  </data>
+  <data name="InlineImageDescription" xml:space="preserve">
+    <value>قم بإنشاء صورة من الموجه</value>
+  </data>
+  <data name="InlineImagePending" xml:space="preserve">
+    <value>⏳ يقوم GPTipsBot بالرسم...
+مستعجل: {0}
+
+اضغط على "◀️ احصل على" لبدء عملية التوليد.</value>
+  </data>
+  <data name="InlineHelpAskTitle" xml:space="preserve">
+    <value>💬 اسأل ChatGPT</value>
+  </data>
+  <data name="InlineHelpAskDescription" xml:space="preserve">
+    <value>التنسيق: ask سؤالك</value>
+  </data>
+  <data name="InlineHelpAskMessage" xml:space="preserve">
+    <value>إلى ask عبر الوضع المضمن، اكتب:
+@GPTipsBot ask سؤالك
+
+مثال: @GPTipsBot ask كيف تتم عملية التمثيل الضوئي؟</value>
+  </data>
+  <data name="InlineHelpImageTitle" xml:space="preserve">
+    <value>🖼 قم بإنشاء صورة</value>
+  </data>
+  <data name="InlineHelpImageDescription" xml:space="preserve">
+    <value>التنسيق: وصف صورة</value>
+  </data>
+  <data name="InlineHelpImageMessage" xml:space="preserve">
+    <value>لإنشاء صورة عبر الوضع المضمن، اكتب:
+وصف @GPTipsBot image
+
+مثال: @GPTipsBot image قطة في الفضاء</value>
+  </data>
+  <data name="InlineResultExpired" xml:space="preserve">
+    <value>⏳ انتهت صلاحية هذه النتيجة. اكتب @GPTipsBot مرة أخرى.</value>
+  </data>
+  <data name="InlineRunButton" xml:space="preserve">
+    <value>◀️ احصل على</value>
+  </data>
+  <data name="AccountLinkSuccess" xml:space="preserve">
+    <value>✅تيليجرام مرتبط بحسابك على الموقع. تتم الآن مشاركة Stars والحصص المجانية.</value>
+  </data>
+  <data name="AccountLinkTokenInvalid" xml:space="preserve">
+    <value>⚠️ هذا الرابط غير صالح أو منتهي الصلاحية. افتح البوت مرة أخرى من الموقع.</value>
+  </data>
+  <data name="AccountLinkAlreadyLinked" xml:space="preserve">
+    <value>⚠️ حساب موقع الويب هذا مرتبط بالفعل بـ Telegram آخر.</value>
+  </data>
+  <data name="AccountLinkFailed" xml:space="preserve">
+    <value>⚠️ لا يمكن ربط تيليجرام. حاول مرة أخرى لاحقًا أو استخدم Telegram Login على الموقع الإلكتروني.</value>
+  </data>
+  <data name="ChooseModel" xml:space="preserve">
+    <value>🤖 اختر موديل ChatGPT
+
+الحالي: {0} ({1:0.##}⭐ لكل رسالة)
+
+الطلبات المجانية تعمل فقط مع {2}.
+الموديلات الأخرى تنفق Stars من رصيدك.</value>
+  </data>
+  <data name="ModelSelected" xml:space="preserve">
+    <value>✅ الموديل المحدد: {0}
+التكلفة لكل رسالة: {1:0.##}⭐</value>
+  </data>
+  <data name="ModelSelectionRequiresBalance" xml:space="preserve">
+    <value>🔒 اختيار الموديل متاح عندما يكون رصيد Stars الخاص بك موجبًا.
+
+يمكنك التبديل إلى {0} أو زيادة رصيدك.</value>
+  </data>
+  <data name="ModelNeedsBalance" xml:space="preserve">
+    <value>❗️لا يكفي Stars لـ {0} ({1:0.##}⭐ لكل رسالة).
+
+قم بتعبئة رصيدك أو قم بالتبديل إلى {2}.</value>
+  </data>
+  <data name="UnknownModel" xml:space="preserve">
+    <value>نموذج غير معروف. افتح /model واختر واحدًا من القائمة.</value>
+  </data>
+  <data name="GptImageGenerateIntro" xml:space="preserve">
+    <value>🎨 GPT Image 2 — إنشاء
+
+اختر الحجم والجودة، ثم أرسل الوصف.
+التكلفة: {0:0.##}⭐ (لا توجد حصة مجانية)</value>
+  </data>
+  <data name="GptImageEditIntro" xml:space="preserve">
+    <value>🛠 GPT Image 2 – تعديل
+
+أرسل صورة، ثم اختر الحجم/quality وقم بوصف التغييرات.
+أو قم بالرد على الصورة: /edit_image تجعل السماء وردية
+التكلفة: {0:0.##}⭐ (لا توجد حصة مجانية)</value>
+  </data>
+  <data name="GptImageSendPhotoFirst" xml:space="preserve">
+    <value>أرسل صورة لتعديلها أولاً</value>
+  </data>
+  <data name="GptImageSendPrompt" xml:space="preserve">
+    <value>أرسل وصفًا نصيًا لـ صورة</value>
+  </data>
+  <data name="GptImageSendEditPrompt" xml:space="preserve">
+    <value>صف ما يجب تغييره في الصورة.
+التكلفة: {0:0.##}⭐</value>
+  </data>
+  <data name="GptImageDoneCaption" xml:space="preserve">
+    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
+  </data>
+</root>

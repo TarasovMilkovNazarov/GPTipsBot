@@ -8,7 +8,7 @@ import {
   type Me,
   type PaymentPackages,
 } from './api'
-import { t, type Lang } from './i18n'
+import { t, type Lang, detectLang, cycleLang } from './i18n'
 
 declare global {
   interface Window {
@@ -70,9 +70,7 @@ function applyTheme(theme: Theme) {
 }
 
 export default function App() {
-  const [lang, setLang] = useState<Lang>(() =>
-    navigator.language.toLowerCase().startsWith('ru') ? 'ru' : 'en',
-  )
+  const [lang, setLang] = useState<Lang>(() => detectLang())
   const [theme, setTheme] = useState<Theme>(() => {
     const initial = readStoredTheme()
     applyTheme(initial)
@@ -785,7 +783,7 @@ export default function App() {
         <header className="topbar">
           <div className="topbar-left">
             <strong>GPTipsBot</strong>
-            <button className="ghost" type="button" onClick={() => setLang(lang === 'en' ? 'ru' : 'en')}>
+            <button className="ghost" type="button" onClick={() => setLang(cycleLang(lang))}>
               {lang.toUpperCase()}
             </button>
             <button
@@ -827,7 +825,7 @@ export default function App() {
         {quotaUpsell && me?.isGuest && (
           <div className="auth-backdrop upsell-backdrop" onClick={closeQuotaUpsell}>
             <div className="auth-modal upsell-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-              <div className="upsell-badge">{lang === 'ru' ? 'Лимит исчерпан' : 'Limit reached'}</div>
+              <div className="upsell-badge">{t(lang, 'limitReached')}</div>
               <h2 className="upsell-title">{t(lang, 'quotaUpsellTitle')}</h2>
               <p className="upsell-lead">{t(lang, 'quotaUpsellLead')}</p>
               <ul className="upsell-benefits">
@@ -1348,7 +1346,7 @@ export default function App() {
                   type="button"
                   onClick={() => {
                     setMode('chat')
-                    setInput(lang === 'ru' ? 'Переведи на английский: ' : 'Translate to English: ')
+                    setInput(t(lang, 'translatePrompt'))
                   }}
                 >
                   {t(lang, 'translate')}
@@ -1391,34 +1389,32 @@ export default function App() {
                     >
                       <strong>{t(lang, 'promptFromImage')}</strong>
                       <span>
-                        {lang === 'ru'
-                          ? 'Составить промпт по загруженному изображению'
-                          : 'Create a text-to-image prompt from a photo'}
+                        {t(lang, 'promptFromImageHint')}
                       </span>
                     </button>
                     <button
                       type="button"
                       className="preset-card"
-                      onClick={() => setInput(lang === 'ru' ? 'Объясни простыми словами: ' : 'Explain simply: ')}
+                      onClick={() => setInput(t(lang, 'explainPrompt'))}
                     >
-                      <strong>{lang === 'ru' ? 'Объяснить' : 'Explain'}</strong>
-                      <span>{lang === 'ru' ? 'Сложные темы простыми словами' : 'Hard topics in plain words'}</span>
+                      <strong>{t(lang, 'explainTitle')}</strong>
+                      <span>{t(lang, 'explainHint')}</span>
                     </button>
                     <button
                       type="button"
                       className="preset-card"
-                      onClick={() => setInput(lang === 'ru' ? 'Напиши код: ' : 'Write code: ')}
+                      onClick={() => setInput(t(lang, 'codePrompt'))}
                     >
-                      <strong>{lang === 'ru' ? 'Код' : 'Code'}</strong>
-                      <span>{lang === 'ru' ? 'Скрипты и отладка' : 'Scripts and debugging'}</span>
+                      <strong>{t(lang, 'codeTitle')}</strong>
+                      <span>{t(lang, 'codeHint')}</span>
                     </button>
                     <button
                       type="button"
                       className="preset-card"
-                      onClick={() => setInput(lang === 'ru' ? 'Перепиши текст: ' : 'Rewrite this text: ')}
+                      onClick={() => setInput(t(lang, 'rewritePrompt'))}
                     >
-                      <strong>{lang === 'ru' ? 'Рерайт' : 'Rewrite'}</strong>
-                      <span>{lang === 'ru' ? 'Письма и посты' : 'Emails and posts'}</span>
+                      <strong>{t(lang, 'rewriteTitle')}</strong>
+                      <span>{t(lang, 'rewriteHint')}</span>
                     </button>
                   </div>
                 </div>

@@ -181,9 +181,10 @@ https://gptips.skolkokomu.ru
 /get_image_text — распознать текст
 /deposit — пополнить баланс
 /reset_context — новый диалог
+/human — переписать простым естественным English
 /donate — поддержать проект
 
-В группах доступны: /ask, /image, /summary
+В группах доступны: /ask, /human, /image, /summary
 
 🔎 Inline (в любом чате)
 Наберите @GPTipsBot и команду:
@@ -216,10 +217,17 @@ https://gptips.skolkokomu.ru
     <value>GPTipDev</value>
   </data>
   <data name="Greeting" xml:space="preserve">
-    <value>Привет! Чем могу помочь?
-Выберите действие в меню ниже или просто напишите вопрос.
+    <value>Привет! Я GPTipsBot — чат с ИИ, картинки и работа с фото.
 
-🌐 Также доступен сайт с тем же аккаунтом и балансом:
+Просто напишите вопрос — или выберите действие:
+• 🎨 Изображения — сгенерировать, отредактировать, OCR
+• ✨ Оживить фото
+• ✍️ /human — простой естественный English
+• 💬 Новый диалог — сбросить контекст
+
+Подробнее: /help
+
+🌐 Сайт с тем же аккаунтом и балансом:
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
@@ -464,6 +472,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="GroupCommandNotAvailable" xml:space="preserve">
     <value>В групповом чате доступны только:
 • /ask — вопрос к ИИ
+• /human — переписать простым естественным English
 • /image — генерация картинок
 • /summary — краткое содержание за день
 • упоминание бота или reply на его сообщение
@@ -473,6 +482,18 @@ https://gptips.skolkokomu.ru</value>
   <data name="AskUsage" xml:space="preserve">
     <value>Напишите вопрос после команды, например:
 /ask Как работает фотосинтез?</value>
+  </data>
+  <data name="HumanUsage" xml:space="preserve">
+    <value>Напишите текст после команды или ответьте /human на сообщение.
+
+Пример:
+/human The Delivery or Outlet pipe from pumps was layouted How to connected to the Water Canal</value>
+  </data>
+  <data name="HumanHeader" xml:space="preserve">
+    <value>✍️ Human English:</value>
+  </data>
+  <data name="HumanSystemPrompt" xml:space="preserve">
+    <value>You rewrite text into clear, simple, natural English that sounds human — not robotic or overly formal. Keep the original meaning and important details. Fix grammar and awkward phrasing. Do not add explanations, quotes, labels, or commentary — output only the rewritten text.</value>
   </data>
   <data name="InlineAskTitle" xml:space="preserve">
     <value>💬 Спросить GPT: {0}</value>

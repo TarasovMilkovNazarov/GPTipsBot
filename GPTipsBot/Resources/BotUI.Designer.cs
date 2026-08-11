@@ -80,6 +80,12 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        internal static string Human {
+            get {
+                return ResourceManager.GetString("Human", resourceCulture);
+            }
+        }
+
         internal static string Model {
             get {
                 return ResourceManager.GetString("Model", resourceCulture);
@@ -160,6 +166,33 @@ namespace GPTipsBot.Resources {
         internal static string EnglishButton {
             get {
                 return ResourceManager.GetString("EnglishButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Español.
+        /// </summary>
+        internal static string SpanishButton {
+            get {
+                return ResourceManager.GetString("SpanishButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to فارسی.
+        /// </summary>
+        internal static string PersianButton {
+            get {
+                return ResourceManager.GetString("PersianButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to العربية.
+        /// </summary>
+        internal static string ArabicButton {
+            get {
+                return ResourceManager.GetString("ArabicButton", resourceCulture);
             }
         }
         
@@ -301,6 +334,33 @@ namespace GPTipsBot.Resources {
         internal static string SetEngLang {
             get {
                 return ResourceManager.GetString("SetEngLang", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Español.
+        /// </summary>
+        internal static string SetEsLang {
+            get {
+                return ResourceManager.GetString("SetEsLang", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to فارسی.
+        /// </summary>
+        internal static string SetFaLang {
+            get {
+                return ResourceManager.GetString("SetFaLang", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to العربية.
+        /// </summary>
+        internal static string SetArLang {
+            get {
+                return ResourceManager.GetString("SetArLang", resourceCulture);
             }
         }
         

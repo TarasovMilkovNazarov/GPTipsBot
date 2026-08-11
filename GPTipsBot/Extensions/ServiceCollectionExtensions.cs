@@ -114,6 +114,15 @@ namespace GPTipsBot.Extensions
                 CultureInfo.CurrentUICulture = LocalizationManager.En;
                 SetBotMenus(botClient);
 
+                CultureInfo.CurrentUICulture = LocalizationManager.Es;
+                SetBotMenus(botClient, "es");
+
+                CultureInfo.CurrentUICulture = LocalizationManager.Fa;
+                SetBotMenus(botClient, "fa");
+
+                CultureInfo.CurrentUICulture = LocalizationManager.Ar;
+                SetBotMenus(botClient, "ar");
+
                 return botClient;
             })
             .AddSingleton<BotCommandMenuService>()

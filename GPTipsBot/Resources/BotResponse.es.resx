@@ -118,190 +118,190 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BotDescription" xml:space="preserve">
-    <value>🤖 ChatGPT + images
+    <value>🤖 ChatGPT + imágenes
 
-Just type a question — the bot replies with conversation context.
-Menu: new chat, models, images (GPT IMAGE 1 / GPT Image 2), photo animation, account and ⭐ top-up.
+Solo escribe una pregunta — el bot responde con el contexto de la conversación.
+Menú: nuevo chat, modelos, imágenes (GPT IMAGE 1 / GPT Image 2), animación de fotos, cuenta y recarga ⭐.
 
-Free daily limits apply — see /profile. Details: /help</value>
+Hay límites diarios gratuitos — ver /profile. Detalles: /help</value>
   </data>
   <data name="HelpText" xml:space="preserve">
-    <value>🤖 Full guide
+    <value>🤖 Guía completa
 
-🌐 Website
-The same ChatGPT chat and image tools are also available in the browser:
+🌐 Sitio web
+El mismo chat de ChatGPT y las herramientas de imagen también están disponibles en el navegador:
 https://gptips.skolkokomu.ru
-Sign in with Telegram — your ⭐ balance and quotas are shared with the bot.
+Inicia sesión con Telegram — tu saldo de ⭐ y las cuotas se comparten con el bot.
 
-💬 Chat with AI
-Just send a text message — the bot replies using the current conversation context.
-• 💬 New chat — reset context and start fresh
-• 🤖 Model — choose a ChatGPT model
-  — GPT-4o mini: uses the free daily quota
-  — other models: Stars only
+💬 Chat con IA
+Solo envía un mensaje de texto — el bot responde usando el contexto actual de la conversación.
+• 💬 Nuevo chat — restablecer el contexto y empezar de nuevo
+• 🤖 Modelo — elegir un modelo de ChatGPT
+  — GPT-4o mini: usa la cuota diaria gratuita
+  — otros modelos: solo Stars
 
-🎨 Images
-Open “🎨 Images” in the menu:
-• 🖼 GPT IMAGE 1 — free text-to-image (within daily quota)
-• 🎨 GPT Image 2 — paid generation with size and quality options
-• 🛠 Edit photo — edit a photo from a text instruction (paid, GPT Image 2); in groups: reply `/edit_image …` to a photo
-• 📝 Text from photo — OCR / extract text from an image
-• 🪄 Prompt from photo — create a text-to-image prompt from an uploaded picture
+🎨 Imágenes
+Abre «🎨 Imágenes» en el menú:
+• 🖼 GPT IMAGE 1 — texto a imagen gratuito (dentro de la cuota diaria)
+• 🎨 GPT Image 2 — generación de pago con opciones de tamaño y calidad
+• 🛠 Editar foto — editar una foto con una instrucción de texto (de pago, GPT Image 2); en grupos: responde `/edit_image …` a una foto
+• 📝 Texto de la foto — OCR / extraer texto de una imagen
+• 🪄 Prompt desde foto — crear un prompt de texto a imagen a partir de una foto
 
-🪄 Prompt from photo
-Send an image — the bot writes a prompt that can generate a similar picture (uses ChatGPT quota or ⭐).
-In groups and comments: reply to a photo with /prompt_from_image.
+🪄 Prompt desde foto
+Envía una imagen — el bot escribe un prompt que puede generar una imagen similar (usa la cuota de ChatGPT o ⭐).
+En grupos y comentarios: responde a una foto con /prompt_from_image.
 
-✨ Animate photo
-Turn a photo into a short animation (free within quota or paid with ⭐).
+✨ Animar foto
+Convierte una foto en una animación corta (gratis dentro de la cuota o de pago con ⭐).
 
-👤 Account
-Shows your ⭐ balance, free quotas, and current model.
-From account you can:
-• choose a model
-• top up balance
-• switch interface language
+👤 Cuenta
+Muestra tu saldo de ⭐, cuotas gratuitas y modelo actual.
+Desde la cuenta puedes:
+• elegir un modelo
+• recargar el saldo
+• cambiar el idioma de la interfaz
 
-⭐ Balance and limits
-Free requests are limited and refresh daily.
-When the quota is used up, top up ⭐ in Account or via /deposit.
-Guide: 1⭐ ≈ 10 ChatGPT requests, 2 image generations, or 2 photo animations.
+⭐ Saldo y límites
+Las solicitudes gratuitas son limitadas y se renuevan cada día.
+Cuando se agote la cuota, recarga ⭐ en Cuenta o con /deposit.
+Guía: 1⭐ ≈ 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto.
 
-Useful commands
-/start — main menu
-/help — this guide
-/profile — account
-/model — choose model
-/images — images menu
+Comandos útiles
+/start — menú principal
+/help — esta guía
+/profile — cuenta
+/model — elegir modelo
+/images — menú de imágenes
 /image — GPT IMAGE 1
 /gpt_image — GPT Image 2
-/edit_image — edit photo
-/prompt_from_image — prompt from photo
-/animate — animate photo
+/edit_image — editar foto
+/prompt_from_image — prompt desde foto
+/animate — animar foto
 /get_image_text — OCR
-/deposit — top up
-/reset_context — new chat
-/human — rewrite into simple natural English
-/donate — support the project
+/deposit — recargar
+/reset_context — nuevo chat
+/human — reescribir en inglés simple y natural
+/donate — apoyar el proyecto
 
-In groups: /ask, /human, /image, /summary
+En grupos: /ask, /human, /image, /summary
 
-🔎 Inline (any chat)
-Type @GPTipsBot and a command:
-• ask your question — ChatGPT answer
-• image description — generate an image
-Example: @GPTipsBot ask What is a neutrino?
-Example: @GPTipsBot image a cat in space
+🔎 Inline (cualquier chat)
+Escribe @GPTipsBot y un comando:
+• ask tu pregunta — respuesta de ChatGPT
+• image descripción — generar una imagen
+Ejemplo: @GPTipsBot ask ¿Qué es un neutrino?
+Ejemplo: @GPTipsBot image un gato en el espacio
 
-Support: @my_super_ultra_smart_bot</value>
+Soporte: @my_super_ultra_smart_bot</value>
   </data>
   <data name="BotName" xml:space="preserve">
-    <value>ChatGPT + DALL-E | FREE | Sora</value>
+    <value>ChatGPT + DALL-E | GRATIS | Sora</value>
   </data>
   <data name="Cancel" xml:space="preserve">
-    <value>Operation canceled</value>
+    <value>Operación cancelada</value>
   </data>
   <data name="ContinueConversation" xml:space="preserve">
-    <value>Send message to continue conversation</value>
+    <value>Envía un mensaje para continuar la conversación</value>
   </data>
   <data name="ChooseLanguagePlease" xml:space="preserve">
-    <value>Choose user interface language please</value>
+    <value>Elige el idioma de la interfaz</value>
   </data>
   <data name="ContextUpdated" xml:space="preserve">
-    <value>Context reset successfully. Start a new dialogue.</value>
+    <value>Contexto restablecido correctamente. Empieza un nuevo diálogo.</value>
   </data>
   <data name="CookiesUpdated" xml:space="preserve">
-    <value>Bing image cookies were updated</value>
+    <value>Las cookies de imágenes de Bing se actualizaron</value>
   </data>
   <data name="DevBotName" xml:space="preserve">
     <value>GPTipDev</value>
   </data>
   <data name="Greeting" xml:space="preserve">
-    <value>Hi! I’m GPTipsBot — AI chat, images, and photo tools.
+    <value>¡Hola! Soy GPTipsBot — chat con IA, imágenes y herramientas para fotos.
 
-Just type a question — or pick an action:
-• 🎨 Images — generate, edit, OCR
-• ✨ Animate photo
-• ✍️ /human — simple natural English rewrite
-• 💬 New chat — reset context
+Solo escribe una pregunta — o elige una acción:
+• 🎨 Imágenes — generar, editar, OCR
+• ✨ Animar foto
+• ✍️ /human — inglés simple y natural
+• 💬 Nuevo chat — restablecer contexto
 
-Details: /help
+Detalles: /help
 
-🌐 Website with the same account and balance:
+🌐 Sitio web con la misma cuenta y saldo:
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>What would you like to do with an image?</value>
+    <value>¿Qué te gustaría hacer con una imagen?</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
-    <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
+    <value>La descripción de texto de la imagen no debe superar los {0} caracteres. Acórtala y envíala de nuevo</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1 — free generation
+    <value>🖼 GPT IMAGE 1 — generación gratuita
 
-Enter a description up to {0} characters.
+Introduce una descripción de hasta {0} caracteres.
 
-1:1 — square image
-2:1 — rectangular image (default)</value>
+1:1 — imagen cuadrada
+2:1 — imagen rectangular (predeterminado)</value>
   </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
-    <value>English was set as interface language</value>
+    <value>El español se estableció como idioma de la interfaz</value>
   </data>
   <data name="UnsupportedMessageType" xml:space="preserve">
-    <value>I'm sorry, only text or voice messages are supported currently</value>
+    <value>Lo siento, actualmente solo se admiten mensajes de texto o de voz</value>
   </data>
   <data name="OnMaintenance" xml:space="preserve">
-    <value>⚙️ Technical maintenance is in progress. Thank you for your understanding.</value>
+    <value>⚙️ Hay mantenimiento técnico en curso. Gracias por tu comprensión.</value>
   </data>
   <data name="PleaseSetLanguage" xml:space="preserve">
-    <value>Please choose language for interface</value>
+    <value>Elige el idioma de la interfaz</value>
   </data>
   <data name="PleaseWaitMsg" xml:space="preserve">
-    <value>⌛️ Please wait, preparing the response...</value>
+    <value>⌛️ Por favor espera, preparando la respuesta...</value>
   </data>
   <data name="Recovered" xml:space="preserve">
-    <value>Sorry for being away for a while, but now I'm back in action.</value>
+    <value>Perdona la ausencia, pero ya estoy de vuelta.</value>
   </data>
   <data name="SendFeedback" xml:space="preserve">
-    <value>Enter your message below. We appreciate any feedback.</value>
+    <value>Escribe tu mensaje a continuación. Agradecemos cualquier comentario.</value>
   </data>
   <data name="ShortDescription" xml:space="preserve">
-    <value>A bot answers to your questions and creates images 🤖👋 (Support @my_super_ultra_smart_bot)</value>
+    <value>Un bot responde a tus preguntas y crea imágenes 🤖👋 (Soporte @my_super_ultra_smart_bot)</value>
   </data>
   <data name="ShortDevDescription" xml:space="preserve">
-    <value>It's for debugging purpose of the main bot(@GPTipsBot)</value>
+    <value>Sirve para depurar el bot principal (@GPTipsBot)</value>
   </data>
   <data name="SomethingWentWrong" xml:space="preserve">
-    <value>Something went wrong, please try again.</value>
+    <value>Algo salió mal, inténtalo de nuevo.</value>
   </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
-    <value>The number of tokens in your message {1} exceeds the limit of {0} tokens. Please shorten your request. Consider that one word approximately contains one token.</value>
+    <value>El número de tokens en tu mensaje {1} supera el límite de {0} tokens. Acorta tu solicitud. Ten en cuenta que una palabra contiene aproximadamente un token.</value>
   </data>
   <data name="TooManyRequests" xml:space="preserve">
-    <value>❗️ Too many requests per minute, please try again later</value>
+    <value>❗️ Demasiadas solicitudes por minuto, inténtalo más tarde</value>
   </data>
   <data name="DailyLimitViolation" xml:space="preserve">
-    <value>❗️The daily limit of {0} requests has been reached. We look forward to seeing you tomorrow.</value>
+    <value>❗️Se alcanzó el límite diario de {0} solicitudes. Te esperamos mañana.</value>
   </data>
   <data name="SendTextRecognitionImage" xml:space="preserve">
-    <value>Send image for text recognition</value>
+    <value>Envía una imagen para reconocimiento de texto</value>
   </data>
   <data name="CantRecognizeText" xml:space="preserve">
-    <value>Failed to recognize text on image</value>
+    <value>No se pudo reconocer el texto de la imagen</value>
   </data>
   <data name="SendImageTextRecognitionCommandFirst" xml:space="preserve">
-    <value>For image text recognition choose command from bot menu first</value>
+    <value>Para reconocer texto en una imagen, elige primero el comando del menú del bot</value>
   </data>
   <data name="SendPromptFromImagePhoto" xml:space="preserve">
-    <value>Send an image — I will create a prompt that can generate a similar picture
+    <value>Envía una imagen — crearé un prompt que pueda generar una imagen similar
 
-You can also reply with /prompt_from_image to a photo message (including in comments).</value>
+También puedes responder con /prompt_from_image a un mensaje con foto (incluso en comentarios).</value>
   </data>
   <data name="SendPromptFromImageCommandFirst" xml:space="preserve">
-    <value>To create a prompt from an image, choose the command from the bot menu first</value>
+    <value>Para crear un prompt a partir de una imagen, elige primero el comando del menú del bot</value>
   </data>
   <data name="PromptFromImageHeader" xml:space="preserve">
-    <value>🪄 Prompt from image:</value>
+    <value>🪄 Prompt desde imagen:</value>
   </data>
   <data name="PromptFromImageSystemPrompt" xml:space="preserve">
     <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
@@ -310,47 +310,47 @@ You can also reply with /prompt_from_image to a photo message (including in comm
     <value>Create a detailed text-to-image prompt for this image.</value>
   </data>
   <data name="InvoiceTitle" xml:space="preserve">
-    <value>Add stars to account</value>
+    <value>Añadir estrellas a la cuenta</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>❗️Minimum top-up is {0} RUB ({1}⭐)
-Choose a package or enter the amount again:</value>
+    <value>❗️La recarga mínima es {0} RUB ({1}⭐)
+Elige un paquete o introduce el importe de nuevo:</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
-    <value>👤 Profile: {0} {1}
+    <value>👤 Perfil: {0} {1}
 
 
-💵 Balance: {2} Stars 💵
-🤖 Model: {8}
-Free requests:
+💵 Saldo: {2} Stars 💵
+🤖 Modelo: {8}
+Solicitudes gratuitas:
  -- ChatGpt: {3}
- -- image generations: {4}
- -- image text recognitions: {5}
- -- photo animations: {6}
- -- day summaries: {7}
+ -- generaciones de imagen: {4}
+ -- reconocimientos de texto: {5}
+ -- animaciones de foto: {6}
+ -- resúmenes del día: {7}
 </value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>1 star = 10 ChatGPT requests OR 2 image generations OR 2 photo animations</value>
+    <value>1 estrella = 10 solicitudes de ChatGPT O 2 generaciones de imagen O 2 animaciones de foto</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1⭐ = 10 ChatGPT requests, 2 image generations or 2 photo animations
+    <value>1⭐ = 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto
 
-Minimum top-up: {0} RUB ({1}⭐)
-Choose a package or enter a whole Stars amount:</value>
+Recarga mínima: {0} RUB ({1}⭐)
+Elige un paquete o introduce una cantidad entera de Stars:</value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
-    <value>Top up your balance</value>
+    <value>Recarga tu saldo</value>
   </data>
   <data name="InsufficientBalance" xml:space="preserve">
-    <value>You need to have {0} stars to perform this operation.
+    <value>Necesitas tener {0} estrellas para realizar esta operación.
 
-After topping up, enter the command again.</value>
+Después de recargar, vuelve a introducir el comando.</value>
   </data>
   <data name="ChoosePaymentMethod" xml:space="preserve">
-    <value>Top up {0}⭐ ({1} RUB)
+    <value>Recargar {0}⭐ ({1} RUB)
 
-Choose a payment method:</value>
+Elige un método de pago:</value>
   </data>
   <data name="PayWithStarsButton" xml:space="preserve">
     <value>⭐ Telegram Stars</value>
@@ -359,129 +359,129 @@ Choose a payment method:</value>
     <value>{0}⭐ · {1} RUB</value>
   </data>
   <data name="PayWithYooKassaButton" xml:space="preserve">
-    <value>💳 Card / SBP / SberPay · {0} RUB</value>
+    <value>💳 Tarjeta / SBP / SberPay · {0} RUB</value>
   </data>
   <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
-    <value>Payment for {0}⭐ ({1} RUB)
+    <value>Pago de {0}⭐ ({1} RUB)
 
-Tap the button below to open the YooKassa payment form.
-Your balance will update automatically after a successful payment.</value>
+Pulsa el botón de abajo para abrir el formulario de pago de YooKassa.
+Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
   </data>
   <data name="OpenYooKassaPaymentButton" xml:space="preserve">
-    <value>Pay now</value>
+    <value>Pagar ahora</value>
   </data>
   <data name="CheckYooKassaPaymentButton" xml:space="preserve">
-    <value>Check payment</value>
+    <value>Comprobar pago</value>
   </data>
   <data name="YooKassaPaymentCheckPending" xml:space="preserve">
-    <value>Payment not received yet. If you already paid, wait a minute and try again.</value>
+    <value>Aún no se ha recibido el pago. Si ya pagaste, espera un minuto e inténtalo de nuevo.</value>
   </data>
   <data name="YooKassaPaymentCheckOk" xml:space="preserve">
-    <value>Payment found, balance updated ✅</value>
+    <value>Pago encontrado, saldo actualizado ✅</value>
   </data>
   <data name="YooKassaPaymentDescription" xml:space="preserve">
-    <value>GPTipsBot balance top-up: {0} stars</value>
+    <value>Recarga de saldo GPTipsBot: {0} estrellas</value>
   </data>
   <data name="YooKassaPaymentSucceeded" xml:space="preserve">
-    <value>✅ Payment successful! Your balance has been topped up.</value>
+    <value>✅ ¡Pago exitoso! Tu saldo ha sido recargado.</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
-    <value>⌛️ Video generation typically takes between 5 to 10 minutes. Please wait, preparing the response...</value>
+    <value>⌛️ La generación de vídeo suele tardar entre 5 y 10 minutos. Por favor espera, preparando la respuesta...</value>
   </data>
   <data name="SimpleNoFreeRequests" xml:space="preserve">
-    <value>❗️Your free request limit for today has been reached.
-Top up your balance or wait for the free limits to reset.
+    <value>❗️Has agotado el límite de solicitudes gratuitas de hoy.
+Recarga tu saldo o espera a que se restablezcan los límites gratuitos.
 
-1⭐ = 10 ChatGPT requests, 2 image generations or 2 photo animations.</value>
+1⭐ = 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto.</value>
   </data>
   <data name="TimeNoFreeRequests" xml:space="preserve">
-    <value>❗️You've used all your free requests for today.
-Either add funds now or wait {0:%d} d {0:%h} h {0:%m} min for your free requests to refresh.
+    <value>❗️Has usado todas tus solicitudes gratuitas de hoy.
+Recarga ahora o espera {0:%d} d {0:%h} h {0:%m} min para que se renueven.
 
-1⭐ = 10 ChatGPT requests, 2 image generations or 2 photo animations</value>
+1⭐ = 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
-    <value>🌟 Support our project! 💪
+    <value>🌟 ¡Apoya nuestro proyecto! 💪
 
-💖 Every donation helps us grow and improve the service.
-🤝 We deeply appreciate your support and are working hard to make our product even better! 🚀💡</value>
+💖 Cada donación nos ayuda a crecer y mejorar el servicio.
+🤝 Agradecemos profundamente tu apoyo y trabajamos duro para hacer nuestro producto aún mejor! 🚀💡</value>
   </data>
   <data name="DonateText" xml:space="preserve">
-    <value>🌱 Because of you, we can grow and improve. Thank you!</value>
+    <value>🌱 Gracias a ti podemos crecer y mejorar. ¡Gracias!</value>
   </data>
   <data name="DonateTitle" xml:space="preserve">
-    <value>Support us with {0} stars</value>
+    <value>Apóyanos con {0} estrellas</value>
   </data>
   <data name="DonateInstructions" xml:space="preserve">
-    <value>✨ Support Our Project!
+    <value>✨ ¡Apoya nuestro proyecto!
 
-👇 Enter the number of stars you'd like to donate.
-Every contribution counts, and we're so grateful for your support! 🤗</value>
+👇 Introduce el número de estrellas que te gustaría donar.
+Cada contribución cuenta, ¡y estamos muy agradecidos por tu apoyo! 🤗</value>
   </data>
   <data name="StarsDonationHint" xml:space="preserve">
-    <value>✨ Almost there! Just enter a number (like 5, 10, or 50) – every star counts! 🌟 Thank you!</value>
+    <value>✨ ¡Casi listo! Solo introduce un número (como 5, 10 o 50) – ¡cada estrella cuenta! 🌟 ¡Gracias!</value>
   </data>
   <data name="SendPhotoToAnimate" xml:space="preserve">
-    <value>Example: photo → "Kids happily jump and hug" → result
+    <value>Ejemplo: foto → "Niños saltan y se abrazan felices" → resultado
 
-Send your photo to bring it to life and briefly describe the action. For example: "laughing", "dancing", "writing"</value>
+Envía tu foto para darle vida y describe brevemente la acción. Por ejemplo: "riendo", "bailando", "escribiendo"</value>
   </data>
   <data name="SendAnimatePrompt" xml:space="preserve">
-    <value>Input animation prompt</value>
+    <value>Introduce el prompt de animación</value>
   </data>
   <data name="PhotoAnimationDownloading" xml:space="preserve">
-    <value>📥 Downloading photo...</value>
+    <value>📥 Descargando foto...</value>
   </data>
   <data name="PhotoAnimationUploading" xml:space="preserve">
-    <value>📤 Uploading photo to generation server...</value>
+    <value>📤 Subiendo foto al servidor de generación...</value>
   </data>
   <data name="PhotoAnimationGenerating" xml:space="preserve">
-    <value>🎬 Starting video generation...</value>
+    <value>🎬 Iniciando generación de vídeo...</value>
   </data>
   <data name="PhotoAnimationWaiting" xml:space="preserve">
-    <value>⏳ Generating video... approximately {0} left</value>
+    <value>⏳ Generando vídeo... aproximadamente {0} restantes</value>
   </data>
   <data name="PhotoAnimationFailed" xml:space="preserve">
-    <value>Could not animate the photo. Please try again later or choose a different image.</value>
+    <value>No se pudo animar la foto. Inténtalo más tarde o elige otra imagen.</value>
   </data>
   <data name="ReplySentPrivately" xml:space="preserve">
-    <value>✉️ Replied in private messages</value>
+    <value>✉️ Respondido en mensajes privados</value>
   </data>
   <data name="OpenPrivateChatFirst" xml:space="preserve">
-    <value>To receive private replies, open a chat with the bot and press Start first: https://t.me/{0}</value>
+    <value>Para recibir respuestas privadas, abre un chat con el bot y pulsa Start primero: https://t.me/{0}</value>
   </data>
   <data name="SummaryEmpty" xml:space="preserve">
-    <value>No messages to summarize for today yet.
+    <value>Aún no hay mensajes para resumir de hoy.
 
-In groups the bot only sees messages when privacy mode is off (@BotFather → /setprivacy → Disable) or when it is addressed.</value>
+En grupos el bot solo ve mensajes cuando el modo privacidad está desactivado (@BotFather → /setprivacy → Disable) o cuando se le menciona.</value>
   </data>
   <data name="SummaryHeader" xml:space="preserve">
-    <value>📋 Today's summary:</value>
+    <value>📋 Resumen de hoy:</value>
   </data>
   <data name="SummaryPrompt" xml:space="preserve">
-    <value>Write a concise summary of today's conversation. Highlight main topics, decisions, and important facts. Use the language of the chat. Be structured and to the point.
+    <value>Escribe un resumen conciso de la conversación de hoy. Destaca temas principales, decisiones y hechos importantes. Usa el idioma del chat. Sé estructurado y directo.
 
-Conversation:
+Conversación:
 {0}</value>
   </data>
   <data name="GroupCommandNotAvailable" xml:space="preserve">
-    <value>In group chats only these are available:
-• /ask — ask the AI
-• /human — rewrite into simple natural English
-• /image — image generation
-• /summary — today's chat summary
-• mention the bot or reply to its message
+    <value>En chats de grupo solo están disponibles:
+• /ask — preguntar a la IA
+• /human — reescribir en inglés simple y natural
+• /image — generación de imagen
+• /summary — resumen del chat de hoy
+• mencionar al bot o responder a su mensaje
 
-Other commands work in a private chat with the bot.</value>
+Otros comandos funcionan en un chat privado con el bot.</value>
   </data>
   <data name="AskUsage" xml:space="preserve">
-    <value>Write your question after the command, for example:
-/ask How does photosynthesis work?</value>
+    <value>Escribe tu pregunta después del comando, por ejemplo:
+/ask ¿Cómo funciona la fotosíntesis?</value>
   </data>
   <data name="HumanUsage" xml:space="preserve">
-    <value>Send the text to rewrite after the command, or reply to a message with /human.
+    <value>Escribe el texto después del comando o responde a un mensaje con /human.
 
-Example:
+Ejemplo:
 /human The Delivery or Outlet pipe from pumps was layouted How to connected to the Water Canal</value>
   </data>
   <data name="HumanHeader" xml:space="preserve">
@@ -491,121 +491,121 @@ Example:
     <value>You rewrite text into clear, simple, natural English that sounds human — not robotic or overly formal. Keep the original meaning and important details. Fix grammar and awkward phrasing. Do not add explanations, quotes, labels, or commentary — output only the rewritten text.</value>
   </data>
   <data name="InlineAskTitle" xml:space="preserve">
-    <value>💬 Ask GPT: {0}</value>
+    <value>💬 Preguntar a GPT: {0}</value>
   </data>
   <data name="InlineAskDescription" xml:space="preserve">
-    <value>Send a ChatGPT question to this chat</value>
+    <value>Enviar una pregunta de ChatGPT a este chat</value>
   </data>
   <data name="InlineAskPending" xml:space="preserve">
-    <value>⏳ GPTipsBot is thinking…
-Question: {0}
+    <value>⏳ GPTipsBot está pensando…
+Pregunta: {0}
 
-Tap “▶️ Get” to show the answer.</value>
+Pulsa «▶️ Obtener» para mostrar la respuesta.</value>
   </data>
   <data name="InlineImageTitle" xml:space="preserve">
-    <value>🖼 Image: {0}</value>
+    <value>🖼 Imagen: {0}</value>
   </data>
   <data name="InlineImageTitleShort" xml:space="preserve">
-    <value>🖼 Image generation</value>
+    <value>🖼 Generación de imagen</value>
   </data>
   <data name="InlineImageDescription" xml:space="preserve">
-    <value>Generate an image from a prompt</value>
+    <value>Generar una imagen a partir de un prompt</value>
   </data>
   <data name="InlineImagePending" xml:space="preserve">
-    <value>⏳ GPTipsBot is drawing…
+    <value>⏳ GPTipsBot está dibujando…
 Prompt: {0}
 
-Tap “▶️ Get” to start generation.</value>
+Pulsa «▶️ Obtener» para iniciar la generación.</value>
   </data>
   <data name="InlineHelpAskTitle" xml:space="preserve">
-    <value>💬 Ask ChatGPT</value>
+    <value>💬 Preguntar a ChatGPT</value>
   </data>
   <data name="InlineHelpAskDescription" xml:space="preserve">
-    <value>Format: ask your question</value>
+    <value>Formato: ask tu pregunta</value>
   </data>
   <data name="InlineHelpAskMessage" xml:space="preserve">
-    <value>To ask via inline mode, type:
-@GPTipsBot ask your question
+    <value>Para preguntar en modo inline, escribe:
+@GPTipsBot ask tu pregunta
 
-Example: @GPTipsBot ask How does photosynthesis work?</value>
+Ejemplo: @GPTipsBot ask ¿Cómo funciona la fotosíntesis?</value>
   </data>
   <data name="InlineHelpImageTitle" xml:space="preserve">
-    <value>🖼 Generate an image</value>
+    <value>🖼 Generar una imagen</value>
   </data>
   <data name="InlineHelpImageDescription" xml:space="preserve">
-    <value>Format: image description</value>
+    <value>Formato: image descripción</value>
   </data>
   <data name="InlineHelpImageMessage" xml:space="preserve">
-    <value>To generate an image via inline mode, type:
-@GPTipsBot image description
+    <value>Para generar una imagen en modo inline, escribe:
+@GPTipsBot image descripción
 
-Example: @GPTipsBot image a cat in space</value>
+Ejemplo: @GPTipsBot image un gato en el espacio</value>
   </data>
   <data name="InlineResultExpired" xml:space="preserve">
-    <value>⏳ This result expired. Type @GPTipsBot again.</value>
+    <value>⏳ Este resultado expiró. Escribe @GPTipsBot de nuevo.</value>
   </data>
   <data name="InlineRunButton" xml:space="preserve">
-    <value>▶️ Get</value>
+    <value>▶️ Obtener</value>
   </data>
   <data name="AccountLinkSuccess" xml:space="preserve">
-    <value>✅ Telegram is linked to your website account. Stars and free quotas are now shared.</value>
+    <value>✅ Telegram está vinculado a tu cuenta del sitio web. Las Stars y las cuotas gratuitas ahora se comparten.</value>
   </data>
   <data name="AccountLinkTokenInvalid" xml:space="preserve">
-    <value>⚠️ This link is invalid or expired. Open the bot again from the website.</value>
+    <value>⚠️ Este enlace no es válido o ha expirado. Abre el bot de nuevo desde el sitio web.</value>
   </data>
   <data name="AccountLinkAlreadyLinked" xml:space="preserve">
-    <value>⚠️ That website account is already linked to another Telegram.</value>
+    <value>⚠️ Esa cuenta del sitio web ya está vinculada a otro Telegram.</value>
   </data>
   <data name="AccountLinkFailed" xml:space="preserve">
-    <value>⚠️ Could not link Telegram. Try again later or use Telegram Login on the website.</value>
+    <value>⚠️ No se pudo vincular Telegram. Inténtalo más tarde o usa Telegram Login en el sitio web.</value>
   </data>
   <data name="ChooseModel" xml:space="preserve">
-    <value>🤖 Choose a ChatGPT model
+    <value>🤖 Elige un modelo de ChatGPT
 
-Current: {0} ({1:0.##}⭐ per message)
+Actual: {0} ({1:0.##}⭐ por mensaje)
 
-Free requests work only with {2}.
-Other models spend Stars from your balance.</value>
+Las solicitudes gratuitas solo funcionan con {2}.
+Otros modelos gastan Stars de tu saldo.</value>
   </data>
   <data name="ModelSelected" xml:space="preserve">
-    <value>✅ Model selected: {0}
-Cost per message: {1:0.##}⭐</value>
+    <value>✅ Modelo seleccionado: {0}
+Coste por mensaje: {1:0.##}⭐</value>
   </data>
   <data name="ModelSelectionRequiresBalance" xml:space="preserve">
-    <value>🔒 Model selection is available when your Stars balance is positive.
+    <value>🔒 La selección de modelo está disponible cuando tu saldo de Stars es positivo.
 
-You can switch to {0} or top up your balance.</value>
+Puedes cambiar a {0} o recargar tu saldo.</value>
   </data>
   <data name="ModelNeedsBalance" xml:space="preserve">
-    <value>❗️Not enough Stars for {0} ({1:0.##}⭐ per message).
+    <value>❗️No hay suficientes Stars para {0} ({1:0.##}⭐ por mensaje).
 
-Top up your balance or switch to {2}.</value>
+Recarga tu saldo o cambia a {2}.</value>
   </data>
   <data name="UnknownModel" xml:space="preserve">
-    <value>Unknown model. Open /model and pick one from the list.</value>
+    <value>Modelo desconocido. Abre /model y elige uno de la lista.</value>
   </data>
   <data name="GptImageGenerateIntro" xml:space="preserve">
-    <value>🎨 GPT Image 2 — generate
+    <value>🎨 GPT Image 2 — generar
 
-Choose size and quality, then send a description.
-Cost: {0:0.##}⭐ (no free quota)</value>
+Elige tamaño y calidad, luego envía una descripción.
+Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
-    <value>🛠 GPT Image 2 — edit
+    <value>🛠 GPT Image 2 — editar
 
-Send a photo, then choose size/quality and describe the changes.
-Or reply to a photo: /edit_image make the sky pink
-Cost: {0:0.##}⭐ (no free quota)</value>
+Envía una foto, luego elige tamaño/calidad y describe los cambios.
+O responde a una foto: /edit_image haz el cielo rosa
+Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
   </data>
   <data name="GptImageSendPhotoFirst" xml:space="preserve">
-    <value>Send a photo to edit first</value>
+    <value>Envía primero una foto para editar</value>
   </data>
   <data name="GptImageSendPrompt" xml:space="preserve">
-    <value>Send a text description for the image</value>
+    <value>Envía una descripción de texto para la imagen</value>
   </data>
   <data name="GptImageSendEditPrompt" xml:space="preserve">
-    <value>Describe what to change in the photo.
-Cost: {0:0.##}⭐</value>
+    <value>Describe qué cambiar en la foto.
+Coste: {0:0.##}⭐</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
     <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
