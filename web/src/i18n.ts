@@ -86,6 +86,9 @@ const dict = {
     quotaUpsellBenefitImages: 'Free image generations and OCR',
     quotaUpsellBenefitSync: 'Your chats and Stars stay synced across devices',
     quotaUpsellContinue: 'Maybe later',
+    downloadImage: 'Download',
+    viewImage: 'View image',
+    closePreview: 'Close',
   },
   ru: {
     howCanIHelp: 'Чем могу помочь?',
@@ -172,6 +175,9 @@ const dict = {
     quotaUpsellBenefitImages: 'Бесплатные генерации изображений и OCR',
     quotaUpsellBenefitSync: 'Чаты и Stars синхронизируются на всех устройствах',
     quotaUpsellContinue: 'Позже',
+    downloadImage: 'Скачать',
+    viewImage: 'Открыть изображение',
+    closePreview: 'Закрыть',
   },
 } as const
 

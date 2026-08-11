@@ -109,6 +109,7 @@ export default function App() {
   const [authCode, setAuthCode] = useState('')
   const [authBusy, setAuthBusy] = useState(false)
   const [authHint, setAuthHint] = useState<string | null>(null)
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
@@ -250,6 +251,20 @@ export default function App() {
       document.removeEventListener('keydown', onKey)
     }
   }, [menuOpenId])
+
+  useEffect(() => {
+    if (!previewImageUrl) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPreviewImageUrl(null)
+    }
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [previewImageUrl])
 
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
@@ -1218,7 +1233,28 @@ export default function App() {
               {messages.map((m, idx) => (
                 <div key={idx} className={`bubble ${m.role}`}>
                   {m.text}
-                  {m.imageUrl && <img src={m.imageUrl} alt="generated" />}
+                  {m.imageUrl && (
+                    <div className="bubble-image">
+                      <button
+                        type="button"
+                        className="bubble-image-open"
+                        onClick={() => setPreviewImageUrl(m.imageUrl!)}
+                        aria-label={t(lang, 'viewImage')}
+                      >
+                        <img src={m.imageUrl} alt="" />
+                      </button>
+                      <button
+                        type="button"
+                        className="bubble-image-download"
+                        onClick={() => downloadImage(m.imageUrl!)}
+                        title={t(lang, 'downloadImage')}
+                        aria-label={t(lang, 'downloadImage')}
+                      >
+                        <DownloadIcon />
+                        <span>{t(lang, 'downloadImage')}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={bottomRef} />
@@ -1416,7 +1452,69 @@ export default function App() {
           e.target.value = ''
         }}
       />
+
+      {previewImageUrl && (
+        <div
+          className="image-preview-backdrop"
+          onClick={() => setPreviewImageUrl(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t(lang, 'viewImage')}
+        >
+          <div className="image-preview" onClick={(e) => e.stopPropagation()}>
+            <div className="image-preview-toolbar">
+              <button
+                type="button"
+                className="pill"
+                onClick={() => downloadImage(previewImageUrl)}
+              >
+                <DownloadIcon />
+                {t(lang, 'downloadImage')}
+              </button>
+              <button
+                type="button"
+                className="pill"
+                onClick={() => setPreviewImageUrl(null)}
+                aria-label={t(lang, 'closePreview')}
+              >
+                {t(lang, 'closePreview')}
+              </button>
+            </div>
+            <img src={previewImageUrl} alt="" className="image-preview-img" />
+          </div>
+        </div>
+      )}
     </div>
+  )
+}
+
+function downloadImage(url: string) {
+  const mime = url.startsWith('data:') ? url.slice(5, url.indexOf(';')) : ''
+  const ext =
+    mime === 'image/jpeg' || mime === 'image/jpg'
+      ? 'jpg'
+      : mime === 'image/webp'
+        ? 'webp'
+        : mime === 'image/gif'
+          ? 'gif'
+          : 'png'
+  const filename = `gptips-${Date.now()}.${ext}`
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M12 3v12" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M5 21h14" />
+    </svg>
   )
 }
 
