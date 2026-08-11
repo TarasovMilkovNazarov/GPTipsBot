@@ -23,6 +23,42 @@ type Theme = 'light' | 'dark'
 const THEME_KEY = 'gptips_theme'
 const PENDING_INVOICE_KEY = 'gptips_pending_invoice'
 
+function AuthIconTelegram() {
+  return (
+    <svg className="auth-method-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="12" fill="#2AABEE" />
+      <path
+        fill="#fff"
+        d="M5.5 11.7 16.8 7.3c.5-.2 1 .1.8.9l-1.9 9c-.1.6-.5.8-1 .5l-2.8-2.1-1.4 1.3c-.2.2-.3.3-.6.3l.2-3 5.5-5c.2-.2 0-.3-.3-.1l-6.8 4.3-2.9-.9c-.6-.2-.6-.6.1-.8Z"
+      />
+    </svg>
+  )
+}
+
+function AuthIconYandex() {
+  return (
+    <svg className="auth-method-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect width="24" height="24" rx="6" fill="#FC3F1D" />
+      <path
+        fill="#fff"
+        d="M13.2 18.2h-2.2v-4.3L7.4 5.8h2.5l2.2 5.8c.2.6.4 1.2.5 1.8h.1c.1-.6.3-1.2.5-1.8l2.2-5.8h2.4l-3.6 8.1v4.3Z"
+      />
+    </svg>
+  )
+}
+
+function AuthIconEmail() {
+  return (
+    <svg className="auth-method-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect width="24" height="24" rx="6" fill="currentColor" opacity="0.12" />
+      <path
+        fill="currentColor"
+        d="M6.5 8.2A1.7 1.7 0 0 1 8.2 6.5h7.6a1.7 1.7 0 0 1 1.7 1.7v7.6a1.7 1.7 0 0 1-1.7 1.7H8.2a1.7 1.7 0 0 1-1.7-1.7V8.2Zm1.5.4 4 2.8 4-2.8v-.4H8v.4Zm0 1.6v5.3h8V10.2l-3.6 2.5a.8.8 0 0 1-.8 0L8 10.2Z"
+      />
+    </svg>
+  )
+}
+
 function readStoredTheme(): Theme {
   const stored = localStorage.getItem(THEME_KEY)
   if (stored === 'light' || stored === 'dark') return stored
@@ -790,7 +826,8 @@ export default function App() {
                   type="button"
                   onClick={() => continueFromQuotaUpsell('telegram')}
                 >
-                  {t(lang, 'authViaTelegram')}
+                  <AuthIconTelegram />
+                  <span>{t(lang, 'authViaTelegram')}</span>
                 </button>
                 {yandexLoginEnabled && (
                   <button
@@ -798,7 +835,8 @@ export default function App() {
                     type="button"
                     onClick={() => continueFromQuotaUpsell('yandex')}
                   >
-                    {t(lang, 'authViaYandex')}
+                    <AuthIconYandex />
+                    <span>{t(lang, 'authViaYandex')}</span>
                   </button>
                 )}
                 <button
@@ -806,7 +844,8 @@ export default function App() {
                   type="button"
                   onClick={() => continueFromQuotaUpsell('email')}
                 >
-                  {t(lang, 'authViaEmail')}
+                  <AuthIconEmail />
+                  <span>{t(lang, 'authViaEmail')}</span>
                 </button>
               </div>
               <button className="ghost upsell-dismiss" type="button" onClick={closeQuotaUpsell}>
@@ -833,11 +872,13 @@ export default function App() {
                   {authHint && <p className="auth-choose">{authHint}</p>}
                   <p className="auth-choose">{t(lang, 'authChoose')}</p>
                   <button className="auth-method telegram" type="button" onClick={() => setAuthView('telegram')}>
-                    {t(lang, 'authViaTelegram')}
+                    <AuthIconTelegram />
+                    <span>{t(lang, 'authViaTelegram')}</span>
                   </button>
                   {yandexLoginEnabled && (
                     <button className="auth-method yandex" type="button" onClick={startYandexLogin}>
-                      {t(lang, 'authViaYandex')}
+                      <AuthIconYandex />
+                      <span>{t(lang, 'authViaYandex')}</span>
                     </button>
                   )}
                   <button
@@ -848,7 +889,8 @@ export default function App() {
                       setAuthTab(authTab === 'register' ? 'register' : 'login')
                     }}
                   >
-                    {t(lang, 'authViaEmail')}
+                    <AuthIconEmail />
+                    <span>{t(lang, 'authViaEmail')}</span>
                   </button>
                 </div>
               )}

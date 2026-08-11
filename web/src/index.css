@@ -960,6 +960,9 @@ a.pill {
 }
 
 .auth-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   border: 1px solid var(--line);
   background: var(--control-bg);
   color: var(--ink);
@@ -968,6 +971,16 @@ a.pill {
   cursor: pointer;
   text-align: left;
   font-weight: 600;
+}
+
+.auth-method-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.auth-method.email {
+  color: var(--ink);
 }
 
 .auth-method:hover {

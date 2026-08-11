@@ -238,7 +238,7 @@ namespace GPTipsBot.UpdateHandlers
                     replyMarkup = GetImageInstructionInlineKeyboard(false);
                     break;
                 case AnimatePhotoCommand:
-                    await botClient.SendMessage(chatId, BotResponse.SendPhotoToAnimate, replyMarkup: CancelInlineKeyboard);
+                    await botClient.SendAnimatePhotoInstructionsAsync(chatId, replyMarkup: CancelInlineKeyboard);
                     return;
                 case ImageSquareCommand:
                     if (previousCommand?.Type == CommandType.ImageSquare)

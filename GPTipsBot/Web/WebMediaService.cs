@@ -145,7 +145,7 @@ public class WebMediaService(
                 Text = promptText,
                 Role = MessageOwner.Assistant,
                 ContextBound = false,
-                BotMessageType = BotMessageType.ChatGptPrompt,
+                BotMessageType = BotMessageType.PromptFromImage,
             });
             await userService.ConfirmAsync(hold.Id);
             return promptText;

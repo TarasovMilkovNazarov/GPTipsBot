@@ -91,7 +91,7 @@ namespace GPTipsBot.UpdateHandlers
                 var resultMessage = new MessageDto(update.UserChatKey)
                 {
                     Text = promptText,
-                    BotMessageType = BotMessageType.ChatGptPrompt,
+                    BotMessageType = BotMessageType.PromptFromImage,
                     ContextBound = false,
                     Role = MessageOwner.Assistant,
                 };

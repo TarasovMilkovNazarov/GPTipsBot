@@ -385,11 +385,11 @@ namespace GPTipsBot.Services
                 survivor.EmailConfirmExpiresAt = emailConfirmExpiresToMove;
             }
 
-            survivor.FreeGptRequests += loser.FreeGptRequests;
-            survivor.FreeImageGenerations += loser.FreeImageGenerations;
-            survivor.FreeImageTextRecognitions += loser.FreeImageTextRecognitions;
-            survivor.FreePhotoAnimations += loser.FreePhotoAnimations;
-            survivor.FreeSummaryRequests += loser.FreeSummaryRequests;
+            survivor.FreeGptRequests = Math.Max(survivor.FreeGptRequests, loser.FreeGptRequests);
+            survivor.FreeImageGenerations = Math.Max(survivor.FreeImageGenerations, loser.FreeImageGenerations);
+            survivor.FreeImageTextRecognitions = Math.Max(survivor.FreeImageTextRecognitions, loser.FreeImageTextRecognitions);
+            survivor.FreePhotoAnimations = Math.Max(survivor.FreePhotoAnimations, loser.FreePhotoAnimations);
+            survivor.FreeSummaryRequests = Math.Max(survivor.FreeSummaryRequests, loser.FreeSummaryRequests);
             survivor.IsActive = true;
 
             var loserBalance = loser.Wallet?.Balance ?? 0;

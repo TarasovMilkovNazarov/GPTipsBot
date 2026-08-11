@@ -413,8 +413,17 @@ Every contribution counts, and we're so grateful for your support! 🤗</value>
   <data name="StarsDonationHint" xml:space="preserve">
     <value>✨ Almost there! Just enter a number (like 5, 10, or 50) – every star counts! 🌟 Thank you!</value>
   </data>
+  <data name="AnimateExampleBeforeCaption" xml:space="preserve">
+    <value>1️⃣ Photo</value>
+  </data>
+  <data name="AnimateExamplePromptCaption" xml:space="preserve">
+    <value>2️⃣ Prompt: "Kids happily jump and hug"</value>
+  </data>
+  <data name="AnimateExampleResultCaption" xml:space="preserve">
+    <value>3️⃣ Result</value>
+  </data>
   <data name="SendPhotoToAnimate" xml:space="preserve">
-    <value>Send a photo to bring it to life. Briefly describe what actions should take place. For example: "laughing", "dancing", "writing", etc.</value>
+    <value>Send your photo to bring it to life and briefly describe the action. For example: "laughing", "dancing", "writing"</value>
   </data>
   <data name="SendAnimatePrompt" xml:space="preserve">
     <value>Input animation prompt</value>

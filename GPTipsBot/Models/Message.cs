@@ -36,4 +36,5 @@ public enum BotMessageType
     ChatGptPrompt = 4,
     ImagePrompt = 5,
     AnimatedPhoto = 6,
+    PromptFromImage = 7,
 }

@@ -334,8 +334,10 @@ namespace GPTipsBot.UpdateHandlers
                 var imageId = update.FileId;
                 if (update.FileId == null && imageCache.TryGet(update.UserChatKey.ChatId, out imageId) == false)
                 {
-                    await botClient.SendUserReplyAsync(update, BotResponse.SendPhotoToAnimate,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                    await botClient.SendAnimatePhotoInstructionsAsync(
+                        update.UserChatKey.ChatId,
+                        TelegramBotUiService.CancelInlineKeyboard,
+                        update.Message?.MessageThreadId is long tid ? (int)tid : null);
 
                     return;
                 }

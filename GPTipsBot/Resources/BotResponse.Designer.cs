@@ -69,6 +69,33 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 1️⃣ Фото.
+        /// </summary>
+        public static string AnimateExampleBeforeCaption {
+            get {
+                return ResourceManager.GetString("AnimateExampleBeforeCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2️⃣ Промпт: «Дети радостно прыгают и обнимаются».
+        /// </summary>
+        public static string AnimateExamplePromptCaption {
+            get {
+                return ResourceManager.GetString("AnimateExamplePromptCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 3️⃣ Результат.
+        /// </summary>
+        public static string AnimateExampleResultCaption {
+            get {
+                return ResourceManager.GetString("AnimateExampleResultCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [VPN для всей семьи всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
         ///
         ///🎁 Первые 2 дня бесплатно
@@ -453,7 +480,7 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Отправьте фото для оживления. Опишите кратко, какие действия должны происходить. Например: &quot;смеются&quot;, &quot;танцуют&quot;, &quot;пишет&quot; и тд.
+        ///   Looks up a localized string similar to Отправьте своё фото для оживления и кратко опишите действие. Например: «смеются», «танцует», «пишет».
         /// </summary>
         public static string SendPhotoToAnimate {
             get {
