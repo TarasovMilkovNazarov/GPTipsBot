@@ -9,6 +9,10 @@ public class NaturalLanguageToolRouterTests
     [TestCase("Create an image of a cat in space", MediaToolIntent.GenerateImage, "a cat in space")]
     [TestCase("generate a picture of an Ethiopian farmer", MediaToolIntent.GenerateImage, "an Ethiopian farmer")]
     [TestCase("нарисуй картинку кота в космосе", MediaToolIntent.GenerateImage, "кота в космосе")]
+    [TestCase("нарисуй жирафа", MediaToolIntent.GenerateImage, "жирафа")]
+    [TestCase("нарисуй мне кота в космосе", MediaToolIntent.GenerateImage, "кота в космосе")]
+    [TestCase("draw a giraffe", MediaToolIntent.GenerateImage, "giraffe")]
+    [TestCase("dibuja un perro", MediaToolIntent.GenerateImage, "perro")]
     [TestCase("сгенерируй изображение: закат над морем", MediaToolIntent.GenerateImage, "закат над морем")]
     [TestCase("Crea una imagen de un perro", MediaToolIntent.GenerateImage, "un perro")]
     [TestCase("image a cat in space", MediaToolIntent.GenerateImage, "a cat in space")]
@@ -18,6 +22,14 @@ public class NaturalLanguageToolRouterTests
         var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: false);
         Assert.That(route.Intent, Is.EqualTo(intent));
         Assert.That(route.Prompt, Is.EqualTo(prompt));
+    }
+
+    [TestCase("нарисуй вывод")]
+    [TestCase("draw a conclusion")]
+    public void TryMatch_DrawMetaphor_DoesNotRouteToImage(string text)
+    {
+        var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: false);
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.None));
     }
 
     [TestCase("создай картинку")]
@@ -104,5 +116,28 @@ public class NaturalLanguageToolRouterTests
             "Приведи доводы для мужа, мне необходимо поехать отдохнуть",
             hasPhoto: true);
         Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.None));
+    }
+
+    [TestCase("нарисуй жирафа")]
+    [TestCase("draw a giraffe")]
+    [TestCase("hi")]
+    public void LooksLikeShortImperative_ShortMessage_ReturnsTrue(string text)
+    {
+        Assert.That(NaturalLanguageToolRouter.LooksLikeShortImperative(text), Is.True);
+    }
+
+    [Test]
+    public void LooksLikeShortImperative_NullOrEmpty_ReturnsFalse()
+    {
+        Assert.That(NaturalLanguageToolRouter.LooksLikeShortImperative(null), Is.False);
+        Assert.That(NaturalLanguageToolRouter.LooksLikeShortImperative("   "), Is.False);
+    }
+
+    [Test]
+    public void LooksLikeShortImperative_LongSentence_ReturnsFalse()
+    {
+        const string text = "напиши, пожалуйста, подробный пост про современный маркетинг для малого бизнеса " +
+                             "с примерами и рекомендациями на будущее";
+        Assert.That(NaturalLanguageToolRouter.LooksLikeShortImperative(text), Is.False);
     }
 }

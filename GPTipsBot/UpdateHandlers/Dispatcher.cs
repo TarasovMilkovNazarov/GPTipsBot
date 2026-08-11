@@ -43,7 +43,8 @@ namespace GPTipsBot.UpdateHandlers
         IGptImageSessionCache gptImageSessionCache,
         MessageRepository messageRepository,
         PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
-        IJobService jobService)
+        IJobService jobService,
+        MediaIntentClassifier mediaIntentClassifier)
         : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
@@ -392,6 +393,10 @@ namespace GPTipsBot.UpdateHandlers
             {
                 return;
             }
+            else if (await TryLlmFallbackRouteAsync(update))
+            {
+                return;
+            }
             else
             {
                 SetNextHandler(chatGptHandler);
@@ -417,6 +422,28 @@ namespace GPTipsBot.UpdateHandlers
 
             route = NaturalLanguageToolRouter.TryMatch(update.Message.Text, hasPhoto);
             return route.Intent != MediaToolIntent.None;
+        }
+
+        /// <summary>
+        /// Regex missed it — for short, private-chat messages ask a cheap LLM classifier
+        /// (gpt-4o-mini) to catch phrasings regex can't enumerate (e.g. "нарисуй жирафа").
+        /// Fails open (returns false) on any timeout/parse error/"none" verdict.
+        /// </summary>
+        private async Task<bool> TryLlmFallbackRouteAsync(UpdateDecorator update)
+        {
+            if (update.IsGroupOrChannel)
+            {
+                return false;
+            }
+
+            var text = update.Message?.Text;
+            if (!NaturalLanguageToolRouter.LooksLikeShortImperative(text))
+            {
+                return false;
+            }
+
+            var route = await mediaIntentClassifier.TryClassifyAsync(text!, CancellationToken.None);
+            return route.Intent != MediaToolIntent.None && await TryRouteMediaToolAsync(update, route);
         }
 
         /// <summary>

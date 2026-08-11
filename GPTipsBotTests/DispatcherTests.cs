@@ -464,6 +464,46 @@ namespace GPTipsBotTests
         }
 
         [Test]
+        public async Task GenerateImageRequest_PhraseRegexMisses_LlmFallbackGeneratesImage()
+        {
+            const string prompt = "хочу картинку с котом в очках";
+            var llmResponse = new ChatCompletionCreateResponse
+            {
+                Choices = new()
+                {
+                    new() { Message = new("assistant", """{"intent": "generate_image", "prompt": "кот в очках"}""") }
+                }
+            };
+
+            _gptMock.Setup(m => m.SendOneOffAsync(
+                    It.IsAny<string>(),
+                    It.Is<string>(s => s == prompt),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(llmResponse);
+
+            var update = CreateTelegramUpdate(1, 2, prompt);
+            await _mainHandler.HandleUpdateAsync(update);
+
+            await WaitForTodayImagesCount(update.Message!.From.Id, expectedCount: 1);
+
+            _imageGeneratorMock.Verify(g => g.StartImageGenerationAsync("кот в очках", false), Times.Once);
+        }
+
+        [Test]
+        public async Task ChatMessage_LlmFallbackReturnsNone_FallsThroughToChat()
+        {
+            const string prompt = "как погода в москве сегодня";
+
+            var update = CreateTelegramUpdate(1, 2, prompt);
+            await _mainHandler.HandleUpdateAsync(update);
+
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
+                    arg.Message.Text.Equals(prompt)),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task RecognizeImageTextRequest_ImageTextRecognizeCommand_ReturnsText()
         {
             var update = CreateTelegramUpdate(1, 2, BotMenu.ImageTextRecognizeCommand);

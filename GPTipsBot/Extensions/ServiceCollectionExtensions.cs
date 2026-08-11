@@ -91,6 +91,7 @@ namespace GPTipsBot.Extensions
             .AddSingleton<InlinePendingStore>()
             .AddSingleton<AccountLinkTokenService>()
             .AddScoped<IGpt, ChatGptService>()
+            .AddScoped<MediaIntentClassifier>()
             .AddSingleton<OpenAiVpnConnectivityService>()
             .AddSingleton<IJobService, JobService>()
             .AddSingleton<YaPhotoAnimatorService>()

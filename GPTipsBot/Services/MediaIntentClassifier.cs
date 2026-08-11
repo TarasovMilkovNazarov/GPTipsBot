@@ -1,0 +1,127 @@
+using System.Text.Json;
+using GPTipsBot.Config;
+using Microsoft.Extensions.Logging;
+
+namespace GPTipsBot.Services;
+
+/// <summary>
+/// Last-resort intent detector for messages the regex-based <see cref="NaturalLanguageToolRouter"/>
+/// could not classify. Runs a single cheap LLM call (gpt-4o-mini) that must answer with strict JSON;
+/// any failure/timeout/parse error fails open to regular chat so it never blocks a reply.
+/// </summary>
+public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifier> logger)
+{
+    private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(6);
+
+    private const string SystemPrompt = """
+        You are the intent router for a Telegram bot that can chat, generate images, run OCR on photos,
+        and build image-generation prompts from photos. Classify the user's message and reply with
+        STRICT JSON only (no markdown, no code fences, no extra text):
+        {"intent": "<generate_image|recognize_text|prompt_from_image|images_menu|none>", "prompt": "<string>"}
+
+        Rules:
+        - generate_image: the user wants a picture/drawing/illustration created (e.g. "нарисуй жирафа",
+          "draw a cat", "хочу картинку кота"). "prompt" is the subject only, in the user's own language,
+          with the request wording ("нарисуй", "draw", etc.) stripped out.
+        - recognize_text: the user wants text extracted (OCR) from a photo.
+        - prompt_from_image: the user wants a text-to-image prompt built from an existing photo, or asks
+          what is shown in a photo they already sent.
+        - images_menu: the user asks in general whether/how the bot can work with images or photos,
+          without a concrete request yet.
+        - none: anything else — regular chat, questions, or requests unrelated to image tools. Use "none"
+          whenever you are not confident.
+        - "prompt" must be "" unless intent is "generate_image".
+        Reply with the JSON object only.
+        """;
+
+    public async Task<MediaToolRoute> TryClassifyAsync(string text, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(RequestTimeout);
+
+            var response = await gptService.SendOneOffAsync(
+                SystemPrompt,
+                text,
+                cts.Token,
+                GptModelCatalog.DefaultModelId);
+
+            return Parse(response.Choices.FirstOrDefault()?.Message.Content);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Media intent LLM classification failed; falling back to chat");
+            return MediaToolRoute.None;
+        }
+    }
+
+    private static MediaToolRoute Parse(string? content)
+    {
+        var json = ExtractJsonObject(content);
+        if (json is null)
+        {
+            return MediaToolRoute.None;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var intentRaw = root.TryGetProperty("intent", out var intentProp) ? intentProp.GetString() : null;
+            var intent = intentRaw?.Trim().ToLowerInvariant() switch
+            {
+                "generate_image" => MediaToolIntent.GenerateImage,
+                "recognize_text" => MediaToolIntent.RecognizeText,
+                "prompt_from_image" => MediaToolIntent.PromptFromImage,
+                "images_menu" => MediaToolIntent.ImagesMenu,
+                _ => MediaToolIntent.None,
+            };
+
+            if (intent == MediaToolIntent.None)
+            {
+                return MediaToolRoute.None;
+            }
+
+            string? prompt = null;
+            if (intent == MediaToolIntent.GenerateImage &&
+                root.TryGetProperty("prompt", out var promptProp) &&
+                promptProp.GetString() is { Length: > 0 } promptValue)
+            {
+                prompt = promptValue.Trim();
+            }
+
+            return new MediaToolRoute(intent, prompt);
+        }
+        catch (JsonException)
+        {
+            return MediaToolRoute.None;
+        }
+    }
+
+    private static string? ExtractJsonObject(string? content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return null;
+        }
+
+        var trimmed = content.Trim();
+        if (trimmed.StartsWith("```", StringComparison.Ordinal))
+        {
+            var firstNewline = trimmed.IndexOf('\n');
+            trimmed = firstNewline >= 0 ? trimmed[(firstNewline + 1)..] : trimmed;
+
+            var fenceEnd = trimmed.LastIndexOf("```", StringComparison.Ordinal);
+            if (fenceEnd >= 0)
+            {
+                trimmed = trimmed[..fenceEnd];
+            }
+        }
+
+        var start = trimmed.IndexOf('{');
+        var end = trimmed.LastIndexOf('}');
+        return start >= 0 && end > start ? trimmed[start..(end + 1)] : null;
+    }
+}

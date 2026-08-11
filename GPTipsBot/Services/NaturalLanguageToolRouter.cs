@@ -67,22 +67,39 @@ public static class NaturalLanguageToolRouter
 
     private static readonly Regex GenerateWithPromptRegex = new(
         @"^(?:" +
-        @"(?:нарисуй|сгенерируй|создай|сделай)\s+(?:мне\s+)?(?:картинку|изображение|рисунок|фото|иллюстрацию)" +
+        // "нарисуй картинку кота" / "сгенерируй изображение: закат"
+        @"(?:нарисуй|нарисуйте|сгенерируй|сгенерируйте|создай|создайте|сделай|сделайте)\s+(?:мне\s+)?" +
+        @"(?:картинку|изображение|рисунок|фото|иллюстрацию)" +
         @"(?:\s+(?:с|про|на\s+тему|of|about))?\s*[:\-—]?\s*(?<prompt>.+)" +
-        @"|(?:create|generate|draw|make|paint)\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|illustration|drawing)" +
+        // "нарисуй жирафа" / "нарисуй мне кота в космосе" (без слова «картинку»)
+        @"|(?:нарисуй|нарисуйте)\s+(?:мне\s+|пожалуйста\s+)*(?<prompt>(?!картинку\b|изображение\b|рисунок\b|фото\b|иллюстрацию\b).+)" +
+        @"|(?:create|generate|make|paint)\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|illustration|drawing)" +
         @"(?:\s+of)?\s*[:\-—]?\s*(?<prompt>.+)" +
-        @"|(?:crea|genera|haz|dibuja)\s+(?:una?\s+)?(?:imagen|foto|dibujo|ilustraci[oó]n)" +
+        // "draw a giraffe"
+        @"|(?:draw)\s+(?:me\s+)?(?:an?\s+)?(?<prompt>.+)" +
+        @"|(?:crea|genera|haz)\s+(?:una?\s+)?(?:imagen|foto|dibujo|ilustraci[oó]n)" +
         @"(?:\s+de)?\s*[:\-—]?\s*(?<prompt>.+)" +
+        @"|(?:dibuja)\s+(?:me\s+)?(?:una?\s+)?(?<prompt>.+)" +
         @")$",
         Rx);
 
     private static readonly Regex GenerateBareRegex = new(
         @"^(?:" +
-        @"(?:нарисуй|сгенерируй|создай|сделай)\s+(?:мне\s+)?(?:картинку|изображение|рисунок|фото|иллюстрацию)" +
+        @"(?:нарисуй|нарисуйте|сгенерируй|сгенерируйте|создай|создайте|сделай|сделайте)\s+(?:мне\s+)?" +
+        @"(?:картинку|изображение|рисунок|фото|иллюстрацию)" +
         @"|(?:create|generate|draw|make|paint)\s+(?:me\s+)?(?:an?\s+)?(?:image|picture|photo|illustration|drawing)" +
         @"|(?:crea|genera|haz|dibuja)\s+(?:una?\s+)?(?:imagen|foto|dibujo|ilustraci[oó]n)" +
         @"|necesito\s+crear\s+im[aá]genes?(?:\s+en\s+photo)?" +
         @")\s*[.!?]*$",
+        Rx);
+
+    /// <summary>Rejects prompts that are clearly not image subjects (e.g. "нарисуй вывод").</summary>
+    private static readonly Regex NonImagePromptRegex = new(
+        @"^(?:" +
+        @"вывод|заключение|итог|график|диаграмму|таблицу|схему\s+кода|uml" +
+        @"|conclusion|a\s+conclusion|an?\s+inference|a\s+distinction" +
+        @"|conclusi[oó]n|una\s+conclusi[oó]n" +
+        @")\b",
         Rx);
 
     private static readonly Regex ImageCapabilityAskRegex = new(
@@ -186,11 +203,17 @@ public static class NaturalLanguageToolRouter
     {
         prompt = null;
 
+        // Keep short — long messages with "нарисуй" mid-text are usually chat, not image gen.
+        if (text.Length > 200)
+        {
+            return false;
+        }
+
         var withPrompt = GenerateWithPromptRegex.Match(text);
         if (withPrompt.Success)
         {
             var extracted = withPrompt.Groups["prompt"].Value.Trim();
-            if (extracted.Length > 0)
+            if (extracted.Length > 0 && !NonImagePromptRegex.IsMatch(extracted))
             {
                 prompt = extracted;
                 return true;
@@ -198,5 +221,22 @@ public static class NaturalLanguageToolRouter
         }
 
         return GenerateBareRegex.IsMatch(text);
+    }
+
+    /// <summary>
+    /// Cheap pre-filter for the LLM fallback classifier (<see cref="MediaIntentClassifier"/>):
+    /// only short, imperative-shaped messages are worth an extra model call — long messages
+    /// and multi-sentence chat are almost never “draw/read/describe this” asks.
+    /// </summary>
+    public static bool LooksLikeShortImperative(string? text)
+    {
+        var trimmed = text?.Trim() ?? string.Empty;
+        if (trimmed.Length is 0 or > 100)
+        {
+            return false;
+        }
+
+        var wordCount = trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
+        return wordCount <= 10;
     }
 }
