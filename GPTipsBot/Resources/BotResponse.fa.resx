@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + تصاویر
 
 فقط یک سوال تایپ کنید - ربات با زمینه گفتگو پاسخ می دهد.
-منو: گپ جدید، مدل‌ها، تصویر (GPT تصویر 1 / GPT Image 2)، انیمیشن عکس، حساب کاربری و ⭐ شارژ.
+منو: گپ جدید، مدل‌ها، تصویر (GPT IMAGE 1 / GPT Image 2)، انیمیشن عکس، حساب کاربری و ⭐ شارژ.
 
 محدودیت های روزانه رایگان اعمال می شود - /profile را ببینید. جزئیات: /help</value>
   </data>
@@ -142,7 +142,7 @@ https://gptips.skolkokomu.ru
 
 🎨 تصاویر
 "🎨 تصاویر" را در منو باز کنید:
-• 🖼 GPT تصویر 1 — ارسال متنی رایگان به تصویر (در سهمیه روزانه)
+• 🖼 GPT IMAGE 1 — ارسال متنی رایگان به تصویر (در سهمیه روزانه)
 • 🎨 GPT Image 2 — نسل پولی با گزینه های اندازه و کیفیت
 • 🛠 ویرایش عکس — ویرایش عکس از یک دستورالعمل متنی (پرداخت، GPT Image 2). در گروه ها: "/edit_image…" را به یک عکس پاسخ دهید
 • 📝 متن از عکس — OCR / استخراج متن از تصویر
@@ -173,7 +173,7 @@ https://gptips.skolkokomu.ru
 /profile - حساب
 /model - مدل را انتخاب کنید
 /images — منوی تصاویر
-/image - GPT تصویر 1
+/image - GPT IMAGE 1
 /gpt_image — GPT Image 2
 /edit_image - ویرایش عکس
 /prompt_from_image - درخواست از عکس
@@ -237,12 +237,12 @@ https://gptips.skolkokomu.ru</value>
     <value>توضیحات متنی تصویر نباید بیشتر از نویسه های {0} باشد. لطفا توضیحات را کوتاه کنید و دوباره ارسال کنید</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT تصویر 1 - نسل رایگان
+    <value>🖼 GPT IMAGE 1 - نسل رایگان
 
 توضیحاتی تا نویسه های {0} وارد کنید.
 
 1:1 - مربع تصویر
-2:1 — مستطیل شکل تصویر (پیش‌فرض)</value>
+2:1 — تصویر مستطیل (پیش‌فرض)</value>
   </data>
   <data name="LanguageWasSetSuccessfully" xml:space="preserve">
     <value>فارسی به‌عنوان زبان رابط تنظیم شد</value>
@@ -592,7 +592,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="GptImageEditIntro" xml:space="preserve">
     <value>🛠 GPT Image 2 — ویرایش
 
-یک عکس ارسال کنید، سپس اندازه/quality را انتخاب کنید و تغییرات را شرح دهید.
+یک عکس ارسال کنید، سپس اندازه/کیفیت را انتخاب کنید و تغییرات را شرح دهید.
 یا به یک عکس پاسخ دهید: /edit_image آسمان را صورتی می کند
 هزینه: {0:0.##}⭐ (بدون سهمیه رایگان)</value>
   </data>

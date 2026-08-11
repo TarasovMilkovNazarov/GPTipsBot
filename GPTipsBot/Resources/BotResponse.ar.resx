@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + صور
 
 ما عليك سوى كتابة سؤال - يقوم الروبوت بالرد بسياق المحادثة.
-القائمة: دردشة جديدة، نماذج، صور (GPT صورة 1 / GPT Image 2)، صور متحركة، حساب و⭐ تعبئة رصيد.
+القائمة: دردشة جديدة، نماذج، صور (GPT IMAGE 1 / GPT Image 2)، صور متحركة، حساب و⭐ تعبئة رصيد.
 
 تنطبق الحدود اليومية المجانية - راجع /profile. التفاصيل: /help</value>
   </data>
@@ -142,7 +142,7 @@ https://gptips.skolkokomu.ru
 
 🎨 الصور
 افتح "🎨 الصور" في القائمة:
-• 🖼 GPT صورة 1 — إرسال رسالة نصية مجانية إلى صورة (ضمن الحصة اليومية)
+• 🖼 GPT IMAGE 1 — إرسال رسالة نصية مجانية إلى صورة (ضمن الحصة اليومية)
 • 🎨 GPT Image 2 — جيل مدفوع مع خيارات الحجم والجودة
 • 🛠 تحرير الصورة — تحرير صورة من تعليمات نصية (مدفوعة، GPT Image 2)؛ في المجموعات: قم بالرد بـ "/edit_image ..." على صورة
 • 📝 نص من الصورة — OCR / استخراج النص من صورة
@@ -172,8 +172,8 @@ https://gptips.skolkokomu.ru
 /help - هذا الدليل
 /profile — الحساب
 /model - اختر الطراز
-/images — قائمة صورة
-/image — GPT صورة 1
+/images — قائمة الصور
+/image — GPT IMAGE 1
 /gpt_image — GPT Image 2
 /edit_image - تحرير الصورة
 /prompt_from_image - موجه من الصورة
@@ -237,7 +237,7 @@ https://gptips.skolkokomu.ru</value>
     <value>يجب ألا يتجاوز الوصف النصي لـ صورة أحرف {0}. يرجى اختصار الوصف وإرساله مرة أخرى</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT صورة 1 — جيل مجاني
+    <value>🖼 GPT IMAGE 1 — جيل مجاني
 
 أدخل وصفًا يصل إلى أحرف {0}.
 
@@ -592,7 +592,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="GptImageEditIntro" xml:space="preserve">
     <value>🛠 GPT Image 2 – تعديل
 
-أرسل صورة، ثم اختر الحجم/quality وقم بوصف التغييرات.
+أرسل صورة، ثم اختر الحجم/الجودة وقم بوصف التغييرات.
 أو قم بالرد على الصورة: /edit_image تجعل السماء وردية
 التكلفة: {0:0.##}⭐ (لا توجد حصة مجانية)</value>
   </data>

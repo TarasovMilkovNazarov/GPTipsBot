@@ -169,11 +169,20 @@ namespace GPTipsBot.Services
         {
             return new InlineKeyboardMarkup(new[]
             {
-                InlineKeyboardButton.WithCallbackData(BotUI.RussianButton, BotMenu.SetRuLangCommand),
-                InlineKeyboardButton.WithCallbackData(BotUI.EnglishButton, BotMenu.SetEngLangCommand),
-                InlineKeyboardButton.WithCallbackData(BotUI.SpanishButton, BotMenu.SetEsLangCommand),
-                InlineKeyboardButton.WithCallbackData(BotUI.PersianButton, BotMenu.SetFaLangCommand),
-                InlineKeyboardButton.WithCallbackData(BotUI.ArabicButton, BotMenu.SetArLangCommand),
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(BotUI.RussianButton, BotMenu.SetRuLangCommand),
+                    InlineKeyboardButton.WithCallbackData(BotUI.EnglishButton, BotMenu.SetEngLangCommand),
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(BotUI.SpanishButton, BotMenu.SetEsLangCommand),
+                    InlineKeyboardButton.WithCallbackData(BotUI.PersianButton, BotMenu.SetFaLangCommand),
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(BotUI.ArabicButton, BotMenu.SetArLangCommand),
+                },
             });
         }
 
