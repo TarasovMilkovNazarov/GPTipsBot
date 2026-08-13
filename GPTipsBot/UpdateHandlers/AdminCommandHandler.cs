@@ -3,6 +3,7 @@ using GPTipsBot.Config;
 using GPTipsBot.Dtos;
 using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
+using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.Services.Broadcast;
@@ -15,7 +16,8 @@ namespace GPTipsBot.UpdateHandlers
         OpenAiVpnConnectivityService connectivityService,
         BroadcastDraftStore draftStore,
         BroadcastService broadcastService,
-        BroadcastRunner broadcastRunner)
+        BroadcastRunner broadcastRunner,
+        BotSettingsRepository botSettingsRepository)
         : BaseMessageHandler
     {
         private const string HelpText =
@@ -34,7 +36,7 @@ namespace GPTipsBot.UpdateHandlers
             text for others
 
             Команды:
-            /broadcast preview — прислать варианты себе
+            /broadcast preview — прислать себе текст на языке из настроек
             /broadcast test — только админам
             /broadcast start — всем из аудитории
             /broadcast status
@@ -251,12 +253,9 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            foreach (var (lang, text) in config.Texts.OrderBy(x => x.Key))
-            {
-                await botClient.SendMessage(
-                    update.UserChatKey.ChatId,
-                    $"— preview {lang} —\n{text}");
-            }
+            var language = AdminUiLanguage(update);
+            var text = BroadcastTextParser.ResolveText(config, language);
+            await botClient.SendMessage(update.UserChatKey.ChatId, text);
         }
 
         private async Task StartAsync(UpdateDecorator update, bool adminsOnly)
@@ -343,5 +342,9 @@ namespace GPTipsBot.UpdateHandlers
 
         private static long AdminId(UpdateDecorator update) =>
             update.UserChatKey.TelegramUserId ?? update.UserChatKey.Id;
+
+        private string AdminUiLanguage(UpdateDecorator update) =>
+            LocalizationManager.NormalizeLanguage(
+                botSettingsRepository.Get(update.UserChatKey.Id)?.Language ?? update.Language);
     }
 }

@@ -5,6 +5,7 @@ using GPTipsBot;
 using GPTipsBot.Config;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
+using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
@@ -73,6 +74,7 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
 
                     var userId = user.Id;
                     var chatId = update.GetChatId();
+                    using var cultureScope = UiCultureScope.ForLanguage(update.GetLanguageOrDefault());
                     using (_log.BeginScope(new [] {update.Id, userId}))
                     {
                         _log.LogInformation("Handling message '{text}' with id={updateId} from {userName}(id={userId}) in chat {chatId}",

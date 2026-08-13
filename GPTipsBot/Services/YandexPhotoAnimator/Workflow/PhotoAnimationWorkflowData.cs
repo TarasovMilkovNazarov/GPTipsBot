@@ -13,4 +13,6 @@ public class PhotoAnimationWorkflowData
     public string? VideoUrl { get; set; }
     public string? ErrorMessage { get; set; }
     public long? PaymentHoldId { get; set; }
+    /// <summary>Bot UI language (ru/en/es/fa/ar) captured when the workflow started.</summary>
+    public string? UiLanguage { get; set; }
 }

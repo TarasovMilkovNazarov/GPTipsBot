@@ -94,6 +94,8 @@ namespace GPTipsBot.Extensions
             .AddSingleton<BroadcastRunner>()
             .AddHostedService(sp => sp.GetRequiredService<BroadcastRunner>())
             .AddScoped<BroadcastService>()
+            .AddScoped<InferMissingUserLanguages>()
+            .AddHostedService<InferMissingUserLanguagesService>()
             .AddSingleton<InlinePendingStore>()
             .AddSingleton<AccountLinkTokenService>()
             .AddScoped<IGpt, ChatGptService>()
@@ -130,6 +132,9 @@ namespace GPTipsBot.Extensions
 
                 CultureInfo.CurrentUICulture = LocalizationManager.Ar;
                 SetBotMenus(botClient, "ar");
+
+                CultureInfo.CurrentUICulture = LocalizationManager.Ru;
+                CultureInfo.DefaultThreadCurrentUICulture = LocalizationManager.Ru;
 
                 return botClient;
             })

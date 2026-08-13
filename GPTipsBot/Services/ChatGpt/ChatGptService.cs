@@ -2,6 +2,7 @@
 using GPTipsBot.Config;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
 using Microsoft.Extensions.Logging;
@@ -149,6 +150,7 @@ namespace GPTipsBot.Services
                 Prompt = prompt,
                 ProgressMessageId = progressMessageId,
                 PaymentHoldId = paymentHoldId,
+                UiLanguage = LocalizationManager.CurrentLanguage(),
             };
 
             return _photoAnimationWorkflowService.StartAsync(workflowData);

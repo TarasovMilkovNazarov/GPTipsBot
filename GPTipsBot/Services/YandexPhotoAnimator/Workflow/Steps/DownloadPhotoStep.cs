@@ -1,4 +1,5 @@
 using GPTipsBot.Extensions;
+using GPTipsBot.Localization;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using WorkflowCore.Interface;

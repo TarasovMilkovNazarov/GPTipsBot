@@ -59,30 +59,45 @@ public sealed class BroadcastService(ApplicationContext context)
         context.BroadcastCampaigns.FirstOrDefaultAsync(c => c.Status == BroadcastStatus.Running, token);
 
     public async Task<int> CountAudienceAsync(BroadcastCampaignConfig config, CancellationToken token) =>
-        await QueryRecipients(config).CountAsync(token);
+        await JoinAudience(config).CountAsync(token);
 
     public async Task<IReadOnlyDictionary<string, int>> CountByLanguageAsync(
         BroadcastCampaignConfig config,
         CancellationToken token)
     {
-        var rows = await QueryRecipients(config)
+        config.ClampDeliveryLimits();
+        var fallback = config.FallbackLanguage;
+        var rows = await JoinAudience(config)
             .GroupBy(r => r.Language)
             .Select(g => new { Language = g.Key, Count = g.Count() })
             .ToListAsync(token);
 
-        return rows.ToDictionary(r => r.Language, r => r.Count, StringComparer.OrdinalIgnoreCase);
+        return rows
+            .GroupBy(r => ResolveAudienceLanguage(r.Language, fallback), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Count), StringComparer.OrdinalIgnoreCase);
     }
 
     public async Task<IReadOnlyList<BroadcastRecipient>> TakeBatchAsync(
         BroadcastCampaignConfig config,
         long afterUserId,
         int take,
-        CancellationToken token) =>
-        await QueryRecipients(config)
+        CancellationToken token)
+    {
+        config.ClampDeliveryLimits();
+        var fallback = config.FallbackLanguage;
+        var rows = await JoinAudience(config)
             .Where(r => r.UserId > afterUserId)
             .OrderBy(r => r.UserId)
             .Take(take)
             .ToListAsync(token);
+
+        return rows
+            .Select(r => new BroadcastRecipient(
+                r.UserId,
+                r.TelegramId,
+                ResolveAudienceLanguage(r.Language, fallback)))
+            .ToList();
+    }
 
     public async Task MarkBlockedAsync(IReadOnlyCollection<long> userIds, CancellationToken token)
     {
@@ -168,7 +183,11 @@ public sealed class BroadcastService(ApplicationContext context)
                 """.Trim();
     }
 
-    private IQueryable<BroadcastRecipient> QueryRecipients(BroadcastCampaignConfig config)
+    /// <summary>
+    /// Scalar projection so EF can translate Count/GroupBy/OrderBy/Take in SQL.
+    /// Do not project to <see cref="BroadcastRecipient"/> here — composing on a record struct fails translation.
+    /// </summary>
+    private IQueryable<AudienceRow> JoinAudience(BroadcastCampaignConfig config)
     {
         config.ClampDeliveryLimits();
         var fallback = config.FallbackLanguage;
@@ -178,10 +197,12 @@ public sealed class BroadcastService(ApplicationContext context)
             from user in users
             join settings in context.BotSettings.AsNoTracking() on user.Id equals settings.Id into settingJoin
             from settings in settingJoin.DefaultIfEmpty()
-            select new BroadcastRecipient(
-                user.Id,
-                user.TelegramId ?? 0,
-                settings != null ? settings.Language : fallback);
+            select new AudienceRow
+            {
+                UserId = user.Id,
+                TelegramId = user.TelegramId ?? 0L,
+                Language = settings.Language ?? fallback,
+            };
 
         if (config.Audience.Languages is { Length: > 0 } languages)
         {
@@ -193,6 +214,18 @@ public sealed class BroadcastService(ApplicationContext context)
         }
 
         return query;
+    }
+
+    private static string ResolveAudienceLanguage(string? language, string fallback) =>
+        string.IsNullOrWhiteSpace(language)
+            ? fallback
+            : LocalizationManager.NormalizeLanguage(language);
+
+    private sealed class AudienceRow
+    {
+        public long UserId { get; set; }
+        public long TelegramId { get; set; }
+        public string Language { get; set; } = "";
     }
 
     private IQueryable<User> ApplyAudience(IQueryable<User> users, BroadcastCampaignConfig config)

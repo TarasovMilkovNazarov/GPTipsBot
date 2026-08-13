@@ -4,6 +4,7 @@ using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
+using GPTipsBot.Localization;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.Services.Inline;
@@ -255,6 +256,7 @@ public class InlineQueryHandler(
                 IsSquare = false,
                 InlineMessageId = inlineMessageId,
                 PaymentHoldId = hold.Id,
+                UiLanguage = LocalizationManager.CurrentLanguage(),
             });
         }
         catch (Exception ex)

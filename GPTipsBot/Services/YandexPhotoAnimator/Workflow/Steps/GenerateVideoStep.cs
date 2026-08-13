@@ -1,3 +1,4 @@
+using GPTipsBot.Localization;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;

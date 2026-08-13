@@ -33,6 +33,17 @@ public class BroadcastTextParserTests
     }
 
     [Test]
+    public void Parse_HelpExample_SplitsRuAndEn()
+    {
+        var raw = "ru:\nтекст для русских\n\nen:\ntext for others";
+
+        var texts = BroadcastTextParser.Parse(raw);
+
+        Assert.That(texts["ru"], Is.EqualTo("текст для русских"));
+        Assert.That(texts["en"], Is.EqualTo("text for others"));
+    }
+
+    [Test]
     public void Parse_InlineHeader_KeepsRestOfLine()
     {
         var texts = BroadcastTextParser.Parse("en: Hello there\nru: Привет");

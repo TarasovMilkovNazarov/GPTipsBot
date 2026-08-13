@@ -87,7 +87,7 @@ namespace GPTipsBot.UpdateHandlers
                 language = settings.Language;
             }
 
-            CultureInfo.CurrentUICulture = new CultureInfo(language);
+            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(language);
 
             if (update.IsInline)
             {

@@ -68,6 +68,9 @@ namespace GPTipsBot.Localization
             return GetCulture(langOrAcceptLanguage).TwoLetterISOLanguageName;
         }
 
+        public static string CurrentLanguage() =>
+            NormalizeLanguage(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+
         private static string? GetPrimaryLanguageTag(string? langCode)
         {
             if (string.IsNullOrWhiteSpace(langCode))

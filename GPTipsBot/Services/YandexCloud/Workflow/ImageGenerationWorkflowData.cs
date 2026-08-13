@@ -16,6 +16,8 @@ public class ImageGenerationWorkflowData
     public DateTime? DeadlineUtc { get; set; }
     public string? ErrorMessage { get; set; }
     public long? PaymentHoldId { get; set; }
+    /// <summary>Bot UI language (ru/en/es/fa/ar) captured when the workflow started.</summary>
+    public string? UiLanguage { get; set; }
 
     public long DeliveryChatId => ReplyChatId != 0 ? ReplyChatId : ChatId;
     public bool IsInlineDelivery => !string.IsNullOrEmpty(InlineMessageId);

@@ -62,6 +62,7 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             var extendedUpd = new UpdateDecorator(update);
+            CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(extendedUpd.Language);
             var enter = _rateLimiter.TryEnter(extendedUpd);
             if (enter is ChatGateResult.Queued or ChatGateResult.Dropped)
             {

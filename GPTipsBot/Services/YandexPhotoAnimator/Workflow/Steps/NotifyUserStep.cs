@@ -1,5 +1,6 @@
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
+using GPTipsBot.Localization;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
