@@ -21,6 +21,9 @@ public class WaitForVideoStep(
 
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
+        var data = (PhotoAnimationWorkflowData)context.Workflow.Data;
+        using var _ = UiCultureScope.ForLanguage(data.UiLanguage);
+
         if (!string.IsNullOrEmpty(ErrorMessage))
         {
             return ExecutionResult.Next();

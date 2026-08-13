@@ -1,5 +1,6 @@
 using System.Globalization;
 using GPTipsBot.Localization;
+using GPTipsBot.Resources;
 using NUnit.Framework;
 
 namespace GPTipsBotTests;
@@ -48,5 +49,25 @@ public class UiCultureScopeTests
         }
 
         Assert.That(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, Is.EqualTo("ru"));
+    }
+
+    [Test]
+    public void ForLanguage_EmptyFallsBackToRu()
+    {
+        CultureInfo.CurrentUICulture = LocalizationManager.En;
+        using var scope = UiCultureScope.ForLanguage(null);
+        Assert.That(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, Is.EqualTo("ru"));
+    }
+
+    [Test]
+    public void ForLanguage_AppliesBotResponseLanguage()
+    {
+        CultureInfo.CurrentUICulture = LocalizationManager.Ru;
+        using (UiCultureScope.ForLanguage("es"))
+        {
+            Assert.That(BotResponse.SomethingWentWrong, Is.EqualTo("Algo salió mal, inténtalo de nuevo."));
+        }
+
+        Assert.That(BotResponse.SomethingWentWrong, Is.EqualTo("Что-то пошло не так, попробуйте ещё раз"));
     }
 }

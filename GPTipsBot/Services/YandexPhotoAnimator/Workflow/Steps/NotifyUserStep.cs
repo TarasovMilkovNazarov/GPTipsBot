@@ -22,6 +22,7 @@ public class NotifyUserStep(
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
         var data = (PhotoAnimationWorkflowData)context.Workflow.Data;
+        using var _ = UiCultureScope.ForLanguage(data.UiLanguage);
         var success = false;
 
         try
