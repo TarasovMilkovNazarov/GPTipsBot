@@ -155,6 +155,11 @@ En grupos y comentarios: responde a una foto con /prompt_from_image.
 ✨ Animar foto
 Convierte una foto en una animación corta (gratis dentro de la cuota o de pago con ⭐).
 
+🧼 Quitar marca de agua
+Elimina rótulos, logotipos y capas semitransparentes de una foto (solo con ⭐, sin cuota gratuita).
+La foto se regenera, así que los detalles pequeños pueden cambiar un poco.
+Quita marcas de agua solo de imágenes que te pertenezcan.
+
 👤 Cuenta
 Muestra tu saldo de ⭐, cuotas gratuitas y modelo actual.
 Desde la cuenta puedes:
@@ -178,6 +183,7 @@ Comandos útiles
 /edit_image — editar foto
 /prompt_from_image — prompt desde foto
 /animate — animar foto
+/remove_watermark — quitar marca de agua
 /get_image_text — OCR
 /deposit — recargar
 /reset_context — nuevo chat
@@ -222,6 +228,7 @@ Soporte: @my_super_ultra_smart_bot</value>
 Solo escribe una pregunta — o elige una acción:
 • 🎨 Imágenes — generar, editar, OCR
 • ✨ Animar foto
+• 🧼 Quitar marca de agua — de pago con ⭐
 • ✍️ /human — inglés simple y natural
 • 💬 Nuevo chat — restablecer contexto
 
@@ -622,7 +629,7 @@ Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
     <value>Envía la foto de la que quieres quitar la marca de agua</value>
   </data>
   <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
-    <value>🧼 Marca de agua eliminada · Seedream 4.5 · {0:0.##}⭐</value>
+    <value>🧼 Marca de agua eliminada · {0:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>El modo de eliminación de marcas de agua sigue activo: puedes enviar otra foto, cada una cuesta {0:0.##}⭐. Pulsa «Cancelar» para salir.</value>

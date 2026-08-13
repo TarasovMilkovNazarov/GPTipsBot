@@ -155,6 +155,11 @@ In groups and comments: reply to a photo with /prompt_from_image.
 ✨ Animate photo
 Turn a photo into a short animation (free within quota or paid with ⭐).
 
+🧼 Remove watermark
+Removes captions, logos, and semi-transparent overlays from a photo (⭐ only, no free quota).
+The photo is regenerated, so small details may change slightly.
+Only remove watermarks from images you own.
+
 👤 Account
 Shows your ⭐ balance, free quotas, and current model.
 From account you can:
@@ -178,6 +183,7 @@ Useful commands
 /edit_image — edit photo
 /prompt_from_image — prompt from photo
 /animate — animate photo
+/remove_watermark — remove watermark
 /get_image_text — OCR
 /deposit — top up
 /reset_context — new chat
@@ -222,6 +228,7 @@ Support: @my_super_ultra_smart_bot</value>
 Just type a question — or pick an action:
 • 🎨 Images — generate, edit, OCR
 • ✨ Animate photo
+• 🧼 Remove watermark — paid with ⭐
 • ✍️ /human — simple natural English rewrite
 • 💬 New chat — reset context
 
@@ -622,7 +629,7 @@ Cost: {0:0.##}⭐ (no free quota)</value>
     <value>Send the photo you want the watermark removed from</value>
   </data>
   <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
-    <value>🧼 Watermark removed · Seedream 4.5 · {0:0.##}⭐</value>
+    <value>🧼 Watermark removed · {0:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>Watermark removal is still on: you can send another photo, each one costs {0:0.##}⭐. Tap “Cancel” to exit.</value>
