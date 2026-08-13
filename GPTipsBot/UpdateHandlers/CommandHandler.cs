@@ -13,6 +13,7 @@ using GPTipsBot.Jobs;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Services.Cache;
+using GPTipsBot.Services.Broadcast;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -40,7 +41,8 @@ namespace GPTipsBot.UpdateHandlers
         IJobService jobService,
         IGpt gptService,
         IGptImageSessionCache gptImageSessionCache,
-        AccountLinkTokenService accountLinkTokenService)
+        AccountLinkTokenService accountLinkTokenService,
+        BroadcastDraftStore broadcastDraftStore)
         : BaseMessageHandler
     {
         private readonly ApplicationContext _context = context;
@@ -362,6 +364,11 @@ namespace GPTipsBot.UpdateHandlers
                     reply = await UpdateLanguage(update.UserChatKey, "ar");
                     break;
                 case CancelCommand:
+                    if (update.UserChatKey.IsAdmin())
+                    {
+                        broadcastDraftStore.Clear(update.UserChatKey.TelegramUserId ?? update.UserChatKey.Id);
+                    }
+
                     if (update.CallbackQuery == null)
                     {
                         reply = BotResponse.ContinueConversation;

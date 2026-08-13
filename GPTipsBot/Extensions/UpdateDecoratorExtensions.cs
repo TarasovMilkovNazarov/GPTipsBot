@@ -10,7 +10,8 @@ public static class UpdateDecoratorExtensions
 {
     public static bool IsAdminCommand(this UpdateDecorator update)
     {
-        return update.IsCommand && update.UserChatKey.IsAdmin() && update.Command?.Type == CommandType.Admin;
+        return update.IsCommand && update.UserChatKey.IsAdmin() &&
+               update.Command?.Type is CommandType.Admin or CommandType.Broadcast;
     }
 
     public static bool IsExpired(this UpdateDecorator update)

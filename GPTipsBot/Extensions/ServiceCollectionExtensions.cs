@@ -13,6 +13,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
+using GPTipsBot.Services.Broadcast;
 using GPTipsBot.Services.Inline;
 using GPTipsBot.Services.YandexCloud;
 using GPTipsBot.Services.YandexCloud.Workflow;
@@ -89,6 +90,10 @@ namespace GPTipsBot.Extensions
             .AddScoped<UserStatusActivator>()
             .AddSingleton<SpeechToTextService>()
             .AddSingleton<RateLimiter>()
+            .AddSingleton<BroadcastDraftStore>()
+            .AddSingleton<BroadcastRunner>()
+            .AddHostedService(sp => sp.GetRequiredService<BroadcastRunner>())
+            .AddScoped<BroadcastService>()
             .AddSingleton<InlinePendingStore>()
             .AddSingleton<AccountLinkTokenService>()
             .AddScoped<IGpt, ChatGptService>()

@@ -48,6 +48,7 @@ public class BotMenu
     public const string FixCommand = "/fix";
     public const string VersionCommand = "/version";
     public const string VpnCheckCommand = "/vpn_check";
+    public const string BroadcastCommand = "/broadcast";
 
     public static CustomBotCommand Start => new() { Command = StartCommand, Description = BotUI.Start, Type = CommandType.Start};
     public static CustomBotCommand Image => new() { Command = ImageCommand, Description = BotUI.Image, Type = CommandType.Image };
@@ -87,6 +88,7 @@ public class BotMenu
 
     public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
     public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
+    public static CustomBotCommand Broadcast => new() { Command = BroadcastCommand, Type = CommandType.Broadcast };
 
     public BotMenu()
     {

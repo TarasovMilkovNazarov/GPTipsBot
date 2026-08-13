@@ -10,10 +10,12 @@ using GPTipsBot.Enums;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Jobs;
+using GPTipsBot.Localization;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services.Cache;
+using GPTipsBot.Services.Broadcast;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
@@ -45,7 +47,8 @@ namespace GPTipsBot.UpdateHandlers
         MessageRepository messageRepository,
         PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
         IJobService jobService,
-        MediaIntentClassifier mediaIntentClassifier)
+        MediaIntentClassifier mediaIntentClassifier,
+        BroadcastDraftStore broadcastDraftStore)
         : BaseMessageHandler
     {
         public static readonly ConcurrentDictionary<UserChatKey, UserStateDto> UserState = new ();
@@ -72,7 +75,18 @@ namespace GPTipsBot.UpdateHandlers
                     update.TelegramUserId);
             }
 
-            var language = botSettingsRepository.Get(userKey.Id)?.Language ?? update.Language;
+            var settings = botSettingsRepository.Get(userKey.Id);
+            string language;
+            if (settings == null)
+            {
+                language = LocalizationManager.NormalizeLanguage(update.Language);
+                botSettingsRepository.Create(userKey.Id, language);
+            }
+            else
+            {
+                language = settings.Language;
+            }
+
             CultureInfo.CurrentUICulture = new CultureInfo(language);
 
             if (update.IsInline)
@@ -208,9 +222,19 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            if (update.IsAdminCommand())
+            if (update.IsAdminCommand() ||
+                (update.UserChatKey.IsAdmin() && BroadcastCallbacks.IsMatch(update.CallbackQuery?.Data)) ||
+                (update.UserChatKey.IsAdmin() &&
+                 broadcastDraftStore.IsAwaitingText(update.UserChatKey.TelegramUserId ?? update.UserChatKey.Id) &&
+                 !update.IsCommand &&
+                 !string.IsNullOrEmpty(update.Message?.Text)))
             {
                 SetNextHandler(adminCommandHandler);
+            }
+            else if (update.IsCommand &&
+                     update.Command?.Type is CommandType.Admin or CommandType.Broadcast)
+            {
+                return;
             }
             else if (update.IsExpired() && update.CallbackQuery == null)
             {
