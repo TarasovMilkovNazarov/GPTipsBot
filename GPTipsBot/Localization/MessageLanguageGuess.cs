@@ -8,7 +8,8 @@ public enum MessageLanguageVote
 }
 
 /// <summary>
-/// Classifies user texts as Russian vs other by script. Used to fill missing BotSettings.Language.
+/// Classifies user texts as Russian vs other by script.
+/// Any Cyrillic message counts as Russian so GPT prompts in English do not hide ru users.
 /// </summary>
 public static class MessageLanguageGuess
 {
@@ -32,7 +33,13 @@ public static class MessageLanguageGuess
             }
         }
 
-        return russian > other ? Russian : English;
+        // Any Cyrillic wins: GPT users often write prompts in English even when the UI should be ru.
+        if (russian > 0)
+        {
+            return Russian;
+        }
+
+        return other > 0 ? English : Russian;
     }
 
     public static MessageLanguageVote ClassifyMessage(string? text)

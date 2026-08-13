@@ -5,7 +5,8 @@ using Microsoft.Extensions.Logging;
 namespace GPTipsBot.Services;
 
 /// <summary>
-/// Backfills BotSettings.Language from user messages. Yields immediately so host/polling start is not blocked.
+/// Fills missing BotSettings.Language from recent user texts, and corrects English when messages are Russian.
+/// Yields immediately so host/polling start is not blocked.
 /// </summary>
 public sealed class InferMissingUserLanguagesService(
     IServiceScopeFactory scopeFactory,

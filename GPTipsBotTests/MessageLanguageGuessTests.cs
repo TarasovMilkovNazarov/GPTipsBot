@@ -7,7 +7,7 @@ namespace GPTipsBotTests;
 public class MessageLanguageGuessTests
 {
     [Test]
-    public void FromUserTexts_MajorityCyrillic_ReturnsRu()
+    public void FromUserTexts_AnyCyrillic_ReturnsRu()
     {
         var language = MessageLanguageGuess.FromUserTexts(
         [
@@ -20,7 +20,7 @@ public class MessageLanguageGuessTests
     }
 
     [Test]
-    public void FromUserTexts_MajorityLatin_ReturnsEn()
+    public void FromUserTexts_EnglishPromptsWithOneRussian_ReturnsRu()
     {
         var language = MessageLanguageGuess.FromUserTexts(
         [
@@ -29,15 +29,27 @@ public class MessageLanguageGuessTests
             "Привет",
         ]);
 
+        Assert.That(language, Is.EqualTo("ru"));
+    }
+
+    [Test]
+    public void FromUserTexts_OnlyLatin_ReturnsEn()
+    {
+        var language = MessageLanguageGuess.FromUserTexts(
+        [
+            "Hello there",
+            "draw a cat please",
+            "write a python script",
+        ]);
+
         Assert.That(language, Is.EqualTo("en"));
     }
 
     [Test]
-    public void FromUserTexts_TieOrEmpty_ReturnsEn()
+    public void FromUserTexts_EmptyOrCommands_ReturnsRu()
     {
-        Assert.That(MessageLanguageGuess.FromUserTexts(["Hello", "Привет"]), Is.EqualTo("en"));
-        Assert.That(MessageLanguageGuess.FromUserTexts([]), Is.EqualTo("en"));
-        Assert.That(MessageLanguageGuess.FromUserTexts(["/start", "👍", ""]), Is.EqualTo("en"));
+        Assert.That(MessageLanguageGuess.FromUserTexts([]), Is.EqualTo("ru"));
+        Assert.That(MessageLanguageGuess.FromUserTexts(["/start", "👍", ""]), Is.EqualTo("ru"));
     }
 
     [Test]

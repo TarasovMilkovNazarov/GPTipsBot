@@ -44,7 +44,10 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
             join settings in context.BotSettings.AsNoTracking() on user.Id equals settings.Id into settingJoin
             from settings in settingJoin.DefaultIfEmpty()
             where user.Id > afterId
-                  && (settings == null || settings.Language == null || settings.Language == "")
+                  && (settings == null
+                      || settings.Language == null
+                      || settings.Language == ""
+                      || settings.Language.ToLower().StartsWith("en"))
             orderby user.Id
             select user.Id;
 
@@ -70,7 +73,7 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
             var language = MessageLanguageGuess.FromUserTexts(texts ?? []);
             if (existing.TryGetValue(userId, out var settings))
             {
-                if (!string.IsNullOrWhiteSpace(settings.Language))
+                if (!ShouldReplaceLanguage(settings.Language, language))
                 {
                     continue;
                 }
@@ -92,6 +95,21 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
         }
 
         return changed;
+    }
+
+    private static bool ShouldReplaceLanguage(string? current, string inferred)
+    {
+        if (string.IsNullOrWhiteSpace(current))
+        {
+            return true;
+        }
+
+        if (string.Equals(current, inferred, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return LocalizationManager.NormalizeLanguage(current) == MessageLanguageGuess.English;
     }
 
     private async Task<Dictionary<long, List<string>>> LoadRecentUserTextsAsync(

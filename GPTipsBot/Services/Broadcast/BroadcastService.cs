@@ -58,6 +58,21 @@ public sealed class BroadcastService(ApplicationContext context)
     public Task<BroadcastCampaign?> GetRunningAsync(CancellationToken token) =>
         context.BroadcastCampaigns.FirstOrDefaultAsync(c => c.Status == BroadcastStatus.Running, token);
 
+    public async Task<bool> CancelRunningAsync(string reason, CancellationToken token)
+    {
+        var campaign = await GetRunningAsync(token);
+        if (campaign == null)
+        {
+            return false;
+        }
+
+        campaign.Status = BroadcastStatus.Cancelled;
+        campaign.FinishedAt = DateTimeOffset.UtcNow;
+        campaign.LastError = reason;
+        await context.SaveChangesAsync(token);
+        return true;
+    }
+
     public async Task<int> CountAudienceAsync(BroadcastCampaignConfig config, CancellationToken token) =>
         await JoinAudience(config).CountAsync(token);
 
@@ -201,16 +216,17 @@ public sealed class BroadcastService(ApplicationContext context)
             {
                 UserId = user.Id,
                 TelegramId = user.TelegramId ?? 0L,
-                Language = settings.Language ?? fallback,
+                Language = settings.Language == null || settings.Language == "" ? fallback : settings.Language,
             };
 
         if (config.Audience.Languages is { Length: > 0 } languages)
         {
-            var normalized = languages
+            var accepted = languages
                 .Select(LocalizationManager.NormalizeLanguage)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .SelectMany(LocalizationManager.DatabaseTagsFor)
+                .Distinct()
                 .ToArray();
-            query = query.Where(r => normalized.Contains(r.Language));
+            query = query.Where(r => accepted.Contains(r.Language.ToLower()));
         }
 
         return query;

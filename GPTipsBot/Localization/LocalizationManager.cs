@@ -11,8 +11,11 @@ namespace GPTipsBot.Localization
         public static readonly CultureInfo Fa;
         public static readonly CultureInfo Ar;
 
-        // Страны СНГ
-        private static readonly string[] CisCountries;
+        /// <summary>
+        /// Telegram language codes and ISO country codes that should get the Russian UI / ru broadcast text.
+        /// Telegram sends uk/be/kk; older rows and some clients store ua/by/kz instead.
+        /// </summary>
+        private static readonly HashSet<string> RussianAudienceTags;
 
         static LocalizationManager()
         {
@@ -22,19 +25,11 @@ namespace GPTipsBot.Localization
             Fa = new CultureInfo("fa");
             Ar = new CultureInfo("ar");
             SupportedCultures = new CultureInfo[] { En, Ru, Es, Fa, Ar };
-            CisCountries = new string[] {
-              "am", // Armenia
-              "az", // Azerbaijan
-              "by", // Belarus
-              "ge", // Georgia
-              "kz", // Kazakhstan
-              "kg", // Kyrgyzstan
-              "md", // Moldova
-              "ru", // Russia
-              "tj", // Tajikistan
-              "tm", // Turkmenistan
-              "uz", // Uzbekistan
-              "ua", // Ukraine
+            RussianAudienceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "ru",
+                "uk", "be", "kk", "ky", "uz", "tg", "tk", "hy", "az", "ka", "mo",
+                "ua", "by", "kz", "kg", "tj", "tm", "am", "ge", "md",
             };
         }
 
@@ -46,7 +41,7 @@ namespace GPTipsBot.Localization
                 return En;
             }
 
-            if (CisCountries.Contains(primary) || primary == "ru")
+            if (RussianAudienceTags.Contains(primary))
             {
                 return Ru;
             }
@@ -71,6 +66,35 @@ namespace GPTipsBot.Localization
         public static string CurrentLanguage() =>
             NormalizeLanguage(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
 
+        /// <summary>
+        /// Raw BotSettings.Language values that NormalizeLanguage maps onto <paramref name="normalized"/>.
+        /// Used for SQL IN filters where the DB still has uk, ru-RU, EN, etc.
+        /// </summary>
+        public static string[] DatabaseTagsFor(string normalized)
+        {
+            var target = NormalizeLanguage(normalized);
+            var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { target };
+            if (target == "ru")
+            {
+                foreach (var tag in RussianAudienceTags)
+                {
+                    tags.Add(tag);
+                }
+
+                tags.Add("ru-ru");
+                tags.Add("ru-RU");
+            }
+            else if (target == "en")
+            {
+                tags.Add("en-us");
+                tags.Add("en-gb");
+                tags.Add("en-US");
+                tags.Add("en-GB");
+            }
+
+            return tags.Select(t => t.ToLowerInvariant()).Distinct().ToArray();
+        }
+
         private static string? GetPrimaryLanguageTag(string? langCode)
         {
             if (string.IsNullOrWhiteSpace(langCode))
@@ -85,10 +109,10 @@ namespace GPTipsBot.Localization
                 primary = primary[..semicolon].Trim();
             }
 
-            var dash = primary.IndexOf('-');
-            if (dash >= 0)
+            var separator = primary.IndexOfAny(['-', '_']);
+            if (separator >= 0)
             {
-                primary = primary[..dash];
+                primary = primary[..separator];
             }
 
             return string.IsNullOrWhiteSpace(primary) ? null : primary.ToLowerInvariant();

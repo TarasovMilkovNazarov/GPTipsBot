@@ -13,7 +13,7 @@ public sealed class BroadcastCampaignConfig
     public const int TelegramMaxMessagesPerSecond = 30;
     public const int DefaultMessagesPerSecond = 25;
     public const int DefaultBatchSize = 100;
-    public const int DefaultProgressEvery = 100;
+    public const int DefaultProgressEvery = 1000;
 
     public Dictionary<string, string> Texts { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 

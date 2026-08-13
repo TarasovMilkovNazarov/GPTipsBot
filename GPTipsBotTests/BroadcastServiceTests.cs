@@ -14,7 +14,7 @@ public class BroadcastServiceTests
 {
     private IServiceProvider? _services;
     private bool _dbAvailable;
-    private static readonly long[] TestUserIds = [901001, 901002, 901003, 901004];
+    private static readonly long[] TestUserIds = [901001, 901002, 901003, 901004, 901005, 901006];
 
     [OneTimeSetUp]
     public void OneTimeSetup()
@@ -100,6 +100,55 @@ public class BroadcastServiceTests
 
         Assert.That(row.TelegramId, Is.EqualTo(777001));
         Assert.That(row.Language, Is.EqualTo("en"));
+    }
+
+    [Test]
+    public async Task CountByLanguage_TelegramCisCodes_CountAsRu()
+    {
+        RequireDb();
+        var db = _services!.GetRequiredService<ApplicationContext>();
+        var service = _services.GetRequiredService<BroadcastService>();
+        var before = await service.CountByLanguageAsync(new BroadcastCampaignConfig(), CancellationToken.None);
+
+        db.Users.AddRange(User(901005, 901005), User(901006, 901006));
+        db.BotSettings.AddRange(
+            new BotSettings { Id = 901005, Language = "uk" },
+            new BotSettings { Id = 901006, Language = "ru-RU" });
+        await db.SaveChangesAsync();
+
+        var counts = await service.CountByLanguageAsync(new BroadcastCampaignConfig(), CancellationToken.None);
+        before.TryGetValue("ru", out var ruBefore);
+
+        Assert.That(counts["ru"], Is.EqualTo(ruBefore + 2));
+        Assert.That(counts.Keys, Does.Not.Contain("uk"));
+    }
+
+    [Test]
+    public async Task CountByLanguage_FilterRu_IncludesCisAliases()
+    {
+        RequireDb();
+        var db = _services!.GetRequiredService<ApplicationContext>();
+        var service = _services.GetRequiredService<BroadcastService>();
+        var config = new BroadcastCampaignConfig
+        {
+            Audience = { Languages = ["ru"] },
+        };
+        var before = await service.CountByLanguageAsync(config, CancellationToken.None);
+
+        db.Users.AddRange(
+            User(901001, 901001),
+            User(901005, 901005),
+            User(901006, 901006));
+        db.BotSettings.AddRange(
+            new BotSettings { Id = 901001, Language = "en-US" },
+            new BotSettings { Id = 901005, Language = "uk" },
+            new BotSettings { Id = 901006, Language = "RU" });
+        await db.SaveChangesAsync();
+
+        var counts = await service.CountByLanguageAsync(config, CancellationToken.None);
+
+        Assert.That(counts.GetValueOrDefault("ru"), Is.EqualTo(before.GetValueOrDefault("ru") + 2));
+        Assert.That(counts.GetValueOrDefault("en"), Is.EqualTo(before.GetValueOrDefault("en")));
     }
 
     private static User User(long id, long? telegramId) => new()

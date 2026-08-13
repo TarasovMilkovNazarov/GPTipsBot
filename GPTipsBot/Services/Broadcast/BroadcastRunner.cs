@@ -72,6 +72,8 @@ public sealed class BroadcastRunner(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await EnqueueInterruptedAsync(stoppingToken);
+
         await foreach (var campaignId in _queue.Reader.ReadAllAsync(stoppingToken))
         {
             using var runCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
@@ -88,6 +90,10 @@ public sealed class BroadcastRunner(
             catch (OperationCanceledException) when (!stoppingToken.IsCancellationRequested)
             {
                 await MarkStatusAsync(campaignId, BroadcastStatus.Cancelled, "Остановлено админом.");
+            }
+            catch (OperationCanceledException)
+            {
+                // Host is stopping: keep Status=Running so the next start can resume from LastUserId.
             }
             catch (Exception ex)
             {
@@ -109,6 +115,43 @@ public sealed class BroadcastRunner(
         }
     }
 
+    private async Task EnqueueInterruptedAsync(CancellationToken token)
+    {
+        try
+        {
+            using var scope = scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+            var ids = await db.BroadcastCampaigns
+                .Where(c => c.Status == BroadcastStatus.Running)
+                .OrderBy(c => c.Id)
+                .Select(c => c.Id)
+                .ToListAsync(token);
+            if (ids.Count == 0)
+            {
+                return;
+            }
+
+            lock (_gate)
+            {
+                _runningCampaignId ??= ids[0];
+            }
+
+            foreach (var id in ids)
+            {
+                if (!_queue.Writer.TryWrite(id))
+                {
+                    logger.LogWarning("Could not enqueue interrupted broadcast {CampaignId}", id);
+                }
+            }
+
+            logger.LogInformation("Resuming {Count} interrupted broadcast(s)", ids.Count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to resume interrupted broadcasts");
+        }
+    }
+
     private async Task RunCampaignAsync(long campaignId, CancellationToken token)
     {
         using var scope = scopeFactory.CreateScope();
@@ -121,6 +164,11 @@ public sealed class BroadcastRunner(
             return;
         }
 
+        if (campaign.Status is BroadcastStatus.Completed or BroadcastStatus.Cancelled)
+        {
+            return;
+        }
+
         var config = BroadcastService.Deserialize(campaign.ConfigJson);
         var error = BroadcastTextParser.Validate(config);
         if (error != null)
@@ -128,81 +176,101 @@ public sealed class BroadcastRunner(
             campaign.Status = BroadcastStatus.Failed;
             campaign.LastError = error;
             campaign.FinishedAt = DateTimeOffset.UtcNow;
-            await db.SaveChangesAsync(token);
-            await NotifyAdminsAsync(campaign, token);
+            await db.SaveChangesAsync(CancellationToken.None);
+            await NotifyAdminsAsync(campaign, CancellationToken.None);
             return;
         }
 
         campaign.Status = BroadcastStatus.Running;
         campaign.StartedAt ??= DateTimeOffset.UtcNow;
+        campaign.FinishedAt = null;
         campaign.LastError = null;
         if (campaign.TotalTargeted == 0)
         {
             campaign.TotalTargeted = await service.CountAudienceAsync(config, token);
         }
 
-        await db.SaveChangesAsync(token);
+        await db.SaveChangesAsync(CancellationToken.None);
         await NotifyAdminsAsync(campaign, token);
 
         var delay = TimeSpan.FromMilliseconds(1000d / config.MessagesPerSecond);
         var lastProgressAt = campaign.SentCount + campaign.FailedCount + campaign.BlockedCount + campaign.SkippedCount;
 
-        while (!token.IsCancellationRequested)
+        try
         {
-            var batch = await service.TakeBatchAsync(config, campaign.LastUserId, config.BatchSize, token);
-            if (batch.Count == 0)
+            while (!token.IsCancellationRequested)
             {
-                campaign.Status = BroadcastStatus.Completed;
-                campaign.FinishedAt = DateTimeOffset.UtcNow;
-                await db.SaveChangesAsync(token);
-                await NotifyAdminsAsync(campaign, token);
-                return;
-            }
-
-            var blockedIds = new List<long>();
-            foreach (var recipient in batch)
-            {
-                token.ThrowIfCancellationRequested();
-                var result = await SendOneAsync(config, recipient, token);
-                campaign.LastUserId = recipient.UserId;
-                switch (result)
+                var batch = await service.TakeBatchAsync(config, campaign.LastUserId, config.BatchSize, token);
+                if (batch.Count == 0)
                 {
-                    case SendResult.Sent:
-                        campaign.SentCount++;
-                        break;
-                    case SendResult.Blocked:
-                        campaign.BlockedCount++;
-                        blockedIds.Add(recipient.UserId);
-                        break;
-                    case SendResult.Skipped:
-                        campaign.SkippedCount++;
-                        break;
-                    default:
-                        campaign.FailedCount++;
-                        break;
+                    campaign.Status = BroadcastStatus.Completed;
+                    campaign.FinishedAt = DateTimeOffset.UtcNow;
+                    await db.SaveChangesAsync(CancellationToken.None);
+                    await NotifyAdminsAsync(campaign, CancellationToken.None);
+                    return;
                 }
 
-                var processed = campaign.SentCount + campaign.FailedCount + campaign.BlockedCount +
-                                campaign.SkippedCount;
-                if (processed - lastProgressAt >= config.ProgressEvery)
+                var blockedIds = new List<long>();
+                foreach (var recipient in batch)
                 {
-                    lastProgressAt = processed;
-                    await db.SaveChangesAsync(token);
-                    await NotifyAdminsAsync(campaign, token);
+                    token.ThrowIfCancellationRequested();
+                    var result = await SendOneAsync(config, recipient, token);
+                    campaign.LastUserId = recipient.UserId;
+                    switch (result)
+                    {
+                        case SendResult.Sent:
+                            campaign.SentCount++;
+                            break;
+                        case SendResult.Blocked:
+                            campaign.BlockedCount++;
+                            blockedIds.Add(recipient.UserId);
+                            break;
+                        case SendResult.Skipped:
+                            campaign.SkippedCount++;
+                            break;
+                        default:
+                            campaign.FailedCount++;
+                            break;
+                    }
+
+                    await db.SaveChangesAsync(CancellationToken.None);
+
+                    var processed = campaign.SentCount + campaign.FailedCount + campaign.BlockedCount +
+                                    campaign.SkippedCount;
+                    if (processed - lastProgressAt >= config.ProgressEvery)
+                    {
+                        lastProgressAt = processed;
+                        await NotifyAdminsAsync(campaign, token);
+                    }
+
+                    await Task.Delay(delay, token);
                 }
 
-                await Task.Delay(delay, token);
+                if (blockedIds.Count > 0)
+                {
+                    await service.MarkBlockedAsync(blockedIds, CancellationToken.None);
+                }
             }
 
-            if (blockedIds.Count > 0)
-            {
-                await service.MarkBlockedAsync(blockedIds, token);
-            }
-
-            await db.SaveChangesAsync(token);
+            token.ThrowIfCancellationRequested();
         }
+        catch (OperationCanceledException)
+        {
+            await PersistProgressAsync(db, campaignId);
+            throw;
+        }
+    }
 
-        token.ThrowIfCancellationRequested();
+    private async Task PersistProgressAsync(ApplicationContext db, long campaignId)
+    {
+        try
+        {
+            await db.SaveChangesAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to persist broadcast {CampaignId} progress on interrupt", campaignId);
+        }
     }
 
     private async Task<SendResult> SendOneAsync(

@@ -46,7 +46,7 @@ namespace GPTipsBot.UpdateHandlers
             /broadcast lang all|ru,en,es
 
             Лимиты Telegram: 4096 символов, ~30 сообщ/сек (шлём 25).
-            Язык получателя: BotSettings, иначе fallback (ru).
+            Язык получателя: BotSettings (uk/be/kk и СНГ → ru), иначе fallback (ru).
             """;
 
         public override async Task HandleAsync(UpdateDecorator update)
@@ -260,15 +260,30 @@ namespace GPTipsBot.UpdateHandlers
 
         private async Task StartAsync(UpdateDecorator update, bool adminsOnly)
         {
-            var config = await RequireTextAsync(update);
-            if (config == null)
-            {
-                return;
-            }
-
             if (broadcastRunner.IsRunning)
             {
                 await botClient.SendMessage(update.UserChatKey.ChatId, "Уже идёт другая рассылка. /broadcast stop или status.");
+                return;
+            }
+
+            var interrupted = await broadcastService.GetRunningAsync(CancellationToken.None);
+            if (interrupted != null)
+            {
+                if (!broadcastRunner.TryEnqueue(interrupted.Id))
+                {
+                    await botClient.SendMessage(update.UserChatKey.ChatId, "Не удалось поставить рассылку в очередь.");
+                    return;
+                }
+
+                await botClient.SendMessage(
+                    update.UserChatKey.ChatId,
+                    $"Продолжаю рассылку #{interrupted.Id} с {interrupted.SentCount} отправленных.");
+                return;
+            }
+
+            var config = await RequireTextAsync(update);
+            if (config == null)
+            {
                 return;
             }
 
@@ -291,7 +306,13 @@ namespace GPTipsBot.UpdateHandlers
             var running = await broadcastService.GetRunningAsync(CancellationToken.None);
             if (running != null)
             {
-                await botClient.SendMessage(update.UserChatKey.ChatId, BroadcastService.FormatProgress(running));
+                var text = BroadcastService.FormatProgress(running);
+                if (!broadcastRunner.IsRunning)
+                {
+                    text += "\n⏸ Прервана, прогресс сохранён. Старт — продолжить.";
+                }
+
+                await botClient.SendMessage(update.UserChatKey.ChatId, text);
                 return;
             }
 
@@ -307,14 +328,20 @@ namespace GPTipsBot.UpdateHandlers
 
         private async Task StopAsync(UpdateDecorator update)
         {
-            if (!broadcastRunner.IsRunning)
+            if (broadcastRunner.IsRunning)
             {
-                await botClient.SendMessage(update.UserChatKey.ChatId, "Сейчас ничего не отправляется.");
+                broadcastRunner.RequestStop();
+                await botClient.SendMessage(update.UserChatKey.ChatId, "Останавливаю рассылку…");
                 return;
             }
 
-            broadcastRunner.RequestStop();
-            await botClient.SendMessage(update.UserChatKey.ChatId, "Останавливаю рассылку…");
+            if (await broadcastService.CancelRunningAsync("Остановлено админом.", CancellationToken.None))
+            {
+                await botClient.SendMessage(update.UserChatKey.ChatId, "Прерванная рассылка отмечена как остановленная.");
+                return;
+            }
+
+            await botClient.SendMessage(update.UserChatKey.ChatId, "Сейчас ничего не отправляется.");
         }
 
         private async Task<BroadcastCampaignConfig?> RequireTextAsync(UpdateDecorator update)

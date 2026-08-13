@@ -15,7 +15,7 @@ public class InferMissingUserLanguagesTests
 {
     private IServiceProvider? _services;
     private bool _dbAvailable;
-    private static readonly long[] TestUserIds = [902001, 902002, 902003, 902004, 902005];
+    private static readonly long[] TestUserIds = [902001, 902002, 902003, 902004, 902005, 902006, 902007];
 
     [OneTimeSetUp]
     public void OneTimeSetup()
@@ -69,31 +69,39 @@ public class InferMissingUserLanguagesTests
             User(902002),
             User(902003),
             User(902004),
-            User(902005));
+            User(902005),
+            User(902006),
+            User(902007));
         db.BotSettings.AddRange(
             new BotSettings { Id = 902003, Language = "es" },
-            new BotSettings { Id = 902005, Language = "" });
+            new BotSettings { Id = 902005, Language = "" },
+            new BotSettings { Id = 902006, Language = "en" },
+            new BotSettings { Id = 902007, Language = "en" });
         db.Messages.AddRange(
             Msg(902001, "Привет, как дела?"),
             Msg(902001, "Нарисуй кота"),
             Msg(902001, "hello"),
             Msg(902002, "Hello there"),
             Msg(902002, "draw a cat"),
-            Msg(902002, "Привет"),
+            Msg(902002, "write a python script"),
             Msg(902003, "Только русский текст, но язык уже задан"),
-            Msg(902005, "Спасибо большое"));
+            Msg(902005, "Спасибо большое"),
+            Msg(902006, "Сделай картинку кота"),
+            Msg(902007, "draw a cat please"));
         await db.SaveChangesAsync();
 
         var job = _services.GetRequiredService<InferMissingUserLanguages>();
         var updated = await job.RunAsync(TestUserIds, CancellationToken.None);
 
-        Assert.That(updated, Is.EqualTo(4));
+        Assert.That(updated, Is.EqualTo(5));
         db.ChangeTracker.Clear();
         Assert.That(db.BotSettings.Single(s => s.Id == 902001).Language, Is.EqualTo("ru"));
         Assert.That(db.BotSettings.Single(s => s.Id == 902002).Language, Is.EqualTo("en"));
         Assert.That(db.BotSettings.Single(s => s.Id == 902003).Language, Is.EqualTo("es"));
-        Assert.That(db.BotSettings.Single(s => s.Id == 902004).Language, Is.EqualTo("en"));
+        Assert.That(db.BotSettings.Single(s => s.Id == 902004).Language, Is.EqualTo("ru"));
         Assert.That(db.BotSettings.Single(s => s.Id == 902005).Language, Is.EqualTo("ru"));
+        Assert.That(db.BotSettings.Single(s => s.Id == 902006).Language, Is.EqualTo("ru"));
+        Assert.That(db.BotSettings.Single(s => s.Id == 902007).Language, Is.EqualTo("en"));
     }
 
     private static User User(long id) => new()
