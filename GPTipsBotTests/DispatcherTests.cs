@@ -491,6 +491,22 @@ namespace GPTipsBotTests
         }
 
         [Test]
+        public async Task RemoveWatermarkRequest_NaturalLanguage_InsufficientBalance_ShowsDeposit()
+        {
+            const string prompt = "убери водяной знак с этого фото";
+            var update = CreateTelegramUpdate(1, 2, prompt);
+            var chatId = update.Message!.Chat.Id;
+
+            await _mainHandler.HandleUpdateAsync(update);
+
+            _botClientMock.Verify(b => b.SendRequest(It.Is<SendMessageRequest>(arg =>
+                    arg.ChatId == chatId &&
+                    arg.Text == string.Format(BotResponse.InsufficientBalance, PaymentConfig.WatermarkRemoval)
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task ChatMessage_LlmFallbackReturnsNone_FallsThroughToChat()
         {
             const string prompt = "как погода в москве сегодня";

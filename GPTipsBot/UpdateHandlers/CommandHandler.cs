@@ -30,6 +30,7 @@ namespace GPTipsBot.UpdateHandlers
         UserCommandRepository userCommandRepository,
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
+        RemoveWatermarkHandler removeWatermarkHandler,
         PromptFromImageHandler promptFromImageHandler,
         ChatGptHandler chatGptHandler,
         InvoiceRepository invoiceRepository,
@@ -158,6 +159,54 @@ namespace GPTipsBot.UpdateHandlers
                     }
 
                     await HandleGptImageStartAsync(update, GptImageMode.Edit);
+                    return;
+                }
+                case RemoveWatermarkCommand:
+                {
+                    // Button-only feature: the hidden slash command is not an entry point.
+                    if (!IsPressedFromButton(update, RemoveWatermarkCommand))
+                    {
+                        await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
+                        await botClient.SendMessage(chatId, BotResponse.ChooseImagesPlease,
+                            replyMarkup: GetImagesMenuInlineKeyboard());
+                        return;
+                    }
+
+                    if (profile.Stars < PaymentConfig.WatermarkRemoval)
+                    {
+                        await botClient.SendMessage(
+                            chatId,
+                            string.Format(BotResponse.InsufficientBalance, PaymentConfig.WatermarkRemoval),
+                            replyMarkup: DepositInlineKeyboard);
+                        return;
+                    }
+
+                    // Photo already attached (button tapped while replying to a photo) — run now.
+                    if (update.FileId != null)
+                    {
+                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(removeWatermarkHandler);
+                        await base.HandleAsync(update);
+                        return;
+                    }
+
+                    var introText = string.Format(
+                        BotResponse.RemoveWatermarkIntro,
+                        PaymentConfig.WatermarkRemoval);
+
+                    if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+                    {
+                        await botClient.EditMessageText(
+                            chatId,
+                            (int)update.Message.TelegramMessageId.Value,
+                            introText,
+                            replyMarkup: CancelInlineKeyboard);
+                    }
+                    else
+                    {
+                        await botClient.SendMessage(chatId, introText, replyMarkup: CancelInlineKeyboard);
+                    }
+
                     return;
                 }
                 case GptImageSizeSquareCommand:
@@ -383,6 +432,24 @@ namespace GPTipsBot.UpdateHandlers
 
                 return BotResponse.LanguageWasSetSuccessfully;
             }
+        }
+
+        /// <summary>
+        /// True when the update came from an inline button (callback data) or from a reply-keyboard
+        /// button (localized label), as opposed to the user typing the slash command.
+        /// </summary>
+        private static bool IsPressedFromButton(UpdateDecorator update, string command)
+        {
+            if (update.CallbackQuery != null)
+            {
+                return true;
+            }
+
+            var text = update.Message?.Text?.Trim();
+
+            return !string.IsNullOrEmpty(text) &&
+                   ButtonToLocalizations.TryGetValue(command, out var labels) &&
+                   labels.Exists(label => string.Equals(label, text, StringComparison.OrdinalIgnoreCase));
         }
 
         private async Task HandleGptImageStartAsync(UpdateDecorator update, GptImageMode mode)

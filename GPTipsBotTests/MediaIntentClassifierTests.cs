@@ -92,6 +92,17 @@ public class MediaIntentClassifierTests
     }
 
     [Test]
+    public async Task TryClassifyAsync_RemoveWatermarkJson_ReturnsRoute()
+    {
+        SetupGptResponse("""{"intent": "remove_watermark", "prompt": ""}""");
+
+        var route = await _classifier.TryClassifyAsync("сможешь очистить логотип с этого фото?", CancellationToken.None);
+
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.RemoveWatermark));
+        Assert.That(route.Prompt, Is.Null);
+    }
+
+    [Test]
     public async Task TryClassifyAsync_RecognizeTextIntent_IgnoresPromptField()
     {
         SetupGptResponse("""{"intent": "recognize_text", "prompt": "should be ignored"}""");

@@ -16,6 +16,8 @@ public enum MediaToolIntent
     ImagesMenu = 4,
     /// <summary>Greeting or “what can you do” — show onboarding instead of ChatGPT.</summary>
     Onboarding = 5,
+    /// <summary>Watermark removal via VseGPT Seedream (/remove_watermark button flow).</summary>
+    RemoveWatermark = 6,
 }
 
 public readonly record struct MediaToolRoute(MediaToolIntent Intent, string? Prompt = null)
@@ -40,6 +42,18 @@ public static class NaturalLanguageToolRouter
         @"|(?:read|recognize)\s+(?:the\s+)?text(?:\s+from(?:\s+(?:the|this))?\s+(?:photo|image|picture))?" +
         @"|\bocr\b" +
         @"|extrae(?:r)?\s+(?:el\s+)?texto(?:\s+de(?:\s+(?:la|esta))?\s+(?:foto|imagen))?" +
+        @")",
+        Rx);
+
+    private static readonly Regex RemoveWatermarkRegex = new(
+        @"(?:^|\b)(?:" +
+        @"(?:убери|удали|сними|очисти|почисти|избавься\s+от)(?:\s+мне)?\s+" +
+        @"(?:водяно(?:й|го)\s+знак\w*|вотермарк\w*|watermark\w*)" +
+        @"(?:\s+(?:с|на)\s+(?:фото|картинк\w*|изображени\w*))?" +
+        @"|(?:водяно(?:й|го)\s+знак\w*|вотермарк\w*)\s+(?:убери|удали|можешь\s+убрать)" +
+        @"|remove\s+(?:the\s+|this\s+)?watermark(?:s)?(?:\s+from(?:\s+(?:the|this))?\s+(?:photo|image|picture))?" +
+        @"|(?:delete|clean(?:\s+up)?|get\s+rid\s+of|erase)\s+(?:the\s+|this\s+)?watermark(?:s)?" +
+        @"|(?:quita|elimina|borra)(?:r)?\s+(?:la\s+)?marca\s+de\s+agua" +
         @")",
         Rx);
 
@@ -160,6 +174,11 @@ public static class NaturalLanguageToolRouter
         if (InlineQueryHandler.TryParse(trimmed, "image", out var inlinePrompt))
         {
             return new MediaToolRoute(MediaToolIntent.GenerateImage, inlinePrompt);
+        }
+
+        if (trimmed.Length <= 200 && RemoveWatermarkRegex.IsMatch(trimmed))
+        {
+            return new MediaToolRoute(MediaToolIntent.RemoveWatermark);
         }
 
         if (trimmed.Length <= 280 && OcrRegex.IsMatch(trimmed))

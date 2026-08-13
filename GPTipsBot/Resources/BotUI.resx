@@ -242,4 +242,10 @@
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 Редактировать фото</value>
   </data>
+  <data name="RemoveWatermark" xml:space="preserve">
+    <value>Убрать водяной знак с фото</value>
+  </data>
+  <data name="RemoveWatermarkButton" xml:space="preserve">
+    <value>🧼 Убрать водяной знак</value>
+  </data>
 </root>

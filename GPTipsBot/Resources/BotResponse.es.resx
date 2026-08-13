@@ -610,4 +610,21 @@ Coste: {0:0.##}⭐</value>
   <data name="GptImageDoneCaption" xml:space="preserve">
     <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
   </data>
+  <data name="RemoveWatermarkIntro" xml:space="preserve">
+    <value>🧼 Eliminación de marca de agua
+
+Envía una foto: quitaré textos, logotipos y las plantillas semitransparentes repetidas.
+Ten en cuenta que la foto se regenera, así que los detalles finos pueden cambiar un poco.
+Elimina marcas de agua solo de tus propias imágenes.
+Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
+  </data>
+  <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
+    <value>Envía la foto de la que quieres quitar la marca de agua</value>
+  </data>
+  <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
+    <value>🧼 Marca de agua eliminada · Seedream 4.5 · {0:0.##}⭐</value>
+  </data>
+  <data name="RemoveWatermarkModeActive" xml:space="preserve">
+    <value>El modo de eliminación de marcas de agua sigue activo: puedes enviar otra foto, cada una cuesta {0:0.##}⭐. Pulsa «Cancelar» para salir.</value>
+  </data>
 </root>

@@ -76,6 +76,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<PromptFromImageHandler>()
             .AddScoped<ChatGptHandler>()
             .AddScoped<GptImageHandler>()
+            .AddScoped<RemoveWatermarkHandler>()
             .AddScoped<InlineQueryHandler>()
             // services
             .AddScoped<UserService>()
@@ -138,6 +139,11 @@ namespace GPTipsBot.Extensions
             services.AddHttpClient<YooKassaClient>(client =>
             {
                 client.BaseAddress = new Uri("https://api.yookassa.ru/v3/");
+            });
+            services.AddHttpClient<GPTipsBot.Services.VseGpt.VseGptImageClient>(client =>
+            {
+                client.BaseAddress = new Uri(WatermarkRemovalConfig.BaseUrl);
+                client.Timeout = WatermarkRemovalConfig.RequestTimeout;
             });
 
             services.AddImageCache();

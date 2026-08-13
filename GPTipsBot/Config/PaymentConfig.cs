@@ -23,6 +23,9 @@ public static class PaymentConfig
     /// <summary>GPT Image 2 high quality (~$0.211 / 1024²).</summary>
     public const double GptImageHigh = 4.0;
 
+    /// <summary>Watermark removal via Seedream 4.5 (13.9 ₽ per image at the provider).</summary>
+    public const double WatermarkRemoval = 2.0;
+
     /// <summary>
     /// Число бесплатных запросов на генерацию изображений, которое добавляется джобой обновления лимитов
     /// </summary>

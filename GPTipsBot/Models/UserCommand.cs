@@ -43,6 +43,7 @@ public enum CommandType
     SetEsLang = 29,
     SetFaLang = 30,
     SetArLang = 31,
+    RemoveWatermark = 32,
 }
 
 public class Wallet: Entity

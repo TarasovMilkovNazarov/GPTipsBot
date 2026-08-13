@@ -610,4 +610,21 @@ Cost: {0:0.##}⭐</value>
   <data name="GptImageDoneCaption" xml:space="preserve">
     <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
   </data>
+  <data name="RemoveWatermarkIntro" xml:space="preserve">
+    <value>🧼 Watermark removal
+
+Send a photo — I will remove captions, logos and repeated semi-transparent overlays.
+Note: the photo is regenerated, so fine details may change slightly.
+Only remove watermarks from images you own.
+Cost: {0:0.##}⭐ (no free quota)</value>
+  </data>
+  <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
+    <value>Send the photo you want the watermark removed from</value>
+  </data>
+  <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
+    <value>🧼 Watermark removed · Seedream 4.5 · {0:0.##}⭐</value>
+  </data>
+  <data name="RemoveWatermarkModeActive" xml:space="preserve">
+    <value>Watermark removal is still on: you can send another photo, each one costs {0:0.##}⭐. Tap “Cancel” to exit.</value>
+  </data>
 </root>

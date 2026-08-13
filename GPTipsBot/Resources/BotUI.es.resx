@@ -180,6 +180,12 @@
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 Editar foto</value>
   </data>
+  <data name="RemoveWatermark" xml:space="preserve">
+    <value>Quitar la marca de agua de una foto</value>
+  </data>
+  <data name="RemoveWatermarkButton" xml:space="preserve">
+    <value>🧼 Quitar marca de agua</value>
+  </data>
   <data name="Ask" xml:space="preserve">
     <value>Preguntar a la IA</value>
   </data>

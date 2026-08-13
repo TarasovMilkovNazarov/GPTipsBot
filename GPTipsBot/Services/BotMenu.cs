@@ -35,6 +35,7 @@ public class BotMenu
     public const string ImagesMenuCommand = "/images";
     public const string GptImageCommand = "/gpt_image";
     public const string EditImageCommand = "/edit_image";
+    public const string RemoveWatermarkCommand = "/remove_watermark";
     public const string GptImageSizeSquareCommand = "/gpt_image_sq";
     public const string GptImageSizeLandscapeCommand = "/gpt_image_land";
     public const string GptImageSizePortraitCommand = "/gpt_image_port";
@@ -72,6 +73,8 @@ public class BotMenu
     public static CustomBotCommand ImagesMenu => new() { Command = ImagesMenuCommand, Description = BotUI.ImagesMenu, Type = CommandType.ImagesMenu };
     public static CustomBotCommand GptImage => new() { Command = GptImageCommand, Description = BotUI.GptImage, Type = CommandType.GptImage };
     public static CustomBotCommand EditImage => new() { Command = EditImageCommand, Description = BotUI.EditImage, Type = CommandType.EditImage };
+    // Deliberately absent from GetBotCommands: reachable from the keyboard buttons only.
+    public static CustomBotCommand RemoveWatermark => new() { Command = RemoveWatermarkCommand, Description = BotUI.RemoveWatermark, Type = CommandType.RemoveWatermark };
     public static CustomBotCommand GptImageSizeSquare => new() { Command = GptImageSizeSquareCommand, Type = CommandType.GptImage };
     public static CustomBotCommand GptImageSizeLandscape => new() { Command = GptImageSizeLandscapeCommand, Type = CommandType.GptImage };
     public static CustomBotCommand GptImageSizePortrait => new() { Command = GptImageSizePortraitCommand, Type = CommandType.GptImage };

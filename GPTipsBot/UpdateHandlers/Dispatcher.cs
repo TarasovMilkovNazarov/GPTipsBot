@@ -28,6 +28,7 @@ namespace GPTipsBot.UpdateHandlers
         PromptFromImageHandler promptFromImageHandler,
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
+        RemoveWatermarkHandler removeWatermarkHandler,
         CommandHandler commandHandler,
         ChatGptHandler chatGptHandler,
         AdminCommandHandler adminCommandHandler,
@@ -278,12 +279,17 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
             }
+            else if (lastCommand?.Type == CommandType.RemoveWatermark && !update.IsGroupOrChannel)
+            {
+                SetNextHandler(removeWatermarkHandler);
+            }
             else if (update.IsGroupOrChannel &&
                      lastCommand?.Type is CommandType.TextRecognition
                          or CommandType.Deposit
                          or CommandType.Donate
                          or CommandType.AnimatePhoto
-                         or CommandType.GptImage)
+                         or CommandType.GptImage
+                         or CommandType.RemoveWatermark)
             {
                 await botClient.SendMessage(userKey.ChatId, BotResponse.GroupCommandNotAvailable);
                 return;
@@ -544,6 +550,38 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendPromptFromImagePhoto,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return true;
+
+                case MediaToolIntent.RemoveWatermark:
+                    if (update.IsGroupOrChannel)
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    if (profile.Stars < PaymentConfig.WatermarkRemoval)
+                    {
+                        await botClient.SendMessage(
+                            update.UserChatKey.ChatId,
+                            string.Format(BotResponse.InsufficientBalance, PaymentConfig.WatermarkRemoval),
+                            replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.RemoveWatermark);
+
+                    if (update.FileId != null)
+                    {
+                        await messageRepository.AddAsync(update.Message);
+                        SetNextHandler(removeWatermarkHandler);
+                        await base.HandleAsync(update);
+                        return true;
+                    }
+
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        string.Format(BotResponse.RemoveWatermarkIntro, PaymentConfig.WatermarkRemoval),
                         TelegramBotUiService.CancelInlineKeyboard);
                     return true;
 

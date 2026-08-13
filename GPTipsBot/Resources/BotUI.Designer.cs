@@ -121,6 +121,18 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("EditImageButton", resourceCulture);
             }
         }
+
+        internal static string RemoveWatermark {
+            get {
+                return ResourceManager.GetString("RemoveWatermark", resourceCulture);
+            }
+        }
+
+        internal static string RemoveWatermarkButton {
+            get {
+                return ResourceManager.GetString("RemoveWatermarkButton", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Отмена.

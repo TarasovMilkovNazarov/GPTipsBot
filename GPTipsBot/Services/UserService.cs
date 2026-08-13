@@ -94,6 +94,10 @@ namespace GPTipsBot.Services
         public Task<PaymentHold?> TryReserveGptImageAsync(long userId, double starsCost) =>
             TryReserveAsync(userId, PaidFeature.GptImage, starsCost, allowFreeQuota: false);
 
+        public Task<PaymentHold?> TryReserveWatermarkRemovalAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.WatermarkRemoval, PaymentConfig.WatermarkRemoval,
+                allowFreeQuota: false);
+
         public async Task ConfirmAsync(long holdId)
         {
             await _context.PaymentHolds

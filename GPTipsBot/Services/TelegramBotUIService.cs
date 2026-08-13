@@ -26,6 +26,7 @@ namespace GPTipsBot.Services
 
         private static KeyboardButton ImagesMenuButton => new(BotUI.ImagesMenuButton);
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
+        private static KeyboardButton RemoveWatermarkButton => new(BotUI.RemoveWatermarkButton);
         private static KeyboardButton PromptFromImageButton => new(BotUI.PromptFromImageButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
@@ -68,6 +69,7 @@ namespace GPTipsBot.Services
                 { BotMenu.GptImageCommand, new() },
                 { BotMenu.EditImageCommand, new() },
                 { BotMenu.ImagesMenuCommand, new() },
+                { BotMenu.RemoveWatermarkCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -95,6 +97,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.GptImageCommand].Add(BotUI.GptImageButton);
                 ButtonToLocalizations[BotMenu.EditImageCommand].Add(BotUI.EditImageButton);
                 ButtonToLocalizations[BotMenu.ImagesMenuCommand].Add(BotUI.ImagesMenuButton);
+                ButtonToLocalizations[BotMenu.RemoveWatermarkCommand].Add(BotUI.RemoveWatermarkButton);
             }
 
             // Keep old reply-keyboard labels working until users get the new menu via /start.
@@ -144,6 +147,7 @@ namespace GPTipsBot.Services
                 [ResetContextButton, ProfileButton],
                 [ModelButton, ImagesMenuButton],
                 [PromptFromImageButton, AnimatePhotoButton],
+                [RemoveWatermarkButton],
                 [HelpButton],
             ]);
 
@@ -257,6 +261,7 @@ namespace GPTipsBot.Services
             [
                 [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.RemoveWatermarkButton, BotMenu.RemoveWatermarkCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageButton, BotMenu.ImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.PromptFromImageButton, BotMenu.PromptFromImageCommand)],

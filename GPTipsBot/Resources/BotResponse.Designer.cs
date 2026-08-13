@@ -936,5 +936,29 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("GptImageDoneCaption", resourceCulture);
             }
         }
+
+        public static string RemoveWatermarkIntro {
+            get {
+                return ResourceManager.GetString("RemoveWatermarkIntro", resourceCulture);
+            }
+        }
+
+        public static string RemoveWatermarkSendPhoto {
+            get {
+                return ResourceManager.GetString("RemoveWatermarkSendPhoto", resourceCulture);
+            }
+        }
+
+        public static string RemoveWatermarkDoneCaption {
+            get {
+                return ResourceManager.GetString("RemoveWatermarkDoneCaption", resourceCulture);
+            }
+        }
+
+        public static string RemoveWatermarkModeActive {
+            get {
+                return ResourceManager.GetString("RemoveWatermarkModeActive", resourceCulture);
+            }
+        }
     }
 }

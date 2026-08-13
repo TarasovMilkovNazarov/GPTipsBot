@@ -242,4 +242,10 @@
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 Edit photo</value>
   </data>
+  <data name="RemoveWatermark" xml:space="preserve">
+    <value>Remove watermark from a photo</value>
+  </data>
+  <data name="RemoveWatermarkButton" xml:space="preserve">
+    <value>🧼 Remove watermark</value>
+  </data>
 </root>

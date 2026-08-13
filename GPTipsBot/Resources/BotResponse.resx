@@ -615,4 +615,21 @@ https://gptips.skolkokomu.ru</value>
   <data name="GptImageDoneCaption" xml:space="preserve">
     <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
   </data>
+  <data name="RemoveWatermarkIntro" xml:space="preserve">
+    <value>🧼 Удаление водяного знака
+
+Отправьте фото — уберу надписи, логотипы и повторяющуюся полупрозрачную плашку.
+Учтите: фото пересобирается заново, поэтому мелкие детали могут немного измениться.
+Удаляйте знаки только со своих изображений.
+Стоимость: {0:0.##}⭐ (без бесплатных запросов)</value>
+  </data>
+  <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
+    <value>Отправьте фото, с которого нужно убрать водяной знак</value>
+  </data>
+  <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
+    <value>🧼 Водяной знак удалён · Seedream 4.5 · {0:0.##}⭐</value>
+  </data>
+  <data name="RemoveWatermarkModeActive" xml:space="preserve">
+    <value>Режим удаления водяных знаков всё ещё включён: можно прислать ещё фото, каждое спишет {0:0.##}⭐. Чтобы выйти — нажмите «Отмена».</value>
+  </data>
 </root>

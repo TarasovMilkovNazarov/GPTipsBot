@@ -609,4 +609,21 @@ https://gptips.skolkokomu.ru</value>
   <data name="GptImageDoneCaption" xml:space="preserve">
     <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
   </data>
+  <data name="RemoveWatermarkIntro" xml:space="preserve">
+    <value>🧼 إزالة العلامة المائية
+
+أرسل صورة — سأزيل النصوص والشعارات والطبقات نصف الشفافة المتكررة.
+لاحظ أن الصورة يُعاد إنشاؤها، لذا قد تتغير التفاصيل الدقيقة قليلًا.
+أزل العلامات المائية من صورك الخاصة فقط.
+التكلفة: {0:0.##}⭐ (بدون طلبات مجانية)</value>
+  </data>
+  <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
+    <value>أرسل الصورة التي تريد إزالة العلامة المائية منها</value>
+  </data>
+  <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
+    <value>🧼 تمت إزالة العلامة المائية · Seedream 4.5 · {0:0.##}⭐</value>
+  </data>
+  <data name="RemoveWatermarkModeActive" xml:space="preserve">
+    <value>وضع إزالة العلامة المائية ما زال مفعّلاً: يمكنك إرسال صورة أخرى، وكل صورة تكلّف {0:0.##}⭐. اضغط «إلغاء» للخروج.</value>
+  </data>
 </root>

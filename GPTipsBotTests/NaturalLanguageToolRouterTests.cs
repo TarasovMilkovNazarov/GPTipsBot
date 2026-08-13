@@ -81,6 +81,20 @@ public class NaturalLanguageToolRouterTests
         Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.RecognizeText));
     }
 
+    [TestCase("убери водяной знак")]
+    [TestCase("удали водяной знак с фото")]
+    [TestCase("убери вотермарк")]
+    [TestCase("remove watermark")]
+    [TestCase("remove the watermark from this photo")]
+    [TestCase("can you get rid of the watermark")]
+    [TestCase("quita la marca de agua")]
+    [TestCase("elimina la marca de agua de la foto")]
+    public void TryMatch_RemoveWatermark(string text)
+    {
+        var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: false);
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.RemoveWatermark));
+    }
+
     [TestCase("что на фото")]
     [TestCase("опиши картинку")]
     [TestCase("what's in the photo")]

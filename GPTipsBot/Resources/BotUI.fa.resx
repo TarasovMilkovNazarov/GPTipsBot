@@ -183,4 +183,10 @@
   <data name="EditImageButton" xml:space="preserve">
     <value>🛠 ویرایش عکس</value>
   </data>
+  <data name="RemoveWatermark" xml:space="preserve">
+    <value>حذف واترمارک از عکس</value>
+  </data>
+  <data name="RemoveWatermarkButton" xml:space="preserve">
+    <value>🧼 حذف واترمارک</value>
+  </data>
 </root>
