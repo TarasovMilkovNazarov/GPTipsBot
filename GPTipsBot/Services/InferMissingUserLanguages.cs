@@ -1,7 +1,6 @@
 using GPTipsBot.Db;
 using GPTipsBot.Enums;
 using GPTipsBot.Localization;
-using GPTipsBot.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -26,7 +25,19 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
                 break;
             }
 
-            updated += await ApplyBatchAsync(ids, token);
+            try
+            {
+                updated += await ApplyBatchAsync(ids, token);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogWarning(
+                    ex,
+                    "Language backfill batch failed for users {FirstId}-{LastId}; continuing",
+                    ids[0],
+                    ids[^1]);
+            }
+
             afterId = ids[^1];
         }
 
@@ -61,36 +72,53 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
     {
         var uniqueIds = ids.Distinct().ToList();
         var textsByUser = await LoadRecentUserTextsAsync(uniqueIds, token);
-        var existing = await LoadSettingsByUserIdAsync(uniqueIds, token);
+        var existingLanguages = await LoadLanguagesByUserIdAsync(uniqueIds, token);
 
-        var changed = 0;
+        var toWrite = new List<(long Id, string Language)>();
         foreach (var userId in uniqueIds)
         {
             textsByUser.TryGetValue(userId, out var texts);
             var language = MessageLanguageGuess.FromUserTexts(texts ?? []);
-            if (existing.TryGetValue(userId, out var settings))
+            if (existingLanguages.TryGetValue(userId, out var current)
+                && !ShouldReplaceLanguage(current, language))
             {
-                if (!ShouldReplaceLanguage(settings.Language, language))
-                {
-                    continue;
-                }
-
-                settings.Language = language;
-            }
-            else
-            {
-                context.BotSettings.Add(new BotSettings { Id = userId, Language = language });
+                continue;
             }
 
-            changed++;
+            toWrite.Add((userId, language));
         }
 
-        if (changed > 0)
+        if (toWrite.Count == 0)
         {
-            await context.SaveChangesAsync(token);
-            logger.LogInformation("Inferred BotSettings.Language for {Count} users", changed);
+            return 0;
         }
 
+        var changed = 0;
+        foreach (var (userId, language) in toWrite)
+        {
+            try
+            {
+                var affected = await context.Database.ExecuteSqlInterpolatedAsync($"""
+                    INSERT INTO "BotSettings" ("Id", "Language")
+                    VALUES ({userId}, {language})
+                    ON CONFLICT ("Id") DO UPDATE
+                    SET "Language" = EXCLUDED."Language"
+                    WHERE COALESCE(btrim("BotSettings"."Language"), '') = ''
+                       OR lower("BotSettings"."Language") LIKE 'en%'
+                    """, token);
+                if (affected > 0)
+                {
+                    changed++;
+                }
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogWarning(ex, "Failed to upsert BotSettings.Language for user {UserId}", userId);
+            }
+        }
+
+        context.ChangeTracker.Clear();
+        logger.LogInformation("Inferred BotSettings.Language for {Count} users", changed);
         return changed;
     }
 
@@ -109,31 +137,18 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
         return LocalizationManager.NormalizeLanguage(current) == MessageLanguageGuess.English;
     }
 
-    private async Task<Dictionary<long, BotSettings>> LoadSettingsByUserIdAsync(
+    private async Task<Dictionary<long, string?>> LoadLanguagesByUserIdAsync(
         IReadOnlyList<long> ids,
         CancellationToken token)
     {
-        var rows = await context.BotSettings
+        var rows = await context.BotSettings.AsNoTracking()
             .Where(s => ids.Contains(s.Id))
+            .Select(s => new { s.Id, s.Language })
             .ToListAsync(token);
 
-        var existing = new Dictionary<long, BotSettings>();
-        foreach (var row in rows)
-        {
-            if (existing.TryGetValue(row.Id, out var kept))
-            {
-                if (!ReferenceEquals(kept, row))
-                {
-                    context.BotSettings.Remove(row);
-                }
-
-                continue;
-            }
-
-            existing[row.Id] = row;
-        }
-
-        return existing;
+        return rows
+            .GroupBy(r => r.Id)
+            .ToDictionary(g => g.Key, g => g.First().Language);
     }
 
     private async Task<Dictionary<long, List<string>>> LoadRecentUserTextsAsync(
