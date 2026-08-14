@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /webhooks/
+Disallow: /health
+
+Sitemap: https://gptips.skolkokomu.ru/sitemap.xml

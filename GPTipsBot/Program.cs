@@ -89,6 +89,7 @@ if (Directory.Exists(webRoot))
 
 app.MapYooKassaWebhook();
 app.MapWebApi();
+app.MapSeoFiles();
 
 if (Directory.Exists(webRoot))
 {
