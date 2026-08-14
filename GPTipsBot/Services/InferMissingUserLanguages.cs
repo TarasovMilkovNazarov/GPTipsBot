@@ -41,14 +41,12 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
     {
         var query =
             from user in context.Users.AsNoTracking()
-            join settings in context.BotSettings.AsNoTracking() on user.Id equals settings.Id into settingJoin
-            from settings in settingJoin.DefaultIfEmpty()
             where user.Id > afterId
-                  && (settings == null
-                      || settings.Language == null
-                      || settings.Language == ""
-                      || settings.Language.ToLower().StartsWith("en"))
-            orderby user.Id
+                  && !context.BotSettings.Any(s =>
+                      s.Id == user.Id
+                      && s.Language != null
+                      && s.Language != ""
+                      && !s.Language.ToLower().StartsWith("en"))
             select user.Id;
 
         if (onlyUserIds is { Count: > 0 })
@@ -56,18 +54,17 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
             query = query.Where(id => onlyUserIds.Contains(id));
         }
 
-        return query.Take(take).ToListAsync(token);
+        return query.OrderBy(id => id).Take(take).ToListAsync(token);
     }
 
     private async Task<int> ApplyBatchAsync(IReadOnlyList<long> ids, CancellationToken token)
     {
-        var textsByUser = await LoadRecentUserTextsAsync(ids, token);
-        var existing = await context.BotSettings
-            .Where(s => ids.Contains(s.Id))
-            .ToDictionaryAsync(s => s.Id, token);
+        var uniqueIds = ids.Distinct().ToList();
+        var textsByUser = await LoadRecentUserTextsAsync(uniqueIds, token);
+        var existing = await LoadSettingsByUserIdAsync(uniqueIds, token);
 
         var changed = 0;
-        foreach (var userId in ids)
+        foreach (var userId in uniqueIds)
         {
             textsByUser.TryGetValue(userId, out var texts);
             var language = MessageLanguageGuess.FromUserTexts(texts ?? []);
@@ -110,6 +107,33 @@ public sealed class InferMissingUserLanguages(ApplicationContext context, ILogge
         }
 
         return LocalizationManager.NormalizeLanguage(current) == MessageLanguageGuess.English;
+    }
+
+    private async Task<Dictionary<long, BotSettings>> LoadSettingsByUserIdAsync(
+        IReadOnlyList<long> ids,
+        CancellationToken token)
+    {
+        var rows = await context.BotSettings
+            .Where(s => ids.Contains(s.Id))
+            .ToListAsync(token);
+
+        var existing = new Dictionary<long, BotSettings>();
+        foreach (var row in rows)
+        {
+            if (existing.TryGetValue(row.Id, out var kept))
+            {
+                if (!ReferenceEquals(kept, row))
+                {
+                    context.BotSettings.Remove(row);
+                }
+
+                continue;
+            }
+
+            existing[row.Id] = row;
+        }
+
+        return existing;
     }
 
     private async Task<Dictionary<long, List<string>>> LoadRecentUserTextsAsync(

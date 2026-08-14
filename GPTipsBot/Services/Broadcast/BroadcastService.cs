@@ -210,13 +210,15 @@ public sealed class BroadcastService(ApplicationContext context)
 
         var query =
             from user in users
-            join settings in context.BotSettings.AsNoTracking() on user.Id equals settings.Id into settingJoin
-            from settings in settingJoin.DefaultIfEmpty()
+            let lang = context.BotSettings.AsNoTracking()
+                .Where(s => s.Id == user.Id)
+                .Select(s => s.Language)
+                .FirstOrDefault()
             select new AudienceRow
             {
                 UserId = user.Id,
                 TelegramId = user.TelegramId ?? 0L,
-                Language = settings.Language == null || settings.Language == "" ? fallback : settings.Language,
+                Language = lang == null || lang == "" ? fallback : lang,
             };
 
         if (config.Audience.Languages is { Length: > 0 } languages)

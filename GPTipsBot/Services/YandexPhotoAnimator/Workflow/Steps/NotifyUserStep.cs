@@ -29,7 +29,7 @@ public class NotifyUserStep(
         {
             if (!string.IsNullOrEmpty(data.VideoUrl))
             {
-                await botClient.SendVideo(data.UserId, InputFile.FromUri(data.VideoUrl));
+                await botClient.SendVideo(data.ChatId, InputFile.FromUri(data.VideoUrl));
 
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var messageRepository = scope.ServiceProvider.GetRequiredService<MessageRepository>();
