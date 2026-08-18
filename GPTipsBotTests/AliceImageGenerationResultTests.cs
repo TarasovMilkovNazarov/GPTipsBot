@@ -49,6 +49,45 @@ public class AliceImageGenerationResultTests
     }
 
     [Test]
+    public void FromJson_EditingGeneration_ReadsNestedResultsImageUrl()
+    {
+        const string json = """
+            {
+              "editingGeneration": {
+                "id": "27f54b139b3511f1949622e14fa19f98",
+                "status": "pending",
+                "prompt": "преврати в аниме",
+                "originalURL": "https://yaart-images.s3.yandex.net/webalice/original_27f54b139b3511f1949622e14fa19f98",
+                "estimateTimeSec": 46,
+                "remainingTimeSec": 0,
+                "results": {
+                  "postID": "27f54b139b3511f1949622e14fa19f98",
+                  "images": [
+                    {
+                      "id": "editing_result_27f54b139b3511f1949622e14fa19f98:1",
+                      "width": 0,
+                      "height": 0,
+                      "imageURL": "https://yaart-images.s3.yandex.net/webalice/editing_result_27f54b139b3511f1949622e14fa19f98:1"
+                    }
+                  ]
+                },
+                "imageCount": 1
+              }
+            }
+            """;
+
+        var result = AliceImageGenerationResult.FromJson(json, "editingGeneration");
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Id, Is.EqualTo("27f54b139b3511f1949622e14fa19f98"));
+        Assert.That(result.Status, Is.EqualTo("pending"));
+        Assert.That(result.RemainingTimeSec, Is.EqualTo(0));
+        Assert.That(
+            result.ImageUrl,
+            Is.EqualTo("https://yaart-images.s3.yandex.net/webalice/editing_result_27f54b139b3511f1949622e14fa19f98:1"));
+    }
+
+    [Test]
     public void FromJson_InProgressSourceUrl_IsNotTreatedAsResult()
     {
         const string json = """

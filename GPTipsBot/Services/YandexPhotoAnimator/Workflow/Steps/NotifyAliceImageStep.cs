@@ -29,7 +29,8 @@ public class NotifyAliceImageStep(
         {
             if (!string.IsNullOrEmpty(data.ResultImageUrl))
             {
-                await botClient.SendPhoto(data.ChatId, InputFile.FromUri(data.ResultImageUrl));
+                await using var imageStream = await DownloadImageAsync(data.ResultImageUrl);
+                await botClient.SendPhoto(data.ChatId, InputFile.FromStream(imageStream, "alice-image.jpg"));
 
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var messageRepository = scope.ServiceProvider.GetRequiredService<MessageRepository>();
@@ -80,6 +81,13 @@ public class NotifyAliceImageStep(
         }
 
         return ExecutionResult.Next();
+    }
+
+    private async Task<MemoryStream> DownloadImageAsync(string imageUrl)
+    {
+        using var httpClient = new HttpClient();
+        var bytes = await httpClient.GetByteArrayAsync(imageUrl);
+        return new MemoryStream(bytes);
     }
 
     private async Task FinalizePaymentAsync(long? paymentHoldId, bool success)

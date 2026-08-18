@@ -50,9 +50,14 @@ public class WaitForAliceImageStep(
                 ? await animator.GetCombiningStatus(GenerationId)
                 : await animator.GetEditingStatus(GenerationId);
 
-            var remainingSeconds = Math.Max(result.RemainingTimeSec, 0);
+            var remainingSeconds = ResolveRemainingSeconds(result);
             if (!string.IsNullOrEmpty(result.ImageUrl))
             {
+                logger.LogInformation(
+                    "Alice {Kind} ready for chat {ChatId}. Status={Status}, ImageUrl set",
+                    Kind,
+                    ChatId,
+                    result.Status);
                 ResultImageUrl = result.ImageUrl;
                 return ExecutionResult.Next();
             }
@@ -90,5 +95,15 @@ public class WaitForAliceImageStep(
             ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
             return ExecutionResult.Next();
         }
+    }
+
+    private static int ResolveRemainingSeconds(AliceImageGenerationResult result)
+    {
+        if (result.RemainingTimeSec > 0)
+        {
+            return result.RemainingTimeSec;
+        }
+
+        return result.EstimateTimeSec > 0 ? result.EstimateTimeSec : 0;
     }
 }
