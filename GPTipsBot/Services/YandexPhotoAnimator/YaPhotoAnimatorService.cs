@@ -225,17 +225,36 @@ public class YaPhotoAnimatorService
         throw new Exception("Превышено время ожидания генерации видео");
     }
 
-    public Task<AliceImageGenerationResult?> EditImage(string imageUrl, string prompt)
-        => StartImageGeneration(
+    public async Task<AliceImageGenerationResult?> EditImage(string imageUrl, string prompt)
+    {
+        var attempt = await StartImageGeneration(
             EditImageUrl,
-            new { prompt, url = new[] { imageUrl } },
+            new
+            {
+                imageCount = 1,
+                prompt,
+                url = imageUrl,
+                is_template = "0"
+            },
             EditingGenerationProperty);
+        return attempt.Result;
+    }
 
-    public Task<AliceImageGenerationResult?> CombineImages(string firstImageUrl, string secondImageUrl, string prompt)
-        => StartImageGeneration(
+    public async Task<AliceImageGenerationResult?> CombineImages(string firstImageUrl, string secondImageUrl, string prompt)
+    {
+        var attempt = await StartImageGeneration(
             CombineImagesUrl,
-            new { prompt, url = new[] { firstImageUrl, secondImageUrl } },
+            new
+            {
+                prompt,
+                urls = new[] { firstImageUrl, secondImageUrl },
+                imageCount = 1,
+                edit = false,
+                is_template = "0"
+            },
             CombiningGenerationProperty);
+        return attempt.Result;
+    }
 
     public Task<AliceImageGenerationResult> GetEditingStatus(string generationId)
         => GetImageGenerationStatus(GetEditingUrl, generationId, EditingGenerationProperty);
@@ -243,7 +262,7 @@ public class YaPhotoAnimatorService
     public Task<AliceImageGenerationResult> GetCombiningStatus(string generationId)
         => GetImageGenerationStatus(GetCombiningUrl, generationId, CombiningGenerationProperty);
 
-    private async Task<AliceImageGenerationResult?> StartImageGeneration(
+    private async Task<AliceGenerateAttempt> StartImageGeneration(
         string url,
         object body,
         string generationProperty)
@@ -287,7 +306,7 @@ public class YaPhotoAnimatorService
                 (int)statusCode,
                 url,
                 generationProperty);
-            return null;
+            return new AliceGenerateAttempt(statusCode, responseBody, null);
         }
 
         var parsed = AliceImageGenerationResult.FromJson(responseBody, generationProperty);
@@ -297,7 +316,7 @@ public class YaPhotoAnimatorService
                 "Alice generate JSON has no '{GenerationProperty}'. Root keys: [{JsonKeys}]",
                 generationProperty,
                 DescribeJsonRoot(responseBody));
-            return null;
+            return new AliceGenerateAttempt(statusCode, responseBody, null);
         }
 
         if (string.IsNullOrEmpty(parsed.Id))
@@ -317,8 +336,13 @@ public class YaPhotoAnimatorService
                 parsed.RemainingTimeSec);
         }
 
-        return parsed;
+        return new AliceGenerateAttempt(statusCode, responseBody, parsed);
     }
+
+    private readonly record struct AliceGenerateAttempt(
+        HttpStatusCode StatusCode,
+        string ResponseBody,
+        AliceImageGenerationResult? Result);
 
     private async Task<AliceImageGenerationResult> GetImageGenerationStatus(
         string url,
