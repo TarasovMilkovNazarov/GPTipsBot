@@ -568,6 +568,44 @@ namespace GPTipsBotTests
         }
 
         [Test]
+        public async Task PhotoWithQuestionCaption_GoesToChat()
+        {
+            const string prompt = "Работает ли Юля завтра";
+            var update = CreateTelegramUpdate(2, 2, null);
+            update.Message!.Photo =
+            [
+                new PhotoSize { FileId = "schedule-photo" }
+            ];
+            update.Message.Caption = prompt;
+
+            await _mainHandler.HandleUpdateAsync(update);
+
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
+                    arg.Message.Text == prompt && arg.FileId == "schedule-photo"),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task PhotoThenFollowUpQuestion_GoesToChat()
+        {
+            const string prompt = "Работает ли Юля завтра";
+            var photoUpdate = CreateTelegramUpdate(2, 2, null);
+            photoUpdate.Message!.Photo =
+            [
+                new PhotoSize { FileId = "schedule-photo" }
+            ];
+
+            await _mainHandler.HandleUpdateAsync(photoUpdate);
+
+            var questionUpdate = CreateTelegramUpdate(3, 3, prompt);
+            await _mainHandler.HandleUpdateAsync(questionUpdate);
+
+            _gptMock.Verify(g => g.SendMessage(It.Is<UpdateDecorator>(arg =>
+                    arg.Message.Text == prompt),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
         public async Task RecognizeImageTextRequest_CommandSelected_NextMessageImageExpected()
         {
             var commandUpdate = CreateTelegramUpdate(2, 2, BotMenu.ImageTextRecognizeCommand);

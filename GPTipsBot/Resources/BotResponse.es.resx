@@ -238,7 +238,9 @@ Detalles: /help
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>¿Qué te gustaría hacer con una imagen?</value>
+    <value>¿Qué te gustaría hacer con una imagen?
+
+También puedes hacer una pregunta sobre la foto — por ejemplo, «¿Trabaja Yulia mañana?».</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>La descripción de texto de la imagen no debe superar los {0} caracteres. Acórtala y envíala de nuevo</value>

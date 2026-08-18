@@ -43,6 +43,7 @@ namespace GPTipsBot.UpdateHandlers
         InvoiceRepository invoiceRepository,
         IGpt gptService,
         IImageCache imageCache,
+        IVisionImageCache visionImageCache,
         IGptImageSessionCache gptImageSessionCache,
         MessageRepository messageRepository,
         PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
@@ -88,6 +89,11 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             CultureInfo.CurrentUICulture = LocalizationManager.GetCulture(language);
+
+            if (!string.IsNullOrEmpty(update.FileId) && !update.IsCommand)
+            {
+                visionImageCache.Remember(update.UserChatKey, update.FileId);
+            }
 
             if (update.IsInline)
             {
@@ -462,6 +468,16 @@ namespace GPTipsBot.UpdateHandlers
         private async Task<bool> TryLlmFallbackRouteAsync(UpdateDecorator update)
         {
             if (update.IsGroupOrChannel)
+            {
+                return false;
+            }
+
+            if (update.FileId != null)
+            {
+                return false;
+            }
+
+            if (visionImageCache.TryGet(update.UserChatKey, out _))
             {
                 return false;
             }

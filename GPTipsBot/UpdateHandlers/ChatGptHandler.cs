@@ -31,7 +31,7 @@ namespace GPTipsBot.UpdateHandlers
     {
         public override async Task HandleAsync(UpdateDecorator update)
         {
-            var shortMessage = update.Message.Text.Truncate(30) + "...";
+            var shortMessage = (update.Message.Text ?? "[image]").Truncate(30) + "...";
             var chatId = update.UserChatKey.ChatId;
             var userId = update.UserChatKey.Id;
 

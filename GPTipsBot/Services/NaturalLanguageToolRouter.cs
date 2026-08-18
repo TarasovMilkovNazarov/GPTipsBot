@@ -27,7 +27,9 @@ public readonly record struct MediaToolRoute(MediaToolIntent Intent, string? Pro
 
 /// <summary>
 /// Routes free-text (and photo captions) to existing media commands so chat does not
-/// answer “I am a text-only model” for image/OCR asks.
+/// steal image-generation / OCR / watermark flows. Questions about an attached photo
+/// (schedules, documents, "does Yulia work tomorrow?") stay in chat — ChatGptService
+/// attaches the image as vision input.
 /// </summary>
 public static class NaturalLanguageToolRouter
 {
@@ -186,10 +188,15 @@ public static class NaturalLanguageToolRouter
             return new MediaToolRoute(MediaToolIntent.RecognizeText);
         }
 
-        if (trimmed.Length <= 280 &&
-            (PromptFromImageRegex.IsMatch(trimmed) || DescribeAttachedPhotoRegex.IsMatch(trimmed)))
+        if (trimmed.Length <= 280 && PromptFromImageRegex.IsMatch(trimmed))
         {
             return new MediaToolRoute(MediaToolIntent.PromptFromImage);
+        }
+
+        // "what's on the photo" / "опиши картинку" — vision chat, not the images menu.
+        if (trimmed.Length <= 280 && DescribeAttachedPhotoRegex.IsMatch(trimmed))
+        {
+            return MediaToolRoute.None;
         }
 
         if (TryMatchGenerate(trimmed, out var prompt))

@@ -95,16 +95,29 @@ public class NaturalLanguageToolRouterTests
         Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.RemoveWatermark));
     }
 
-    [TestCase("что на фото")]
-    [TestCase("опиши картинку")]
-    [TestCase("what's in the photo")]
-    [TestCase("describe this image")]
     [TestCase("промпт по фото")]
     [TestCase("create a prompt from this photo")]
     public void TryMatch_PromptFromImage(string text)
     {
         var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: false);
         Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.PromptFromImage));
+    }
+
+    [TestCase("что на фото")]
+    [TestCase("опиши картинку")]
+    [TestCase("what's in the photo")]
+    [TestCase("describe this image")]
+    public void TryMatch_DescribePhoto_GoesToChat(string text)
+    {
+        var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: true);
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.None));
+    }
+
+    [Test]
+    public void TryMatch_ScheduleQuestionWithPhoto_GoesToChat()
+    {
+        var route = NaturalLanguageToolRouter.TryMatch("Работает ли Юля завтра", hasPhoto: true);
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.None));
     }
 
     [Test]

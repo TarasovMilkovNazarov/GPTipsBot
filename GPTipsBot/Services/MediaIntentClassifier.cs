@@ -24,14 +24,16 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
           "draw a cat", "хочу картинку кота"). "prompt" is the subject only, in the user's own language,
           with the request wording ("нарисуй", "draw", etc.) stripped out.
         - recognize_text: the user wants text extracted (OCR) from a photo.
-        - prompt_from_image: the user wants a text-to-image prompt built from an existing photo, or asks
-          what is shown in a photo they already sent.
+        - prompt_from_image: the user wants a text-to-image prompt built from an existing photo
+          (e.g. "промпт по фото", "create a prompt from this image"). NOT ordinary questions about
+          what a photo shows — those are "none".
         - remove_watermark: the user wants a watermark, logo, caption or stamp removed/cleaned/erased
           from a photo (e.g. "убери водяной знак с фото", "remove the watermark", "quita la marca de agua").
         - images_menu: the user asks in general whether/how the bot can work with images or photos,
           without a concrete request yet.
-        - none: anything else — regular chat, questions, or requests unrelated to image tools. Use "none"
-          whenever you are not confident.
+        - none: anything else — regular chat, questions about a photo they sent (schedules, documents,
+          "does X work tomorrow"), or requests unrelated to image tools. Use "none" whenever you are
+          not confident.
         - "prompt" must be "" unless intent is "generate_image".
         Reply with the JSON object only.
         """;

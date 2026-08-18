@@ -41,6 +41,7 @@ namespace GPTipsBot.UpdateHandlers
         IJobService jobService,
         IGpt gptService,
         IGptImageSessionCache gptImageSessionCache,
+        IVisionImageCache visionImageCache,
         AccountLinkTokenService accountLinkTokenService,
         BroadcastDraftStore broadcastDraftStore)
         : BaseMessageHandler
@@ -343,6 +344,7 @@ namespace GPTipsBot.UpdateHandlers
                 case ResetContextCommand:
                     reply = BotResponse.ContextUpdated;
                     update.Message.NewContext = true;
+                    visionImageCache.Forget(update.UserChatKey);
                     break;
                 case ChooseLangCommand:
                     reply = BotResponse.ChooseLanguagePlease;

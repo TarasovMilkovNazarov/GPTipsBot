@@ -2,8 +2,10 @@
 using GPTipsBot.Config;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
+using GPTipsBot.Services.Cache;
 using GPTipsBot.Services.YandexPhotoAnimator.Workflow;
 using Microsoft.Extensions.Logging;
 using OpenAI.Interfaces;
@@ -11,6 +13,7 @@ using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.ResponseModels;
 using Polly;
 using Polly.Retry;
+using Telegram.Bot;
 
 namespace GPTipsBot.Services
 {
@@ -22,6 +25,8 @@ namespace GPTipsBot.Services
         private readonly PhotoAnimationWorkflowService _photoAnimationWorkflowService;
         private readonly BotSettingsRepository _botSettingsRepository;
         private readonly ChatToolExecutor _chatToolExecutor;
+        private readonly ITelegramBotClient _botClient;
+        private readonly IVisionImageCache _visionImageCache;
         private readonly AsyncRetryPolicy _policy;
 
         private const int MaxRetryCount = 4;
@@ -38,7 +43,9 @@ namespace GPTipsBot.Services
             ContextWindow contextWindow,
             PhotoAnimationWorkflowService photoAnimationWorkflowService,
             BotSettingsRepository botSettingsRepository,
-            ChatToolExecutor chatToolExecutor)
+            ChatToolExecutor chatToolExecutor,
+            ITelegramBotClient botClient,
+            IVisionImageCache visionImageCache)
         {
             _log = log;
             _openAiService = openAiService;
@@ -46,6 +53,8 @@ namespace GPTipsBot.Services
             _photoAnimationWorkflowService = photoAnimationWorkflowService;
             _botSettingsRepository = botSettingsRepository;
             _chatToolExecutor = chatToolExecutor;
+            _botClient = botClient;
+            _visionImageCache = visionImageCache;
             _policy = Policy
                 .Handle<ChatGptException>()
                 .WaitAndRetryAsync(MaxRetryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
@@ -63,12 +72,14 @@ namespace GPTipsBot.Services
 
             if (update.Message.NewContext)
             {
-                messages = [new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text)];
+                messages = [new ChatMessage(update.Message.Role.ToString().ToLower(), update.Message.Text ?? "")];
             }
             else
             {
                 messages = [.. _contextWindow.GetContext(update.UserChatKey, update.Message.ContextId.Value)];
             }
+
+            await AttachVisionAsync(messages, update, token);
 
             var modelId = ResolveModelId(update.UserChatKey.Id);
             var toolsEnabled = _chatToolExecutor.IsEnabledFor(update);
@@ -158,6 +169,40 @@ namespace GPTipsBot.Services
 
         private string ResolveModelId(long userId) =>
             GptModelCatalog.Resolve(_botSettingsRepository.Get(userId)?.PreferredGptModel).Id;
+
+        private async Task AttachVisionAsync(
+            List<ChatMessage> messages,
+            UpdateDecorator update,
+            CancellationToken token)
+        {
+            var fileId = update.FileId;
+            if (string.IsNullOrWhiteSpace(fileId) &&
+                !_visionImageCache.TryGet(update.UserChatKey, out fileId))
+            {
+                return;
+            }
+
+            try
+            {
+                token.ThrowIfCancellationRequested();
+                var base64 = await fileId.GetPhotoAsync(_botClient);
+                var imageBytes = Convert.FromBase64String(base64);
+                VisionChatAttacher.AttachToLastUserMessage(
+                    messages,
+                    imageBytes,
+                    DateTime.UtcNow,
+                    update.Message?.Text);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _log.LogWarning(ex, "Failed to attach image {FileId} to chat for user {UserId}",
+                    fileId, update.UserChatKey.Id);
+            }
+        }
 
         private async Task<ChatCompletionCreateResponse?> SendMessageInternal(
             ChatMessage[] messages,

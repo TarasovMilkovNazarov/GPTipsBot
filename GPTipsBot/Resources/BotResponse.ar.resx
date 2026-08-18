@@ -238,7 +238,9 @@ https://gptips.skolkokomu.ru
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>ماذا تريد أن تفعل مع صورة؟</value>
+    <value>ماذا تريد أن تفعل مع صورة؟
+
+يمكنك أيضاً طرح سؤال عن الصورة — مثلاً «هل تعمل يوليا غداً؟».</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>يجب ألا يتجاوز الوصف النصي لـ صورة أحرف {0}. يرجى اختصار الوصف وإرساله مرة أخرى</value>

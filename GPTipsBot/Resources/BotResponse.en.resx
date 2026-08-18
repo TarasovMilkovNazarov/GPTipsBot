@@ -148,6 +148,8 @@ Open “🎨 Images” in the menu:
 • 📝 Text from photo — OCR / extract text from an image
 • 🪄 Prompt from photo — create a text-to-image prompt from an uploaded picture
 
+You can also just send a photo (or reply to one) and ask a question — the bot can see the image, including tables and schedules.
+
 🪄 Prompt from photo
 Send an image — the bot writes a prompt that can generate a similar picture (uses ChatGPT quota or ⭐).
 In groups and comments: reply to a photo with /prompt_from_image.
@@ -238,7 +240,9 @@ Details: /help
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>What would you like to do with an image?</value>
+    <value>What would you like to do with an image?
+
+You can also just ask a question about the photo — for example, “Does Yulia work tomorrow?”.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
