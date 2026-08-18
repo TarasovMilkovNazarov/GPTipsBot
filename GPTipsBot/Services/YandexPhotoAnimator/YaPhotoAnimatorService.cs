@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using GPTipsBot.Config;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,18 @@ public class YaPhotoAnimatorService
     private const string GetCombiningUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_combining_get";
     private const string EditingGenerationProperty = "editingGeneration";
     private const string CombiningGenerationProperty = "imageCombiningGeneration";
+    private const string AliceUuid = "5e95f47b-3fde-49fa-9439-f47d3B368C51";
+    private const string AliceReferer = "https://alice.yandex.ru/";
+    private const string AliceSupportedFeatures =
+        "background_response_streaming_for_dialog_controls,background_response_streaming_in_read_dialog,background_response_streaming_anon,background_response_streaming,supports_bso_answer,open_link,server_action,show_promo,reminders_and_todos,div2_cards,player_pause_directive,can_open_dialogs_in_tabs,supports_streaming_response,supports_rich_json_cards,builtin_reaction,open_link_by_button,supports_origin_in_separate_card,supports_new_sources_cards,supports_markdown_response,supported_save_chathistory,supported_load_chathistory,supports_unlimited_dialogs_creation,supports_multi_model_dialogs,print_text_in_message_view,show_loader_directive,supports_stringbody_in_div2_card,supports_default_dialog_as_dedicated,whisper";
+    private const string AliceImageExperiments =
+        "[\"read_dialogs_for_unauthorized_users\",\"mm_allow_anonymous_request\",\"dont_skip_cancel_requests\",\"enable_parallel_requests_to_chats\",\"enable_external_skills_for_webdesktop_and_webtouch\",\"send_show_view_directive_on_supports_show_view_layer_content_interface\",\"standalone_alice_2_0\",\"mm_enable_protocol_scenario=WebAliceControls\",\"exp_flag_chat_dialog_history\",\"exp_flag_chat_dialog_history_main_context_save\",\"div2cards_in_external_skills_for_web_standalone\",\"enable_find_poi_standalone\",\"use_server_pings\",\"enable_onboarding_adaptive_size\",\"standalone_show_fullscreen_image_gallery_directive\",\"draw_picture_enable_controls\",\"alice_has_borders_div_paddings\",\"enable_new_colors_for_alice_chat\",\"erase_serialized_response_from_json_deferred_alice_response\",\"skills_standalone_use_div_render\",\"standalone_skill_card_cloud_ui\"]";
+    private const string AliceVideoExperiments =
+        "[\"dont_skip_cancel_requests\",\"enable_parallel_requests_to_chats\",\"read_dialogs_for_unauthorized_users\",\"mm_allow_anonymous_request\",\"enable_external_skills_for_webdesktop_and_webtouch\",\"send_show_view_directive_on_supports_show_view_layer_content_interface\",\"standalone_alice_2_0\",\"mm_enable_protocol_scenario=WebAliceControls\",\"exp_flag_chat_dialog_history\",\"exp_flag_chat_dialog_history_main_context_save\",\"div2cards_in_external_skills_for_web_standalone\",\"enable_find_poi_standalone\",\"use_server_pings\",\"enable_onboarding_adaptive_size\",\"standalone_show_fullscreen_image_gallery_directive\",\"draw_picture_enable_controls\",\"alice_has_borders_div_paddings\",\"enable_new_colors_for_alice_chat\",\"erase_serialized_response_from_json_deferred_alice_response\",\"skills_standalone_use_div_render\",\"standalone_skill_card_cloud_ui\",\"alice_enable_generate_video\",\"aliceapp_enable_generate_video\",\"alice_video_generation_soon\",\"new_input_bts\"]";
+    private static readonly JsonSerializerOptions AliceJsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
     private readonly ILogger<YaPhotoAnimatorService> _logger;
 
     public YaPhotoAnimatorService(ILogger<YaPhotoAnimatorService> logger)
@@ -126,17 +139,15 @@ public class YaPhotoAnimatorService
             var request = new HttpRequestMessage(HttpMethod.Post,
                 "https://rpc.alice.yandex.ru/gproxy/draw_picture_video_generate");
 
-            // Добавляем тело запроса
-            var body = new
+            var body = new GenerateRequest
             {
-                prompt = prompt,
-                url = imageUrl
+                Prompt = prompt,
+                Url = imageUrl
             };
 
-            var jsonBody = JsonSerializer.Serialize(body);
-            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            var (_, content) = CreateAliceJsonContent(body);
             request.Content = content;
+            ApplyAliceRpcExperiments(request, includeVideoExperiments: true);
 
             // Отправляем запрос
             var response = await _httpClient.SendAsync(request);
@@ -188,10 +199,9 @@ public class YaPhotoAnimatorService
             GenerationId = generationId
         };
 
-        var json = JsonSerializer.Serialize(getRequest);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        var (_, content) = CreateAliceJsonContent(getRequest);
         request.Content = content;
+        ApplyAliceRpcExperiments(request, includeVideoExperiments: true);
 
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -229,12 +239,12 @@ public class YaPhotoAnimatorService
     {
         var attempt = await StartImageGeneration(
             EditImageUrl,
-            new
+            new EditImageGenerateRequest
             {
-                imageCount = 1,
-                prompt,
-                url = imageUrl,
-                is_template = "0"
+                ImageCount = 1,
+                Prompt = prompt,
+                Url = imageUrl,
+                IsTemplate = "0"
             },
             EditingGenerationProperty);
         return attempt.Result;
@@ -244,13 +254,13 @@ public class YaPhotoAnimatorService
     {
         var attempt = await StartImageGeneration(
             CombineImagesUrl,
-            new
+            new CombineImagesGenerateRequest
             {
-                prompt,
-                urls = new[] { firstImageUrl, secondImageUrl },
-                imageCount = 1,
-                edit = false,
-                is_template = "0"
+                Prompt = prompt,
+                Urls = new[] { firstImageUrl, secondImageUrl },
+                ImageCount = 1,
+                Edit = false,
+                IsTemplate = "0"
             },
             CombiningGenerationProperty);
         return attempt.Result;
@@ -268,8 +278,9 @@ public class YaPhotoAnimatorService
         string generationProperty)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
-        var jsonBody = JsonSerializer.Serialize(body);
-        request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+        var (jsonBody, content) = CreateAliceJsonContent(body);
+        request.Content = content;
+        ApplyAliceRpcExperiments(request, includeVideoExperiments: false);
 
         _logger.LogInformation(
             "Alice generate request {Url} property {GenerationProperty} body {RequestBody}",
@@ -350,8 +361,9 @@ public class YaPhotoAnimatorService
         string generationProperty)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
-        var json = JsonSerializer.Serialize(new GetVideoRequest { GenerationId = generationId });
-        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        var (json, content) = CreateAliceJsonContent(new GetVideoRequest { GenerationId = generationId });
+        request.Content = content;
+        ApplyAliceRpcExperiments(request, includeVideoExperiments: false);
 
         _logger.LogInformation(
             "Alice status request {Url} generationId {GenerationId} body {RequestBody}",
@@ -377,6 +389,21 @@ public class YaPhotoAnimatorService
 
     private static bool IsSuccessStatusCode(HttpStatusCode statusCode)
         => (int)statusCode is >= 200 and <= 299;
+
+    private static (string Json, StringContent Content) CreateAliceJsonContent(object body)
+    {
+        var json = JsonSerializer.Serialize(body, body.GetType(), AliceJsonOptions);
+        var content = new StringContent(json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        return (json, content);
+    }
+
+    private static void ApplyAliceRpcExperiments(HttpRequestMessage request, bool includeVideoExperiments)
+    {
+        request.Headers.TryAddWithoutValidation(
+            "x-ya-experiments",
+            includeVideoExperiments ? AliceVideoExperiments : AliceImageExperiments);
+    }
 
     private static string Truncate(string? text)
     {
@@ -444,15 +471,15 @@ public class YaPhotoAnimatorService
         _httpClient.DefaultRequestHeaders.Add("sec-fetch-mode", "cors");
         _httpClient.DefaultRequestHeaders.Add("sec-fetch-site", "same-site");
         _httpClient.DefaultRequestHeaders.Add("x-ya-app-id", "ru.yandex.webstandalone.desktop");
-        _httpClient.DefaultRequestHeaders.Add("x-ya-application", "{\"app_id\":\"ru.yandex.webstandalone.desktop\",\"uuid\":\"5e95f47b-3fde-49fa-9439-f47d3B368C51\",\"device_id\":\"\",\"lang\":\"ru\",\"timezone\":\"UTC\"}");
-        _httpClient.DefaultRequestHeaders.Add("x-ya-device-id", "");
-        _httpClient.DefaultRequestHeaders.Add("x-ya-experiments", "[\"dont_skip_cancel_requests\",\"enable_parallel_requests_to_chats\",\"read_dialogs_for_unauthorized_users\",\"mm_allow_anonymous_request\",\"enable_external_skills_for_webdesktop_and_webtouch\",\"send_show_view_directive_on_supports_show_view_layer_content_interface\",\"standalone_alice_2_0\",\"mm_enable_protocol_scenario=WebAliceControls\",\"exp_flag_chat_dialog_history\",\"exp_flag_chat_dialog_history_main_context_save\",\"div2cards_in_external_skills_for_web_standalone\",\"enable_find_poi_standalone\",\"use_server_pings\",\"enable_onboarding_adaptive_size\",\"standalone_show_fullscreen_image_gallery_directive\",\"draw_picture_enable_controls\",\"alice_has_borders_div_paddings\",\"enable_new_colors_for_alice_chat\",\"erase_serialized_response_from_json_deferred_alice_response\",\"skills_standalone_use_div_render\",\"standalone_skill_card_cloud_ui\",\"alice_enable_generate_video\",\"aliceapp_enable_generate_video\",\"alice_video_generation_soon\",\"new_input_bts\"]");
+        _httpClient.DefaultRequestHeaders.Add("x-ya-application", $"{{\"app_id\":\"ru.yandex.webstandalone.desktop\",\"uuid\":\"{AliceUuid}\",\"device_id\":\"{AliceUuid}\",\"lang\":\"ru\",\"timezone\":\"UTC\"}}");
+        _httpClient.DefaultRequestHeaders.Add("x-ya-device-id", AliceUuid);
+        _httpClient.DefaultRequestHeaders.Add("x-ya-device-model", "");
         _httpClient.DefaultRequestHeaders.Add("x-ya-language", "ru");
         _httpClient.DefaultRequestHeaders.Add("x-ya-platform", "");
-        _httpClient.DefaultRequestHeaders.Add("x-ya-supported-features", "background_response_streaming_for_dialog_controls,background_response_streaming_in_read_dialog,background_response_streaming_anon,background_response_streaming,supports_bso_answer,open_link,server_action,show_promo,reminders_and_todos,div2_cards,player_pause_directive,can_open_dialogs_in_tabs,supports_streaming_response,supports_rich_json_cards,builtin_reaction,open_link_by_button,supports_origin_in_separate_card,supports_new_sources_cards,supports_markdown_response,supported_save_chathistory,supported_load_chathistory,supports_unlimited_dialogs_creation,supports_multi_model_dialogs,print_text_in_message_view,show_loader_directive,supports_stringbody_in_div2_card,supports_default_dialog_as_dedicated");
+        _httpClient.DefaultRequestHeaders.Add("x-ya-supported-features", AliceSupportedFeatures);
         _httpClient.DefaultRequestHeaders.Add("x-ya-test-ids", "");
-        _httpClient.DefaultRequestHeaders.Add("x-ya-uuid", "5e95f47b-3fde-49fa-9439-f47d3B368C51");
+        _httpClient.DefaultRequestHeaders.Add("x-ya-uuid", AliceUuid);
         _httpClient.DefaultRequestHeaders.Add("y-browser-experiments", "MTUwNDgwMSwwLC0xOzE0OTcxMzcsMCw4NDsxMjc0OTA4LDAsLTE=");
-        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Referer", "https://yandex.ru/");
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Referer", AliceReferer);
     }
 }

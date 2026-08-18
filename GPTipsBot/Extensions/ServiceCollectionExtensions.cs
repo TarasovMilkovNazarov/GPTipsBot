@@ -101,7 +101,7 @@ namespace GPTipsBot.Extensions
             .AddHostedService(sp => sp.GetRequiredService<BroadcastRunner>())
             .AddScoped<BroadcastService>()
             .AddScoped<InferMissingUserLanguages>()
-            .AddHostedService<InferMissingUserLanguagesService>()
+            // .AddHostedService<InferMissingUserLanguagesService>()
             .AddSingleton<InlinePendingStore>()
             .AddSingleton<AccountLinkTokenService>()
             .AddScoped<IGpt, ChatGptService>()
