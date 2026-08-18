@@ -34,6 +34,8 @@ public class DailyStatisticsJob(
                 RecognitionsCount = g.Count(m => m.Type == BotMessageType.RecognizeText),
                 GptResponses = g.Count(m => m.Role == MessageOwner.Assistant),
                 AnimatedPhotosCount = g.Count(m => m.Type == BotMessageType.AnimatedPhoto),
+                CombinedPhotosCount = g.Count(m => m.Type == BotMessageType.CombinedPhoto),
+                ChangedPhotosCount = g.Count(m => m.Type == BotMessageType.ChangedPhoto),
                 PromptFromImageCount = g.Count(m => m.Type == BotMessageType.PromptFromImage)
             })
             .FirstOrDefaultAsync() ?? new();
@@ -63,29 +65,24 @@ public class DailyStatisticsJob(
         var yandexLogins = GetLoginStat(loginStats, AuthProvider.Yandex);
         var totalLogins = loginEvents.Count;
 
-        var summaryUserIds = await context.UserCommands.AsNoTracking()
-            .Where(c => c.CreatedAt > today && c.Type == CommandType.Summary)
-            .Select(c => c.UserId)
-            .ToListAsync();
-        var summaryCommands = summaryUserIds.Count;
-        var summaryUniqueUsers = summaryUserIds.Distinct().Count();
-
-        var humanUserIds = await context.UserCommands.AsNoTracking()
-            .Where(c => c.CreatedAt > today && c.Type == CommandType.Human)
-            .Select(c => c.UserId)
-            .ToListAsync();
-        var humanCommands = humanUserIds.Count;
-        var humanUniqueUsers = humanUserIds.Distinct().Count();
+        var summary = await CountCommandUses(CommandType.Summary, today);
+        var human = await CountCommandUses(CommandType.Human, today);
+        var combine = await CountCommandUses(CommandType.CombinePhoto, today);
+        var change = await CountCommandUses(CommandType.ChangePhoto, today);
 
         var message = "#statistics" + Environment.NewLine +
                       $"New users created: {newUsersCount} for {today:dd.MM.yyyy}" + Environment.NewLine;
         message += Environment.NewLine + $"Images generated: {counts.ImagesCount}";
         message += Environment.NewLine + $"Animated photos count: {counts.AnimatedPhotosCount}";
+        message += Environment.NewLine + $"Combined photos: {counts.CombinedPhotosCount}";
+        message += Environment.NewLine + $"Changed photos: {counts.ChangedPhotosCount}";
         message += Environment.NewLine + $"Prompt from image: {counts.PromptFromImageCount}";
         message += Environment.NewLine + $"Text recognitions: {counts.RecognitionsCount}";
         message += Environment.NewLine + $"Gpt responses: {counts.GptResponses}";
-        message += Environment.NewLine + $"/summary uses: {summaryCommands} ({summaryUniqueUsers} users)";
-        message += Environment.NewLine + $"/human uses: {humanCommands} ({humanUniqueUsers} users)";
+        message += Environment.NewLine + $"/summary uses: {summary.Count} ({summary.UniqueUsers} users)";
+        message += Environment.NewLine + $"/human uses: {human.Count} ({human.UniqueUsers} users)";
+        message += Environment.NewLine + $"/combine uses: {combine.Count} ({combine.UniqueUsers} users)";
+        message += Environment.NewLine + $"/change_photo uses: {change.Count} ({change.UniqueUsers} users)";
         message += Environment.NewLine + $"Web logins: {totalLogins}";
         message += Environment.NewLine + $"  telegram: {telegramLogins.Count} ({telegramLogins.UniqueUsers} users)";
         message += Environment.NewLine + $"  guest: {guestLogins.Count} ({guestLogins.UniqueUsers} users)";
@@ -98,6 +95,16 @@ public class DailyStatisticsJob(
         message += Environment.NewLine + $"Monthly users: {mau}";
 
         await botClient.SendMessage(AppConfig.AdminIds.First(), message);
+    }
+
+    private async Task<(int Count, int UniqueUsers)> CountCommandUses(CommandType type, DateTime today)
+    {
+        var userIds = await context.UserCommands.AsNoTracking()
+            .Where(c => c.CreatedAt > today && c.Type == type)
+            .Select(c => c.UserId)
+            .ToListAsync();
+
+        return (userIds.Count, userIds.Distinct().Count());
     }
 
     private async Task<long> CalculateMonthlyActiveUsers()

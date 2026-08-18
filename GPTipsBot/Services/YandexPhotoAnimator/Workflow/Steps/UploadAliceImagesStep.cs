@@ -27,9 +27,18 @@ public class UploadAliceImagesStep(
             }
 
             data.ImageUrl = await animator.UploadImageFromBase64(data.Base64Image!);
+            logger.LogInformation(
+                "Alice uploaded image 1 for chat {ChatId}: {ImageUrl}",
+                data.ChatId,
+                data.ImageUrl);
+
             if (data.Kind == AliceImageKind.Combining && !string.IsNullOrEmpty(data.Base64Image2))
             {
                 data.ImageUrl2 = await animator.UploadImageFromBase64(data.Base64Image2, "image2.jpg");
+                logger.LogInformation(
+                    "Alice uploaded image 2 for chat {ChatId}: {ImageUrl}",
+                    data.ChatId,
+                    data.ImageUrl2);
             }
         }
         catch (Exception ex)

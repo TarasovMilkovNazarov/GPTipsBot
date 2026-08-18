@@ -37,4 +37,6 @@ public enum BotMessageType
     ImagePrompt = 5,
     AnimatedPhoto = 6,
     PromptFromImage = 7,
+    CombinedPhoto = 8,
+    ChangedPhoto = 9,
 }

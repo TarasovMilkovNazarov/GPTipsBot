@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using GPTipsBot.Config;
+using Microsoft.Extensions.Logging;
 
 namespace GPTipsBot.Services.YandexPhotoAnimator;
 
@@ -10,6 +11,7 @@ public class YaPhotoAnimatorService
 {
     private static HttpClient _httpClient;
     private static readonly CookieContainer _cookieContainer = new();
+    private const int LoggedBodyLimit = 4000;
     const string UploadImageUrl = "https://masterpiecer.yandex.ru/yaart-web-alice-api/api/v1/wow/upload_image";
     private const string GenerateImageUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_video_generate";
     private const string WaitForResultUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_video_get";
@@ -19,9 +21,11 @@ public class YaPhotoAnimatorService
     private const string GetCombiningUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_combining_get";
     private const string EditingGenerationProperty = "editingGeneration";
     private const string CombiningGenerationProperty = "imageCombiningGeneration";
+    private readonly ILogger<YaPhotoAnimatorService> _logger;
 
-    public YaPhotoAnimatorService()
+    public YaPhotoAnimatorService(ILogger<YaPhotoAnimatorService> logger)
     {
+        _logger = logger;
         ConfigureHttpClient();
     }
 
@@ -254,17 +258,72 @@ public class YaPhotoAnimatorService
         var jsonBody = JsonSerializer.Serialize(body);
         request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.SendAsync(request);
-        var responseBody = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Status Code: {response.StatusCode}");
-        Console.WriteLine($"Response: {responseBody}");
+        _logger.LogInformation(
+            "Alice generate request {Url} property {GenerationProperty} body {RequestBody}",
+            url,
+            generationProperty,
+            Truncate(jsonBody));
 
-        if (!response.IsSuccessStatusCode)
+        HttpStatusCode statusCode;
+        string responseBody;
+        try
         {
+            using var response = await _httpClient.SendAsync(request);
+            statusCode = response.StatusCode;
+            responseBody = await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Alice generate request failed {Url}", url);
+            throw;
+        }
+
+        _logger.LogInformation(
+            "Alice generate response {Url} status {StatusCode} ({Status}) keys [{JsonKeys}] body {ResponseBody}",
+            url,
+            (int)statusCode,
+            statusCode,
+            DescribeJsonRoot(responseBody),
+            Truncate(responseBody));
+
+        if (!IsSuccessStatusCode(statusCode))
+        {
+            _logger.LogWarning(
+                "Alice generate HTTP {StatusCode} for {Url}. Expected property {GenerationProperty}",
+                (int)statusCode,
+                url,
+                generationProperty);
             return null;
         }
 
-        return AliceImageGenerationResult.FromJson(responseBody, generationProperty);
+        var parsed = AliceImageGenerationResult.FromJson(responseBody, generationProperty);
+        if (parsed == null)
+        {
+            _logger.LogWarning(
+                "Alice generate JSON has no '{GenerationProperty}'. Root keys: [{JsonKeys}]",
+                generationProperty,
+                DescribeJsonRoot(responseBody));
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(parsed.Id))
+        {
+            _logger.LogWarning(
+                "Alice generate parsed without id. Status {Status}, remaining {RemainingTimeSec}s, imageUrl set={HasImageUrl}",
+                parsed.Status,
+                parsed.RemainingTimeSec,
+                !string.IsNullOrEmpty(parsed.ImageUrl));
+        }
+        else
+        {
+            _logger.LogInformation(
+                "Alice generate started id {GenerationId} status {Status} remaining {RemainingTimeSec}s",
+                parsed.Id,
+                parsed.Status,
+                parsed.RemainingTimeSec);
+        }
+
+        return parsed;
     }
 
     private async Task<AliceImageGenerationResult> GetImageGenerationStatus(
@@ -276,12 +335,59 @@ public class YaPhotoAnimatorService
         var json = JsonSerializer.Serialize(new GetVideoRequest { GenerationId = generationId });
         request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
+        _logger.LogInformation(
+            "Alice status request {Url} generationId {GenerationId} body {RequestBody}",
+            url,
+            generationId,
+            json);
+
         var response = await _httpClient.SendAsync(request);
+        var responseJson = await response.Content.ReadAsStringAsync();
+        _logger.LogInformation(
+            "Alice status response {Url} generationId {GenerationId} status {StatusCode} keys [{JsonKeys}] body {ResponseBody}",
+            url,
+            generationId,
+            (int)response.StatusCode,
+            DescribeJsonRoot(responseJson),
+            Truncate(responseJson));
+
         response.EnsureSuccessStatusCode();
 
-        var responseJson = await response.Content.ReadAsStringAsync();
         return AliceImageGenerationResult.FromJson(responseJson, generationProperty)
                ?? throw new Exception("Не удалось получить статус генерации изображения");
+    }
+
+    private static bool IsSuccessStatusCode(HttpStatusCode statusCode)
+        => (int)statusCode is >= 200 and <= 299;
+
+    private static string Truncate(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return "<empty>";
+        }
+
+        return text.Length <= LoggedBodyLimit
+            ? text
+            : text[..LoggedBodyLimit] + $"...(+{text.Length - LoggedBodyLimit} chars)";
+    }
+
+    private static string DescribeJsonRoot(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return doc.RootElement.ValueKind.ToString();
+            }
+
+            return string.Join(", ", doc.RootElement.EnumerateObject().Select(p => p.Name));
+        }
+        catch (Exception ex)
+        {
+            return $"invalid-json: {ex.Message}";
+        }
     }
 
     private static void ConfigureHttpClient()

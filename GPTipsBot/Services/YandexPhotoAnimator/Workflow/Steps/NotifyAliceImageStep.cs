@@ -37,7 +37,9 @@ public class NotifyAliceImageStep(
                 {
                     TelegramId = data.UserId,
                     Role = MessageOwner.Ya,
-                    BotMessageType = BotMessageType.ImageGenerated,
+                    BotMessageType = data.Kind == AliceImageKind.Combining
+                        ? BotMessageType.CombinedPhoto
+                        : BotMessageType.ChangedPhoto,
                 });
                 success = true;
             }

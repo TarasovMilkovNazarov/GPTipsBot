@@ -52,7 +52,14 @@ public class GenerateAliceImageStep(
 
             if (string.IsNullOrEmpty(response?.Id))
             {
-                logger.LogWarning("Alice {Kind} generation was not started for chat {ChatId}", data.Kind, data.ChatId);
+                logger.LogWarning(
+                    "Alice {Kind} generation was not started for chat {ChatId}. PromptLength={PromptLength}, HasUrl1={HasUrl1}, HasUrl2={HasUrl2}, ParsedStatus={ParsedStatus}",
+                    data.Kind,
+                    data.ChatId,
+                    data.Prompt?.Length ?? 0,
+                    !string.IsNullOrEmpty(data.ImageUrl),
+                    !string.IsNullOrEmpty(data.ImageUrl2),
+                    response?.Status);
                 data.ErrorMessage = PhotoAnimationWorkflowErrors.Failed;
                 return ExecutionResult.Next();
             }
