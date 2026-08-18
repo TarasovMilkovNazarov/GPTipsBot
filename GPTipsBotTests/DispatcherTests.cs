@@ -164,6 +164,8 @@ namespace GPTipsBotTests
                 GPTipsBot.Services.YandexCloud.Workflow.ImageGenerationWorkflowData>();
             workflowHost.RegisterWorkflow<GPTipsBot.Services.YandexPhotoAnimator.Workflow.PhotoAnimationWorkflow,
                 GPTipsBot.Services.YandexPhotoAnimator.Workflow.PhotoAnimationWorkflowData>();
+            workflowHost.RegisterWorkflow<GPTipsBot.Services.YandexPhotoAnimator.Workflow.AliceImageWorkflow,
+                GPTipsBot.Services.YandexPhotoAnimator.Workflow.AliceImageWorkflowData>();
             workflowHost.Start();
         }
 

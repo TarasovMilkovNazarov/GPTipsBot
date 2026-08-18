@@ -15,9 +15,10 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
 
     private const string SystemPrompt = """
         You are the intent router for a Telegram bot that can chat, generate images, run OCR on photos,
-        build image-generation prompts from photos, and remove watermarks from photos. Classify the
-        user's message and reply with STRICT JSON only (no markdown, no code fences, no extra text):
-        {"intent": "<generate_image|recognize_text|prompt_from_image|remove_watermark|images_menu|none>", "prompt": "<string>"}
+        build image-generation prompts from photos, remove watermarks, combine two photos, and change
+        a photo with Yandex Alice. Classify the user's message and reply with STRICT JSON only
+        (no markdown, no code fences, no extra text):
+        {"intent": "<generate_image|recognize_text|prompt_from_image|remove_watermark|combine_photo|change_photo|images_menu|none>", "prompt": "<string>"}
 
         Rules:
         - generate_image: the user wants a picture/drawing/illustration created (e.g. "нарисуй жирафа",
@@ -29,6 +30,10 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
           what a photo shows — those are "none".
         - remove_watermark: the user wants a watermark, logo, caption or stamp removed/cleaned/erased
           from a photo (e.g. "убери водяной знак с фото", "remove the watermark", "quita la marca de agua").
+        - combine_photo: the user wants to merge/combine two photos into one (e.g. "объедини фото",
+          "combine these photos").
+        - change_photo: the user wants Alice to restyle/change one existing photo (e.g. "измени фото",
+          "change this photo", "преобрази в аниме"). Not GPT Image 2 "edit_image".
         - images_menu: the user asks in general whether/how the bot can work with images or photos,
           without a concrete request yet.
         - none: anything else — regular chat, questions about a photo they sent (schedules, documents,
@@ -80,6 +85,8 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
                 "recognize_text" => MediaToolIntent.RecognizeText,
                 "prompt_from_image" => MediaToolIntent.PromptFromImage,
                 "remove_watermark" => MediaToolIntent.RemoveWatermark,
+                "combine_photo" => MediaToolIntent.CombinePhoto,
+                "change_photo" => MediaToolIntent.ChangePhoto,
                 "images_menu" => MediaToolIntent.ImagesMenu,
                 _ => MediaToolIntent.None,
             };

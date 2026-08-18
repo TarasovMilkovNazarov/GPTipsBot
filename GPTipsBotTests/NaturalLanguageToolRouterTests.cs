@@ -103,6 +103,24 @@ public class NaturalLanguageToolRouterTests
         Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.PromptFromImage));
     }
 
+    [TestCase("объедини фото")]
+    [TestCase("объединить два фото")]
+    [TestCase("combine these photos")]
+    public void TryMatch_CombinePhoto(string text)
+    {
+        var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: false);
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.CombinePhoto));
+    }
+
+    [TestCase("измени фото")]
+    [TestCase("change this photo")]
+    [TestCase("cambiar esta foto")]
+    public void TryMatch_ChangePhoto(string text)
+    {
+        var route = NaturalLanguageToolRouter.TryMatch(text, hasPhoto: false);
+        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.ChangePhoto));
+    }
+
     [TestCase("что на фото")]
     [TestCase("опиши картинку")]
     [TestCase("what's in the photo")]

@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + images
 
 Just type a question — the bot replies with conversation context.
-Menu: new chat, models, images (GPT IMAGE 1 / GPT Image 2), photo animation, account and ⭐ top-up.
+Menu: new chat, models, images (GPT IMAGE 1 / GPT Image 2), photo animation, combine, change, account and ⭐ top-up.
 
 Free daily limits apply — see /profile. Details: /help</value>
   </data>
@@ -157,6 +157,14 @@ In groups and comments: reply to a photo with /prompt_from_image.
 ✨ Animate photo
 Turn a photo into a short animation (free within quota or paid with ⭐).
 
+🧩 Combine photos
+Merge two photos into one from a text description (uses the photo-animation quota or ⭐).
+Command /combine: first photo, then the second, then a description.
+
+🪄 Change photo
+Restyle one photo with Alice (uses the photo-animation quota or ⭐).
+This is not “🛠 Edit photo” (GPT Image 2). Command /change_photo.
+
 🧼 Remove watermark
 Removes captions, logos, and semi-transparent overlays from a photo (⭐ only, no free quota).
 The photo is regenerated, so small details may change slightly.
@@ -185,6 +193,8 @@ Useful commands
 /edit_image — edit photo
 /prompt_from_image — prompt from photo
 /animate — animate photo
+/combine — combine two photos
+/change_photo — change photo
 /remove_watermark — remove watermark
 /get_image_text — OCR
 /deposit — top up
@@ -230,6 +240,8 @@ Support: @my_super_ultra_smart_bot</value>
 Just type a question — or pick an action:
 • 🎨 Images — generate, edit, OCR
 • ✨ Animate photo
+• 🧩 Combine photos
+• 🪄 Change photo
 • 🧼 Remove watermark — paid with ⭐
 • ✍️ /human — simple natural English rewrite
 • 💬 New chat — reset context
@@ -637,5 +649,32 @@ Cost: {0:0.##}⭐ (no free quota)</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>Watermark removal is still on: you can send another photo, each one costs {0:0.##}⭐. Tap “Cancel” to exit.</value>
+  </data>
+  <data name="PleaseWaitImageMsg" xml:space="preserve">
+    <value>⌛️ Image generation usually takes a few seconds. Please wait...</value>
+  </data>
+  <data name="PhotoImageGenerating" xml:space="preserve">
+    <value>🎨 Starting image generation...</value>
+  </data>
+  <data name="PhotoImageWaiting" xml:space="preserve">
+    <value>⏳ Generating image... about {0} left</value>
+  </data>
+  <data name="PhotoImageFailed" xml:space="preserve">
+    <value>Could not process the photo. Try again later or send another image.</value>
+  </data>
+  <data name="SendPhotoToChange" xml:space="preserve">
+    <value>Send a photo and describe what to change. For example: “change my hair to platinum blonde”, “turn me into anime”</value>
+  </data>
+  <data name="SendChangePrompt" xml:space="preserve">
+    <value>Describe what to change in the photo</value>
+  </data>
+  <data name="SendFirstPhotoToCombine" xml:space="preserve">
+    <value>Send the first photo to combine</value>
+  </data>
+  <data name="SendSecondPhotoToCombine" xml:space="preserve">
+    <value>Send the second photo</value>
+  </data>
+  <data name="SendCombinePrompt" xml:space="preserve">
+    <value>Describe how to combine the photos. For example: “a shared portrait, standing next to each other”</value>
   </data>
 </root>

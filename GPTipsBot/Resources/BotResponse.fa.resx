@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + تصاویر
 
 فقط یک سوال تایپ کنید - ربات با زمینه گفتگو پاسخ می دهد.
-منو: گپ جدید، مدل‌ها، تصویر (GPT IMAGE 1 / GPT Image 2)، انیمیشن عکس، حساب کاربری و ⭐ شارژ.
+منو: گپ جدید، مدل‌ها، تصویر (GPT IMAGE 1 / GPT Image 2)، انیمیشن، ادغام و تغییر عکس، حساب کاربری و ⭐ شارژ.
 
 محدودیت های روزانه رایگان اعمال می شود - /profile را ببینید. جزئیات: /help</value>
   </data>
@@ -155,6 +155,14 @@ https://gptips.skolkokomu.ru
 ✨ عکس متحرک
 یک عکس را به یک انیمیشن کوتاه تبدیل کنید (رایگان در حد سهمیه یا پولی با ⭐).
 
+🧩 ادغام عکس
+دو عکس را طبق توضیح متنی در یک تصویر ادغام می‌کند (از سهمیه انیمیشن یا ⭐).
+دستور /combine: اول عکس اول، بعد عکس دوم، سپس توضیح.
+
+🪄 تغییر عکس
+یک عکس را با آلیسا بازنویسی می‌کند (از سهمیه انیمیشن یا ⭐).
+این «🛠 ویرایش عکس» (GPT Image 2) نیست. دستور /change_photo.
+
 🧼 حذف واترمارک
 نوشته‌ها، لوگوها و لایه‌های نیمه‌شفاف را از عکس پاک می‌کنم (فقط با ⭐، بدون سهمیه رایگان).
 عکس دوباره ساخته می‌شود، بنابراین جزئیات ریز ممکن است کمی تغییر کند.
@@ -183,6 +191,8 @@ https://gptips.skolkokomu.ru
 /edit_image - ویرایش عکس
 /prompt_from_image - درخواست از عکس
 /animate - عکس متحرک
+/combine — ادغام دو عکس
+/change_photo — تغییر عکس
 /remove_watermark - حذف واترمارک
 /get_image_text — OCR
 /deposit - شارژ کنید
@@ -228,6 +238,8 @@ https://gptips.skolkokomu.ru
 فقط یک سوال تایپ کنید - یا یک اقدام را انتخاب کنید:
 • 🎨 تصاویر — تولید، ویرایش، OCR
 • ✨ عکس متحرک
+• 🧩 ادغام عکس
+• 🪄 تغییر عکس
 • 🧼 حذف واترمارک — با ⭐
 • ✍️ /human - بازنویسی ساده انگلیسی طبیعی
 • 💬 گپ جدید — زمینه را بازنشانی کنید
@@ -634,5 +646,32 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>حالت حذف واترمارک هنوز فعال است: می‌توانید عکس دیگری بفرستید، هر عکس {0:0.##}⭐ هزینه دارد. برای خروج «لغو» را بزنید.</value>
+  </data>
+  <data name="PleaseWaitImageMsg" xml:space="preserve">
+    <value>⌛️ تولید تصویر معمولاً چند ثانیه طول می‌کشد. لطفاً صبر کنید...</value>
+  </data>
+  <data name="PhotoImageGenerating" xml:space="preserve">
+    <value>🎨 در حال شروع تولید تصویر...</value>
+  </data>
+  <data name="PhotoImageWaiting" xml:space="preserve">
+    <value>⏳ در حال تولید تصویر... حدود {0} مانده</value>
+  </data>
+  <data name="PhotoImageFailed" xml:space="preserve">
+    <value>نتوانستیم عکس را پردازش کنیم. بعداً دوباره امتحان کنید یا تصویر دیگری بفرستید.</value>
+  </data>
+  <data name="SendPhotoToChange" xml:space="preserve">
+    <value>عکس را بفرستید و بگویید چه چیزی تغییر کند. مثلاً: «رنگ مو را بلوند پلاتینی کن»، «به انیمه تبدیلم کن»</value>
+  </data>
+  <data name="SendChangePrompt" xml:space="preserve">
+    <value>توضیح دهید چه چیزی در عکس تغییر کند</value>
+  </data>
+  <data name="SendFirstPhotoToCombine" xml:space="preserve">
+    <value>اولین عکس را برای ادغام بفرستید</value>
+  </data>
+  <data name="SendSecondPhotoToCombine" xml:space="preserve">
+    <value>دومین عکس را بفرستید</value>
+  </data>
+  <data name="SendCombinePrompt" xml:space="preserve">
+    <value>توضیح دهید عکس‌ها چگونه ادغام شوند. مثلاً: «پرتره مشترک، کنار هم ایستاده‌اند»</value>
   </data>
 </root>

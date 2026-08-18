@@ -45,6 +45,8 @@ public enum CommandType
     SetArLang = 31,
     RemoveWatermark = 32,
     Broadcast = 33,
+    CombinePhoto = 34,
+    ChangePhoto = 35,
 }
 
 public class Wallet: Entity

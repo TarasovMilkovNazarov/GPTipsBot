@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + imágenes
 
 Solo escribe una pregunta — el bot responde con el contexto de la conversación.
-Menú: nuevo chat, modelos, imágenes (GPT IMAGE 1 / GPT Image 2), animación de fotos, cuenta y recarga ⭐.
+Menú: nuevo chat, modelos, imágenes (GPT IMAGE 1 / GPT Image 2), animación, combinación y cambio de fotos, cuenta y recarga ⭐.
 
 Hay límites diarios gratuitos — ver /profile. Detalles: /help</value>
   </data>
@@ -155,6 +155,14 @@ En grupos y comentarios: responde a una foto con /prompt_from_image.
 ✨ Animar foto
 Convierte una foto en una animación corta (gratis dentro de la cuota o de pago con ⭐).
 
+🧩 Combinar fotos
+Une dos fotos en una según una descripción (usa la cuota de animación o ⭐).
+Comando /combine: primera foto, luego la segunda, luego la descripción.
+
+🪄 Cambiar foto
+Rehace una foto con Alice (usa la cuota de animación o ⭐).
+No es «🛠 Editar foto» (GPT Image 2). Comando /change_photo.
+
 🧼 Quitar marca de agua
 Elimina rótulos, logotipos y capas semitransparentes de una foto (solo con ⭐, sin cuota gratuita).
 La foto se regenera, así que los detalles pequeños pueden cambiar un poco.
@@ -183,6 +191,8 @@ Comandos útiles
 /edit_image — editar foto
 /prompt_from_image — prompt desde foto
 /animate — animar foto
+/combine — combinar dos fotos
+/change_photo — cambiar foto
 /remove_watermark — quitar marca de agua
 /get_image_text — OCR
 /deposit — recargar
@@ -228,6 +238,8 @@ Soporte: @my_super_ultra_smart_bot</value>
 Solo escribe una pregunta — o elige una acción:
 • 🎨 Imágenes — generar, editar, OCR
 • ✨ Animar foto
+• 🧩 Combinar fotos
+• 🪄 Cambiar foto
 • 🧼 Quitar marca de agua — de pago con ⭐
 • ✍️ /human — inglés simple y natural
 • 💬 Nuevo chat — restablecer contexto
@@ -635,5 +647,32 @@ Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>El modo de eliminación de marcas de agua sigue activo: puedes enviar otra foto, cada una cuesta {0:0.##}⭐. Pulsa «Cancelar» para salir.</value>
+  </data>
+  <data name="PleaseWaitImageMsg" xml:space="preserve">
+    <value>⌛️ La generación de imagen suele tardar unos segundos. Espera...</value>
+  </data>
+  <data name="PhotoImageGenerating" xml:space="preserve">
+    <value>🎨 Empiezo a generar la imagen...</value>
+  </data>
+  <data name="PhotoImageWaiting" xml:space="preserve">
+    <value>⏳ Generando imagen... quedan unos {0}</value>
+  </data>
+  <data name="PhotoImageFailed" xml:space="preserve">
+    <value>No se pudo procesar la foto. Prueba más tarde o envía otra imagen.</value>
+  </data>
+  <data name="SendPhotoToChange" xml:space="preserve">
+    <value>Envía una foto y describe qué cambiar. Por ejemplo: «cambia el color de pelo a rubio platino», «transfórmame en anime»</value>
+  </data>
+  <data name="SendChangePrompt" xml:space="preserve">
+    <value>Describe qué cambiar en la foto</value>
+  </data>
+  <data name="SendFirstPhotoToCombine" xml:space="preserve">
+    <value>Envía la primera foto para combinar</value>
+  </data>
+  <data name="SendSecondPhotoToCombine" xml:space="preserve">
+    <value>Envía la segunda foto</value>
+  </data>
+  <data name="SendCombinePrompt" xml:space="preserve">
+    <value>Describe cómo combinar las fotos. Por ejemplo: «un retrato juntos, de pie uno al lado del otro»</value>
   </data>
 </root>

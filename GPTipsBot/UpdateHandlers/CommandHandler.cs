@@ -42,6 +42,8 @@ namespace GPTipsBot.UpdateHandlers
         IGpt gptService,
         IGptImageSessionCache gptImageSessionCache,
         IVisionImageCache visionImageCache,
+        IImageCache imageCache,
+        IAliceImageSessionCache aliceImageSessionCache,
         AccountLinkTokenService accountLinkTokenService,
         BroadcastDraftStore broadcastDraftStore)
         : BaseMessageHandler
@@ -295,6 +297,16 @@ namespace GPTipsBot.UpdateHandlers
                 case AnimatePhotoCommand:
                     await botClient.SendAnimatePhotoInstructionsAsync(chatId, replyMarkup: CancelInlineKeyboard);
                     return;
+                case CombinePhotoCommand:
+                    aliceImageSessionCache.Remove(chatId);
+                    reply = BotResponse.SendFirstPhotoToCombine;
+                    replyMarkup = CancelInlineKeyboard;
+                    break;
+                case ChangePhotoCommand:
+                    imageCache.Remove(chatId);
+                    reply = BotResponse.SendPhotoToChange;
+                    replyMarkup = CancelInlineKeyboard;
+                    break;
                 case ImageSquareCommand:
                     if (previousCommand?.Type == CommandType.ImageSquare)
                     {
@@ -366,6 +378,8 @@ namespace GPTipsBot.UpdateHandlers
                     reply = await UpdateLanguage(update.UserChatKey, "ar");
                     break;
                 case CancelCommand:
+                    aliceImageSessionCache.Remove(chatId);
+                    imageCache.Remove(chatId);
                     if (update.UserChatKey.IsAdmin())
                     {
                         broadcastDraftStore.Clear(update.UserChatKey.TelegramUserId ?? update.UserChatKey.Id);

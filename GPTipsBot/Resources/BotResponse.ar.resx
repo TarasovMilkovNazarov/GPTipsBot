@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + صور
 
 ما عليك سوى كتابة سؤال - يقوم الروبوت بالرد بسياق المحادثة.
-القائمة: دردشة جديدة، نماذج، صور (GPT IMAGE 1 / GPT Image 2)، صور متحركة، حساب و⭐ تعبئة رصيد.
+القائمة: دردشة جديدة، نماذج، صور (GPT IMAGE 1 / GPT Image 2)، تحريك ودمج وتغيير الصور، حساب و⭐ تعبئة رصيد.
 
 تنطبق الحدود اليومية المجانية - راجع /profile. التفاصيل: /help</value>
   </data>
@@ -155,6 +155,14 @@ https://gptips.skolkokomu.ru
 ✨ تحريك الصورة
 قم بتحويل الصورة إلى رسم متحرك قصير (مجانًا ضمن الحصة النسبية أو مدفوعًا بـ ⭐).
 
+🧩 دمج الصور
+دمج صورتين في صورة واحدة حسب الوصف (يستخدم حصة التحريك أو ⭐).
+الأمر /combine: الصورة الأولى ثم الثانية ثم الوصف.
+
+🪄 تغيير الصورة
+إعادة رسم صورة واحدة مع أليس (يستخدم حصة التحريك أو ⭐).
+هذا ليس «🛠 تحرير الصورة» (GPT Image 2). الأمر /change_photo.
+
 🧼 إزالة العلامة المائية
 أزل الكتابات والشعارات والطبقات شبه الشفافة من الصورة (بـ ⭐ فقط، بدون حصة مجانية).
 تتم إعادة إنشاء الصورة، لذلك قد تتغير التفاصيل الصغيرة قليلاً.
@@ -183,6 +191,8 @@ https://gptips.skolkokomu.ru
 /edit_image - تحرير الصورة
 /prompt_from_image - موجه من الصورة
 /animate — صورة متحركة
+/combine — دمج صورتين
+/change_photo — تغيير الصورة
 /remove_watermark — إزالة العلامة المائية
 /get_image_text — OCR
 /deposit - قم بتعبئة الرصيد
@@ -228,6 +238,8 @@ https://gptips.skolkokomu.ru
 ما عليك سوى كتابة سؤال — أو اختيار إجراء:
 • 🎨 الصور — إنشاء وتحرير OCR
 • ✨ تحريك الصورة
+• 🧩 دمج الصور
+• 🪄 تغيير الصورة
 • 🧼 إزالة العلامة المائية — مدفوعة بـ ⭐
 • ✍️ /human — إعادة كتابة بسيطة باللغة الإنجليزية بشكل طبيعي
 • 💬 دردشة جديدة — إعادة ضبط السياق
@@ -634,5 +646,32 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>وضع إزالة العلامة المائية ما زال مفعّلاً: يمكنك إرسال صورة أخرى، وكل صورة تكلّف {0:0.##}⭐. اضغط «إلغاء» للخروج.</value>
+  </data>
+  <data name="PleaseWaitImageMsg" xml:space="preserve">
+    <value>⌛️ يستغرق إنشاء الصورة عادةً بضع ثوانٍ. انتظر...</value>
+  </data>
+  <data name="PhotoImageGenerating" xml:space="preserve">
+    <value>🎨 أبدأ إنشاء الصورة...</value>
+  </data>
+  <data name="PhotoImageWaiting" xml:space="preserve">
+    <value>⏳ جارٍ إنشاء الصورة... تبقّى حوالي {0}</value>
+  </data>
+  <data name="PhotoImageFailed" xml:space="preserve">
+    <value>تعذّر معالجة الصورة. حاول لاحقاً أو أرسل صورة أخرى.</value>
+  </data>
+  <data name="SendPhotoToChange" xml:space="preserve">
+    <value>أرسل صورة وصف ما تريد تغييره. مثلاً: «غيّر لون شعري إلى أشقر بلاتيني»، «حوّلني إلى أنمي»</value>
+  </data>
+  <data name="SendChangePrompt" xml:space="preserve">
+    <value>صف ما تريد تغييره في الصورة</value>
+  </data>
+  <data name="SendFirstPhotoToCombine" xml:space="preserve">
+    <value>أرسل الصورة الأولى للدمج</value>
+  </data>
+  <data name="SendSecondPhotoToCombine" xml:space="preserve">
+    <value>أرسل الصورة الثانية</value>
+  </data>
+  <data name="SendCombinePrompt" xml:space="preserve">
+    <value>صف كيف تريد دمج الصورتين. مثلاً: «صورة شخصية مشتركة، يقفان بجانب بعض»</value>
   </data>
 </root>

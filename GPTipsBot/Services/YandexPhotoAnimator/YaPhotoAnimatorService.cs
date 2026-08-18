@@ -13,6 +13,12 @@ public class YaPhotoAnimatorService
     const string UploadImageUrl = "https://masterpiecer.yandex.ru/yaart-web-alice-api/api/v1/wow/upload_image";
     private const string GenerateImageUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_video_generate";
     private const string WaitForResultUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_video_get";
+    private const string EditImageUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_editing_generate";
+    private const string GetEditingUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_editing_get";
+    private const string CombineImagesUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_combining_generate";
+    private const string GetCombiningUrl = "https://rpc.alice.yandex.ru/gproxy/draw_picture_combining_get";
+    private const string EditingGenerationProperty = "editingGeneration";
+    private const string CombiningGenerationProperty = "imageCombiningGeneration";
 
     public YaPhotoAnimatorService()
     {
@@ -213,6 +219,69 @@ public class YaPhotoAnimatorService
         }
 
         throw new Exception("Превышено время ожидания генерации видео");
+    }
+
+    public Task<AliceImageGenerationResult?> EditImage(string imageUrl, string prompt)
+        => StartImageGeneration(
+            EditImageUrl,
+            new { prompt, url = imageUrl },
+            EditingGenerationProperty);
+
+    public Task<AliceImageGenerationResult?> CombineImages(string firstImageUrl, string secondImageUrl, string prompt)
+        => StartImageGeneration(
+            CombineImagesUrl,
+            new
+            {
+                prompt,
+                url = firstImageUrl,
+                url2 = secondImageUrl,
+                urls = new[] { firstImageUrl, secondImageUrl },
+            },
+            CombiningGenerationProperty);
+
+    public Task<AliceImageGenerationResult> GetEditingStatus(string generationId)
+        => GetImageGenerationStatus(GetEditingUrl, generationId, EditingGenerationProperty);
+
+    public Task<AliceImageGenerationResult> GetCombiningStatus(string generationId)
+        => GetImageGenerationStatus(GetCombiningUrl, generationId, CombiningGenerationProperty);
+
+    private async Task<AliceImageGenerationResult?> StartImageGeneration(
+        string url,
+        object body,
+        string generationProperty)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        var jsonBody = JsonSerializer.Serialize(body);
+        request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(request);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Status Code: {response.StatusCode}");
+        Console.WriteLine($"Response: {responseBody}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        return AliceImageGenerationResult.FromJson(responseBody, generationProperty);
+    }
+
+    private async Task<AliceImageGenerationResult> GetImageGenerationStatus(
+        string url,
+        string generationId,
+        string generationProperty)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        var json = JsonSerializer.Serialize(new GetVideoRequest { GenerationId = generationId });
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return AliceImageGenerationResult.FromJson(responseJson, generationProperty)
+               ?? throw new Exception("Не удалось получить статус генерации изображения");
     }
 
     private static void ConfigureHttpClient()

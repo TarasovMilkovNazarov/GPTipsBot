@@ -189,4 +189,16 @@
   <data name="RemoveWatermarkButton" xml:space="preserve">
     <value>🧼 حذف واترمارک</value>
   </data>
+  <data name="CombinePhoto" xml:space="preserve">
+    <value>ادغام دو عکس</value>
+  </data>
+  <data name="CombinePhotoButton" xml:space="preserve">
+    <value>🧩 ادغام عکس‌ها</value>
+  </data>
+  <data name="ChangePhoto" xml:space="preserve">
+    <value>تغییر عکس</value>
+  </data>
+  <data name="ChangePhotoButton" xml:space="preserve">
+    <value>🪄 تغییر عکس</value>
+  </data>
 </root>

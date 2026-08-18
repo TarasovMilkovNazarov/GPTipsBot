@@ -23,6 +23,7 @@ namespace GPTipsBot.Services
         private readonly IOpenAIService _openAiService;
         private readonly ContextWindow _contextWindow;
         private readonly PhotoAnimationWorkflowService _photoAnimationWorkflowService;
+        private readonly AliceImageWorkflowService _aliceImageWorkflowService;
         private readonly BotSettingsRepository _botSettingsRepository;
         private readonly ChatToolExecutor _chatToolExecutor;
         private readonly ITelegramBotClient _botClient;
@@ -42,6 +43,7 @@ namespace GPTipsBot.Services
             IOpenAIService openAiService,
             ContextWindow contextWindow,
             PhotoAnimationWorkflowService photoAnimationWorkflowService,
+            AliceImageWorkflowService aliceImageWorkflowService,
             BotSettingsRepository botSettingsRepository,
             ChatToolExecutor chatToolExecutor,
             ITelegramBotClient botClient,
@@ -51,6 +53,7 @@ namespace GPTipsBot.Services
             _openAiService = openAiService;
             _contextWindow = contextWindow;
             _photoAnimationWorkflowService = photoAnimationWorkflowService;
+            _aliceImageWorkflowService = aliceImageWorkflowService;
             _botSettingsRepository = botSettingsRepository;
             _chatToolExecutor = chatToolExecutor;
             _botClient = botClient;
@@ -167,6 +170,32 @@ namespace GPTipsBot.Services
             return _photoAnimationWorkflowService.StartAsync(workflowData);
         }
 
+        public Task StartAliceImage(
+            AliceImageKind kind,
+            string prompt,
+            string imageFileId,
+            string? imageFileId2,
+            long chatId,
+            long userId,
+            int progressMessageId,
+            long paymentHoldId)
+        {
+            var workflowData = new AliceImageWorkflowData
+            {
+                Kind = kind,
+                ChatId = chatId,
+                UserId = userId,
+                ImageFileId = imageFileId,
+                ImageFileId2 = imageFileId2,
+                Prompt = prompt,
+                ProgressMessageId = progressMessageId,
+                PaymentHoldId = paymentHoldId,
+                UiLanguage = LocalizationManager.CurrentLanguage(),
+            };
+
+            return _aliceImageWorkflowService.StartAsync(workflowData);
+        }
+
         private string ResolveModelId(long userId) =>
             GptModelCatalog.Resolve(_botSettingsRepository.Get(userId)?.PreferredGptModel).Id;
 
@@ -277,6 +306,15 @@ namespace GPTipsBot.Services
         Task StartAnimatePhoto(
             string prompt,
             string imageFileId,
+            long chatId,
+            long userId,
+            int progressMessageId,
+            long paymentHoldId);
+        Task StartAliceImage(
+            AliceImageKind kind,
+            string prompt,
+            string imageFileId,
+            string? imageFileId2,
             long chatId,
             long userId,
             int progressMessageId,

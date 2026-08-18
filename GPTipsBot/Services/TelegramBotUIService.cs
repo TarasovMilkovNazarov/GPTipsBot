@@ -26,6 +26,8 @@ namespace GPTipsBot.Services
 
         private static KeyboardButton ImagesMenuButton => new(BotUI.ImagesMenuButton);
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
+        private static KeyboardButton CombinePhotoButton => new(BotUI.CombinePhotoButton);
+        private static KeyboardButton ChangePhotoButton => new(BotUI.ChangePhotoButton);
         private static KeyboardButton RemoveWatermarkButton => new(BotUI.RemoveWatermarkButton);
         private static KeyboardButton PromptFromImageButton => new(BotUI.PromptFromImageButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
@@ -65,6 +67,8 @@ namespace GPTipsBot.Services
                 { BotMenu.DepositCommand, new() },
                 { BotMenu.GetProfileCommand, new() },
                 { BotMenu.AnimatePhotoCommand, new() },
+                { BotMenu.CombinePhotoCommand, new() },
+                { BotMenu.ChangePhotoCommand, new() },
                 { BotMenu.ModelCommand, new() },
                 { BotMenu.GptImageCommand, new() },
                 { BotMenu.EditImageCommand, new() },
@@ -93,6 +97,8 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.DepositCommand].Add(BotUI.DepositButton);
                 ButtonToLocalizations[BotMenu.GetProfileCommand].Add(BotUI.ProfileButton);
                 ButtonToLocalizations[BotMenu.AnimatePhotoCommand].Add(BotUI.AnimateButton);
+                ButtonToLocalizations[BotMenu.CombinePhotoCommand].Add(BotUI.CombinePhotoButton);
+                ButtonToLocalizations[BotMenu.ChangePhotoCommand].Add(BotUI.ChangePhotoButton);
                 ButtonToLocalizations[BotMenu.ModelCommand].Add(BotUI.ModelButton);
                 ButtonToLocalizations[BotMenu.GptImageCommand].Add(BotUI.GptImageButton);
                 ButtonToLocalizations[BotMenu.EditImageCommand].Add(BotUI.EditImageButton);
@@ -147,6 +153,7 @@ namespace GPTipsBot.Services
                 [ResetContextButton, ProfileButton],
                 [ModelButton, ImagesMenuButton],
                 [PromptFromImageButton, AnimatePhotoButton],
+                [CombinePhotoButton, ChangePhotoButton],
                 [RemoveWatermarkButton],
                 [HelpButton],
             ]);
@@ -261,6 +268,8 @@ namespace GPTipsBot.Services
             [
                 [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.CombinePhotoButton, BotMenu.CombinePhotoCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.ChangePhotoButton, BotMenu.ChangePhotoCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.RemoveWatermarkButton, BotMenu.RemoveWatermarkCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageButton, BotMenu.ImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand)],

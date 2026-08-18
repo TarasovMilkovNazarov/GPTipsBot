@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + изображения
 
 Просто напишите вопрос — бот ответит с учётом диалога.
-В меню: новый диалог, модели, изображения (GPT IMAGE 1 / GPT Image 2), оживление фото, кабинет и пополнение ⭐.
+В меню: новый диалог, модели, изображения (GPT IMAGE 1 / GPT Image 2), оживление, объединение и изменение фото, кабинет и пополнение ⭐.
 
 Бесплатные лимиты ограничены — смотрите /profile. Подробнее: /help</value>
   </data>
@@ -157,6 +157,14 @@ https://gptips.skolkokomu.ru
 ✨ Оживить фото
 Анимация загруженного фото (бесплатно в рамках лимита или за ⭐).
 
+🧩 Объединить фото
+Склейка двух фото в одно по текстовому описанию (бесплатно в рамках лимита анимации или за ⭐).
+Команда /combine: сначала первое фото, потом второе, затем описание.
+
+🪄 Изменить фото
+Перерисовать одно фото по инструкции Алисы (бесплатно в рамках лимита анимации или за ⭐).
+Это не «🛠 Редактировать фото» (GPT Image 2). Команда /change_photo.
+
 🧼 Убрать водяной знак
 Уберу с фото надписи, логотипы и полупрозрачные плашки (только за ⭐, без бесплатных запросов).
 Фото пересобирается заново, поэтому мелкие детали могут немного измениться.
@@ -185,6 +193,8 @@ https://gptips.skolkokomu.ru
 /edit_image — редактирование фото
 /prompt_from_image — промпт по фото
 /animate — оживить фото
+/combine — объединить два фото
+/change_photo — изменить фото
 /remove_watermark — убрать водяной знак
 /get_image_text — распознать текст
 /deposit — пополнить баланс
@@ -230,6 +240,8 @@ https://gptips.skolkokomu.ru
 Просто напишите вопрос — или выберите действие:
 • 🎨 Изображения — сгенерировать, отредактировать, OCR
 • ✨ Оживить фото
+• 🧩 Объединить фото
+• 🪄 Изменить фото
 • 🧼 Убрать водяной знак — за ⭐
 • ✍️ /human — простой естественный English
 • 💬 Новый диалог — сбросить контекст
@@ -642,5 +654,32 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
     <value>Режим удаления водяных знаков всё ещё включён: можно прислать ещё фото, каждое спишет {0:0.##}⭐. Чтобы выйти — нажмите «Отмена».</value>
+  </data>
+  <data name="PleaseWaitImageMsg" xml:space="preserve">
+    <value>⌛️ Генерация изображения обычно занимает несколько секунд. Подождите...</value>
+  </data>
+  <data name="PhotoImageGenerating" xml:space="preserve">
+    <value>🎨 Запускаю генерацию изображения...</value>
+  </data>
+  <data name="PhotoImageWaiting" xml:space="preserve">
+    <value>⏳ Генерация изображения... осталось примерно {0}</value>
+  </data>
+  <data name="PhotoImageFailed" xml:space="preserve">
+    <value>Не удалось обработать фото. Попробуйте позже или выберите другое изображение.</value>
+  </data>
+  <data name="SendPhotoToChange" xml:space="preserve">
+    <value>Отправьте фото и опишите, что изменить. Например: «смени цвет волос на блонд», «преобрази в аниме»</value>
+  </data>
+  <data name="SendChangePrompt" xml:space="preserve">
+    <value>Опишите, что изменить на фото</value>
+  </data>
+  <data name="SendFirstPhotoToCombine" xml:space="preserve">
+    <value>Отправьте первое фото для объединения</value>
+  </data>
+  <data name="SendSecondPhotoToCombine" xml:space="preserve">
+    <value>Отправьте второе фото</value>
+  </data>
+  <data name="SendCombinePrompt" xml:space="preserve">
+    <value>Опишите, как объединить фото. Например: «общий портрет, стоят рядом»</value>
   </data>
 </root>

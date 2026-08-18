@@ -43,6 +43,7 @@ namespace GPTipsBot.UpdateHandlers
         InvoiceRepository invoiceRepository,
         IGpt gptService,
         IImageCache imageCache,
+        IAliceImageSessionCache aliceImageSessionCache,
         IVisionImageCache visionImageCache,
         IGptImageSessionCache gptImageSessionCache,
         MessageRepository messageRepository,
@@ -318,6 +319,8 @@ namespace GPTipsBot.UpdateHandlers
                          or CommandType.Deposit
                          or CommandType.Donate
                          or CommandType.AnimatePhoto
+                         or CommandType.CombinePhoto
+                         or CommandType.ChangePhoto
                          or CommandType.GptImage
                          or CommandType.RemoveWatermark)
             {
@@ -414,6 +417,110 @@ namespace GPTipsBot.UpdateHandlers
                 }
 
                 imageCache.Remove(userKey.ChatId);
+                return;
+            }
+            else if (lastCommand?.Type == CommandType.ChangePhoto)
+            {
+                var imageId = update.FileId;
+                if (update.FileId == null && imageCache.TryGet(update.UserChatKey.ChatId, out imageId) == false)
+                {
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendPhotoToChange,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(update.Message?.Text))
+                {
+                    imageCache.Set(update.UserChatKey.ChatId, imageId!);
+                    await botClient.SendUserReplyAsync(update, BotResponse.SendChangePrompt,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return;
+                }
+
+                if (!await TryStartAliceImageAsync(
+                        update,
+                        userKey,
+                        AliceImageKind.Editing,
+                        update.Message.Text,
+                        imageId!,
+                        imageFileId2: null))
+                {
+                    return;
+                }
+
+                imageCache.Remove(userKey.ChatId);
+                return;
+            }
+            else if (lastCommand?.Type == CommandType.CombinePhoto)
+            {
+                var session = aliceImageSessionCache.GetOrCreate(userKey.ChatId);
+                if (string.IsNullOrEmpty(session.FirstFileId))
+                {
+                    if (update.FileId == null)
+                    {
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            BotResponse.SendFirstPhotoToCombine,
+                            TelegramBotUiService.CancelInlineKeyboard);
+                        return;
+                    }
+
+                    session.FirstFileId = update.FileId;
+                    aliceImageSessionCache.Set(userKey.ChatId, session);
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendSecondPhotoToCombine,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(session.SecondFileId))
+                {
+                    if (update.FileId == null)
+                    {
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            BotResponse.SendSecondPhotoToCombine,
+                            TelegramBotUiService.CancelInlineKeyboard);
+                        return;
+                    }
+
+                    session.SecondFileId = update.FileId;
+                    aliceImageSessionCache.Set(userKey.ChatId, session);
+
+                    if (string.IsNullOrWhiteSpace(update.Message?.Text))
+                    {
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            BotResponse.SendCombinePrompt,
+                            TelegramBotUiService.CancelInlineKeyboard);
+                        return;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(update.Message?.Text))
+                {
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendCombinePrompt,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return;
+                }
+
+                if (!await TryStartAliceImageAsync(
+                        update,
+                        userKey,
+                        AliceImageKind.Combining,
+                        update.Message.Text,
+                        session.FirstFileId,
+                        session.SecondFileId))
+                {
+                    return;
+                }
+
+                aliceImageSessionCache.Remove(userKey.ChatId);
                 return;
             }
             else if (TryGetMediaToolRoute(update, out var mediaRoute))
@@ -625,6 +732,59 @@ namespace GPTipsBot.UpdateHandlers
                         TelegramBotUiService.CancelInlineKeyboard);
                     return true;
 
+                case MediaToolIntent.ChangePhoto:
+                    if (update.IsGroupOrChannel)
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.ChangePhoto);
+                    if (update.FileId != null)
+                    {
+                        imageCache.Set(update.UserChatKey.ChatId, update.FileId);
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            BotResponse.SendChangePrompt,
+                            TelegramBotUiService.CancelInlineKeyboard);
+                        return true;
+                    }
+
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendPhotoToChange,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return true;
+
+                case MediaToolIntent.CombinePhoto:
+                    if (update.IsGroupOrChannel)
+                    {
+                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
+                        return true;
+                    }
+
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CombinePhoto);
+                    var combineSession = aliceImageSessionCache.GetOrCreate(update.UserChatKey.ChatId);
+                    combineSession.FirstFileId = null;
+                    combineSession.SecondFileId = null;
+                    if (update.FileId != null)
+                    {
+                        combineSession.FirstFileId = update.FileId;
+                        aliceImageSessionCache.Set(update.UserChatKey.ChatId, combineSession);
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            BotResponse.SendSecondPhotoToCombine,
+                            TelegramBotUiService.CancelInlineKeyboard);
+                        return true;
+                    }
+
+                    aliceImageSessionCache.Set(update.UserChatKey.ChatId, combineSession);
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.SendFirstPhotoToCombine,
+                        TelegramBotUiService.CancelInlineKeyboard);
+                    return true;
+
                 case MediaToolIntent.ImagesMenu:
                     if (update.IsGroupOrChannel)
                     {
@@ -649,6 +809,43 @@ namespace GPTipsBot.UpdateHandlers
 
                 default:
                     return false;
+            }
+        }
+
+        private async Task<bool> TryStartAliceImageAsync(
+            UpdateDecorator update,
+            UserChatKey userKey,
+            AliceImageKind kind,
+            string prompt,
+            string imageFileId,
+            string? imageFileId2)
+        {
+            var hold = await userService.TryReserveAnimationAsync(userKey.Id);
+            if (hold is null)
+            {
+                var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();
+                await botClient.SendOutOfFreeRequestsMessageAsync(update.ReplyChatId, nextExec);
+                return false;
+            }
+
+            try
+            {
+                var progressMessageId = await photoAnimationProgressNotifier.StartImageAsync(update.ReplyChatId);
+                await gptService.StartAliceImage(
+                    kind,
+                    prompt,
+                    imageFileId,
+                    imageFileId2,
+                    update.ReplyChatId,
+                    userKey.Id,
+                    progressMessageId,
+                    hold.Id);
+                return true;
+            }
+            catch
+            {
+                await userService.ReleaseAsync(hold.Id);
+                throw;
             }
         }
 

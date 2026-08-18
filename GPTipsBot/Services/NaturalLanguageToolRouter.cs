@@ -18,6 +18,10 @@ public enum MediaToolIntent
     Onboarding = 5,
     /// <summary>Watermark removal via VseGPT Seedream (/remove_watermark button flow).</summary>
     RemoveWatermark = 6,
+    /// <summary>Yandex Alice studio: edit one photo (/change_photo).</summary>
+    ChangePhoto = 7,
+    /// <summary>Yandex Alice studio: combine two photos (/combine).</summary>
+    CombinePhoto = 8,
 }
 
 public readonly record struct MediaToolRoute(MediaToolIntent Intent, string? Prompt = null)
@@ -65,6 +69,22 @@ public static class NaturalLanguageToolRouter
         @"|prompt\s+from\s+(?:(?:the|this)\s+)?(?:photo|image|picture)" +
         @"|(?:create|generate|make)\s+(?:a\s+)?prompt\s+from\s+(?:(?:the|this)\s+)?(?:photo|image|picture)" +
         @"|промпт\s+(?:по|из|с)\s+(?:фото|картинк\w*|изображени\w*)" +
+        @")",
+        Rx);
+
+    private static readonly Regex CombinePhotoRegex = new(
+        @"(?:^|\b)(?:" +
+        @"объедини(?:ть)?(?:\s+(?:два|2|эти))?\s+(?:фото|картинк\w*|изображени\w*)" +
+        @"|combine\s+(?:(?:the|these|two)\s+)?(?:photos?|images?|pictures?)" +
+        @"|mezcla(?:r)?\s+(?:(?:las|estas|dos)\s+)?(?:fotos?|im[aá]genes?)" +
+        @")",
+        Rx);
+
+    private static readonly Regex ChangePhotoRegex = new(
+        @"(?:^|\b)(?:" +
+        @"измени(?:ть)?\s+(?:это\s+)?(?:фото|картинк\w*|изображени\w*)" +
+        @"|change\s+(?:this\s+|the\s+)?(?:photo|image|picture)" +
+        @"|cambia(?:r)?\s+(?:esta\s+|la\s+)?(?:foto|imagen)" +
         @")",
         Rx);
 
@@ -191,6 +211,16 @@ public static class NaturalLanguageToolRouter
         if (trimmed.Length <= 280 && PromptFromImageRegex.IsMatch(trimmed))
         {
             return new MediaToolRoute(MediaToolIntent.PromptFromImage);
+        }
+
+        if (trimmed.Length <= 280 && CombinePhotoRegex.IsMatch(trimmed))
+        {
+            return new MediaToolRoute(MediaToolIntent.CombinePhoto);
+        }
+
+        if (trimmed.Length <= 280 && ChangePhotoRegex.IsMatch(trimmed))
+        {
+            return new MediaToolRoute(MediaToolIntent.ChangePhoto);
         }
 
         // "what's on the photo" / "опиши картинку" — vision chat, not the images menu.

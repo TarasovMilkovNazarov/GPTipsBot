@@ -362,6 +362,60 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("PleaseWaitVideoMsg", resourceCulture);
             }
         }
+
+        public static string PleaseWaitImageMsg {
+            get {
+                return ResourceManager.GetString("PleaseWaitImageMsg", resourceCulture);
+            }
+        }
+
+        public static string PhotoImageGenerating {
+            get {
+                return ResourceManager.GetString("PhotoImageGenerating", resourceCulture);
+            }
+        }
+
+        public static string PhotoImageWaiting {
+            get {
+                return ResourceManager.GetString("PhotoImageWaiting", resourceCulture);
+            }
+        }
+
+        public static string PhotoImageFailed {
+            get {
+                return ResourceManager.GetString("PhotoImageFailed", resourceCulture);
+            }
+        }
+
+        public static string SendPhotoToChange {
+            get {
+                return ResourceManager.GetString("SendPhotoToChange", resourceCulture);
+            }
+        }
+
+        public static string SendChangePrompt {
+            get {
+                return ResourceManager.GetString("SendChangePrompt", resourceCulture);
+            }
+        }
+
+        public static string SendFirstPhotoToCombine {
+            get {
+                return ResourceManager.GetString("SendFirstPhotoToCombine", resourceCulture);
+            }
+        }
+
+        public static string SendSecondPhotoToCombine {
+            get {
+                return ResourceManager.GetString("SendSecondPhotoToCombine", resourceCulture);
+            }
+        }
+
+        public static string SendCombinePrompt {
+            get {
+                return ResourceManager.GetString("SendCombinePrompt", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to 👤 Профиль: {0} {1}

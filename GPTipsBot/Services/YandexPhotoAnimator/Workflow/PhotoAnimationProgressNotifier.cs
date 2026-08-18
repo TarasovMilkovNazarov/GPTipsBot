@@ -40,6 +40,31 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
     public async Task ReportStartingGenerationAsync(long chatId, int messageId, CancellationToken cancellationToken = default)
         => await UpdateAsync(chatId, messageId, BotResponse.PhotoAnimationGenerating, cancellationToken);
 
+    public async Task<int> StartImageAsync(long chatId, CancellationToken cancellationToken = default)
+    {
+        var message = await botClient.SendMessage(
+            chatId,
+            BotResponse.PleaseWaitImageMsg,
+            replyMarkup: TelegramBotUiService.CancelInlineKeyboard,
+            cancellationToken: cancellationToken);
+
+        return message.MessageId;
+    }
+
+    public async Task ReportStartingImageGenerationAsync(long chatId, int messageId, CancellationToken cancellationToken = default)
+        => await UpdateAsync(chatId, messageId, BotResponse.PhotoImageGenerating, cancellationToken);
+
+    public async Task ReportImageWaitingAsync(
+        long chatId,
+        int messageId,
+        int remainingSeconds,
+        CancellationToken cancellationToken = default)
+    {
+        var formatted = FormatRemainingTime(remainingSeconds);
+        var text = string.Format(BotResponse.PhotoImageWaiting, formatted);
+        await UpdateAsync(chatId, messageId, text, cancellationToken);
+    }
+
     public async Task ReportWaitingAsync(
         long chatId,
         int messageId,

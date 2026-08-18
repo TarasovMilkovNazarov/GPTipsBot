@@ -133,6 +133,30 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("RemoveWatermarkButton", resourceCulture);
             }
         }
+
+        internal static string CombinePhoto {
+            get {
+                return ResourceManager.GetString("CombinePhoto", resourceCulture);
+            }
+        }
+
+        internal static string CombinePhotoButton {
+            get {
+                return ResourceManager.GetString("CombinePhotoButton", resourceCulture);
+            }
+        }
+
+        internal static string ChangePhoto {
+            get {
+                return ResourceManager.GetString("ChangePhoto", resourceCulture);
+            }
+        }
+
+        internal static string ChangePhotoButton {
+            get {
+                return ResourceManager.GetString("ChangePhotoButton", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Отмена.

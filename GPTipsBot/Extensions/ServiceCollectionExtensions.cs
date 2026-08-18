@@ -37,11 +37,17 @@ namespace GPTipsBot.Extensions
             services.AddTransient<PhotoAnimationSteps.GenerateVideoStep>();
             services.AddTransient<PhotoAnimationSteps.WaitForVideoStep>();
             services.AddTransient<PhotoAnimationSteps.NotifyUserStep>();
+            services.AddTransient<PhotoAnimationSteps.DownloadAliceImagesStep>();
+            services.AddTransient<PhotoAnimationSteps.UploadAliceImagesStep>();
+            services.AddTransient<PhotoAnimationSteps.GenerateAliceImageStep>();
+            services.AddTransient<PhotoAnimationSteps.WaitForAliceImageStep>();
+            services.AddTransient<PhotoAnimationSteps.NotifyAliceImageStep>();
             services.AddTransient<StartGenerateImageStep>();
             services.AddTransient<WaitForImageStep>();
             services.AddTransient<NotifyUserStep>();
             services.AddSingleton<PhotoAnimationProgressNotifier>();
             services.AddSingleton<PhotoAnimationWorkflowService>();
+            services.AddSingleton<AliceImageWorkflowService>();
             services.AddSingleton<ImageGenerationWorkflowService>();
             services.AddHostedService<WorkflowHostService>();
 
@@ -158,6 +164,7 @@ namespace GPTipsBot.Extensions
 
             services.AddImageCache();
             services.AddVisionImageCache();
+            services.AddAliceImageSessionCache();
             
             // dummy comment remove please
             return services;
