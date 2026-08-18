@@ -228,19 +228,13 @@ public class YaPhotoAnimatorService
     public Task<AliceImageGenerationResult?> EditImage(string imageUrl, string prompt)
         => StartImageGeneration(
             EditImageUrl,
-            new { prompt, url = imageUrl },
+            new { prompt, url = new[] { imageUrl } },
             EditingGenerationProperty);
 
     public Task<AliceImageGenerationResult?> CombineImages(string firstImageUrl, string secondImageUrl, string prompt)
         => StartImageGeneration(
             CombineImagesUrl,
-            new
-            {
-                prompt,
-                url = firstImageUrl,
-                url2 = secondImageUrl,
-                urls = new[] { firstImageUrl, secondImageUrl },
-            },
+            new { prompt, url = new[] { firstImageUrl, secondImageUrl } },
             CombiningGenerationProperty);
 
     public Task<AliceImageGenerationResult> GetEditingStatus(string generationId)
