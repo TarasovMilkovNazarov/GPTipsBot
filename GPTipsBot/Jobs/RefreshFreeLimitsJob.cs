@@ -12,6 +12,8 @@ public class RefreshFreeLimitsJob(ApplicationContext context) : IJob
         await context.Users
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(u => u.FreeImageGenerations, PaymentConfig.FreeImageGenerations)
+                .SetProperty(u => u.FreeCombinePhotos, PaymentConfig.FreeCombinePhotos)
+                .SetProperty(u => u.FreeChangePhotos, PaymentConfig.FreeChangePhotos)
                 .SetProperty(u => u.FreeImageTextRecognitions, PaymentConfig.FreeTextRecognitions)
                 .SetProperty(u => u.FreeGptRequests, PaymentConfig.FreeChatGptRequests)
                 .SetProperty(u => u.FreePhotoAnimations, PaymentConfig.FreePhotoAnimations)

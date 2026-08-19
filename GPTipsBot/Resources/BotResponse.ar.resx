@@ -252,7 +252,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="ChooseImagesPlease" xml:space="preserve">
     <value>ماذا تريد أن تفعل مع صورة؟
 
-يمكنك أيضاً طرح سؤال عن الصورة — مثلاً «هل تعمل يوليا غداً؟».</value>
+يمكنك أيضاً طرح سؤال عن الصورة — مثلاً «ماذا يوجد في الصورة؟».</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>يجب ألا يتجاوز الوصف النصي لـ صورة أحرف {0}. يرجى اختصار الوصف وإرساله مرة أخرى</value>
@@ -348,7 +348,9 @@ https://gptips.skolkokomu.ru</value>
  - أجيال صورة: {4}
  - التعرف على النص صورة: {5}
  - الصور المتحركة: {6}
- -- ملخصات اليوم : {7}</value>
+ -- ملخصات اليوم : {7}
+ -- دمج الصور: {9}
+ -- تعديل الصور: {10}</value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
     <value>نجمة واحدة = 10 طلبات ChatGPT أو جيلين من صورة أو صورتين رسوم متحركة</value>
@@ -645,7 +647,7 @@ https://gptips.skolkokomu.ru</value>
     <value>🧼 تمت إزالة العلامة المائية · {0:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>وضع إزالة العلامة المائية ما زال مفعّلاً: يمكنك إرسال صورة أخرى، وكل صورة تكلّف {0:0.##}⭐. اضغط «إلغاء» للخروج.</value>
+    <value>وضع إزالة العلامة المائية ما زال مفعّلاً: يمكنك إرسال صورة أخرى، وكل صورة تكلّف {0:0.##}⭐. اضغط «رجوع» للخروج.</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ يستغرق إنشاء الصورة عادةً بضع ثوانٍ. انتظر...</value>

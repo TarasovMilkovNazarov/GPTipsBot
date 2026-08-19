@@ -55,6 +55,8 @@ namespace GPTipsBot.Services
                 LastName = user.LastName,
                 Stars = user.Wallet?.Balance ?? 0.0,
                 Images = user.FreeImageGenerations,
+                CombinePhotos = user.FreeCombinePhotos,
+                ChangePhotos = user.FreeChangePhotos,
                 ImageTexts = user.FreeImageTextRecognitions,
                 GptRequests = user.FreeGptRequests,
                 PhotoAnimations = user.FreePhotoAnimations,
@@ -87,6 +89,12 @@ namespace GPTipsBot.Services
 
         public Task<PaymentHold?> TryReserveAnimationAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.Animation, PaymentConfig.Animation);
+
+        public Task<PaymentHold?> TryReserveCombinePhotoAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.CombinePhoto, PaymentConfig.CombinePhoto);
+
+        public Task<PaymentHold?> TryReserveChangePhotoAsync(long userId) =>
+            TryReserveAsync(userId, PaidFeature.ChangePhoto, PaymentConfig.ChangePhoto);
 
         public Task<PaymentHold?> TryReserveSummaryAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.Summary, PaymentConfig.Summary);
@@ -196,6 +204,12 @@ namespace GPTipsBot.Services
             PaidFeature.Image => await _context.Users
                 .Where(u => u.Id == userId && u.FreeImageGenerations > 0)
                 .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeImageGenerations, u => u.FreeImageGenerations - 1)),
+            PaidFeature.CombinePhoto => await _context.Users
+                .Where(u => u.Id == userId && u.FreeCombinePhotos > 0)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeCombinePhotos, u => u.FreeCombinePhotos - 1)),
+            PaidFeature.ChangePhoto => await _context.Users
+                .Where(u => u.Id == userId && u.FreeChangePhotos > 0)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.FreeChangePhotos, u => u.FreeChangePhotos - 1)),
             PaidFeature.TextRecognition => await _context.Users
                 .Where(u => u.Id == userId && u.FreeImageTextRecognitions > 0)
                 .ExecuteUpdateAsync(s =>
@@ -221,6 +235,16 @@ namespace GPTipsBot.Services
                     await _context.Users.Where(u => u.Id == userId)
                         .ExecuteUpdateAsync(s =>
                             s.SetProperty(u => u.FreeImageGenerations, u => u.FreeImageGenerations + 1));
+                    break;
+                case PaidFeature.CombinePhoto:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(u => u.FreeCombinePhotos, u => u.FreeCombinePhotos + 1));
+                    break;
+                case PaidFeature.ChangePhoto:
+                    await _context.Users.Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(u => u.FreeChangePhotos, u => u.FreeChangePhotos + 1));
                     break;
                 case PaidFeature.TextRecognition:
                     await _context.Users.Where(u => u.Id == userId)
@@ -391,6 +415,8 @@ namespace GPTipsBot.Services
 
             survivor.FreeGptRequests = Math.Max(survivor.FreeGptRequests, loser.FreeGptRequests);
             survivor.FreeImageGenerations = Math.Max(survivor.FreeImageGenerations, loser.FreeImageGenerations);
+            survivor.FreeCombinePhotos = Math.Max(survivor.FreeCombinePhotos, loser.FreeCombinePhotos);
+            survivor.FreeChangePhotos = Math.Max(survivor.FreeChangePhotos, loser.FreeChangePhotos);
             survivor.FreeImageTextRecognitions = Math.Max(survivor.FreeImageTextRecognitions, loser.FreeImageTextRecognitions);
             survivor.FreePhotoAnimations = Math.Max(survivor.FreePhotoAnimations, loser.FreePhotoAnimations);
             survivor.FreeSummaryRequests = Math.Max(survivor.FreeSummaryRequests, loser.FreeSummaryRequests);
@@ -424,6 +450,8 @@ namespace GPTipsBot.Services
             loser.IsActive = false;
             loser.FreeGptRequests = 0;
             loser.FreeImageGenerations = 0;
+            loser.FreeCombinePhotos = 0;
+            loser.FreeChangePhotos = 0;
             loser.FreeImageTextRecognitions = 0;
             loser.FreePhotoAnimations = 0;
             loser.FreeSummaryRequests = 0;

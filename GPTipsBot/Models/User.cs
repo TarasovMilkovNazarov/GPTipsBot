@@ -22,6 +22,8 @@ namespace GPTipsBot.Models
 
         public List<UserCommand> Commands { get; set; }
         public int FreeImageGenerations { get; set; } = PaymentConfig.NewbieFreeImageGenerations;
+        public int FreeCombinePhotos { get; set; } = PaymentConfig.NewbieFreeCombinePhotos;
+        public int FreeChangePhotos { get; set; } = PaymentConfig.NewbieFreeChangePhotos;
         public int FreeImageTextRecognitions { get; set; } = PaymentConfig.NewbieFreeTextRecognitions;
         public int FreeGptRequests { get; set; } = PaymentConfig.NewbieFreeChatGptRequests;
         public int FreePhotoAnimations { get; set; } = PaymentConfig.NewbieFreePhotoAnimations;

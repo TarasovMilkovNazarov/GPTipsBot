@@ -252,7 +252,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="ChooseImagesPlease" xml:space="preserve">
     <value>دوست دارید با تصویر چه کاری انجام دهید؟
 
-می‌توانید فقط سوالی درباره عکس بپرسید — مثلاً «آیا یولیا فردا کار می‌کند؟».</value>
+می‌توانید فقط سوالی درباره عکس بپرسید — مثلاً «چه چیزی در تصویر است؟».</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>توضیحات متنی تصویر نباید بیشتر از نویسه های {0} باشد. لطفا توضیحات را کوتاه کنید و دوباره ارسال کنید</value>
@@ -348,7 +348,9 @@ https://gptips.skolkokomu.ru</value>
  -- نسل های تصویر: {4}
  - تشخیص متن تصویر: {5}
  -- انیمیشن های عکس: {6}
- -- خلاصه روز: {7}</value>
+ -- خلاصه روز: {7}
+ -- ترکیب عکس: {9}
+ -- ویرایش عکس: {10}</value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
     <value>1 ستاره = 10 درخواست ChatGPT یا 2 نسل تصویر یا 2 انیمیشن عکس</value>
@@ -645,7 +647,7 @@ https://gptips.skolkokomu.ru</value>
     <value>🧼 واترمارک حذف شد · {0:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>حالت حذف واترمارک هنوز فعال است: می‌توانید عکس دیگری بفرستید، هر عکس {0:0.##}⭐ هزینه دارد. برای خروج «لغو» را بزنید.</value>
+    <value>حالت حذف واترمارک هنوز فعال است: می‌توانید عکس دیگری بفرستید، هر عکس {0:0.##}⭐ هزینه دارد. برای خروج «بازگشت» را بزنید.</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ تولید تصویر معمولاً چند ثانیه طول می‌کشد. لطفاً صبر کنید...</value>

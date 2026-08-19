@@ -106,13 +106,34 @@ namespace GPTipsBot.UpdateHandlers
                 case GetProfileCommand:
                     reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName);
+                        profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
+                        profile.CombinePhotos, profile.ChangePhotos);
                     replyMarkup = GetProfileInlineKeyboard();
                     break;
                 case ImagesMenuCommand:
-                    reply = BotResponse.ChooseImagesPlease;
-                    replyMarkup = GetImagesMenuInlineKeyboard();
-                    break;
+                    aliceImageSessionCache.Remove(chatId);
+                    imageCache.Remove(chatId);
+                    gptImageSessionCache.Remove(update.UserChatKey.Id);
+
+                    if (update.IsGroupOrChannel)
+                    {
+                        if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+                        {
+                            await botClient.EditMessageText(
+                                chatId,
+                                (int)update.Message.TelegramMessageId.Value,
+                                BotResponse.ContinueConversation);
+                            return;
+                        }
+
+                        reply = BotResponse.ContinueConversation;
+                        replyMarkup = null;
+                        break;
+                    }
+
+                    await SendOrEditImagesFlowMessageAsync(
+                        update, BotResponse.ChooseImagesPlease, GetImagesMenuInlineKeyboard());
+                    return;
                 case ModelCommand:
                     await HandleModelCommandAsync(update, profile);
                     return;
@@ -199,19 +220,7 @@ namespace GPTipsBot.UpdateHandlers
                         BotResponse.RemoveWatermarkIntro,
                         PaymentConfig.WatermarkRemoval);
 
-                    if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
-                    {
-                        await botClient.EditMessageText(
-                            chatId,
-                            (int)update.Message.TelegramMessageId.Value,
-                            introText,
-                            replyMarkup: CancelInlineKeyboard);
-                    }
-                    else
-                    {
-                        await botClient.SendMessage(chatId, introText, replyMarkup: CancelInlineKeyboard);
-                    }
-
+                    await SendOrEditImagesFlowMessageAsync(update, introText, BackToImagesMenuInlineKeyboard);
                     return;
                 }
                 case GptImageSizeSquareCommand:
@@ -289,24 +298,26 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    reply = string.Format(
-                        BotResponse.InputImageDescriptionText,
-                        ImageGeneratorHandler.ImageTextDescriptionLimit);
-                    replyMarkup = GetImageInstructionInlineKeyboard(false);
-                    break;
+                    await SendOrEditImagesFlowMessageAsync(
+                        update,
+                        string.Format(
+                            BotResponse.InputImageDescriptionText,
+                            ImageGeneratorHandler.ImageTextDescriptionLimit),
+                        GetImageInstructionInlineKeyboard(false));
+                    return;
                 case AnimatePhotoCommand:
                     await botClient.SendAnimatePhotoInstructionsAsync(chatId, replyMarkup: CancelInlineKeyboard);
                     return;
                 case CombinePhotoCommand:
                     aliceImageSessionCache.Remove(chatId);
-                    reply = BotResponse.SendFirstPhotoToCombine;
-                    replyMarkup = CancelInlineKeyboard;
-                    break;
+                    await SendOrEditImagesFlowMessageAsync(
+                        update, BotResponse.SendFirstPhotoToCombine, BackToImagesMenuInlineKeyboard);
+                    return;
                 case ChangePhotoCommand:
                     imageCache.Remove(chatId);
-                    reply = BotResponse.SendPhotoToChange;
-                    replyMarkup = CancelInlineKeyboard;
-                    break;
+                    await SendOrEditImagesFlowMessageAsync(
+                        update, BotResponse.SendPhotoToChange, BackToImagesMenuInlineKeyboard);
+                    return;
                 case ImageSquareCommand:
                     if (previousCommand?.Type == CommandType.ImageSquare)
                     {
@@ -332,9 +343,9 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    reply = BotResponse.SendTextRecognitionImage;
-                    replyMarkup = CancelInlineKeyboard;
-                    break;
+                    await SendOrEditImagesFlowMessageAsync(
+                        update, BotResponse.SendTextRecognitionImage, BackToImagesMenuInlineKeyboard);
+                    return;
                 case PromptFromImageCommand:
                     if (profile is { GptRequests: <= 0, Stars: <= 0 })
                     {
@@ -350,9 +361,9 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    reply = BotResponse.SendPromptFromImagePhoto;
-                    replyMarkup = CancelInlineKeyboard;
-                    break;
+                    await SendOrEditImagesFlowMessageAsync(
+                        update, BotResponse.SendPromptFromImagePhoto, BackToImagesMenuInlineKeyboard);
+                    return;
                 case ResetContextCommand:
                     reply = BotResponse.ContextUpdated;
                     update.Message.NewContext = true;
@@ -475,6 +486,25 @@ namespace GPTipsBot.UpdateHandlers
                    labels.Exists(label => string.Equals(label, text, StringComparison.OrdinalIgnoreCase));
         }
 
+        private async Task SendOrEditImagesFlowMessageAsync(
+            UpdateDecorator update,
+            string text,
+            InlineKeyboardMarkup keyboard)
+        {
+            var chatId = update.UserChatKey.ChatId;
+            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+            {
+                await botClient.EditMessageText(
+                    chatId,
+                    (int)update.Message.TelegramMessageId.Value,
+                    text,
+                    replyMarkup: keyboard);
+                return;
+            }
+
+            await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+        }
+
         private async Task HandleGptImageStartAsync(UpdateDecorator update, GptImageMode mode)
         {
             var chatId = update.UserChatKey.ChatId;
@@ -492,7 +522,7 @@ namespace GPTipsBot.UpdateHandlers
                 : string.Format(BotResponse.GptImageGenerateIntro, session.StarsCost);
 
             var keyboard = mode == GptImageMode.Edit
-                ? CancelInlineKeyboard
+                ? BackToImagesMenuInlineKeyboard
                 : GetGptImageOptionsKeyboard(session);
 
             if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)

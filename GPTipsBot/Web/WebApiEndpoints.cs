@@ -1073,6 +1073,8 @@ public static class WebApiEndpoints
             {
                 gpt = profile.GptRequests,
                 images = profile.Images,
+                combinePhotos = profile.CombinePhotos,
+                changePhotos = profile.ChangePhotos,
                 ocr = profile.ImageTexts,
                 animations = profile.PhotoAnimations,
                 summaries = profile.Summaries,

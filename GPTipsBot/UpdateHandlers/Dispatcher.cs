@@ -217,7 +217,8 @@ namespace GPTipsBot.UpdateHandlers
                     var profile = await userService.GetUserProfile(update.UserChatKey.Id);
                     var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations, profile.Summaries);
+                        profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
+                        profile.CombinePhotos, profile.ChangePhotos);
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
@@ -270,7 +271,7 @@ namespace GPTipsBot.UpdateHandlers
                     if (imageId == null && string.IsNullOrWhiteSpace(session.ImageFileId))
                     {
                         await botClient.SendUserReplyAsync(update, BotResponse.GptImageSendPhotoFirst,
-                            TelegramBotUiService.CancelInlineKeyboard);
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                         return;
                     }
 
@@ -427,7 +428,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendPhotoToChange,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return;
                 }
 
@@ -435,7 +436,7 @@ namespace GPTipsBot.UpdateHandlers
                 {
                     imageCache.Set(update.UserChatKey.ChatId, imageId!);
                     await botClient.SendUserReplyAsync(update, BotResponse.SendChangePrompt,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return;
                 }
 
@@ -463,7 +464,7 @@ namespace GPTipsBot.UpdateHandlers
                         await botClient.SendUserReplyAsync(
                             update,
                             BotResponse.SendFirstPhotoToCombine,
-                            TelegramBotUiService.CancelInlineKeyboard);
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                         return;
                     }
 
@@ -472,7 +473,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendSecondPhotoToCombine,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return;
                 }
 
@@ -483,7 +484,7 @@ namespace GPTipsBot.UpdateHandlers
                         await botClient.SendUserReplyAsync(
                             update,
                             BotResponse.SendSecondPhotoToCombine,
-                            TelegramBotUiService.CancelInlineKeyboard);
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                         return;
                     }
 
@@ -495,7 +496,7 @@ namespace GPTipsBot.UpdateHandlers
                         await botClient.SendUserReplyAsync(
                             update,
                             BotResponse.SendCombinePrompt,
-                            TelegramBotUiService.CancelInlineKeyboard);
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                         return;
                     }
                 }
@@ -505,7 +506,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendCombinePrompt,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return;
                 }
 
@@ -668,7 +669,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendTextRecognitionImage,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return true;
 
                 case MediaToolIntent.PromptFromImage:
@@ -697,7 +698,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendPromptFromImagePhoto,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return true;
 
                 case MediaToolIntent.RemoveWatermark:
@@ -729,7 +730,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         string.Format(BotResponse.RemoveWatermarkIntro, PaymentConfig.WatermarkRemoval),
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return true;
 
                 case MediaToolIntent.ChangePhoto:
@@ -746,14 +747,14 @@ namespace GPTipsBot.UpdateHandlers
                         await botClient.SendUserReplyAsync(
                             update,
                             BotResponse.SendChangePrompt,
-                            TelegramBotUiService.CancelInlineKeyboard);
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                         return true;
                     }
 
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendPhotoToChange,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return true;
 
                 case MediaToolIntent.CombinePhoto:
@@ -774,7 +775,7 @@ namespace GPTipsBot.UpdateHandlers
                         await botClient.SendUserReplyAsync(
                             update,
                             BotResponse.SendSecondPhotoToCombine,
-                            TelegramBotUiService.CancelInlineKeyboard);
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                         return true;
                     }
 
@@ -782,7 +783,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.SendFirstPhotoToCombine,
-                        TelegramBotUiService.CancelInlineKeyboard);
+                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return true;
 
                 case MediaToolIntent.ImagesMenu:
@@ -793,6 +794,9 @@ namespace GPTipsBot.UpdateHandlers
                     }
 
                     await userCommandRepository.AddAsync(update.UserChatKey, CommandType.ImagesMenu);
+                    aliceImageSessionCache.Remove(update.UserChatKey.ChatId);
+                    imageCache.Remove(update.UserChatKey.ChatId);
+                    gptImageSessionCache.Remove(update.UserChatKey.Id);
                     await botClient.SendUserReplyAsync(
                         update,
                         BotResponse.ChooseImagesPlease,
@@ -820,7 +824,9 @@ namespace GPTipsBot.UpdateHandlers
             string imageFileId,
             string? imageFileId2)
         {
-            var hold = await userService.TryReserveAnimationAsync(userKey.Id);
+            var hold = kind == AliceImageKind.Combining
+                ? await userService.TryReserveCombinePhotoAsync(userKey.Id)
+                : await userService.TryReserveChangePhotoAsync(userKey.Id);
             if (hold is null)
             {
                 var nextExec = await jobService.GetNextExecutionForExistingJob<RefreshFreeLimitsJob>();

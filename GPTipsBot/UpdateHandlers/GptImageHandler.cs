@@ -47,7 +47,7 @@ public class GptImageHandler(
             await botClient.SendMessage(
                 chatId,
                 string.Format(BotResponse.ImageDescriptionLimitWarning, GptImageConfig.PromptLimit),
-                replyMarkup: TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
+                replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
             return;
         }
 
@@ -56,7 +56,7 @@ public class GptImageHandler(
             await botClient.SendMessage(
                 chatId,
                 BotResponse.GptImageSendPhotoFirst,
-                replyMarkup: TelegramBotUiService.CancelInlineKeyboard);
+                replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
             return;
         }
 

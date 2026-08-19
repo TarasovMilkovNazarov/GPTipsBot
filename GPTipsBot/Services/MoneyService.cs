@@ -759,7 +759,8 @@ public class MoneyService
             var profile = await _userService.GetUserProfile(invoice.UserId);
             var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
                 profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                profile.PhotoAnimations, profile.Summaries);
+                profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
+                profile.CombinePhotos, profile.ChangePhotos);
             var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 

@@ -9,6 +9,8 @@ public enum PaidFeature
     Summary = 4,
     GptImage = 5,
     WatermarkRemoval = 6,
+    CombinePhoto = 7,
+    ChangePhoto = 8,
 }
 
 public enum PaymentHoldStatus

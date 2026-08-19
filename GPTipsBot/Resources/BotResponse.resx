@@ -254,7 +254,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="ChooseImagesPlease" xml:space="preserve">
     <value>Что сделать с изображением?
 
-Можно просто задать вопрос по фото — например, «Работает ли Юля завтра».</value>
+Можно просто задать вопрос по фото — например, «Что находится на изображении?».</value>
   </data>
   <data name="AdvertisementText" xml:space="preserve">
     <value>[VPN для всей семьи всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
@@ -356,6 +356,8 @@ https://gptips.skolkokomu.ru</value>
  -- распознаваний текста: {5}
  -- анимаций фото: {6}
  -- summary за день: {7}
+ -- объединений фото: {9}
+ -- изменений фото: {10}
 </value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
@@ -653,7 +655,7 @@ https://gptips.skolkokomu.ru</value>
     <value>🧼 Водяной знак удалён · {0:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>Режим удаления водяных знаков всё ещё включён: можно прислать ещё фото, каждое спишет {0:0.##}⭐. Чтобы выйти — нажмите «Отмена».</value>
+    <value>Режим удаления водяных знаков всё ещё включён: можно прислать ещё фото, каждое спишет {0:0.##}⭐. Чтобы выйти — нажмите «Назад».</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ Генерация изображения обычно занимает несколько секунд. Подождите...</value>

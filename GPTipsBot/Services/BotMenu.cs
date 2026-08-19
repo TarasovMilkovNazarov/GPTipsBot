@@ -146,5 +146,6 @@ public class BotMenu
             or CommandType.EditImage
             or CommandType.Summary
             or CommandType.CancelPreviousCommand
-            or CommandType.StopRequest;
+            or CommandType.StopRequest
+            or CommandType.ImagesMenu;
 }

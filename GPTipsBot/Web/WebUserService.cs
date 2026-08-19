@@ -25,6 +25,8 @@ public class WebUserService(
     /// <summary>Guest free quotas (reduced vs Telegram newbie).</summary>
     public const int GuestFreeGpt = 5;
     public const int GuestFreeImages = 3;
+    public const int GuestFreeCombinePhotos = GuestFreeImages;
+    public const int GuestFreeChangePhotos = GuestFreeImages;
     public const int GuestFreeOcr = 3;
     public const int GuestFreeAnimations = 1;
 
@@ -63,6 +65,8 @@ public class WebUserService(
             IsActive = true,
             FreeGptRequests = allowFree ? GuestFreeGpt : 0,
             FreeImageGenerations = allowFree ? GuestFreeImages : 0,
+            FreeCombinePhotos = allowFree ? GuestFreeCombinePhotos : 0,
+            FreeChangePhotos = allowFree ? GuestFreeChangePhotos : 0,
             FreeImageTextRecognitions = allowFree ? GuestFreeOcr : 0,
             FreePhotoAnimations = allowFree ? GuestFreeAnimations : 0,
             FreeSummaryRequests = 0,
@@ -95,6 +99,8 @@ public class WebUserService(
             {
                 raced.FreeGptRequests = 0;
                 raced.FreeImageGenerations = 0;
+                raced.FreeCombinePhotos = 0;
+                raced.FreeChangePhotos = 0;
                 raced.FreeImageTextRecognitions = 0;
                 raced.FreePhotoAnimations = 0;
                 await context.SaveChangesAsync();
@@ -199,6 +205,8 @@ public class WebUserService(
             IsActive = true,
             FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests,
             FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations,
+            FreeCombinePhotos = PaymentConfig.NewbieFreeCombinePhotos,
+            FreeChangePhotos = PaymentConfig.NewbieFreeChangePhotos,
             FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions,
             FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations,
             FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries,
@@ -284,6 +292,8 @@ public class WebUserService(
             EmailConfirmed = email is not null,
             FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests,
             FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations,
+            FreeCombinePhotos = PaymentConfig.NewbieFreeCombinePhotos,
+            FreeChangePhotos = PaymentConfig.NewbieFreeChangePhotos,
             FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions,
             FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations,
             FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries,
@@ -381,6 +391,8 @@ public class WebUserService(
                 EmailConfirmExpiresAt = expires,
                 FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests,
                 FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations,
+                FreeCombinePhotos = PaymentConfig.NewbieFreeCombinePhotos,
+                FreeChangePhotos = PaymentConfig.NewbieFreeChangePhotos,
                 FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions,
                 FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations,
                 FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries,
@@ -398,6 +410,8 @@ public class WebUserService(
             existing.IsActive = true;
             existing.FreeGptRequests = PaymentConfig.NewbieFreeChatGptRequests;
             existing.FreeImageGenerations = PaymentConfig.NewbieFreeImageGenerations;
+            existing.FreeCombinePhotos = PaymentConfig.NewbieFreeCombinePhotos;
+            existing.FreeChangePhotos = PaymentConfig.NewbieFreeChangePhotos;
             existing.FreeImageTextRecognitions = PaymentConfig.NewbieFreeTextRecognitions;
             existing.FreePhotoAnimations = PaymentConfig.NewbieFreePhotoAnimations;
             existing.FreeSummaryRequests = PaymentConfig.NewbieFreeSummaries;
@@ -603,6 +617,8 @@ public class WebUserService(
             .ExecuteUpdateAsync(s => s
                 .SetProperty(u => u.FreeGptRequests, PaymentConfig.NewbieFreeChatGptRequests)
                 .SetProperty(u => u.FreeImageGenerations, PaymentConfig.NewbieFreeImageGenerations)
+                .SetProperty(u => u.FreeCombinePhotos, PaymentConfig.NewbieFreeCombinePhotos)
+                .SetProperty(u => u.FreeChangePhotos, PaymentConfig.NewbieFreeChangePhotos)
                 .SetProperty(u => u.FreeImageTextRecognitions, PaymentConfig.NewbieFreeTextRecognitions)
                 .SetProperty(u => u.FreePhotoAnimations, PaymentConfig.NewbieFreePhotoAnimations)
                 .SetProperty(u => u.FreeSummaryRequests, PaymentConfig.NewbieFreeSummaries));

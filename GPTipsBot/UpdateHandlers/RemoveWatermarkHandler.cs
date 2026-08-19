@@ -29,7 +29,7 @@ public class RemoveWatermarkHandler(
             await botClient.SendUserReplyAsync(
                 update,
                 BotResponse.RemoveWatermarkSendPhoto,
-                TelegramBotUiService.CancelInlineKeyboard);
+                TelegramBotUiService.BackToImagesMenuInlineKeyboard);
             return;
         }
 
@@ -85,7 +85,7 @@ public class RemoveWatermarkHandler(
                 chatId,
                 string.Format(BotResponse.RemoveWatermarkModeActive, PaymentConfig.WatermarkRemoval),
                 messageThreadId: threadId,
-                replyMarkup: TelegramBotUiService.CancelInlineKeyboard);
+                replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
         }
         catch (ClientException ex)
         {

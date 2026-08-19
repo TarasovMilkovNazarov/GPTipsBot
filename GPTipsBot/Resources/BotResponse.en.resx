@@ -254,7 +254,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="ChooseImagesPlease" xml:space="preserve">
     <value>What would you like to do with an image?
 
-You can also just ask a question about the photo — for example, “Does Yulia work tomorrow?”.</value>
+You can also just ask a question about the photo — for example, “What’s in the image?”.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
@@ -351,6 +351,8 @@ Free requests:
  -- image text recognitions: {5}
  -- photo animations: {6}
  -- day summaries: {7}
+ -- photo combines: {9}
+ -- photo edits: {10}
 </value>
   </data>
   <data name="InvoiceText" xml:space="preserve">
@@ -648,7 +650,7 @@ Cost: {0:0.##}⭐ (no free quota)</value>
     <value>🧼 Watermark removed · {0:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>Watermark removal is still on: you can send another photo, each one costs {0:0.##}⭐. Tap “Cancel” to exit.</value>
+    <value>Watermark removal is still on: you can send another photo, each one costs {0:0.##}⭐. Tap “Back” to exit.</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ Image generation usually takes a few seconds. Please wait...</value>

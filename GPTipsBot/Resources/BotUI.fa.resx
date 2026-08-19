@@ -61,6 +61,9 @@
   <data name="CancelButton" xml:space="preserve">
     <value>لغو</value>
   </data>
+  <data name="BackButton" xml:space="preserve">
+    <value>بازگشت</value>
+  </data>
   <data name="ContinueButton" xml:space="preserve">
     <value>ادامه</value>
   </data>

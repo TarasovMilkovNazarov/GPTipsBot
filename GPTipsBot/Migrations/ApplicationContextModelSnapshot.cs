@@ -222,6 +222,12 @@ namespace GPTipsBot.Migrations
                     b.Property<int>("FreeGptRequests")
                         .HasColumnType("integer");
 
+                    b.Property<int>("FreeChangePhotos")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FreeCombinePhotos")
+                        .HasColumnType("integer");
+
                     b.Property<int>("FreeImageGenerations")
                         .HasColumnType("integer");
 

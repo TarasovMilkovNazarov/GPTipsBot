@@ -120,6 +120,9 @@
   <data name="CancelButton" xml:space="preserve">
     <value>Отмена</value>
   </data>
+  <data name="BackButton" xml:space="preserve">
+    <value>Назад</value>
+  </data>
   <data name="ContinueButton" xml:space="preserve">
     <value>Продолжить</value>
   </data>

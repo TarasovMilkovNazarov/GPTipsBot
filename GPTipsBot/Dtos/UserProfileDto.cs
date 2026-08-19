@@ -6,6 +6,8 @@ public class UserProfileDto
     public string? LastName { get; set; }
     public double Stars { get; set; }
     public long Images { get; set; }
+    public long CombinePhotos { get; set; }
+    public long ChangePhotos { get; set; }
     public long ImageTexts { get; set; }
     public long GptRequests { get; set; }
     public long PhotoAnimations { get; set; }

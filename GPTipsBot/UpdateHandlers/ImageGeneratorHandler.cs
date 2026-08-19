@@ -35,7 +35,7 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendMessage(
                     chatId,
                     string.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
-                    replyMarkup: TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
+                    replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                 return;
             }
 

@@ -36,7 +36,7 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendUserReplyAsync(
                     update,
                     BotResponse.SendPromptFromImagePhoto,
-                    TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
+                    TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                 return;
             }
 
@@ -48,7 +48,7 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SendUserReplyAsync(
                     update,
                     BotResponse.SendPromptFromImageCommandFirst,
-                    TelegramBotUiService.GetCancelMarkup(update.IsGroupOrChannel));
+                    TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                 return;
             }
 

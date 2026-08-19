@@ -29,6 +29,7 @@ namespace GPTipsBot.Db
             EnsureAppSchema();
             EnsureYooKassaInvoiceColumns();
             EnsureFreePhotoAnimationsColumn();
+            EnsureFreeAlicePhotoQuotasColumns();
             EnsureFreeSummaryRequestsColumn();
             EnsurePaymentHoldsTable();
             EnsureMessageThreadIdColumn();
@@ -97,6 +98,14 @@ namespace GPTipsBot.Db
         {
             Database.ExecuteSqlRaw($"""
                 ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "FreePhotoAnimations" integer NOT NULL DEFAULT {PaymentConfig.NewbieFreePhotoAnimations};
+                """);
+        }
+
+        private void EnsureFreeAlicePhotoQuotasColumns()
+        {
+            Database.ExecuteSqlRaw($"""
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "FreeCombinePhotos" integer NOT NULL DEFAULT {PaymentConfig.NewbieFreeCombinePhotos};
+                ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "FreeChangePhotos" integer NOT NULL DEFAULT {PaymentConfig.NewbieFreeChangePhotos};
                 """);
         }
 

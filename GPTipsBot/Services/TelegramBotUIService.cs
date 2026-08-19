@@ -14,6 +14,7 @@ namespace GPTipsBot.Services
         public static ReplyKeyboardMarkup ChooseLangKeyboard => GetLanguageKeyboardMarkup();
         public static InlineKeyboardMarkup DepositInlineKeyboard => GetDepositInlineKeyboard();
         public static InlineKeyboardMarkup CancelInlineKeyboard => GetCancelInlineKeyboard();
+        public static InlineKeyboardMarkup BackToImagesMenuInlineKeyboard => GetBackToImagesMenuInlineKeyboard();
 
         public static ReplyMarkup? GetMenuMarkup(bool isGroupOrChannel) =>
             isGroupOrChannel ? null : StartKeyboard;
@@ -176,6 +177,14 @@ namespace GPTipsBot.Services
                 .WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand));
         }
 
+        private static InlineKeyboardButton BackToImagesMenuButton =>
+            InlineKeyboardButton.WithCallbackData(BotUI.BackButton, BotMenu.ImagesMenuCommand);
+
+        private static InlineKeyboardMarkup GetBackToImagesMenuInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(BackToImagesMenuButton);
+        }
+
         private static InlineKeyboardMarkup GetLanguageInlineKeyboard()
         {
             return new InlineKeyboardMarkup(new[]
@@ -212,7 +221,7 @@ namespace GPTipsBot.Services
                     },
                     new[]
                     {
-                        InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)
+                        BackToImagesMenuButton
                     },
                 }
             };
@@ -322,7 +331,7 @@ namespace GPTipsBot.Services
             [
                 sizeRow,
                 qualityRow,
-                [InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)],
+                [BackToImagesMenuButton],
             ]);
         }
 

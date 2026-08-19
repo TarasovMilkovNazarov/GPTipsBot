@@ -166,6 +166,15 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("CancelButton", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Назад.
+        /// </summary>
+        internal static string BackButton {
+            get {
+                return ResourceManager.GetString("BackButton", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Продолжить.
