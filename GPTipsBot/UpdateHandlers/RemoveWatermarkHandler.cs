@@ -36,10 +36,11 @@ public class RemoveWatermarkHandler(
         var hold = await userService.TryReserveWatermarkRemovalAsync(userId);
         if (hold is null)
         {
-            await botClient.SendMessage(
+            await botClient.SendMessageWithMenuAsync(
                 chatId,
                 string.Format(BotResponse.InsufficientBalance, PaymentConfig.WatermarkRemoval),
-                replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                TelegramBotUiService.DepositInlineKeyboard,
+                update.IsGroupOrChannel);
             return;
         }
 
@@ -73,6 +74,7 @@ public class RemoveWatermarkHandler(
                     BotResponse.RemoveWatermarkDoneCaption,
                     PaymentConfig.WatermarkRemoval),
                 messageThreadId: threadId,
+                replyMarkup: TelegramBotUiService.MenuIfPrivate(chatId),
                 replyParameters: update.Message?.TelegramMessageId is long mid
                     ? new ReplyParameters { MessageId = (int)mid }
                     : null);
@@ -81,21 +83,24 @@ public class RemoveWatermarkHandler(
             confirmed = true;
 
             // The command stays active, so say so explicitly: the next photo is charged again.
-            await botClient.SendMessage(
+            await botClient.SendMessageWithMenuAsync(
                 chatId,
                 string.Format(BotResponse.RemoveWatermarkModeActive, PaymentConfig.WatermarkRemoval),
-                messageThreadId: threadId,
-                replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+                TelegramBotUiService.BackToImagesMenuInlineKeyboard,
+                update.IsGroupOrChannel,
+                threadId);
         }
         catch (ClientException ex)
         {
             log.LogInformation(ex, "Watermark removal client error");
-            await botClient.SendMessage(chatId, ex.Message, messageThreadId: threadId);
+            await botClient.SendMessageWithMenuAsync(
+                chatId, ex.Message, isGroupOrChannel: update.IsGroupOrChannel, messageThreadId: threadId);
         }
         catch (Exception ex)
         {
             log.LogError(ex, "Watermark removal failed");
-            await botClient.SendMessage(chatId, BotResponse.SomethingWentWrong, messageThreadId: threadId);
+            await botClient.SendMessageWithMenuAsync(
+                chatId, BotResponse.SomethingWentWrong, isGroupOrChannel: update.IsGroupOrChannel, messageThreadId: threadId);
         }
         finally
         {

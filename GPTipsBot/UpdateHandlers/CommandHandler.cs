@@ -193,17 +193,21 @@ namespace GPTipsBot.UpdateHandlers
                     if (!IsPressedFromButton(update, RemoveWatermarkCommand))
                     {
                         await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
-                        await botClient.SendMessage(chatId, BotResponse.ChooseImagesPlease,
-                            replyMarkup: GetImagesMenuInlineKeyboard());
+                        await botClient.SendMessageWithMenuAsync(
+                            chatId,
+                            BotResponse.ChooseImagesPlease,
+                            GetImagesMenuInlineKeyboard(),
+                            update.IsGroupOrChannel);
                         return;
                     }
 
                     if (profile.Stars < PaymentConfig.WatermarkRemoval)
                     {
-                        await botClient.SendMessage(
+                        await botClient.SendMessageWithMenuAsync(
                             chatId,
                             string.Format(BotResponse.InsufficientBalance, PaymentConfig.WatermarkRemoval),
-                            replyMarkup: DepositInlineKeyboard);
+                            DepositInlineKeyboard,
+                            update.IsGroupOrChannel);
                         return;
                     }
 
@@ -240,7 +244,8 @@ namespace GPTipsBot.UpdateHandlers
                     var packagesKeyboard = moneyService.BuildDepositPackagesKeyboard();
                     if (update.CallbackQuery == null)
                     {
-                        await botClient.SendMessage(chatId, depositText, replyMarkup: packagesKeyboard);
+                        await botClient.SendMessageWithMenuAsync(
+                            chatId, depositText, packagesKeyboard, update.IsGroupOrChannel);
                     }
                     else
                     {
@@ -252,7 +257,8 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
                 case DonateCommand:
-                    await botClient.SendMessage(chatId, BotResponse.DonateInstructions, replyMarkup: CancelInlineKeyboard);
+                    await botClient.SendMessageWithMenuAsync(
+                        chatId, BotResponse.DonateInstructions, CancelInlineKeyboard, update.IsGroupOrChannel);
                     return;
                 case HelpCommand:
                     reply = BotResponse.HelpText;
@@ -264,9 +270,10 @@ namespace GPTipsBot.UpdateHandlers
                 {
                     if (!UpdateDecorator.TryGetCommandArgument(messageText, AskCommand, out var question))
                     {
-                        await botClient.SendMessage(
+                        await botClient.SendMessageWithMenuAsync(
                             chatId,
                             BotResponse.AskUsage,
+                            isGroupOrChannel: update.IsGroupOrChannel,
                             replyParameters: update.Message.TelegramMessageId is long askMid
                                 ? new ReplyParameters { MessageId = (int)askMid }
                                 : null);
@@ -417,15 +424,11 @@ namespace GPTipsBot.UpdateHandlers
 
                     if (previousCommand?.Type is CommandType.Image or CommandType.TextRecognition or CommandType.PromptFromImage)
                     {
-                        replyMarkup = GetCancelMarkup(update.IsGroupOrChannel);
-                    }
-                    else if (!update.IsGroupOrChannel)
-                    {
-                        replyMarkup = new ReplyKeyboardRemove();
+                        replyMarkup = BackToImagesMenuInlineKeyboard;
                     }
                     else
                     {
-                        replyMarkup = null;
+                        replyMarkup = GetMenuMarkup(update.IsGroupOrChannel);
                     }
 
                     if (update.Message.TelegramMessageId.HasValue && state.MessageIdToCancellation
@@ -440,7 +443,7 @@ namespace GPTipsBot.UpdateHandlers
             Guard.Against.Null(reply);
 
             await messageRepository.AddAsync(update.Message);
-            await botClient.SendMessage(chatId, reply, replyMarkup: replyMarkup);
+            await botClient.SendMessageWithMenuAsync(chatId, reply, replyMarkup, update.IsGroupOrChannel);
             return;
 
             async Task<string?> UpdateLanguage(UserChatKey userKey, string langCode)
@@ -452,7 +455,7 @@ namespace GPTipsBot.UpdateHandlers
                         ? new BotMenu().GetGroupBotCommands()
                         : new BotMenu().GetBotCommands(),
                     BotCommandScope.Chat(chatId));
-                replyMarkup = update.IsGroupOrChannel ? null : new ReplyKeyboardRemove();
+                replyMarkup = GetMenuMarkup(update.IsGroupOrChannel);
 
                 var settings = botSettingsRepository.Get(userKey.Id);
                 if (settings == null)
@@ -502,7 +505,11 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+            await botClient.SendMessageWithMenuAsync(
+                chatId,
+                text,
+                keyboard,
+                update.IsGroupOrChannel);
         }
 
         private async Task HandleGptImageStartAsync(UpdateDecorator update, GptImageMode mode)
@@ -535,7 +542,11 @@ namespace GPTipsBot.UpdateHandlers
             }
             else
             {
-                await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+                await botClient.SendMessageWithMenuAsync(
+                    chatId,
+                    text,
+                    keyboard,
+                    update.IsGroupOrChannel);
             }
         }
 
@@ -584,7 +595,11 @@ namespace GPTipsBot.UpdateHandlers
             }
             else
             {
-                await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+                await botClient.SendMessageWithMenuAsync(
+                    chatId,
+                    text,
+                    keyboard,
+                    update.IsGroupOrChannel);
             }
         }
 
@@ -622,7 +637,8 @@ namespace GPTipsBot.UpdateHandlers
                     }
                     else
                     {
-                        await botClient.SendMessage(chatId, text, replyMarkup: needsBalanceKeyboard);
+                        await botClient.SendMessageWithMenuAsync(
+                            chatId, text, needsBalanceKeyboard, update.IsGroupOrChannel);
                     }
 
                     return;
@@ -645,7 +661,8 @@ namespace GPTipsBot.UpdateHandlers
                 }
                 else
                 {
-                    await botClient.SendMessage(chatId, selectedText, replyMarkup: keyboard);
+                    await botClient.SendMessageWithMenuAsync(
+                        chatId, selectedText, keyboard, update.IsGroupOrChannel);
                 }
 
                 return;
@@ -678,7 +695,8 @@ namespace GPTipsBot.UpdateHandlers
                 }
                 else
                 {
-                    await botClient.SendMessage(chatId, text, replyMarkup: keyboard);
+                    await botClient.SendMessageWithMenuAsync(
+                        chatId, text, keyboard, update.IsGroupOrChannel);
                 }
 
                 return;
@@ -701,7 +719,8 @@ namespace GPTipsBot.UpdateHandlers
             }
             else
             {
-                await botClient.SendMessage(chatId, pickerText, replyMarkup: pickerKeyboard);
+                await botClient.SendMessageWithMenuAsync(
+                    chatId, pickerText, pickerKeyboard, update.IsGroupOrChannel);
             }
         }
 
@@ -725,12 +744,13 @@ namespace GPTipsBot.UpdateHandlers
             var hold = await userService.TryReserveSummaryAsync(update.UserChatKey.Id);
             if (hold is null)
             {
-                await botClient.SendMessage(
+                await botClient.SendMessageWithMenuAsync(
                     chatId,
                     BotResponse.SimpleNoFreeRequests,
-                    messageThreadId: messageThreadId is long tid ? (int)tid : null,
-                    replyMarkup: DepositInlineKeyboard,
-                    replyParameters: update.Message.TelegramMessageId is long mid
+                    DepositInlineKeyboard,
+                    update.IsGroupOrChannel,
+                    messageThreadId is long tid ? (int)tid : null,
+                    update.Message.TelegramMessageId is long mid
                         ? new ReplyParameters { MessageId = (int)mid }
                         : null);
                 return;

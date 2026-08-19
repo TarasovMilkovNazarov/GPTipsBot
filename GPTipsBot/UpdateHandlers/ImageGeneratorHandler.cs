@@ -32,10 +32,11 @@ namespace GPTipsBot.UpdateHandlers
 
             if (update.Message.Text.Length > ImageTextDescriptionLimit)
             {
-                await botClient.SendMessage(
+                await botClient.SendMessageWithMenuAsync(
                     chatId,
                     string.Format(BotResponse.ImageDescriptionLimitWarning, ImageTextDescriptionLimit),
-                    replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+                    TelegramBotUiService.BackToImagesMenuInlineKeyboard,
+                    update.IsGroupOrChannel);
                 return;
             }
 

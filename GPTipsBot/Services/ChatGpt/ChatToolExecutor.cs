@@ -2,6 +2,7 @@ using System.Text.Json;
 using GPTipsBot.Config;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
+using GPTipsBot.Extensions;
 using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.SharedModels;
@@ -119,6 +120,7 @@ public class ChatToolExecutor(
                 replyParameters: update.Message?.TelegramMessageId is long mid
                     ? new ReplyParameters { MessageId = (int)mid }
                     : null,
+                replyMarkup: TelegramBotUiService.MenuIfPrivate(chatId),
                 cancellationToken: token);
 
             await userService.ConfirmAsync(hold.Id);

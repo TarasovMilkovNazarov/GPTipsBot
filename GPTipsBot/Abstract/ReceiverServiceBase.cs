@@ -90,20 +90,23 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                         }
                         catch (ClientException clientEx)
                         {
-                            await _botClient.SendMessage(clientEx.ChatId, clientEx.Message,
-                                cancellationToken: stoppingToken);
+                            await _botClient.SendMessageWithMenuAsync(
+                                clientEx.ChatId, clientEx.Message, cancellationToken: stoppingToken);
                         }
                         catch (ClientCanceledException clientCanceledException)
                         {
-                            await _botClient.SendMessage(clientCanceledException.ChatId,
+                            await _botClient.SendMessageWithMenuAsync(
+                                clientCanceledException.ChatId,
                                 clientCanceledException.Message,
-                                replyMarkup: TelegramBotUiService.CancelInlineKeyboard,
+                                TelegramBotUiService.CancelInlineKeyboard,
                                 cancellationToken: stoppingToken);
                         }
                         catch (NotSupportedMessageException notSupportedMessageEx)
                         {
-                            await _botClient.SendMessage(notSupportedMessageEx.ChatId,
-                                BotResponse.UnsupportedMessageType, cancellationToken: stoppingToken);
+                            await _botClient.SendMessageWithMenuAsync(
+                                notSupportedMessageEx.ChatId,
+                                BotResponse.UnsupportedMessageType,
+                                cancellationToken: stoppingToken);
                         }
                         catch (ApiRequestException e)
                         {
@@ -124,7 +127,9 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                             _log.LogError(e, "Unknown error while handling update" +
                                              Environment.NewLine + "{update}", updateStr);
 
-                            await _botClient.SendMessage(chatId ?? userId, BotResponse.SomethingWentWrong,
+                            await _botClient.SendMessageWithMenuAsync(
+                                chatId ?? userId,
+                                BotResponse.SomethingWentWrong,
                                 cancellationToken: stoppingToken);
                         }
                     }

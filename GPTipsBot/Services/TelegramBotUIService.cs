@@ -19,11 +19,15 @@ namespace GPTipsBot.Services
         public static ReplyMarkup? GetMenuMarkup(bool isGroupOrChannel) =>
             isGroupOrChannel ? null : StartKeyboard;
 
-        public static ReplyMarkup GetCancelMarkup(bool isGroupOrChannel) =>
-            isGroupOrChannel ? CancelInlineKeyboard : CancelKeyboard;
+        public static ReplyMarkup GetCancelMarkup(bool isGroupOrChannel) => CancelInlineKeyboard;
 
-        public static ReplyMarkup GetChooseLangMarkup(bool isGroupOrChannel) =>
-            isGroupOrChannel ? GetLanguageInlineKeyboard() : ChooseLangKeyboard;
+        public static ReplyMarkup GetChooseLangMarkup(bool isGroupOrChannel) => GetLanguageInlineKeyboard();
+
+        /// <summary>
+        /// Main reply keyboard for private chats. Groups/channels have no persistent bot keyboard.
+        /// </summary>
+        public static ReplyMarkup? MenuIfPrivate(long chatId) =>
+            chatId > 0 ? StartKeyboard : null;
 
         private static KeyboardButton ImagesMenuButton => new(BotUI.ImagesMenuButton);
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
@@ -161,6 +165,7 @@ namespace GPTipsBot.Services
 
             keyboardMarkup.ResizeKeyboard = true;
             keyboardMarkup.OneTimeKeyboard = false;
+            keyboardMarkup.IsPersistent = true;
 
             return keyboardMarkup;
         }

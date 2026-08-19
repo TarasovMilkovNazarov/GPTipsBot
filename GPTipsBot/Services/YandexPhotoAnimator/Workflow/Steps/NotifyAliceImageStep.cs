@@ -1,5 +1,6 @@
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
+using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
@@ -30,7 +31,10 @@ public class NotifyAliceImageStep(
             if (!string.IsNullOrEmpty(data.ResultImageUrl))
             {
                 await using var imageStream = await DownloadImageAsync(data.ResultImageUrl);
-                await botClient.SendPhoto(data.ChatId, InputFile.FromStream(imageStream, "alice-image.jpg"));
+                await botClient.SendPhoto(
+                    data.ChatId,
+                    InputFile.FromStream(imageStream, "alice-image.jpg"),
+                    replyMarkup: TelegramBotUiService.MenuIfPrivate(data.ChatId));
 
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var messageRepository = scope.ServiceProvider.GetRequiredService<MessageRepository>();
@@ -46,7 +50,7 @@ public class NotifyAliceImageStep(
             }
             else
             {
-                await botClient.SendMessage(data.ChatId, BotResponse.PhotoImageFailed);
+                await botClient.SendMessageWithMenuAsync(data.ChatId, BotResponse.PhotoImageFailed);
             }
         }
         catch (Exception ex)
@@ -56,7 +60,7 @@ public class NotifyAliceImageStep(
 
             try
             {
-                await botClient.SendMessage(data.ChatId, BotResponse.SomethingWentWrong);
+                await botClient.SendMessageWithMenuAsync(data.ChatId, BotResponse.SomethingWentWrong);
             }
             catch (Exception notifyEx)
             {

@@ -16,7 +16,67 @@ namespace GPTipsBot.Extensions
     {
         public static async Task SendTextMessageWithMenuKeyboard(this ITelegramBotClient botClient, long chatId, string text)
         {
-            await botClient.SendMessage(chatId, text, replyMarkup: TelegramBotUiService.StartKeyboard);
+            await botClient.SendMessageWithMenuAsync(chatId, text);
+        }
+
+        /// <summary>
+        /// Sends a private-chat message and keeps the main reply keyboard visible.
+        /// Telegram cannot attach a reply keyboard and an inline keyboard to the same payload,
+        /// so inline buttons are applied with a follow-up edit after the menu is set.
+        /// </summary>
+        public static async Task<Message> SendMessageWithMenuAsync(
+            this ITelegramBotClient botClient,
+            long chatId,
+            string text,
+            ReplyMarkup? replyMarkup = null,
+            bool isGroupOrChannel = false,
+            int? messageThreadId = null,
+            ReplyParameters? replyParameters = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (isGroupOrChannel || chatId < 0)
+            {
+                return await botClient.SendMessage(
+                    chatId,
+                    text,
+                    messageThreadId: messageThreadId,
+                    replyMarkup: replyMarkup,
+                    replyParameters: replyParameters,
+                    cancellationToken: cancellationToken);
+            }
+
+            if (replyMarkup is InlineKeyboardMarkup inline)
+            {
+                var sent = await botClient.SendMessage(
+                    chatId,
+                    text,
+                    messageThreadId: messageThreadId,
+                    replyMarkup: TelegramBotUiService.StartKeyboard,
+                    replyParameters: replyParameters,
+                    cancellationToken: cancellationToken);
+                try
+                {
+                    await botClient.EditMessageReplyMarkup(
+                        chatId,
+                        sent.MessageId,
+                        inline,
+                        cancellationToken: cancellationToken);
+                }
+                catch (ApiRequestException)
+                {
+                    // Menu is already shown; inline buttons are best-effort.
+                }
+
+                return sent;
+            }
+
+            return await botClient.SendMessage(
+                chatId,
+                text,
+                messageThreadId: messageThreadId,
+                replyMarkup: replyMarkup ?? TelegramBotUiService.StartKeyboard,
+                replyParameters: replyParameters,
+                cancellationToken: cancellationToken);
         }
         
         public static async Task SendBotVersionAsync(this ITelegramBotClient botClient, params long[] chatIds)
@@ -42,12 +102,13 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             ReplyMarkup? replyMarkup = null,
             bool acknowledgeInGroup = true)
         {
-            await botClient.SendMessage(
+            await botClient.SendMessageWithMenuAsync(
                 update.UserChatKey.ChatId,
                 text,
-                messageThreadId: update.Message?.MessageThreadId is long tid ? (int)tid : null,
-                replyMarkup: replyMarkup,
-                replyParameters: ToReplyParameters(update));
+                replyMarkup,
+                update.IsGroupOrChannel,
+                update.Message?.MessageThreadId is long tid ? (int)tid : null,
+                ToReplyParameters(update));
             return true;
         }
 
@@ -86,10 +147,12 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             foreach (var part in textParts.Take(partsCount))
             {
                 var escapedText = StringUtilities.EscapeTextForMarkdown2(part)!;
+                var isFirst = part == textParts[0];
                 await botClient.SendMessage(
                     chatId,
                     escapedText,
                     ParseMode.MarkdownV2,
+                    replyMarkup: isFirst ? TelegramBotUiService.MenuIfPrivate(chatId) : null,
                     replyParameters: replyToMessageId.HasValue
                         ? new ReplyParameters { MessageId = replyToMessageId.Value }
                         : null);
@@ -136,7 +199,12 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
 
             foreach (var part in textParts.Take(partsCount))
             {
-                await botClient.SendMessage(chatId, part, replyParameters: replyToMessageId);
+                var isFirst = part == textParts[0];
+                await botClient.SendMessage(
+                    chatId,
+                    part,
+                    replyMarkup: isFirst ? TelegramBotUiService.MenuIfPrivate(chatId) : null,
+                    replyParameters: replyToMessageId);
             }
         }
 
@@ -145,17 +213,20 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
         {
             if (!nextRefreshExecution.HasValue || nextRefreshExecution.Value < DateTimeOffset.UtcNow)
             {
-                await botClient.SendMessage(chatId, BotResponse.SimpleNoFreeRequests,
-                    replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
-
+                await botClient.SendMessageWithMenuAsync(
+                    chatId,
+                    BotResponse.SimpleNoFreeRequests,
+                    TelegramBotUiService.DepositInlineKeyboard);
                 return;
             }
 
             var timeTillRefresh = nextRefreshExecution.Value - DateTimeOffset.UtcNow;
             var message = string.Format(BotResponse.TimeNoFreeRequests, timeTillRefresh);
 
-            await botClient.SendMessage(chatId, message,
-                replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+            await botClient.SendMessageWithMenuAsync(
+                chatId,
+                message,
+                TelegramBotUiService.DepositInlineKeyboard);
         }
 
         private static List<string> SplitIfTooLong(string input)

@@ -1,5 +1,6 @@
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
+using GPTipsBot.Extensions;
 using GPTipsBot.Localization;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
@@ -96,7 +97,8 @@ public class NotifyUserStep(
         }
         else
         {
-            await botClient.SendPhoto(data.DeliveryChatId, photo);
+            await botClient.SendPhoto(data.DeliveryChatId, photo,
+                replyMarkup: TelegramBotUiService.MenuIfPrivate(data.DeliveryChatId));
         }
 
         await using var scope = scopeFactory.CreateAsyncScope();
@@ -113,10 +115,11 @@ public class NotifyUserStep(
             return;
         }
 
-        await botClient.SendMessage(
+        await botClient.SendMessageWithMenuAsync(
             data.DeliveryChatId,
             string.Format(BotResponse.InputImageDescriptionText, ImageGeneratorHandler.ImageTextDescriptionLimit),
-            replyMarkup: TelegramBotUiService.GetImageInstructionInlineKeyboard(data.IsSquare));
+            TelegramBotUiService.GetImageInstructionInlineKeyboard(data.IsSquare),
+            isGroupOrChannel: data.DeliveryChatId < 0);
     }
 
     private async Task SendFailureAsync(ImageGenerationWorkflowData data, string text)
@@ -127,7 +130,7 @@ public class NotifyUserStep(
             return;
         }
 
-        await botClient.SendMessage(data.DeliveryChatId, text);
+        await botClient.SendMessageWithMenuAsync(data.DeliveryChatId, text);
     }
 
     private async Task FinalizePaymentAsync(long? paymentHoldId, bool success)

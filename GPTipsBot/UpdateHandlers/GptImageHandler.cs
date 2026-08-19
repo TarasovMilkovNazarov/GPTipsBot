@@ -34,39 +34,43 @@ public class GptImageHandler(
                 var hint = session.Mode == GptImageMode.Edit
                     ? string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost)
                     : BotResponse.GptImageSendPrompt;
-                await botClient.SendMessage(
+                await botClient.SendMessageWithMenuAsync(
                     chatId,
                     hint,
-                    replyMarkup: TelegramBotUiService.GetGptImageOptionsKeyboard(session));
+                    TelegramBotUiService.GetGptImageOptionsKeyboard(session),
+                    update.IsGroupOrChannel);
                 return;
             }
 
         var prompt = update.Message.Text.Trim();
         if (prompt.Length > GptImageConfig.PromptLimit)
         {
-            await botClient.SendMessage(
+            await botClient.SendMessageWithMenuAsync(
                 chatId,
                 string.Format(BotResponse.ImageDescriptionLimitWarning, GptImageConfig.PromptLimit),
-                replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+                TelegramBotUiService.BackToImagesMenuInlineKeyboard,
+                update.IsGroupOrChannel);
             return;
         }
 
         if (session.Mode == GptImageMode.Edit && string.IsNullOrWhiteSpace(session.ImageFileId))
         {
-            await botClient.SendMessage(
+            await botClient.SendMessageWithMenuAsync(
                 chatId,
                 BotResponse.GptImageSendPhotoFirst,
-                replyMarkup: TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+                TelegramBotUiService.BackToImagesMenuInlineKeyboard,
+                update.IsGroupOrChannel);
             return;
         }
 
         var hold = await userService.TryReserveGptImageAsync(userId, session.StarsCost);
         if (hold is null)
         {
-            await botClient.SendMessage(
+            await botClient.SendMessageWithMenuAsync(
                 chatId,
                 string.Format(BotResponse.InsufficientBalance, session.StarsCost),
-                replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
+                TelegramBotUiService.DepositInlineKeyboard,
+                update.IsGroupOrChannel);
             return;
         }
 
@@ -121,6 +125,7 @@ public class GptImageHandler(
                     session.Size,
                     session.StarsCost),
                 messageThreadId: threadId,
+                replyMarkup: TelegramBotUiService.MenuIfPrivate(chatId),
                 replyParameters: update.Message.TelegramMessageId is long mid
                     ? new ReplyParameters { MessageId = (int)mid }
                     : null);
@@ -132,12 +137,14 @@ public class GptImageHandler(
         catch (ClientException ex)
         {
             log.LogInformation(ex, "GPT Image 2 client error");
-            await botClient.SendMessage(chatId, ex.Message, messageThreadId: threadId);
+            await botClient.SendMessageWithMenuAsync(
+                chatId, ex.Message, isGroupOrChannel: update.IsGroupOrChannel, messageThreadId: threadId);
         }
         catch (Exception ex)
         {
             log.LogError(ex, "GPT Image 2 failed");
-            await botClient.SendMessage(chatId, BotResponse.SomethingWentWrong, messageThreadId: threadId);
+            await botClient.SendMessageWithMenuAsync(
+                chatId, BotResponse.SomethingWentWrong, isGroupOrChannel: update.IsGroupOrChannel, messageThreadId: threadId);
         }
         finally
         {

@@ -1,4 +1,5 @@
 using System.Globalization;
+using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Telegram.Bot;
@@ -10,10 +11,10 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
 {
     public async Task<int> StartAsync(long chatId, CancellationToken cancellationToken = default)
     {
-        var message = await botClient.SendMessage(
+        var message = await botClient.SendMessageWithMenuAsync(
             chatId,
             BotResponse.PleaseWaitVideoMsg,
-            replyMarkup: TelegramBotUiService.CancelInlineKeyboard,
+            TelegramBotUiService.CancelInlineKeyboard,
             cancellationToken: cancellationToken);
 
         return message.MessageId;
@@ -42,10 +43,10 @@ public class PhotoAnimationProgressNotifier(ITelegramBotClient botClient)
 
     public async Task<int> StartImageAsync(long chatId, CancellationToken cancellationToken = default)
     {
-        var message = await botClient.SendMessage(
+        var message = await botClient.SendMessageWithMenuAsync(
             chatId,
             BotResponse.PleaseWaitImageMsg,
-            replyMarkup: TelegramBotUiService.CancelInlineKeyboard,
+            TelegramBotUiService.CancelInlineKeyboard,
             cancellationToken: cancellationToken);
 
         return message.MessageId;

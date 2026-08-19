@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.ResponseModels;
 using System.Diagnostics;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace GPTipsBot.UpdateHandlers
 {
@@ -41,15 +42,16 @@ namespace GPTipsBot.UpdateHandlers
             {
                 if (!model.AllowFreeQuota)
                 {
-                    await botClient.SendMessage(
-                        chatId,
-                        string.Format(
-                            BotResponse.ModelNeedsBalance,
-                            model.DisplayName,
-                            model.StarsCost,
-                            GptModelCatalog.Default.DisplayName),
-                        replyMarkup: TelegramBotUiService.GetModelNeedsBalanceKeyboard(),
-                        replyParameters: (int)update.Message.TelegramMessageId!);
+                        await botClient.SendMessageWithMenuAsync(
+                            chatId,
+                            string.Format(
+                                BotResponse.ModelNeedsBalance,
+                                model.DisplayName,
+                                model.StarsCost,
+                                GptModelCatalog.Default.DisplayName),
+                            TelegramBotUiService.GetModelNeedsBalanceKeyboard(),
+                            update.IsGroupOrChannel,
+                            replyParameters: new ReplyParameters { MessageId = (int)update.Message.TelegramMessageId! });
                     return;
                 }
 
@@ -90,11 +92,11 @@ namespace GPTipsBot.UpdateHandlers
                     catch (ChatGptException)
                     {
                         log.LogError("Failed request to OpenAi service: [{Code}] {Message}", response?.Error?.Code, response?.Error?.Message);
-                        await botClient.SendMessage(
-                            chatId,
-                            BotResponse.SomethingWentWrong,
-                            replyParameters: (int)update.Message.TelegramMessageId,
-                            cancellationToken: token);
+                    await botClient.SendMessageWithMenuAsync(
+                        chatId,
+                        BotResponse.SomethingWentWrong,
+                        isGroupOrChannel: update.IsGroupOrChannel,
+                        replyParameters: new ReplyParameters { MessageId = (int)update.Message.TelegramMessageId! });
                         return;
                     }
                     finally
@@ -127,8 +129,11 @@ namespace GPTipsBot.UpdateHandlers
                 catch (ClientException ex)
                 {
                     log.LogInformation(ex, shortMessage);
-                    await botClient.SendMessage(chatId, ex.Message,
-                        replyParameters: (int)update.Message.TelegramMessageId!);
+                    await botClient.SendMessageWithMenuAsync(
+                        chatId,
+                        ex.Message,
+                        isGroupOrChannel: update.IsGroupOrChannel,
+                        replyParameters: new ReplyParameters { MessageId = (int)update.Message.TelegramMessageId! });
                     return;
                 }
                 finally

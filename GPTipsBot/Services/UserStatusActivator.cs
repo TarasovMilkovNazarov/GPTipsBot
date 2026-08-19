@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Dtos;
+using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using GPTipsBot.UpdateHandlers;
 using Microsoft.Extensions.Logging;
@@ -26,8 +27,10 @@ namespace GPTipsBot.Services
         {
             var targetChatId = replyChatId ?? userKey.ChatId;
             var inlineKeyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(BotUI.StopRequestButton, "/stopRequest"));
-            var serviceMessage = await botClient.SendMessage
-                (targetChatId, BotResponse.PleaseWaitMsg, replyMarkup: inlineKeyboard);
+            var serviceMessage = await botClient.SendMessageWithMenuAsync(
+                targetChatId,
+                BotResponse.PleaseWaitMsg,
+                inlineKeyboard);
             _serviceMessageId = serviceMessage.MessageId;
             _targetChatId = targetChatId;
 
