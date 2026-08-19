@@ -65,6 +65,12 @@ public class AliceImageGenerationResult
 
     private static string? ReadNestedResultImageUrl(JsonElement generation)
     {
+        var rootImagesUrl = ReadImagesArrayUrl(generation);
+        if (!string.IsNullOrEmpty(rootImagesUrl))
+        {
+            return rootImagesUrl;
+        }
+
         if (!TryGetProperty(generation, out var results, "results", "Results") ||
             results.ValueKind != JsonValueKind.Object)
         {
@@ -77,7 +83,12 @@ public class AliceImageGenerationResult
             return direct;
         }
 
-        if (!TryGetProperty(results, out var images, "images", "Images") ||
+        return ReadImagesArrayUrl(results);
+    }
+
+    private static string? ReadImagesArrayUrl(JsonElement container)
+    {
+        if (!TryGetProperty(container, out var images, "images", "Images") ||
             images.ValueKind != JsonValueKind.Array)
         {
             return null;

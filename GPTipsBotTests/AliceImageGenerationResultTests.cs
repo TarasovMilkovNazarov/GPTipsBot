@@ -88,6 +88,39 @@ public class AliceImageGenerationResultTests
     }
 
     [Test]
+    public void FromJson_CombiningGeneration_ReadsTopLevelImagesArrayUrl()
+    {
+        const string json = """
+            {
+              "imageCombiningGeneration": {
+                "id": "cc7639589b9711f1b5d772428e827e6c",
+                "kind": "combining",
+                "status": "pending",
+                "remainingTimeSec": 0,
+                "estimateTimeSec": 58,
+                "images": [
+                  {
+                    "id": "cc7639589b9711f1b5d772428e827e6c_1",
+                    "imageURL": "https://yaart-images.s3.yandex.net/webalice/cc7639589b9711f1b5d772428e827e6c_1"
+                  }
+                ]
+              }
+            }
+            """;
+
+        var result = AliceImageGenerationResult.FromJson(json, "imageCombiningGeneration");
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Id, Is.EqualTo("cc7639589b9711f1b5d772428e827e6c"));
+        Assert.That(result.Status, Is.EqualTo("pending"));
+        Assert.That(result.RemainingTimeSec, Is.EqualTo(0));
+        Assert.That(result.EstimateTimeSec, Is.EqualTo(58));
+        Assert.That(
+            result.ImageUrl,
+            Is.EqualTo("https://yaart-images.s3.yandex.net/webalice/cc7639589b9711f1b5d772428e827e6c_1"));
+    }
+
+    [Test]
     public void FromJson_InProgressSourceUrl_IsNotTreatedAsResult()
     {
         const string json = """
