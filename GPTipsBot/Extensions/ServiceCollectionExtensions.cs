@@ -156,11 +156,11 @@ namespace GPTipsBot.Extensions
             {
                 client.BaseAddress = new Uri("https://api.yookassa.ru/v3/");
             });
-            services.AddHttpClient<GPTipsBot.Services.VseGpt.VseGptImageClient>(client =>
+            services.AddHttpClient<GPTipsBot.Services.OpenRouter.OpenRouterImageClient>(client =>
             {
                 client.BaseAddress = new Uri(WatermarkRemovalConfig.BaseUrl);
                 client.Timeout = WatermarkRemovalConfig.RequestTimeout;
-            });
+            }).ConfigurePrimaryHttpMessageHandler(() => new HappProxyClientHandler());
 
             services.AddImageCache();
             services.AddVisionImageCache();

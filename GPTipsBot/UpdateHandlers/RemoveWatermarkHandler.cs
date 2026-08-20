@@ -5,7 +5,7 @@ using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
-using GPTipsBot.Services.VseGpt;
+using GPTipsBot.Services.OpenRouter;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -14,7 +14,7 @@ namespace GPTipsBot.UpdateHandlers;
 
 public class RemoveWatermarkHandler(
     ITelegramBotClient botClient,
-    VseGptImageClient vseGptImageClient,
+    OpenRouterImageClient openRouterImageClient,
     UserService userService,
     ILogger<RemoveWatermarkHandler> log)
     : BaseMessageHandler
@@ -56,7 +56,7 @@ public class RemoveWatermarkHandler(
             var photoBase64 = await update.GetPhotoAsync(botClient);
 
             var sw = Stopwatch.StartNew();
-            var imageBytes = await vseGptImageClient.EditAsync(
+            var imageBytes = await openRouterImageClient.EditAsync(
                 WatermarkRemovalConfig.ModelId,
                 WatermarkRemovalConfig.Prompt,
                 photoBase64,

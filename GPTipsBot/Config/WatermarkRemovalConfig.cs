@@ -1,14 +1,15 @@
 namespace GPTipsBot.Config;
 
 /// <summary>
-/// Watermark removal via VseGPT img2img (ByteDance Seedream 4.5).
+/// Watermark removal via OpenRouter img2img (ByteDance Seedream 4.5).
 /// Seedream is the only edit model that keeps the source aspect ratio instead of
 /// forcing a square crop, which is why it is used here instead of GPT Image / Flux.
 /// </summary>
 public static class WatermarkRemovalConfig
 {
-    public const string BaseUrl = "https://api.vsegpt.ru/v1/";
-    public const string ModelId = "img2img-bytedance/seedream-v4.5-edit-multi";
+    public const string BaseUrl = "https://openrouter.ai/api/v1/";
+    public const string ModelId = "bytedance-seed/seedream-4.5";
+    public const string Referer = "https://gptips.skolkokomu.ru";
 
     /// <summary>
     /// Seedream sometimes replaces a corner watermark with a decorative inset panel,
@@ -22,5 +23,5 @@ public static class WatermarkRemovalConfig
 
     public static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
 
-    public static bool IsEnabled => !string.IsNullOrWhiteSpace(AppConfig.VseGptToken);
+    public static bool IsEnabled => !string.IsNullOrWhiteSpace(AppConfig.OpenRouterApiKey);
 }

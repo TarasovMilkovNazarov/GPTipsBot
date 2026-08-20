@@ -19,7 +19,7 @@ namespace GPTipsBot.Config
                 ? DebugOpenAiApiKey
                 : GetEnvStrict("OPENAI_TOKEN");
         public static string? DebugOpenAiApiKey => Environment.GetEnvironmentVariable("DEBUG_OPENAI_TOKEN");
-        public static string? VseGptToken => Environment.GetEnvironmentVariable("VSEGPT_TOKEN");
+        public static string? OpenRouterApiKey => Environment.GetEnvironmentVariable("OPENROUTER_API_KEY");
         public static string YandexCloudApiKey => GetEnvStrict("YC_API_KEY");
         public static string YandexIamToken => Environment.GetEnvironmentVariable("YC_IAM_TOKEN");
         public static string YandexCloudFolderId => GetEnvStrict("YC_FOLDER_ID");

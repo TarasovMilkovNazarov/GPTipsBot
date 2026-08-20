@@ -21,8 +21,8 @@ namespace GPTipsBot.Extensions
 
         /// <summary>
         /// Sends a private-chat message and keeps the main reply keyboard visible.
-        /// Telegram cannot attach a reply keyboard and an inline keyboard to the same payload,
-        /// so inline buttons are applied with a follow-up edit after the menu is set.
+        /// A message can carry only one reply markup: inline buttons go on the message itself,
+        /// while the persistent StartKeyboard stays at the bottom once it has been shown.
         /// </summary>
         public static async Task<Message> SendMessageWithMenuAsync(
             this ITelegramBotClient botClient,
@@ -43,31 +43,6 @@ namespace GPTipsBot.Extensions
                     replyMarkup: replyMarkup,
                     replyParameters: replyParameters,
                     cancellationToken: cancellationToken);
-            }
-
-            if (replyMarkup is InlineKeyboardMarkup inline)
-            {
-                var sent = await botClient.SendMessage(
-                    chatId,
-                    text,
-                    messageThreadId: messageThreadId,
-                    replyMarkup: TelegramBotUiService.StartKeyboard,
-                    replyParameters: replyParameters,
-                    cancellationToken: cancellationToken);
-                try
-                {
-                    await botClient.EditMessageReplyMarkup(
-                        chatId,
-                        sent.MessageId,
-                        inline,
-                        cancellationToken: cancellationToken);
-                }
-                catch (ApiRequestException)
-                {
-                    // Menu is already shown; inline buttons are best-effort.
-                }
-
-                return sent;
             }
 
             return await botClient.SendMessage(

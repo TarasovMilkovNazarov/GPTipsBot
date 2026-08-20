@@ -1,7 +1,6 @@
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using Telegram.Bot;
-using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -29,33 +28,13 @@ public static class AnimateExampleExtensions
         if (File.Exists(ResultMp4Path))
         {
             await using var resultStream = File.OpenRead(ResultMp4Path);
-            if (chatId < 0 || replyMarkup is not InlineKeyboardMarkup inline)
-            {
-                await botClient.SendAnimation(
-                    chatId,
-                    InputFile.FromStream(resultStream, "result.mp4"),
-                    caption: BotResponse.SendPhotoToAnimate,
-                    replyMarkup: replyMarkup ?? (chatId > 0 ? TelegramBotUiService.StartKeyboard : null),
-                    messageThreadId: messageThreadId,
-                    cancellationToken: cancellationToken);
-                return;
-            }
-
-            var sent = await botClient.SendAnimation(
+            await botClient.SendAnimation(
                 chatId,
                 InputFile.FromStream(resultStream, "result.mp4"),
                 caption: BotResponse.SendPhotoToAnimate,
-                replyMarkup: TelegramBotUiService.StartKeyboard,
+                replyMarkup: replyMarkup ?? (chatId > 0 ? TelegramBotUiService.StartKeyboard : null),
                 messageThreadId: messageThreadId,
                 cancellationToken: cancellationToken);
-            try
-            {
-                await botClient.EditMessageReplyMarkup(chatId, sent.MessageId, inline, cancellationToken: cancellationToken);
-            }
-            catch (ApiRequestException)
-            {
-            }
-
             return;
         }
 
