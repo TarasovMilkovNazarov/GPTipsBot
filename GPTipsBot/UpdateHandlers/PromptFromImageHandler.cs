@@ -1,5 +1,4 @@
 using GPTipsBot.Config;
-using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Extensions;
@@ -20,7 +19,6 @@ namespace GPTipsBot.UpdateHandlers
         UserCommandRepository userCommandRepository,
         IAdvertisementClient gramadsAdvertisementClient,
         UserService userService,
-        ApplicationContext context,
         TelejetAdClient telejetAdClient)
         : BaseMessageHandler
     {
@@ -70,8 +68,6 @@ namespace GPTipsBot.UpdateHandlers
 
             try
             {
-                await using var dbTransaction = await context.Database.BeginTransactionAsync();
-
                 var imageBytes = Convert.FromBase64String(base64String);
                 var response = await gptService.SendVisionOneOffAsync(
                     BotResponse.PromptFromImageSystemPrompt,
@@ -97,7 +93,6 @@ namespace GPTipsBot.UpdateHandlers
                 };
 
                 await messageRepository.AddAsync(resultMessage);
-                await dbTransaction.CommitAsync();
 
                 await botClient.SendUserReplyAsync(
                     update,

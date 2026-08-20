@@ -4,6 +4,7 @@ using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
 using Telegram.Bot;
@@ -115,7 +116,7 @@ namespace GPTipsBot.Services
 
         public async Task ReleaseAsync(long holdId)
         {
-            await using var tx = await _context.Database.BeginTransactionAsync();
+            await using var tx = await BeginOwnedTransactionAsync();
 
             var claimed = await _context.PaymentHolds
                 .Where(h => h.Id == holdId && h.Status == PaymentHoldStatus.Held)
@@ -123,7 +124,11 @@ namespace GPTipsBot.Services
 
             if (claimed != 1)
             {
-                await tx.RollbackAsync();
+                if (tx is not null)
+                {
+                    await tx.RollbackAsync();
+                }
+
                 return;
             }
 
@@ -141,7 +146,10 @@ namespace GPTipsBot.Services
                     .ExecuteUpdateAsync(s => s.SetProperty(w => w.Balance, w => w.Balance + hold.WalletAmount));
             }
 
-            await tx.CommitAsync();
+            if (tx is not null)
+            {
+                await tx.CommitAsync();
+            }
         }
 
         public async Task ReleaseExpiredHoldsAsync(CancellationToken cancellationToken = default)
@@ -164,7 +172,7 @@ namespace GPTipsBot.Services
             double walletPrice,
             bool allowFreeQuota = true)
         {
-            await using var tx = await _context.Database.BeginTransactionAsync();
+            await using var tx = await BeginOwnedTransactionAsync();
 
             if (allowFreeQuota)
             {
@@ -174,7 +182,11 @@ namespace GPTipsBot.Services
                     var hold = NewHold(userId, feature, usedFreeQuota: true, walletAmount: 0);
                     _context.PaymentHolds.Add(hold);
                     await _context.SaveChangesAsync();
-                    await tx.CommitAsync();
+                    if (tx is not null)
+                    {
+                        await tx.CommitAsync();
+                    }
+
                     return hold;
                 }
             }
@@ -188,12 +200,34 @@ namespace GPTipsBot.Services
                 var hold = NewHold(userId, feature, usedFreeQuota: false, walletAmount: walletPrice);
                 _context.PaymentHolds.Add(hold);
                 await _context.SaveChangesAsync();
-                await tx.CommitAsync();
+                if (tx is not null)
+                {
+                    await tx.CommitAsync();
+                }
+
                 return hold;
             }
 
-            await tx.RollbackAsync();
+            if (tx is not null)
+            {
+                await tx.RollbackAsync();
+            }
+
             return null;
+        }
+
+        /// <summary>
+        /// Npgsql does not support nested transactions. If the scoped context is already in one,
+        /// join it instead of calling BeginTransaction again.
+        /// </summary>
+        private async Task<IDbContextTransaction?> BeginOwnedTransactionAsync()
+        {
+            if (_context.Database.CurrentTransaction is not null)
+            {
+                return null;
+            }
+
+            return await _context.Database.BeginTransactionAsync();
         }
 
         private async Task<int> DecrementFreeQuotaAsync(long userId, PaidFeature feature) => feature switch

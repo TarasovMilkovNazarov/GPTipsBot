@@ -1,6 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using GPTipsBot.Config;
-using GPTipsBot.Db;
 using GPTipsBot.Dtos;
 using GPTipsBot.Exceptions;
 using GPTipsBot.Extensions;
@@ -25,7 +24,6 @@ namespace GPTipsBot.UpdateHandlers
         IAdvertisementClient gramadsAdvertisementClient,
         TelejetAdClient telejetAdClient,
         UserService userService,
-        ApplicationContext context,
         IJobService jobService,
         InMemoryAdvertisementTracker advertisementTracker)
         : BaseMessageHandler
@@ -63,7 +61,6 @@ namespace GPTipsBot.UpdateHandlers
             var confirmed = false;
             try
             {
-                await using var dbTransaction = await context.Database.BeginTransactionAsync();
                 var request = await messageRepository.AddAsync(update.Message);
 
                 Guard.Against.Null(update.Message.TelegramMessageId);
@@ -124,7 +121,6 @@ namespace GPTipsBot.UpdateHandlers
 
                     await userService.ConfirmAsync(hold.Id);
                     confirmed = true;
-                    await dbTransaction.CommitAsync();
                 }
                 catch (ClientException ex)
                 {

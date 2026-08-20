@@ -1,5 +1,4 @@
-﻿using GPTipsBot.Db;
-using GPTipsBot.Dtos;
+﻿using GPTipsBot.Dtos;
 using GPTipsBot.Enums;
 using GPTipsBot.Extensions;
 using GPTipsBot.Models;
@@ -20,7 +19,6 @@ namespace GPTipsBot.UpdateHandlers
         UserCommandRepository userCommandRepository,
         IAdvertisementClient gramadsAdvertisementClient,
         UserService userService,
-        ApplicationContext context,
         TelejetAdClient telejetAdClient)
         : BaseMessageHandler
     {
@@ -66,8 +64,6 @@ namespace GPTipsBot.UpdateHandlers
             var confirmed = false;
             try
             {
-                await using var dbTransaction = await context.Database.BeginTransactionAsync();
-
                 var text = await yaCloudClient.Recognize(base64String);
 
                 var recognitionResultMessage = new MessageDto(update.UserChatKey)
@@ -79,7 +75,6 @@ namespace GPTipsBot.UpdateHandlers
                 };
 
                 await messageRepository.AddAsync(recognitionResultMessage);
-                await dbTransaction.CommitAsync();
 
                 await botClient.SendUserReplyAsync(update, text);
                 await userService.ConfirmAsync(hold.Id);
