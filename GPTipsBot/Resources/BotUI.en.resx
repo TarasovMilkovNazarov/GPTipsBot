@@ -145,10 +145,10 @@
     <value>❔ Help</value>
   </data>
   <data name="Image" xml:space="preserve">
-    <value>GPT IMAGE 1 — free generation</value>
+    <value>Yandex Art — draw from text</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1</value>
+    <value>🖼 Yandex Art · Free</value>
   </data>
   <data name="ImagesMenu" xml:space="preserve">
     <value>Image tools menu</value>
@@ -193,13 +193,13 @@
     <value>cancel request</value>
   </data>
   <data name="ImageTextRecognizeButton" xml:space="preserve">
-    <value>📝 Text from photo</value>
+    <value>📝 Text from photo · Free</value>
   </data>
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>Get text on image</value>
   </data>
   <data name="PromptFromImageButton" xml:space="preserve">
-    <value>🪄 Prompt from photo</value>
+    <value>💬 Prompt from photo · Free</value>
   </data>
   <data name="PromptFromImage" xml:space="preserve">
     <value>Create a prompt from an image</value>
@@ -234,33 +234,33 @@
     <value>🤖 Model</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT Image 2 — generate</value>
+    <value>GPT Image — generate</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image 2</value>
+    <value>🎨 GPT Image · ⭐</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT Image 2 — edit photo</value>
+    <value>GPT Image — edit photo</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 Edit photo</value>
+    <value>🛠 Edit · GPT Image · ⭐</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>Remove watermark from a photo</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 Remove watermark</value>
+    <value>🧼 Remove watermark · ⭐</value>
   </data>
   <data name="CombinePhoto" xml:space="preserve">
-    <value>Combine two photos</value>
+    <value>Combine two photos · Alice</value>
   </data>
   <data name="CombinePhotoButton" xml:space="preserve">
-    <value>🧩 Combine photos</value>
+    <value>🧩 Combine · Alice · Free</value>
   </data>
   <data name="ChangePhoto" xml:space="preserve">
-    <value>Change photo</value>
+    <value>Redraw photo · Alice</value>
   </data>
   <data name="ChangePhotoButton" xml:space="preserve">
-    <value>🪄 Change photo</value>
+    <value>🖌 Redraw · Alice · Free</value>
   </data>
 </root>

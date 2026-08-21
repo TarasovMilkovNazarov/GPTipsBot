@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + images
 
 Just type a question — the bot replies with conversation context.
-Menu: new chat, models, images (GPT IMAGE 1 / GPT Image 2), photo animation, combine, change, account and ⭐ top-up.
+Menu: new chat, models, images (Yandex Art / GPT Image), photo animation, combine, redraw, account and ⭐ top-up.
 
 Free daily limits apply — see /profile. Details: /help</value>
   </data>
@@ -142,28 +142,28 @@ Just send a text message — the bot replies using the current conversation cont
 
 🎨 Images
 Open “🎨 Images” in the menu:
-• 🖼 GPT IMAGE 1 — free text-to-image (within daily quota)
-• 🎨 GPT Image 2 — paid generation with size and quality options
-• 🛠 Edit photo — edit a photo from a text instruction (paid, GPT Image 2); in groups: reply `/edit_image …` to a photo
+• 🖼 Yandex Art — free text-to-image (within daily quota)
+• 🎨 GPT Image · ⭐ — paid generation with size and quality options
+• 🛠 Edit · GPT Image · ⭐ — edit a photo from a text instruction; in groups: reply `/edit_image …` to a photo
 • 📝 Text from photo — OCR / extract text from an image
-• 🪄 Prompt from photo — create a text-to-image prompt from an uploaded picture
+• 💬 Prompt from photo — create a text-to-image prompt from an uploaded picture
 
 You can also just send a photo (or reply to one) and ask a question — the bot can see the image, including tables and schedules.
 
-🪄 Prompt from photo
+💬 Prompt from photo
 Send an image — the bot writes a prompt that can generate a similar picture (uses ChatGPT quota or ⭐).
 In groups and comments: reply to a photo with /prompt_from_image.
 
 ✨ Animate photo
 Turn a photo into a short animation (free within quota or paid with ⭐).
 
-🧩 Combine photos
+🧩 Combine · Alice
 Merge two photos into one from a text description (uses the photo-animation quota or ⭐).
 Command /combine: first photo, then the second, then a description.
 
-🪄 Change photo
+🖌 Redraw · Alice
 Restyle one photo with Alice (uses the photo-animation quota or ⭐).
-This is not “🛠 Edit photo” (GPT Image 2). Command /change_photo.
+This is not “🛠 Edit · GPT Image”. Command /change_photo.
 
 🧼 Remove watermark
 Removes captions, logos, and semi-transparent overlays from a photo (⭐ only, no free quota).
@@ -188,13 +188,13 @@ Useful commands
 /profile — account
 /model — choose model
 /images — images menu
-/image — GPT IMAGE 1
-/gpt_image — GPT Image 2
-/edit_image — edit photo
+/image — Yandex Art
+/gpt_image — GPT Image
+/edit_image — edit photo (GPT Image)
 /prompt_from_image — prompt from photo
 /animate — animate photo
-/combine — combine two photos
-/change_photo — change photo
+/combine — combine two photos (Alice)
+/change_photo — redraw photo (Alice)
 /remove_watermark — remove watermark
 /get_image_text — OCR
 /deposit — top up
@@ -238,10 +238,10 @@ Support: @my_super_ultra_smart_bot</value>
     <value>Hi! I’m GPTipsBot — AI chat, images, and photo tools.
 
 Just type a question — or pick an action:
-• 🎨 Images — generate, edit, OCR
+• 🎨 Images — Yandex Art, GPT Image, OCR
 • ✨ Animate photo
-• 🧩 Combine photos
-• 🪄 Change photo
+• 🧩 Combine · Alice
+• 🖌 Redraw · Alice
 • 🧼 Remove watermark — paid with ⭐
 • ✍️ /human — simple natural English rewrite
 • 💬 New chat — reset context
@@ -252,15 +252,17 @@ Details: /help
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>What would you like to do with an image?
+    <value>What would you like to do with the photo?
 
-You can also just ask a question about the photo — for example, “What’s in the image?”.</value>
+You can also just ask in text — for example, “What’s in the image?”
+
+Top options are Free (quota). Buttons with ⭐ are paid.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>The text description of the image should not exceed {0} characters. Please shorten the description and send again</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1 — free generation
+    <value>🖼 Yandex Art — draw from text
 
 Enter a description up to {0} characters.
 
@@ -324,7 +326,7 @@ You can also reply with /prompt_from_image to a photo message (including in comm
     <value>To create a prompt from an image, choose the command from the bot menu first</value>
   </data>
   <data name="PromptFromImageHeader" xml:space="preserve">
-    <value>🪄 Prompt from image:</value>
+    <value>💬 Prompt from image:</value>
   </data>
   <data name="PromptFromImageSystemPrompt" xml:space="preserve">
     <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
@@ -610,13 +612,13 @@ Top up your balance or switch to {2}.</value>
     <value>Unknown model. Open /model and pick one from the list.</value>
   </data>
   <data name="GptImageGenerateIntro" xml:space="preserve">
-    <value>🎨 GPT Image 2 — generate
+    <value>🎨 GPT Image — generate
 
 Choose size and quality, then send a description.
 Cost: {0:0.##}⭐ (no free quota)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
-    <value>🛠 GPT Image 2 — edit
+    <value>🛠 GPT Image — edit
 
 Send a photo, then choose size/quality and describe the changes.
 Or reply to a photo: /edit_image make the sky pink
@@ -633,7 +635,7 @@ Cost: {0:0.##}⭐ (no free quota)</value>
 Cost: {0:0.##}⭐</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 Watermark removal

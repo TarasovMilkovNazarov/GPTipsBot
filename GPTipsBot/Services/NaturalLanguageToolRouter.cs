@@ -6,7 +6,7 @@ namespace GPTipsBot.Services;
 public enum MediaToolIntent
 {
     None = 0,
-    /// <summary>Yandex/GPT-IMAGE-1 free generation flow (/image).</summary>
+    /// <summary>YandexART free generation flow (/image).</summary>
     GenerateImage = 1,
     /// <summary>OCR (/get_image_text).</summary>
     RecognizeText = 2,

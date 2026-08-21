@@ -145,10 +145,10 @@
     <value>❔ Помощь</value>
   </data>
   <data name="Image" xml:space="preserve">
-    <value>GPT IMAGE 1 — бесплатная генерация</value>
+    <value>Яндекс Арт — нарисовать по тексту</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1</value>
+    <value>🖼 Яндекс Арт · Free</value>
   </data>
   <data name="ImagesMenu" xml:space="preserve">
     <value>Меню работы с изображениями</value>
@@ -193,13 +193,13 @@
     <value>отменить запрос</value>
   </data>
   <data name="ImageTextRecognizeButton" xml:space="preserve">
-    <value>📝 Текст с фото</value>
+    <value>📝 Текст с фото · Free</value>
   </data>
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>Текст на изображении</value>
   </data>
   <data name="PromptFromImageButton" xml:space="preserve">
-    <value>🪄 Промпт по фото</value>
+    <value>💬 Промпт по фото · Free</value>
   </data>
   <data name="PromptFromImage" xml:space="preserve">
     <value>Составить промпт по изображению</value>
@@ -234,33 +234,33 @@
     <value>🤖 Модель</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT Image 2 — генерация</value>
+    <value>GPT Image — генерация</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image 2</value>
+    <value>🎨 GPT Image · ⭐</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT Image 2 — редактирование фото</value>
+    <value>GPT Image — редактирование фото</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 Редактировать фото</value>
+    <value>🛠 Редактировать · GPT Image · ⭐</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>Убрать водяной знак с фото</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 Убрать водяной знак</value>
+    <value>🧼 Убрать водяной знак · ⭐</value>
   </data>
   <data name="CombinePhoto" xml:space="preserve">
-    <value>Объединить два фото</value>
+    <value>Объединить два фото · Алиса</value>
   </data>
   <data name="CombinePhotoButton" xml:space="preserve">
-    <value>🧩 Объединить фото</value>
+    <value>🧩 Склеить фото · Алиса · Free</value>
   </data>
   <data name="ChangePhoto" xml:space="preserve">
-    <value>Изменить фото</value>
+    <value>Перерисовать фото · Алиса</value>
   </data>
   <data name="ChangePhotoButton" xml:space="preserve">
-    <value>🪄 Изменить фото</value>
+    <value>🖌 Перерисовать · Алиса · Free</value>
   </data>
 </root>

@@ -185,12 +185,18 @@ namespace GPTipsBot.Services
         private static InlineKeyboardButton BackToImagesMenuButton =>
             InlineKeyboardButton.WithCallbackData(BotUI.BackButton, BotMenu.ImagesMenuCommand);
 
+        public static InlineKeyboardButton BackToProfileButton =>
+            InlineKeyboardButton.WithCallbackData(BotUI.BackButton, BotMenu.GetProfileCommand);
+
+        public static InlineKeyboardButton BackToDepositButton =>
+            InlineKeyboardButton.WithCallbackData(BotUI.BackButton, BotMenu.DepositCommand);
+
         private static InlineKeyboardMarkup GetBackToImagesMenuInlineKeyboard()
         {
             return new InlineKeyboardMarkup(BackToImagesMenuButton);
         }
 
-        private static InlineKeyboardMarkup GetLanguageInlineKeyboard()
+        public static InlineKeyboardMarkup GetLanguageInlineKeyboard()
         {
             return new InlineKeyboardMarkup(new[]
             {
@@ -207,6 +213,10 @@ namespace GPTipsBot.Services
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData(BotUI.ArabicButton, BotMenu.SetArLangCommand),
+                },
+                new[]
+                {
+                    BackToProfileButton
                 },
             });
         }
@@ -244,7 +254,7 @@ namespace GPTipsBot.Services
                 .Cast<IEnumerable<InlineKeyboardButton>>()
                 .ToList();
 
-            rows.Add([InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)]);
+            rows.Add([BackToProfileButton]);
 
             return new InlineKeyboardMarkup(rows);
         }
@@ -263,6 +273,10 @@ namespace GPTipsBot.Services
                 {
                     InlineKeyboardButton.WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand),
                 },
+                new[]
+                {
+                    BackToProfileButton
+                },
             });
         }
 
@@ -278,16 +292,17 @@ namespace GPTipsBot.Services
 
         public static InlineKeyboardMarkup GetImagesMenuInlineKeyboard()
         {
+            // Free / quota tools first; paid (⭐) last — labels name the real engine.
             return new InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
-                [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
-                [InlineKeyboardButton.WithCallbackData(BotUI.CombinePhotoButton, BotMenu.CombinePhotoCommand)],
-                [InlineKeyboardButton.WithCallbackData(BotUI.ChangePhotoButton, BotMenu.ChangePhotoCommand)],
-                [InlineKeyboardButton.WithCallbackData(BotUI.RemoveWatermarkButton, BotMenu.RemoveWatermarkCommand)],
-                [InlineKeyboardButton.WithCallbackData(BotUI.ImageButton, BotMenu.ImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.PromptFromImageButton, BotMenu.PromptFromImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.ImageButton, BotMenu.ImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.CombinePhotoButton, BotMenu.CombinePhotoCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.ChangePhotoButton, BotMenu.ChangePhotoCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.RemoveWatermarkButton, BotMenu.RemoveWatermarkCommand)],
             ]);
         }
 

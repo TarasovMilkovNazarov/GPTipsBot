@@ -86,10 +86,10 @@
     <value>❔ راهنما</value>
   </data>
   <data name="Image" xml:space="preserve">
-    <value>GPT IMAGE 1 — تولید رایگان</value>
+    <value>Yandex Art — نقاشی از متن</value>
   </data>
   <data name="ImageButton" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1</value>
+    <value>🖼 Yandex Art · Free</value>
   </data>
   <data name="ImagesMenu" xml:space="preserve">
     <value>منوی ابزارهای تصویر</value>
@@ -134,13 +134,13 @@
     <value>لغو درخواست</value>
   </data>
   <data name="ImageTextRecognizeButton" xml:space="preserve">
-    <value>📝 متن از عکس</value>
+    <value>📝 متن از عکس · Free</value>
   </data>
   <data name="ImageTextRecognize" xml:space="preserve">
     <value>استخراج متن از تصویر</value>
   </data>
   <data name="PromptFromImageButton" xml:space="preserve">
-    <value>🪄 پرامپت از عکس</value>
+    <value>💬 پرامپت از عکس · Free</value>
   </data>
   <data name="PromptFromImage" xml:space="preserve">
     <value>ساخت پرامپت از تصویر</value>
@@ -175,33 +175,33 @@
     <value>🤖 مدل</value>
   </data>
   <data name="GptImage" xml:space="preserve">
-    <value>GPT Image 2 — تولید</value>
+    <value>GPT Image — تولید</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image 2</value>
+    <value>🎨 GPT Image · ⭐</value>
   </data>
   <data name="EditImage" xml:space="preserve">
-    <value>GPT Image 2 — ویرایش عکس</value>
+    <value>GPT Image — ویرایش عکس</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 ویرایش عکس</value>
+    <value>🛠 ویرایش · GPT Image · ⭐</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>حذف واترمارک از عکس</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 حذف واترمارک</value>
+    <value>🧼 حذف واترمارک · ⭐</value>
   </data>
   <data name="CombinePhoto" xml:space="preserve">
-    <value>ادغام دو عکس</value>
+    <value>ادغام دو عکس · Alice</value>
   </data>
   <data name="CombinePhotoButton" xml:space="preserve">
-    <value>🧩 ادغام عکس‌ها</value>
+    <value>🧩 ادغام · Alice · Free</value>
   </data>
   <data name="ChangePhoto" xml:space="preserve">
-    <value>تغییر عکس</value>
+    <value>بازترسیم عکس · Alice</value>
   </data>
   <data name="ChangePhotoButton" xml:space="preserve">
-    <value>🪄 تغییر عکس</value>
+    <value>🖌 بازترسیم · Alice · Free</value>
   </data>
 </root>

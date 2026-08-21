@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + imágenes
 
 Solo escribe una pregunta — el bot responde con el contexto de la conversación.
-Menú: nuevo chat, modelos, imágenes (GPT IMAGE 1 / GPT Image 2), animación, combinación y cambio de fotos, cuenta y recarga ⭐.
+Menú: nuevo chat, modelos, imágenes (Yandex Art / GPT Image), animación, combinación y cambio de fotos, cuenta y recarga ⭐.
 
 Hay límites diarios gratuitos — ver /profile. Detalles: /help</value>
   </data>
@@ -142,13 +142,13 @@ Solo envía un mensaje de texto — el bot responde usando el contexto actual de
 
 🎨 Imágenes
 Abre «🎨 Imágenes» en el menú:
-• 🖼 GPT IMAGE 1 — texto a imagen gratuito (dentro de la cuota diaria)
-• 🎨 GPT Image 2 — generación de pago con opciones de tamaño y calidad
-• 🛠 Editar foto — editar una foto con una instrucción de texto (de pago, GPT Image 2); en grupos: responde `/edit_image …` a una foto
+• 🖼 Yandex Art — texto a imagen gratuito (dentro de la cuota diaria)
+• 🎨 GPT Image — generación de pago con opciones de tamaño y calidad
+• 🛠 Editar foto — editar una foto con una instrucción de texto (de pago, GPT Image); en grupos: responde `/edit_image …` a una foto
 • 📝 Texto de la foto — OCR / extraer texto de una imagen
-• 🪄 Prompt desde foto — crear un prompt de texto a imagen a partir de una foto
+• 💬 Prompt desde foto — crear un prompt de texto a imagen a partir de una foto
 
-🪄 Prompt desde foto
+💬 Prompt desde foto
 Envía una imagen — el bot escribe un prompt que puede generar una imagen similar (usa la cuota de ChatGPT o ⭐).
 En grupos y comentarios: responde a una foto con /prompt_from_image.
 
@@ -161,7 +161,7 @@ Comando /combine: primera foto, luego la segunda, luego la descripción.
 
 🪄 Cambiar foto
 Rehace una foto con Alice (usa la cuota de animación o ⭐).
-No es «🛠 Editar foto» (GPT Image 2). Comando /change_photo.
+No es «🛠 Editar foto» (GPT Image). Comando /change_photo.
 
 🧼 Quitar marca de agua
 Elimina rótulos, logotipos y capas semitransparentes de una foto (solo con ⭐, sin cuota gratuita).
@@ -186,8 +186,8 @@ Comandos útiles
 /profile — cuenta
 /model — elegir modelo
 /images — menú de imágenes
-/image — GPT IMAGE 1
-/gpt_image — GPT Image 2
+/image — Yandex Art
+/gpt_image — GPT Image
 /edit_image — editar foto
 /prompt_from_image — prompt desde foto
 /animate — animar foto
@@ -250,15 +250,17 @@ Detalles: /help
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>¿Qué te gustaría hacer con una imagen?
+    <value>¿Qué te gustaría hacer con la foto?
 
-También puedes hacer una pregunta sobre la foto — por ejemplo, «¿Qué hay en la imagen?».</value>
+También puedes preguntar en texto — por ejemplo, «¿Qué hay en la imagen?»
+
+Arriba: Free (cuota). Botones con ⭐: de pago.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>La descripción de texto de la imagen no debe superar los {0} caracteres. Acórtala y envíala de nuevo</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1 — generación gratuita
+    <value>🖼 Yandex Art — generación gratuita
 
 Introduce una descripción de hasta {0} caracteres.
 
@@ -322,7 +324,7 @@ También puedes responder con /prompt_from_image a un mensaje con foto (incluso 
     <value>Para crear un prompt a partir de una imagen, elige primero el comando del menú del bot</value>
   </data>
   <data name="PromptFromImageHeader" xml:space="preserve">
-    <value>🪄 Prompt desde imagen:</value>
+    <value>💬 Prompt desde imagen:</value>
   </data>
   <data name="PromptFromImageSystemPrompt" xml:space="preserve">
     <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
@@ -608,13 +610,13 @@ Recarga tu saldo o cambia a {2}.</value>
     <value>Modelo desconocido. Abre /model y elige uno de la lista.</value>
   </data>
   <data name="GptImageGenerateIntro" xml:space="preserve">
-    <value>🎨 GPT Image 2 — generar
+    <value>🎨 GPT Image — generar
 
 Elige tamaño y calidad, luego envía una descripción.
 Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
-    <value>🛠 GPT Image 2 — editar
+    <value>🛠 GPT Image — editar
 
 Envía una foto, luego elige tamaño/calidad y describe los cambios.
 O responde a una foto: /edit_image haz el cielo rosa
@@ -631,7 +633,7 @@ Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
 Coste: {0:0.##}⭐</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 Eliminación de marca de agua

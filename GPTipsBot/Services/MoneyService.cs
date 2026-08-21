@@ -166,10 +166,10 @@ public class MoneyService
             });
         }
 
-        rows.Add(new[]
-        {
-            InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)
-        });
+        rows.Add(
+        [
+            TelegramBotUiService.BackToProfileButton
+        ]);
         return new InlineKeyboardMarkup(rows);
     }
 
@@ -192,7 +192,7 @@ public class MoneyService
             },
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(BotUI.CancelButton, BotMenu.CancelCommand)
+                TelegramBotUiService.BackToDepositButton
             }
         };
 

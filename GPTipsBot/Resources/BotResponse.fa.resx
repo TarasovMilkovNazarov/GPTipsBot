@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + تصاویر
 
 فقط یک سوال تایپ کنید - ربات با زمینه گفتگو پاسخ می دهد.
-منو: گپ جدید، مدل‌ها، تصویر (GPT IMAGE 1 / GPT Image 2)، انیمیشن، ادغام و تغییر عکس، حساب کاربری و ⭐ شارژ.
+منو: گپ جدید، مدل‌ها، تصویر (Yandex Art / GPT Image)، انیمیشن، ادغام و تغییر عکس، حساب کاربری و ⭐ شارژ.
 
 محدودیت های روزانه رایگان اعمال می شود - /profile را ببینید. جزئیات: /help</value>
   </data>
@@ -142,13 +142,13 @@ https://gptips.skolkokomu.ru
 
 🎨 تصاویر
 "🎨 تصاویر" را در منو باز کنید:
-• 🖼 GPT IMAGE 1 — ارسال متنی رایگان به تصویر (در سهمیه روزانه)
-• 🎨 GPT Image 2 — نسل پولی با گزینه های اندازه و کیفیت
-• 🛠 ویرایش عکس — ویرایش عکس از یک دستورالعمل متنی (پرداخت، GPT Image 2). در گروه ها: "/edit_image…" را به یک عکس پاسخ دهید
+• 🖼 Yandex Art — ارسال متنی رایگان به تصویر (در سهمیه روزانه)
+• 🎨 GPT Image — نسل پولی با گزینه های اندازه و کیفیت
+• 🛠 ویرایش عکس — ویرایش عکس از یک دستورالعمل متنی (پرداخت، GPT Image). در گروه ها: "/edit_image…" را به یک عکس پاسخ دهید
 • 📝 متن از عکس — OCR / استخراج متن از تصویر
-• 🪄 درخواست از عکس — از یک عکس آپلود شده یک پیام متنی به تصویر ایجاد کنید
+• 💬 درخواست از عکس — از یک عکس آپلود شده یک پیام متنی به تصویر ایجاد کنید
 
-🪄 درخواست از عکس
+💬 درخواست از عکس
 ارسال یک تصویر — ربات درخواستی می نویسد که می تواند تصویر مشابهی ایجاد کند (از سهمیه ChatGPT یا ⭐ استفاده می کند).
 در گروه ها و نظرات: با /prompt_from_image به عکس پاسخ دهید.
 
@@ -159,9 +159,9 @@ https://gptips.skolkokomu.ru
 دو عکس را طبق توضیح متنی در یک تصویر ادغام می‌کند (از سهمیه انیمیشن یا ⭐).
 دستور /combine: اول عکس اول، بعد عکس دوم، سپس توضیح.
 
-🪄 تغییر عکس
+🖌 تغییر عکس
 یک عکس را با آلیسا بازنویسی می‌کند (از سهمیه انیمیشن یا ⭐).
-این «🛠 ویرایش عکس» (GPT Image 2) نیست. دستور /change_photo.
+این «🛠 ویرایش عکس» (GPT Image) نیست. دستور /change_photo.
 
 🧼 حذف واترمارک
 نوشته‌ها، لوگوها و لایه‌های نیمه‌شفاف را از عکس پاک می‌کنم (فقط با ⭐، بدون سهمیه رایگان).
@@ -186,8 +186,8 @@ https://gptips.skolkokomu.ru
 /profile - حساب
 /model - مدل را انتخاب کنید
 /images — منوی تصاویر
-/image - GPT IMAGE 1
-/gpt_image — GPT Image 2
+/image - Yandex Art
+/gpt_image — GPT Image
 /edit_image - ویرایش عکس
 /prompt_from_image - درخواست از عکس
 /animate - عکس متحرک
@@ -239,7 +239,7 @@ https://gptips.skolkokomu.ru
 • 🎨 تصاویر — تولید، ویرایش، OCR
 • ✨ عکس متحرک
 • 🧩 ادغام عکس
-• 🪄 تغییر عکس
+• 🖌 تغییر عکس
 • 🧼 حذف واترمارک — با ⭐
 • ✍️ /human - بازنویسی ساده انگلیسی طبیعی
 • 💬 گپ جدید — زمینه را بازنشانی کنید
@@ -250,15 +250,17 @@ https://gptips.skolkokomu.ru
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>دوست دارید با تصویر چه کاری انجام دهید؟
+    <value>دوست دارید با عکس چه کاری انجام دهید؟
 
-می‌توانید فقط سوالی درباره عکس بپرسید — مثلاً «چه چیزی در تصویر است؟».</value>
+می‌توانید فقط سوالی درباره عکس بپرسید — مثلاً «چه چیزی در تصویر است؟»
+
+بالا: Free (سهمیه). دکمه‌های ⭐: پولی.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>توضیحات متنی تصویر نباید بیشتر از نویسه های {0} باشد. لطفا توضیحات را کوتاه کنید و دوباره ارسال کنید</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1 - نسل رایگان
+    <value>🖼 Yandex Art - نسل رایگان
 
 توضیحاتی تا نویسه های {0} وارد کنید.
 
@@ -322,7 +324,7 @@ https://gptips.skolkokomu.ru</value>
     <value>برای ایجاد یک درخواست از یک تصویر، ابتدا دستور را از منوی ربات انتخاب کنید</value>
   </data>
   <data name="PromptFromImageHeader" xml:space="preserve">
-    <value>🪄 درخواست از تصویر:</value>
+    <value>💬 درخواست از تصویر:</value>
   </data>
   <data name="PromptFromImageSystemPrompt" xml:space="preserve">
     <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
@@ -607,13 +609,13 @@ https://gptips.skolkokomu.ru</value>
     <value>مدل ناشناس /model را باز کنید و یکی را از لیست انتخاب کنید.</value>
   </data>
   <data name="GptImageGenerateIntro" xml:space="preserve">
-    <value>🎨 GPT Image 2 - تولید کنید
+    <value>🎨 GPT Image - تولید کنید
 
 اندازه و کیفیت را انتخاب کنید، سپس توضیحات را ارسال کنید.
 هزینه: {0:0.##}⭐ (بدون سهمیه رایگان)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
-    <value>🛠 GPT Image 2 — ویرایش
+    <value>🛠 GPT Image — ویرایش
 
 یک عکس ارسال کنید، سپس اندازه/کیفیت را انتخاب کنید و تغییرات را شرح دهید.
 یا به یک عکس پاسخ دهید: /edit_image آسمان را صورتی می کند
@@ -630,7 +632,7 @@ https://gptips.skolkokomu.ru</value>
 هزینه: {0:0.##}⭐</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 حذف واترمارک

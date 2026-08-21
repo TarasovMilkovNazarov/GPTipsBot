@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + изображения
 
 Просто напишите вопрос — бот ответит с учётом диалога.
-В меню: новый диалог, модели, изображения (GPT IMAGE 1 / GPT Image 2), оживление, объединение и изменение фото, кабинет и пополнение ⭐.
+В меню: новый диалог, модели, изображения (Яндекс Арт / GPT Image), оживление, склейка и перерисовка фото, кабинет и пополнение ⭐.
 
 Бесплатные лимиты ограничены — смотрите /profile. Подробнее: /help</value>
   </data>
@@ -142,28 +142,28 @@ https://gptips.skolkokomu.ru
 
 🎨 Изображения
 Кнопка «🎨 Изображения» открывает меню:
-• 🖼 GPT IMAGE 1 — бесплатная генерация по текстовому описанию (в рамках лимита)
-• 🎨 GPT Image 2 — платная генерация с выбором размера и качества
-• 🛠 Редактировать фото — изменить фото по инструкции (платно, GPT Image 2); в группах: ответ на фото `/edit_image …`
+• 🖼 Яндекс Арт — бесплатная генерация по текстовому описанию (в рамках лимита)
+• 🎨 GPT Image · ⭐ — платная генерация с выбором размера и качества
+• 🛠 Редактировать · GPT Image · ⭐ — правки фото по инструкции; в группах: ответ на фото `/edit_image …`
 • 📝 Текст с фото — распознать текст на изображении
-• 🪄 Промпт по фото — составить текстовый промпт по загруженному изображению
+• 💬 Промпт по фото — составить текстовый промпт по загруженному изображению
 
 Можно просто прислать фото (или ответить на него) и задать вопрос — бот видит изображение, в том числе таблицы и расписания.
 
-🪄 Промпт по фото
+💬 Промпт по фото
 Отправьте картинку — бот опишет её промптом для генерации похожего изображения (в рамках лимита ChatGPT или за ⭐).
 В группах и комментариях: ответьте на фото командой /prompt_from_image.
 
 ✨ Оживить фото
 Анимация загруженного фото (бесплатно в рамках лимита или за ⭐).
 
-🧩 Объединить фото
+🧩 Склеить фото · Алиса
 Склейка двух фото в одно по текстовому описанию (бесплатно в рамках лимита анимации или за ⭐).
 Команда /combine: сначала первое фото, потом второе, затем описание.
 
-🪄 Изменить фото
+🖌 Перерисовать · Алиса
 Перерисовать одно фото по инструкции Алисы (бесплатно в рамках лимита анимации или за ⭐).
-Это не «🛠 Редактировать фото» (GPT Image 2). Команда /change_photo.
+Это не «🛠 Редактировать · GPT Image». Команда /change_photo.
 
 🧼 Убрать водяной знак
 Уберу с фото надписи, логотипы и полупрозрачные плашки (только за ⭐, без бесплатных запросов).
@@ -188,13 +188,13 @@ https://gptips.skolkokomu.ru
 /profile — личный кабинет
 /model — выбор модели
 /images — меню изображений
-/image — GPT IMAGE 1
-/gpt_image — GPT Image 2
-/edit_image — редактирование фото
+/image — Яндекс Арт
+/gpt_image — GPT Image
+/edit_image — редактирование фото (GPT Image)
 /prompt_from_image — промпт по фото
 /animate — оживить фото
-/combine — объединить два фото
-/change_photo — изменить фото
+/combine — склеить два фото (Алиса)
+/change_photo — перерисовать фото (Алиса)
 /remove_watermark — убрать водяной знак
 /get_image_text — распознать текст
 /deposit — пополнить баланс
@@ -238,10 +238,10 @@ https://gptips.skolkokomu.ru
     <value>Привет! Я GPTipsBot — чат с ИИ, картинки и работа с фото.
 
 Просто напишите вопрос — или выберите действие:
-• 🎨 Изображения — сгенерировать, отредактировать, OCR
+• 🎨 Изображения — Яндекс Арт, GPT Image, OCR
 • ✨ Оживить фото
-• 🧩 Объединить фото
-• 🪄 Изменить фото
+• 🧩 Склеить фото · Алиса
+• 🖌 Перерисовать · Алиса
 • 🧼 Убрать водяной знак — за ⭐
 • ✍️ /human — простой естественный English
 • 💬 Новый диалог — сбросить контекст
@@ -252,9 +252,11 @@ https://gptips.skolkokomu.ru
 https://gptips.skolkokomu.ru</value>
   </data>
   <data name="ChooseImagesPlease" xml:space="preserve">
-    <value>Что сделать с изображением?
+    <value>Что сделать с фото?
 
-Можно просто задать вопрос по фото — например, «Что находится на изображении?».</value>
+Можно просто спросить текстом — например: «Что на изображении?»
+
+Сверху — Free (лимит). Кнопки с ⭐ — платные.</value>
   </data>
   <data name="AdvertisementText" xml:space="preserve">
     <value>[VPN для всей семьи всего за 150руб в месяц](https://t.me/t_consult_service_bot?start=referral_486363646)
@@ -269,7 +271,7 @@ https://gptips.skolkokomu.ru</value>
     <value>Текстовое описание изображения должно быть не более {0} символов. Сократите описание и отправьте заново</value>
   </data>
   <data name="InputImageDescriptionText" xml:space="preserve">
-    <value>🖼 GPT IMAGE 1 — бесплатная генерация
+    <value>🖼 Яндекс Арт — нарисовать по тексту
 
 Введите описание длиной до {0} символов.
 
@@ -336,7 +338,7 @@ https://gptips.skolkokomu.ru</value>
     <value>Чтобы составить промпт по изображению, сначала выберите команду из меню</value>
   </data>
   <data name="PromptFromImageHeader" xml:space="preserve">
-    <value>🪄 Промпт по изображению:</value>
+    <value>💬 Промпт по изображению:</value>
   </data>
   <data name="PromptFromImageSystemPrompt" xml:space="preserve">
     <value>You are an expert prompt engineer for text-to-image models (DALL·E, Midjourney, Stable Diffusion, GPT Image). Write a single detailed English prompt that would recreate the uploaded image as closely as possible. Include subject, composition, lighting, style, colors, mood, camera/lens cues when relevant, and important background details. Output ONLY the prompt text, with no quotes, labels, or explanations.</value>
@@ -615,13 +617,13 @@ https://gptips.skolkokomu.ru</value>
     <value>Неизвестная модель. Откройте /model и выберите из списка.</value>
   </data>
   <data name="GptImageGenerateIntro" xml:space="preserve">
-    <value>🎨 GPT Image 2 — генерация
+    <value>🎨 GPT Image — генерация
 
 Выберите размер и качество, затем отправьте описание.
 Стоимость: {0:0.##}⭐ (без бесплатных запросов)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
-    <value>🛠 GPT Image 2 — редактирование
+    <value>🛠 GPT Image — редактирование
 
 Отправьте фото. Потом выберите размер/качество и опишите правки.
 Или ответьте на фото: /edit_image сделай небо розовым
@@ -638,7 +640,7 @@ https://gptips.skolkokomu.ru</value>
 Стоимость: {0:0.##}⭐</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image 2 · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 Удаление водяного знака

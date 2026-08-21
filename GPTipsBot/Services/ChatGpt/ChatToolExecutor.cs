@@ -31,7 +31,7 @@ public class ChatToolExecutor(
         {
             Name = GenerateImageTool,
             Description =
-                "Generate a picture with GPT Image 2 and send it directly to the user in this chat. " +
+                "Generate a picture with GPT Image and send it directly to the user in this chat. " +
                 "Only call this when the user explicitly asks to draw/create/generate an image, picture, " +
                 "illustration or photo. It costs the user Telegram Stars, so do not call it speculatively " +
                 "or more than once per request. Do not use it for OCR or for describing a photo the user " +
@@ -105,7 +105,7 @@ public class ChatToolExecutor(
         if (hold is null)
         {
             return $"error: insufficient_balance — the user needs {starsCost} Telegram Stars to generate " +
-                   "an image with GPT Image 2 and does not have enough. Politely tell them the cost, in " +
+                   "an image with GPT Image and does not have enough. Politely tell them the cost, in " +
                    "their own language, and that they can top up via /deposit. Do not claim an image was made.";
         }
 

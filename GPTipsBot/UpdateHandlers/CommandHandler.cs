@@ -108,8 +108,8 @@ namespace GPTipsBot.UpdateHandlers
                         profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
                         profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
                         profile.CombinePhotos, profile.ChangePhotos);
-                    replyMarkup = GetProfileInlineKeyboard();
-                    break;
+                    await SendOrEditInlineMessageAsync(update, reply, GetProfileInlineKeyboard());
+                    return;
                 case ImagesMenuCommand:
                     aliceImageSessionCache.Remove(chatId);
                     imageCache.Remove(chatId);
@@ -131,7 +131,7 @@ namespace GPTipsBot.UpdateHandlers
                         break;
                     }
 
-                    await SendOrEditImagesFlowMessageAsync(
+                    await SendOrEditInlineMessageAsync(
                         update, BotResponse.ChooseImagesPlease, GetImagesMenuInlineKeyboard());
                     return;
                 case ModelCommand:
@@ -224,7 +224,7 @@ namespace GPTipsBot.UpdateHandlers
                         BotResponse.RemoveWatermarkIntro,
                         PaymentConfig.WatermarkRemoval);
 
-                    await SendOrEditImagesFlowMessageAsync(update, introText, BackToImagesMenuInlineKeyboard);
+                    await SendOrEditInlineMessageAsync(update, introText, BackToImagesMenuInlineKeyboard);
                     return;
                 }
                 case GptImageSizeSquareCommand:
@@ -305,7 +305,7 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    await SendOrEditImagesFlowMessageAsync(
+                    await SendOrEditInlineMessageAsync(
                         update,
                         string.Format(
                             BotResponse.InputImageDescriptionText,
@@ -317,12 +317,12 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 case CombinePhotoCommand:
                     aliceImageSessionCache.Remove(chatId);
-                    await SendOrEditImagesFlowMessageAsync(
+                    await SendOrEditInlineMessageAsync(
                         update, BotResponse.SendFirstPhotoToCombine, BackToImagesMenuInlineKeyboard);
                     return;
                 case ChangePhotoCommand:
                     imageCache.Remove(chatId);
-                    await SendOrEditImagesFlowMessageAsync(
+                    await SendOrEditInlineMessageAsync(
                         update, BotResponse.SendPhotoToChange, BackToImagesMenuInlineKeyboard);
                     return;
                 case ImageSquareCommand:
@@ -350,7 +350,7 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    await SendOrEditImagesFlowMessageAsync(
+                    await SendOrEditInlineMessageAsync(
                         update, BotResponse.SendTextRecognitionImage, BackToImagesMenuInlineKeyboard);
                     return;
                 case PromptFromImageCommand:
@@ -368,7 +368,7 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    await SendOrEditImagesFlowMessageAsync(
+                    await SendOrEditInlineMessageAsync(
                         update, BotResponse.SendPromptFromImagePhoto, BackToImagesMenuInlineKeyboard);
                     return;
                 case ResetContextCommand:
@@ -377,9 +377,9 @@ namespace GPTipsBot.UpdateHandlers
                     visionImageCache.Forget(update.UserChatKey);
                     break;
                 case ChooseLangCommand:
-                    reply = BotResponse.ChooseLanguagePlease;
-                    replyMarkup = GetChooseLangMarkup(update.IsGroupOrChannel);
-                    break;
+                    await SendOrEditInlineMessageAsync(
+                        update, BotResponse.ChooseLanguagePlease, GetLanguageInlineKeyboard());
+                    return;
                 case SetEngLangCommand:
                     reply = await UpdateLanguage(update.UserChatKey, "en");
                     break;
@@ -489,7 +489,7 @@ namespace GPTipsBot.UpdateHandlers
                    labels.Exists(label => string.Equals(label, text, StringComparison.OrdinalIgnoreCase));
         }
 
-        private async Task SendOrEditImagesFlowMessageAsync(
+        private async Task SendOrEditInlineMessageAsync(
             UpdateDecorator update,
             string text,
             InlineKeyboardMarkup keyboard)
