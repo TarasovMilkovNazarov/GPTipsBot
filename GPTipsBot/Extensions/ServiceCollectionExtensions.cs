@@ -52,14 +52,24 @@ namespace GPTipsBot.Extensions
             services.AddHostedService<WorkflowHostService>();
 
             services.AddSingleton<ISchedulerService, SchedulerService>();
+            services.AddTransient<DailyStatisticsJob>();
+            services.AddTransient<RefreshFreeLimitsJob>();
+            services.AddTransient<RemoveOldRecordsJob>();
+            services.AddTransient<DeactivateKickedUsersJob>();
+            services.AddTransient<SyncYooKassaPaymentsJob>();
+            services.AddTransient<ReleaseExpiredPaymentHoldsJob>();
+            services.AddTransient<BotUpdateInformerJob>();
             services.AddQuartz(q =>
             {
-                q.UseMicrosoftDependencyInjectionJobFactory();
                 q.UsePersistentStore(opt =>
                 {
                     opt.UsePostgres(AppConfig.ConnectionString);
                     opt.UseNewtonsoftJsonSerializer();
                 });
+            });
+            services.AddQuartzHostedService(options =>
+            {
+                options.WaitForJobsToComplete = true;
             });
             services.AddMemoryCache();
             services.AddLogging();
