@@ -564,6 +564,15 @@ namespace GPTipsBot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Не могу сгенерировать такое изображение. Попробуйте другую тему или переформулируйте запрос..
+        /// </summary>
+        public static string ImageGenerationRejected {
+            get {
+                return ResourceManager.GetString("ImageGenerationRejected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ✨ Почти получилось! Просто введите число (например, 5, 10 или 50) – каждая звёздочка важна! 🌟 Спасибо вам!.
         /// </summary>
         public static string StarsDonationHint {

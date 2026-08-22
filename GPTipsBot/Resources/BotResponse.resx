@@ -308,6 +308,9 @@ https://gptips.skolkokomu.ru</value>
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>Что-то пошло не так, попробуйте ещё раз</value>
   </data>
+  <data name="ImageGenerationRejected" xml:space="preserve">
+    <value>Не могу сгенерировать такое изображение. Попробуйте другую тему или переформулируйте запрос.</value>
+  </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>Количество токенов в вашем сообщении {1} превышает лимит в {0} токенов. Сократите своё сообщение. Считайте, что в одном слове содержится примерно 1 токен</value>
   </data>

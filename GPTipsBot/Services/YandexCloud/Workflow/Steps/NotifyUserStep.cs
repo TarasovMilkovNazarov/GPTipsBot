@@ -44,6 +44,10 @@ public class NotifyUserStep(
                 await SendSuccessAsync(data, InputFile.FromStream(imageStream, "image.png"));
                 success = true;
             }
+            else if (string.Equals(data.ErrorMessage, ImageGenerationWorkflowErrors.Rejected, StringComparison.Ordinal))
+            {
+                await SendFailureAsync(data, BotResponse.ImageGenerationRejected);
+            }
             else
             {
                 await SendFailureAsync(data, BotResponse.SomethingWentWrong);

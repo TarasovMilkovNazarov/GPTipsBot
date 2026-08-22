@@ -297,6 +297,9 @@ https://gptips.skolkokomu.ru</value>
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>مشکلی پیش آمد، لطفاً دوباره امتحان کنید.</value>
   </data>
+  <data name="ImageGenerationRejected" xml:space="preserve">
+    <value>نمی‌توانم چنین تصویری بسازم. موضوع دیگری امتحان کنید یا درخواست را بازنویسی کنید.</value>
+  </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>تعداد نشانه‌های موجود در پیام شما {1} از محدودیت رمزهای {0} بیشتر است. لطفا درخواست خود را کوتاه کنید در نظر بگیرید که یک کلمه تقریباً حاوی یک نشانه است.</value>
   </data>

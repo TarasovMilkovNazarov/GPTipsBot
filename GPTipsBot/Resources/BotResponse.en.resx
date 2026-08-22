@@ -299,6 +299,9 @@ Enter a description up to {0} characters.
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>Something went wrong, please try again.</value>
   </data>
+  <data name="ImageGenerationRejected" xml:space="preserve">
+    <value>I can't generate this image. Try a different topic or rephrase your prompt.</value>
+  </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>The number of tokens in your message {1} exceeds the limit of {0} tokens. Please shorten your request. Consider that one word approximately contains one token.</value>
   </data>

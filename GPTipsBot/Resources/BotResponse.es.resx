@@ -297,6 +297,9 @@ Introduce una descripción de hasta {0} caracteres.
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>Algo salió mal, inténtalo de nuevo.</value>
   </data>
+  <data name="ImageGenerationRejected" xml:space="preserve">
+    <value>No puedo generar esta imagen. Prueba otro tema o reformula la descripción.</value>
+  </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>El número de tokens en tu mensaje {1} supera el límite de {0} tokens. Acorta tu solicitud. Ten en cuenta que una palabra contiene aproximadamente un token.</value>
   </data>

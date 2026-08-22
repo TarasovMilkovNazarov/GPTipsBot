@@ -93,6 +93,19 @@ namespace GPTipsBot.Services.YandexCloud
             var contentResult = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
+                if (YandexArtErrors.IsContentRejection(response.StatusCode, contentResult))
+                {
+                    YandexArtErrors.TryParse(contentResult, out var rejection);
+                    _logger.LogWarning(
+                        "YandexART rejected prompt (code {Code}). Prompt length: {PromptLength}. Response: {ResponseBody}",
+                        rejection?.Code,
+                        prompt.Length,
+                        contentResult);
+                    throw new YandexArtRejectedException(
+                        rejection?.Code,
+                        rejection?.Message ?? rejection?.Error);
+                }
+
                 _logger.LogError(
                     "YandexART imageGenerationAsync failed with {StatusCode}. Prompt length: {PromptLength}. Response: {ResponseBody}",
                     (int)response.StatusCode,

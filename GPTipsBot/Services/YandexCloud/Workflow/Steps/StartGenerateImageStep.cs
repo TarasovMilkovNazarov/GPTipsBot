@@ -1,4 +1,5 @@
 using GPTipsBot.Config;
+using GPTipsBot.Services.YandexCloud;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -26,6 +27,11 @@ public class StartGenerateImageStep(
             }
 
             data.OperationId = await imageGenerator.StartImageGenerationAsync(data.Prompt, data.IsSquare);
+        }
+        catch (YandexArtRejectedException ex)
+        {
+            logger.LogWarning(ex, "YandexART rejected image prompt for chat {ChatId}", data.ChatId);
+            data.ErrorMessage = ImageGenerationWorkflowErrors.Rejected;
         }
         catch (Exception ex)
         {

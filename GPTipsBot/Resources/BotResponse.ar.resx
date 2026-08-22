@@ -297,6 +297,9 @@ https://gptips.skolkokomu.ru</value>
   <data name="SomethingWentWrong" xml:space="preserve">
     <value>حدث خطأ ما، يرجى المحاولة مرة أخرى.</value>
   </data>
+  <data name="ImageGenerationRejected" xml:space="preserve">
+    <value>لا أستطيع إنشاء هذه الصورة. جرّب موضوعاً آخر أو أعد صياغة الطلب.</value>
+  </data>
   <data name="TokensLimitExceeded" xml:space="preserve">
     <value>عدد الرموز المميزة في رسالتك {1} يتجاوز الحد الأقصى لعدد الرموز المميزة {0}. يرجى اختصار طلبك. ضع في اعتبارك أن كلمة واحدة تحتوي تقريبًا على رمز واحد.</value>
   </data>
