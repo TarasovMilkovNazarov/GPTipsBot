@@ -34,6 +34,7 @@ namespace GPTipsBot.Services
         private static KeyboardButton CombinePhotoButton => new(BotUI.CombinePhotoButton);
         private static KeyboardButton ChangePhotoButton => new(BotUI.ChangePhotoButton);
         private static KeyboardButton RemoveWatermarkButton => new(BotUI.RemoveWatermarkButton);
+        private static KeyboardButton StickersButton => new(BotUI.StickersButton);
         private static KeyboardButton PromptFromImageButton => new(BotUI.PromptFromImageButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
@@ -161,7 +162,7 @@ namespace GPTipsBot.Services
                 [ModelButton, ImagesMenuButton],
                 [PromptFromImageButton, AnimatePhotoButton],
                 [CombinePhotoButton, ChangePhotoButton],
-                [RemoveWatermarkButton],
+                [RemoveWatermarkButton, StickersButton],
                 [HelpButton],
             ]);
 
