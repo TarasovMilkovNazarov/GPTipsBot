@@ -144,7 +144,6 @@ https://gptips.skolkokomu.ru
 "🎨 تصاویر" را در منو باز کنید:
 • 🖼 Yandex Art — ارسال متنی رایگان به تصویر (در سهمیه روزانه)
 • 🎨 GPT Image — نسل پولی با گزینه های اندازه و کیفیت
-• 🎭 استیکر · ⭐ — بسته ۸ استیکر از عکس یا توضیح. /stickers
 • 🛠 ویرایش عکس — ویرایش عکس از یک دستورالعمل متنی (پرداخت، GPT Image). در گروه ها: "/edit_image…" را به یک عکس پاسخ دهید
 • 📝 متن از عکس — OCR / استخراج متن از تصویر
 • 💬 درخواست از عکس — از یک عکس آپلود شده یک پیام متنی به تصویر ایجاد کنید
@@ -189,7 +188,6 @@ https://gptips.skolkokomu.ru
 /images — منوی تصاویر
 /image - Yandex Art
 /gpt_image — GPT Image
-/stickers — بسته استیکر از عکس یا توضیح
 /edit_image - ویرایش عکس
 /prompt_from_image - درخواست از عکس
 /animate - عکس متحرک
@@ -682,42 +680,5 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="SendCombinePrompt" xml:space="preserve">
     <value>توضیح دهید عکس‌ها چگونه ادغام شوند. مثلاً: «پرتره مشترک، کنار هم ایستاده‌اند»</value>
-  </data>
-  <data name="StickerPackIntro" xml:space="preserve">
-    <value>🎭 بسته استیکر
-
-عکس شخصیت را بفرستید یا با متن توصیف کنید — استیکر می‌کشم و پیش‌نمایش نشان می‌دهم.
-شخصیت: {0:0.##}⭐، سپس ۷ احساس دیگر: {1:0.##}⭐.
-سبک: چیبی بامزه، حاشیه سفید، پس‌زمینه شفاف.</value>
-  </data>
-  <data name="StickerPackProgress" xml:space="preserve">
-    <value>🎭 در حال کشیدن استیکر {0}/{1}…</value>
-  </data>
-  <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>شخصیت آماده است · {0:0.##}⭐
-بسته ۸ احساسی را با {1:0.##}⭐ دیگر بسازم؟</value>
-  </data>
-  <data name="StickerPackReady" xml:space="preserve">
-    <value>بسته {0} استیکر آماده است · {1:0.##}⭐
-می‌توانید آن را به تلگرام اضافه کنید.</value>
-  </data>
-  <data name="StickerPackAlbumCaption" xml:space="preserve">
-    <value>🎭 {0} استیکر</value>
-  </data>
-  <data name="StickerPackPublished" xml:space="preserve">
-    <value>آماده! افزودن بسته:
-{0}</value>
-  </data>
-  <data name="StickerPackPublishFail" xml:space="preserve">
-    <value>انتشار بسته در تلگرام ممکن نشد. دوباره تلاش کنید.</value>
-  </data>
-  <data name="StickerPackPartialFail" xml:space="preserve">
-    <value>احساس‌های کافی کشیده نشد. می‌توانید شخصیت را دوباره بکشید.</value>
-  </data>
-  <data name="StickerPackNeedPreview" xml:space="preserve">
-    <value>اول بسته را بسازید — عکس یا توضیح بفرستید.</value>
-  </data>
-  <data name="StickerPackDefaultTitle" xml:space="preserve">
-    <value>GPTips Stickers</value>
   </data>
 </root>

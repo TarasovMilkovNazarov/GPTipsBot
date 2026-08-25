@@ -263,19 +263,4 @@
   <data name="ChangePhotoButton" xml:space="preserve">
     <value>🖌 Перерисовать · Алиса · Free</value>
   </data>
-  <data name="Stickers" xml:space="preserve">
-    <value>Стикерпак по фото или описанию</value>
-  </data>
-  <data name="StickersButton" xml:space="preserve">
-    <value>🎭 Стикеры · ⭐</value>
-  </data>
-  <data name="StickersHeroOkButton" xml:space="preserve">
-    <value>✅ Собрать набор</value>
-  </data>
-  <data name="StickersHeroRedoButton" xml:space="preserve">
-    <value>🔄 Другой персонаж</value>
-  </data>
-  <data name="StickersPublishButton" xml:space="preserve">
-    <value>📌 Добавить в Telegram</value>
-  </data>
 </root>

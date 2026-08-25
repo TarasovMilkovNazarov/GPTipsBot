@@ -144,7 +144,6 @@ Just send a text message — the bot replies using the current conversation cont
 Open “🎨 Images” in the menu:
 • 🖼 Yandex Art — free text-to-image (within daily quota)
 • 🎨 GPT Image · ⭐ — paid generation with size and quality options
-• 🎭 Stickers · ⭐ — 8-sticker pack from a photo or a text description. /stickers
 • 🛠 Edit · GPT Image · ⭐ — edit a photo from a text instruction; in groups: reply `/edit_image …` to a photo
 • 📝 Text from photo — OCR / extract text from an image
 • 💬 Prompt from photo — create a text-to-image prompt from an uploaded picture
@@ -191,7 +190,6 @@ Useful commands
 /images — images menu
 /image — Yandex Art
 /gpt_image — GPT Image
-/stickers — sticker pack from a photo or a description
 /edit_image — edit photo (GPT Image)
 /prompt_from_image — prompt from photo
 /animate — animate photo
@@ -685,42 +683,5 @@ Cost: {0:0.##}⭐ (no free quota)</value>
   </data>
   <data name="SendCombinePrompt" xml:space="preserve">
     <value>Describe how to combine the photos. For example: “a shared portrait, standing next to each other”</value>
-  </data>
-  <data name="StickerPackIntro" xml:space="preserve">
-    <value>🎭 Sticker pack
-
-Send a photo of the character or describe it in text — I’ll draw a sticker and show a preview.
-Character: {0:0.##}⭐, then 7 more emotions: {1:0.##}⭐.
-Style: cute chibi, white outline, transparent background.</value>
-  </data>
-  <data name="StickerPackProgress" xml:space="preserve">
-    <value>🎭 Drawing sticker {0}/{1}…</value>
-  </data>
-  <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>Character is ready · {0:0.##}⭐
-Build an 8-emotion pack for another {1:0.##}⭐?</value>
-  </data>
-  <data name="StickerPackReady" xml:space="preserve">
-    <value>Pack of {0} stickers is ready · {1:0.##}⭐
-You can add it to Telegram.</value>
-  </data>
-  <data name="StickerPackAlbumCaption" xml:space="preserve">
-    <value>🎭 {0} stickers</value>
-  </data>
-  <data name="StickerPackPublished" xml:space="preserve">
-    <value>Done! Add the pack:
-{0}</value>
-  </data>
-  <data name="StickerPackPublishFail" xml:space="preserve">
-    <value>Could not publish the pack to Telegram. Please try again.</value>
-  </data>
-  <data name="StickerPackPartialFail" xml:space="preserve">
-    <value>Could not draw enough emotions. You can redraw the character and try again.</value>
-  </data>
-  <data name="StickerPackNeedPreview" xml:space="preserve">
-    <value>Build the sticker pack first — send a photo or a description.</value>
-  </data>
-  <data name="StickerPackDefaultTitle" xml:space="preserve">
-    <value>GPTips Stickers</value>
   </data>
 </root>

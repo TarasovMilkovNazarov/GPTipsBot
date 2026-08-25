@@ -1,4 +1,4 @@
-using GPTipsBot.Services.YooKassa;
+﻿using GPTipsBot.Services.YooKassa;
 using GPTipsBot.Db;
 using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
@@ -93,7 +93,6 @@ namespace GPTipsBot.Extensions
             .AddScoped<PromptFromImageHandler>()
             .AddScoped<ChatGptHandler>()
             .AddScoped<GptImageHandler>()
-            .AddScoped<StickerPackHandler>()
             .AddScoped<RemoveWatermarkHandler>()
             .AddScoped<InlineQueryHandler>()
             // services
@@ -101,9 +100,7 @@ namespace GPTipsBot.Extensions
             .AddSingleton<TelejetAdClient>()
             .AddSingleton<IAdvertisementClient, GramadsAdvertisementClient>()
             .AddSingleton<ImageCreatorService>()
-            .AddSingleton<StickerPackService>()
             .AddSingleton<IGptImageSessionCache, GptImageSessionCache>()
-            .AddSingleton<IStickerPackSessionCache, StickerPackSessionCache>()
             .AddSingleton<IImageGenerator, YaCloudClient>()
             .AddSingleton<ITextRecognizer, YaCloudClient>()
             .AddScoped<UserStatusActivator>()
@@ -163,6 +160,7 @@ namespace GPTipsBot.Extensions
 
             services.AddDbContext<ApplicationContext>();
 
+            services.AddHttpClient(nameof(OpenAiVpnConnectivityService));
             services.AddHttpClient<GPTipsBot.Web.YandexOAuthClient>();
             services.AddHttpClient<YooKassaClient>(client =>
             {

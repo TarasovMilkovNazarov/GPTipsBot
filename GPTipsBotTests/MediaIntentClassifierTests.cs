@@ -103,17 +103,6 @@ public class MediaIntentClassifierTests
     }
 
     [Test]
-    public async Task TryClassifyAsync_StickerPackJson_ReturnsRouteWithPrompt()
-    {
-        SetupGptResponse("""{"intent": "sticker_pack", "prompt": "рыжий кот"}""");
-
-        var route = await _classifier.TryClassifyAsync("сделай стикерпак рыжего кота", CancellationToken.None);
-
-        Assert.That(route.Intent, Is.EqualTo(MediaToolIntent.StickerPack));
-        Assert.That(route.Prompt, Is.EqualTo("рыжий кот"));
-    }
-
-    [Test]
     public async Task TryClassifyAsync_RecognizeTextIntent_IgnoresPromptField()
     {
         SetupGptResponse("""{"intent": "recognize_text", "prompt": "should be ignored"}""");

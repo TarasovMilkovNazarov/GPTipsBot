@@ -30,7 +30,6 @@ namespace GPTipsBot.UpdateHandlers
         PromptFromImageHandler promptFromImageHandler,
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
-        StickerPackHandler stickerPackHandler,
         RemoveWatermarkHandler removeWatermarkHandler,
         CommandHandler commandHandler,
         ChatGptHandler chatGptHandler,
@@ -47,7 +46,6 @@ namespace GPTipsBot.UpdateHandlers
         IAliceImageSessionCache aliceImageSessionCache,
         IVisionImageCache visionImageCache,
         IGptImageSessionCache gptImageSessionCache,
-        IStickerPackSessionCache stickerPackSessionCache,
         MessageRepository messageRepository,
         PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
         IJobService jobService,
@@ -317,10 +315,6 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(removeWatermarkHandler);
             }
-            else if (lastCommand?.Type == CommandType.StickerPack && !update.IsGroupOrChannel)
-            {
-                SetNextHandler(stickerPackHandler);
-            }
             else if (update.IsGroupOrChannel &&
                      lastCommand?.Type is CommandType.TextRecognition
                          or CommandType.Deposit
@@ -329,8 +323,7 @@ namespace GPTipsBot.UpdateHandlers
                          or CommandType.CombinePhoto
                          or CommandType.ChangePhoto
                          or CommandType.GptImage
-                         or CommandType.RemoveWatermark
-                         or CommandType.StickerPack)
+                         or CommandType.RemoveWatermark)
             {
                 await botClient.SendMessage(userKey.ChatId, BotResponse.GroupCommandNotAvailable);
                 return;
@@ -737,53 +730,6 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SendUserReplyAsync(
                         update,
                         string.Format(BotResponse.RemoveWatermarkIntro, PaymentConfig.WatermarkRemoval),
-                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
-                    return true;
-
-                case MediaToolIntent.StickerPack:
-                    if (update.IsGroupOrChannel)
-                    {
-                        await botClient.SendMessage(update.UserChatKey.ChatId, BotResponse.GroupCommandNotAvailable);
-                        return true;
-                    }
-
-                    if (profile.Stars < StickerPackConfig.HeroStars)
-                    {
-                        await botClient.SendMessage(
-                            update.UserChatKey.ChatId,
-                            string.Format(BotResponse.InsufficientBalance, StickerPackConfig.HeroStars),
-                            replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
-                        return true;
-                    }
-
-                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.StickerPack);
-                    var stickerSession = stickerPackSessionCache.GetOrCreate(update.UserChatKey.Id);
-                    stickerSession.Reset();
-                    if (update.FileId != null)
-                    {
-                        stickerSession.SourceFileId = update.FileId;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(route.Prompt))
-                    {
-                        stickerSession.Description = route.Prompt;
-                    }
-
-                    stickerPackSessionCache.Set(update.UserChatKey.Id, stickerSession);
-
-                    if (!string.IsNullOrWhiteSpace(stickerSession.SourceFileId) ||
-                        !string.IsNullOrWhiteSpace(stickerSession.Description))
-                    {
-                        await messageRepository.AddAsync(update.Message);
-                        SetNextHandler(stickerPackHandler);
-                        await base.HandleAsync(update);
-                        return true;
-                    }
-
-                    await botClient.SendUserReplyAsync(
-                        update,
-                        string.Format(BotResponse.StickerPackIntro, StickerPackConfig.HeroStars,
-                            StickerPackConfig.PackRemainderStars),
                         TelegramBotUiService.BackToImagesMenuInlineKeyboard);
                     return true;
 

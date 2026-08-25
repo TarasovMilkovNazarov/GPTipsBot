@@ -144,7 +144,6 @@ https://gptips.skolkokomu.ru
 افتح "🎨 الصور" في القائمة:
 • 🖼 Yandex Art — إرسال رسالة نصية مجانية إلى صورة (ضمن الحصة اليومية)
 • 🎨 GPT Image — جيل مدفوع مع خيارات الحجم والجودة
-• 🎭 ملصقات · ⭐ — حزمة 8 ملصقات من صورة أو وصف. /stickers
 • 🛠 تحرير الصورة — تحرير صورة من تعليمات نصية (مدفوعة، GPT Image)؛ في المجموعات: قم بالرد بـ "/edit_image ..." على صورة
 • 📝 نص من الصورة — OCR / استخراج النص من صورة
 • 💬 مطالبة من الصورة - أنشئ رسالة نصية إلى صورة من صورة تم تحميلها
@@ -189,7 +188,6 @@ https://gptips.skolkokomu.ru
 /images — قائمة الصور
 /image — Yandex Art
 /gpt_image — GPT Image
-/stickers — حزمة ملصقات من صورة أو وصف
 /edit_image - تحرير الصورة
 /prompt_from_image - موجه من الصورة
 /animate — صورة متحركة
@@ -682,42 +680,5 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="SendCombinePrompt" xml:space="preserve">
     <value>صف كيف تريد دمج الصورتين. مثلاً: «صورة شخصية مشتركة، يقفان بجانب بعض»</value>
-  </data>
-  <data name="StickerPackIntro" xml:space="preserve">
-    <value>🎭 حزمة ملصقات
-
-أرسل صورة الشخصية أو صفها نصاً — سأرسم ملصقاً وأعرض معاينة.
-الشخصية: {0:0.##}⭐، ثم 7 تعبيرات أخرى: {1:0.##}⭐.
-النمط: تشيبي لطيف، إطار أبيض، خلفية شفافة.</value>
-  </data>
-  <data name="StickerPackProgress" xml:space="preserve">
-    <value>🎭 جارٍ رسم الملصق {0}/{1}…</value>
-  </data>
-  <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>الشخصية جاهزة · {0:0.##}⭐
-هل نبني حزمة من 8 تعبيرات مقابل {1:0.##}⭐ إضافية؟</value>
-  </data>
-  <data name="StickerPackReady" xml:space="preserve">
-    <value>حزمة من {0} ملصقات جاهزة · {1:0.##}⭐
-يمكنك إضافتها إلى تيليجرام.</value>
-  </data>
-  <data name="StickerPackAlbumCaption" xml:space="preserve">
-    <value>🎭 {0} ملصقات</value>
-  </data>
-  <data name="StickerPackPublished" xml:space="preserve">
-    <value>تم! أضف الحزمة:
-{0}</value>
-  </data>
-  <data name="StickerPackPublishFail" xml:space="preserve">
-    <value>تعذر نشر الحزمة في تيليجرام. حاول مرة أخرى.</value>
-  </data>
-  <data name="StickerPackPartialFail" xml:space="preserve">
-    <value>لم يتم رسم تعبيرات كافية. يمكنك إعادة رسم الشخصية والمحاولة مجدداً.</value>
-  </data>
-  <data name="StickerPackNeedPreview" xml:space="preserve">
-    <value>ابنِ الحزمة أولاً — أرسل صورة أو وصفاً.</value>
-  </data>
-  <data name="StickerPackDefaultTitle" xml:space="preserve">
-    <value>GPTips Stickers</value>
   </data>
 </root>

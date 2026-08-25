@@ -25,6 +25,7 @@ namespace GPTipsBot.Config
         public static string YandexCloudFolderId => GetEnvStrict("YC_FOLDER_ID");
         public static string? TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
         public static string? GramadsBearerToken => Environment.GetEnvironmentVariable("GRAMADS_BEARER");
+        public static string? HappSubscriptionUrl => Environment.GetEnvironmentVariable("HAPP_SUBSCRIPTION_URL");
         public static string HappProxyIp => Environment.GetEnvironmentVariable("HAPP_PROXY_IP") ?? "127.0.0.1";
         public static int HappProxyPort => int.TryParse(Environment.GetEnvironmentVariable("HAPP_PROXY_PORT"), out var port) ? port : 10809;
         public static string? HappProxyLogin => Environment.GetEnvironmentVariable("HAPP_PROXY_LOGIN");

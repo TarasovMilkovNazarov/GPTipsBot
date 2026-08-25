@@ -144,7 +144,6 @@ Solo envía un mensaje de texto — el bot responde usando el contexto actual de
 Abre «🎨 Imágenes» en el menú:
 • 🖼 Yandex Art — texto a imagen gratuito (dentro de la cuota diaria)
 • 🎨 GPT Image — generación de pago con opciones de tamaño y calidad
-• 🎭 Stickers · ⭐ — pack de 8 stickers desde una foto o una descripción. /stickers
 • 🛠 Editar foto — editar una foto con una instrucción de texto (de pago, GPT Image); en grupos: responde `/edit_image …` a una foto
 • 📝 Texto de la foto — OCR / extraer texto de una imagen
 • 💬 Prompt desde foto — crear un prompt de texto a imagen a partir de una foto
@@ -189,7 +188,6 @@ Comandos útiles
 /images — menú de imágenes
 /image — Yandex Art
 /gpt_image — GPT Image
-/stickers — pack de stickers desde foto o descripción
 /edit_image — editar foto
 /prompt_from_image — prompt desde foto
 /animate — animar foto
@@ -683,42 +681,5 @@ Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
   </data>
   <data name="SendCombinePrompt" xml:space="preserve">
     <value>Describe cómo combinar las fotos. Por ejemplo: «un retrato juntos, de pie uno al lado del otro»</value>
-  </data>
-  <data name="StickerPackIntro" xml:space="preserve">
-    <value>🎭 Pack de stickers
-
-Envía una foto del personaje o descríbelo — dibujaré un sticker y te mostraré la vista previa.
-Personaje: {0:0.##}⭐, luego 7 emociones más: {1:0.##}⭐.
-Estilo: chibi adorable, contorno blanco, fondo transparente.</value>
-  </data>
-  <data name="StickerPackProgress" xml:space="preserve">
-    <value>🎭 Dibujando sticker {0}/{1}…</value>
-  </data>
-  <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>Personaje listo · {0:0.##}⭐
-¿Armar un pack de 8 emociones por {1:0.##}⭐ más?</value>
-  </data>
-  <data name="StickerPackReady" xml:space="preserve">
-    <value>Pack de {0} stickers listo · {1:0.##}⭐
-Ya puedes añadirlo a Telegram.</value>
-  </data>
-  <data name="StickerPackAlbumCaption" xml:space="preserve">
-    <value>🎭 {0} stickers</value>
-  </data>
-  <data name="StickerPackPublished" xml:space="preserve">
-    <value>¡Listo! Añade el pack:
-{0}</value>
-  </data>
-  <data name="StickerPackPublishFail" xml:space="preserve">
-    <value>No se pudo publicar el pack en Telegram. Inténtalo de nuevo.</value>
-  </data>
-  <data name="StickerPackPartialFail" xml:space="preserve">
-    <value>No se pudieron dibujar suficientes emociones. Puedes redibujar el personaje e intentarlo otra vez.</value>
-  </data>
-  <data name="StickerPackNeedPreview" xml:space="preserve">
-    <value>Primero arma el pack — envía una foto o una descripción.</value>
-  </data>
-  <data name="StickerPackDefaultTitle" xml:space="preserve">
-    <value>GPTips Stickers</value>
   </data>
 </root>
