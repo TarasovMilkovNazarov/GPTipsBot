@@ -37,6 +37,12 @@ public record SharedImageRequestBaseModel
     public string? Quality { get; set; }
 
     /// <summary>
+    ///     Background for GPT Image models: transparent, opaque, or auto.
+    /// </summary>
+    [JsonPropertyName("background")]
+    public string? Background { get; set; }
+
+    /// <summary>
     ///     A unique identifier representing your end-user, which will help OpenAI to monitor and detect abuse.
     /// </summary>
     [JsonPropertyName("user")]

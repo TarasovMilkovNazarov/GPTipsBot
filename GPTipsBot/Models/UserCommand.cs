@@ -47,6 +47,7 @@ public enum CommandType
     Broadcast = 33,
     CombinePhoto = 34,
     ChangePhoto = 35,
+    StickerPack = 36,
 }
 
 public class Wallet: Entity

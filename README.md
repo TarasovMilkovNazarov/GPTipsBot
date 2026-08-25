@@ -65,7 +65,7 @@ MVP: guest cookie sessions, Telegram Login (shared wallet), streaming chat, mode
 
 ## VPN / OpenAI (mihomo)
 
-Проверка прямого доступа к OpenAI через VPN-подписку Happ. Работает **только по админской команде** `/vpn_check` — фоновой джобы нет.
+Проверка доступа к OpenAI через HTTP-прокси mihomo. Работает **только по админской команде** `/vpn_check` — фоновой джобы нет.
 
 ### Схема
 
@@ -89,14 +89,12 @@ gptipsbot-app (Docker)  →  api.openai.com
 
 ### Что делает `/vpn_check`
 
-1. **Subscription** — доступен ли URL подписки (если задан `HAPP_SUBSCRIPTION_URL`).
-2. **OpenAI** — отвечает ли `api.openai.com` через HTTP-прокси mihomo.
+Проверяет, отвечает ли `api.openai.com` через HTTP-прокси mihomo.
 
 Пример ответа:
 
 ```
 #vpn_openai_check
-Subscription: OK (1234 bytes)
 Proxy: host.docker.internal:10809
 OpenAI: OK
 Duration: 842 ms
@@ -105,9 +103,9 @@ Duration: 842 ms
 ### Установка mihomo на VPS (один раз)
 
 ```bash
-# В .env укажите HAPP_SUBSCRIPTION_URL, затем на VPS:
+# URL подписки — аргументом или HAPP_SUBSCRIPTION_URL в .env (только для скрипта):
 chmod +x scripts/setup-mihomo.sh
-sudo ./scripts/setup-mihomo.sh
+sudo ./scripts/setup-mihomo.sh 'https://bot.tiroel.ru/t-consult_service/...'
 ```
 
 Скрипт:
@@ -130,11 +128,12 @@ curl -x http://127.0.0.1:10809 https://api.openai.com/v1/models \
 В `.env` / конфиге деплоя контейнера:
 
 ```env
-HAPP_SUBSCRIPTION_URL=https://bot.tiroel.ru/t-consult_service/xxxxxxx/486xxxxxx
 HAPP_PROXY_IP=host.docker.internal
 HAPP_PROXY_PORT=10809
 OPENAI_TOKEN=sk-...
 ```
+
+URL подписки живёт в `/etc/mihomo/config.yaml`, не в окружении бота.
 
 `host.docker.internal` — адрес VPS-хоста изнутри контейнера. В `docker-compose.yml` для этого добавлен `extra_hosts`:
 

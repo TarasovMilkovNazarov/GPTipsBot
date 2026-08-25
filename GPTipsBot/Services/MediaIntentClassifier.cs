@@ -15,10 +15,10 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
 
     private const string SystemPrompt = """
         You are the intent router for a Telegram bot that can chat, generate images, run OCR on photos,
-        build image-generation prompts from photos, remove watermarks, combine two photos, and change
-        a photo with Yandex Alice. Classify the user's message and reply with STRICT JSON only
+        build image-generation prompts from photos, remove watermarks, combine two photos, change
+        a photo with Yandex Alice, and create Telegram sticker packs. Classify the user's message and reply with STRICT JSON only
         (no markdown, no code fences, no extra text):
-        {"intent": "<generate_image|recognize_text|prompt_from_image|remove_watermark|combine_photo|change_photo|images_menu|none>", "prompt": "<string>"}
+        {"intent": "<generate_image|recognize_text|prompt_from_image|remove_watermark|combine_photo|change_photo|sticker_pack|images_menu|none>", "prompt": "<string>"}
 
         Rules:
         - generate_image: the user wants a picture/drawing/illustration created (e.g. "нарисуй жирафа",
@@ -34,12 +34,15 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
           "combine these photos").
         - change_photo: the user wants Alice to restyle/change one existing photo (e.g. "измени фото",
           "change this photo", "преобрази в аниме"). Not GPT Image 2 "edit_image".
+        - sticker_pack: the user wants a Telegram sticker pack from a photo or a character description
+          (e.g. "сделай стикеры", "sticker pack", "создай стикерпак кота"). "prompt" is the character
+          description only, or "" if they only asked to start the flow / use the attached photo.
         - images_menu: the user asks in general whether/how the bot can work with images or photos,
           without a concrete request yet.
         - none: anything else — regular chat, questions about a photo they sent (schedules, documents,
           "does X work tomorrow"), or requests unrelated to image tools. Use "none" whenever you are
           not confident.
-        - "prompt" must be "" unless intent is "generate_image".
+        - "prompt" must be "" unless intent is "generate_image" or "sticker_pack".
         Reply with the JSON object only.
         """;
 
@@ -87,6 +90,7 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
                 "remove_watermark" => MediaToolIntent.RemoveWatermark,
                 "combine_photo" => MediaToolIntent.CombinePhoto,
                 "change_photo" => MediaToolIntent.ChangePhoto,
+                "sticker_pack" => MediaToolIntent.StickerPack,
                 "images_menu" => MediaToolIntent.ImagesMenu,
                 _ => MediaToolIntent.None,
             };
@@ -97,7 +101,7 @@ public class MediaIntentClassifier(IGpt gptService, ILogger<MediaIntentClassifie
             }
 
             string? prompt = null;
-            if (intent == MediaToolIntent.GenerateImage &&
+            if (intent is MediaToolIntent.GenerateImage or MediaToolIntent.StickerPack &&
                 root.TryGetProperty("prompt", out var promptProp) &&
                 promptProp.GetString() is { Length: > 0 } promptValue)
             {

@@ -69,6 +69,7 @@ public class DailyStatisticsJob(
         var human = await CountCommandUses(CommandType.Human, today);
         var combine = await CountCommandUses(CommandType.CombinePhoto, today);
         var change = await CountCommandUses(CommandType.ChangePhoto, today);
+        var stickers = await CountCommandUses(CommandType.StickerPack, today);
 
         var message = "#statistics" + Environment.NewLine +
                       $"New users created: {newUsersCount} for {today:dd.MM.yyyy}" + Environment.NewLine;
@@ -83,6 +84,7 @@ public class DailyStatisticsJob(
         message += Environment.NewLine + $"/human uses: {human.Count} ({human.UniqueUsers} users)";
         message += Environment.NewLine + $"/combine uses: {combine.Count} ({combine.UniqueUsers} users)";
         message += Environment.NewLine + $"/change_photo uses: {change.Count} ({change.UniqueUsers} users)";
+        message += Environment.NewLine + $"/stickers uses: {stickers.Count} ({stickers.UniqueUsers} users)";
         message += Environment.NewLine + $"Web logins: {totalLogins}";
         message += Environment.NewLine + $"  telegram: {telegramLogins.Count} ({telegramLogins.UniqueUsers} users)";
         message += Environment.NewLine + $"  guest: {guestLogins.Count} ({guestLogins.UniqueUsers} users)";
