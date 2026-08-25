@@ -157,6 +157,36 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("ChangePhotoButton", resourceCulture);
             }
         }
+
+        internal static string Stickers {
+            get {
+                return ResourceManager.GetString("Stickers", resourceCulture);
+            }
+        }
+
+        internal static string StickersButton {
+            get {
+                return ResourceManager.GetString("StickersButton", resourceCulture);
+            }
+        }
+
+        internal static string StickersHeroOkButton {
+            get {
+                return ResourceManager.GetString("StickersHeroOkButton", resourceCulture);
+            }
+        }
+
+        internal static string StickersHeroRedoButton {
+            get {
+                return ResourceManager.GetString("StickersHeroRedoButton", resourceCulture);
+            }
+        }
+
+        internal static string StickersPublishButton {
+            get {
+                return ResourceManager.GetString("StickersPublishButton", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Отмена.

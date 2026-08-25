@@ -27,6 +27,7 @@ public partial class OpenAIService : IImageService
         AddOptionalString(multipartContent, "size", imageEditCreateRequest.Size);
         AddOptionalString(multipartContent, "quality", imageEditCreateRequest.Quality);
         AddOptionalString(multipartContent, "model", imageEditCreateRequest.Model);
+        AddOptionalString(multipartContent, "background", imageEditCreateRequest.Background);
 
         if (imageEditCreateRequest.N != null)
         {

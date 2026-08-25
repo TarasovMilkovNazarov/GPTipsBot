@@ -17,7 +17,8 @@ public class ImageCreatorService(
         string size,
         string quality,
         long chatId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? background = null)
     {
         var imageResult = await openAiService.Image.CreateImage(new ImageCreateRequest
         {
@@ -26,6 +27,7 @@ public class ImageCreatorService(
             Size = size,
             Quality = quality,
             OutputFormat = StaticValues.ImageStatics.OutputFormat.Png,
+            Background = background,
             User = chatId.ToString(),
             Model = GptImageConfig.ModelId,
         }, cancellationToken);
@@ -40,7 +42,8 @@ public class ImageCreatorService(
         string size,
         string quality,
         long chatId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? background = null)
     {
         var imageResult = await openAiService.Image.CreateImageEdit(new ImageEditCreateRequest
         {
@@ -51,6 +54,7 @@ public class ImageCreatorService(
             Size = size,
             Quality = quality,
             OutputFormat = StaticValues.ImageStatics.OutputFormat.Png,
+            Background = background,
             User = chatId.ToString(),
             Model = GptImageConfig.ModelId,
         }, cancellationToken);

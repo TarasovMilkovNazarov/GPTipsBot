@@ -79,6 +79,7 @@ namespace GPTipsBot.Services
                 { BotMenu.EditImageCommand, new() },
                 { BotMenu.ImagesMenuCommand, new() },
                 { BotMenu.RemoveWatermarkCommand, new() },
+                { BotMenu.StickersCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -109,6 +110,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.EditImageCommand].Add(BotUI.EditImageButton);
                 ButtonToLocalizations[BotMenu.ImagesMenuCommand].Add(BotUI.ImagesMenuButton);
                 ButtonToLocalizations[BotMenu.RemoveWatermarkCommand].Add(BotUI.RemoveWatermarkButton);
+                ButtonToLocalizations[BotMenu.StickersCommand].Add(BotUI.StickersButton);
             }
 
             // Keep old reply-keyboard labels working until users get the new menu via /start.
@@ -301,6 +303,7 @@ namespace GPTipsBot.Services
                 [InlineKeyboardButton.WithCallbackData(BotUI.CombinePhotoButton, BotMenu.CombinePhotoCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.ChangePhotoButton, BotMenu.ChangePhotoCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.StickersButton, BotMenu.StickersCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.RemoveWatermarkButton, BotMenu.RemoveWatermarkCommand)],
             ]);
@@ -351,6 +354,26 @@ namespace GPTipsBot.Services
             [
                 sizeRow,
                 qualityRow,
+                [BackToImagesMenuButton],
+            ]);
+        }
+
+        public static InlineKeyboardMarkup GetStickerHeroKeyboard()
+        {
+            return new InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton.WithCallbackData(BotUI.StickersHeroOkButton, BotMenu.StickersHeroOkCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.StickersHeroRedoButton, BotMenu.StickersHeroRedoCommand)],
+                [BackToImagesMenuButton],
+            ]);
+        }
+
+        public static InlineKeyboardMarkup GetStickerPublishKeyboard()
+        {
+            return new InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton.WithCallbackData(BotUI.StickersPublishButton, BotMenu.StickersPublishCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.StickersHeroRedoButton, BotMenu.StickersHeroRedoCommand)],
                 [BackToImagesMenuButton],
             ]);
         }

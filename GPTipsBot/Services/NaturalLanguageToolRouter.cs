@@ -22,6 +22,8 @@ public enum MediaToolIntent
     ChangePhoto = 7,
     /// <summary>Yandex Alice studio: combine two photos (/combine).</summary>
     CombinePhoto = 8,
+    /// <summary>AI sticker pack from a photo or a text description (/stickers).</summary>
+    StickerPack = 9,
 }
 
 public readonly record struct MediaToolRoute(MediaToolIntent Intent, string? Prompt = null)
@@ -86,6 +88,25 @@ public static class NaturalLanguageToolRouter
         @"|change\s+(?:this\s+|the\s+)?(?:photo|image|picture)" +
         @"|cambia(?:r)?\s+(?:esta\s+|la\s+)?(?:foto|imagen)" +
         @")",
+        Rx);
+
+    private static readonly Regex StickerPackRegex = new(
+        @"^(?:" +
+        @"(?:сделай|создай|сгенерируй|нарисуй)\s+(?:мне\s+)?(?:набор\s+)?" +
+        @"(?:стикер(?:ы|пак)?|sticker(?:s|\s*pack)?)" +
+        @"(?:\s+(?:из\s+(?:этого\s+)?фото|from\s+(?:this\s+)?(?:photo|image)))?" +
+        @"(?:\s+(?:с|про|of|with|:))?" +
+        @"(?:\s+(?<prompt>.+))?" +
+        @"|(?:стикерпак|sticker\s*pack)" +
+        @"(?:\s+(?:из\s+(?:этого\s+)?фото|from\s+(?:this\s+)?(?:photo|image)))?" +
+        @"(?:\s+(?:с|про|of|:))?" +
+        @"(?:\s+(?<prompt>.+))?" +
+        @"|(?:create|make|generate)\s+(?:me\s+)?(?:an?\s+)?(?:sticker\s*pack|stickers)" +
+        @"(?:\s+(?:from\s+(?:this\s+)?(?:photo|image)))?" +
+        @"(?:\s+(?:of|:))?" +
+        @"(?:\s+(?<prompt>.+))?" +
+        @"|(?:стикеры|stickers)" +
+        @")\s*[.!?]*$",
         Rx);
 
     private static readonly Regex DescribeAttachedPhotoRegex = new(
@@ -223,6 +244,11 @@ public static class NaturalLanguageToolRouter
             return new MediaToolRoute(MediaToolIntent.ChangePhoto);
         }
 
+        if (TryMatchStickerPack(trimmed, out var stickerPrompt))
+        {
+            return new MediaToolRoute(MediaToolIntent.StickerPack, stickerPrompt);
+        }
+
         // "what's on the photo" / "опиши картинку" — vision chat, not the images menu.
         if (trimmed.Length <= 280 && DescribeAttachedPhotoRegex.IsMatch(trimmed))
         {
@@ -277,6 +303,25 @@ public static class NaturalLanguageToolRouter
         }
 
         return GenerateBareRegex.IsMatch(text);
+    }
+
+    private static bool TryMatchStickerPack(string text, out string? prompt)
+    {
+        prompt = null;
+        if (text.Length > 280)
+        {
+            return false;
+        }
+
+        var match = StickerPackRegex.Match(text);
+        if (!match.Success)
+        {
+            return false;
+        }
+
+        var extracted = match.Groups["prompt"].Value.Trim();
+        prompt = extracted.Length > 0 ? extracted : null;
+        return true;
     }
 
     /// <summary>

@@ -144,6 +144,7 @@ https://gptips.skolkokomu.ru
 Кнопка «🎨 Изображения» открывает меню:
 • 🖼 Яндекс Арт — бесплатная генерация по текстовому описанию (в рамках лимита)
 • 🎨 GPT Image · ⭐ — платная генерация с выбором размера и качества
+• 🎭 Стикеры · ⭐ — набор из 8 стикеров по фото или описанию. Команда /stickers
 • 🛠 Редактировать · GPT Image · ⭐ — правки фото по инструкции; в группах: ответ на фото `/edit_image …`
 • 📝 Текст с фото — распознать текст на изображении
 • 💬 Промпт по фото — составить текстовый промпт по загруженному изображению
@@ -190,6 +191,7 @@ https://gptips.skolkokomu.ru
 /images — меню изображений
 /image — Яндекс Арт
 /gpt_image — GPT Image
+/stickers — стикерпак по фото или описанию
 /edit_image — редактирование фото (GPT Image)
 /prompt_from_image — промпт по фото
 /animate — оживить фото
@@ -688,5 +690,42 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="SendCombinePrompt" xml:space="preserve">
     <value>Опишите, как объединить фото. Например: «общий портрет, стоят рядом»</value>
+  </data>
+  <data name="StickerPackIntro" xml:space="preserve">
+    <value>🎭 Стикерпак
+
+Пришлите фото персонажа или опишите его текстом — нарисую стикер и покажу превью.
+Персонаж: {0:0.##}⭐, затем ещё 7 эмоций: {1:0.##}⭐.
+Стиль: милый chibi, белый обвод, прозрачный фон.</value>
+  </data>
+  <data name="StickerPackProgress" xml:space="preserve">
+    <value>🎭 Рисую стикер {0}/{1}…</value>
+  </data>
+  <data name="StickerPackHeroCaption" xml:space="preserve">
+    <value>Персонаж готов · {0:0.##}⭐
+Собрать набор из 8 эмоций ещё за {1:0.##}⭐?</value>
+  </data>
+  <data name="StickerPackReady" xml:space="preserve">
+    <value>Набор из {0} стикеров готов · {1:0.##}⭐
+Можно добавить его в Telegram.</value>
+  </data>
+  <data name="StickerPackAlbumCaption" xml:space="preserve">
+    <value>🎭 {0} стикеров</value>
+  </data>
+  <data name="StickerPackPublished" xml:space="preserve">
+    <value>Готово! Добавить набор:
+{0}</value>
+  </data>
+  <data name="StickerPackPublishFail" xml:space="preserve">
+    <value>Не удалось опубликовать набор в Telegram. Попробуйте ещё раз.</value>
+  </data>
+  <data name="StickerPackPartialFail" xml:space="preserve">
+    <value>Не получилось нарисовать достаточно эмоций. Можно перерисовать персонажа и попробовать снова.</value>
+  </data>
+  <data name="StickerPackNeedPreview" xml:space="preserve">
+    <value>Сначала соберите набор стикеров — пришлите фото или описание.</value>
+  </data>
+  <data name="StickerPackDefaultTitle" xml:space="preserve">
+    <value>GPTips Stickers</value>
   </data>
 </root>

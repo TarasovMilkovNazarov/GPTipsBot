@@ -4,5 +4,4 @@ public record OpenAiVpnConnectivityResult(
     bool IsSuccess,
     string ProxyEndpoint,
     string? ErrorMessage,
-    TimeSpan Duration,
-    string? SubscriptionStatus = null);
+    TimeSpan Duration);

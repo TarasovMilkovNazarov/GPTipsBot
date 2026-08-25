@@ -38,6 +38,10 @@ public class BotMenu
     public const string GptImageCommand = "/gpt_image";
     public const string EditImageCommand = "/edit_image";
     public const string RemoveWatermarkCommand = "/remove_watermark";
+    public const string StickersCommand = "/stickers";
+    public const string StickersHeroOkCommand = "/stickers_hero_ok";
+    public const string StickersHeroRedoCommand = "/stickers_hero_redo";
+    public const string StickersPublishCommand = "/stickers_publish";
     public const string GptImageSizeSquareCommand = "/gpt_image_sq";
     public const string GptImageSizeLandscapeCommand = "/gpt_image_land";
     public const string GptImageSizePortraitCommand = "/gpt_image_port";
@@ -80,6 +84,10 @@ public class BotMenu
     public static CustomBotCommand EditImage => new() { Command = EditImageCommand, Description = BotUI.EditImage, Type = CommandType.EditImage };
     // Deliberately absent from GetBotCommands: reachable from the keyboard buttons only.
     public static CustomBotCommand RemoveWatermark => new() { Command = RemoveWatermarkCommand, Description = BotUI.RemoveWatermark, Type = CommandType.RemoveWatermark };
+    public static CustomBotCommand Stickers => new() { Command = StickersCommand, Description = BotUI.Stickers, Type = CommandType.StickerPack };
+    public static CustomBotCommand StickersHeroOk => new() { Command = StickersHeroOkCommand, Type = CommandType.StickerPack };
+    public static CustomBotCommand StickersHeroRedo => new() { Command = StickersHeroRedoCommand, Type = CommandType.StickerPack };
+    public static CustomBotCommand StickersPublish => new() { Command = StickersPublishCommand, Type = CommandType.StickerPack };
     public static CustomBotCommand GptImageSizeSquare => new() { Command = GptImageSizeSquareCommand, Type = CommandType.GptImage };
     public static CustomBotCommand GptImageSizeLandscape => new() { Command = GptImageSizeLandscapeCommand, Type = CommandType.GptImage };
     public static CustomBotCommand GptImageSizePortrait => new() { Command = GptImageSizePortraitCommand, Type = CommandType.GptImage };
@@ -117,6 +125,7 @@ public class BotMenu
             Model,
             GptImage,
             EditImage,
+            Stickers,
             Summary,
             Ask,
             Human

@@ -31,6 +31,7 @@ namespace GPTipsBot.UpdateHandlers
         UserCommandRepository userCommandRepository,
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
+        StickerPackHandler stickerPackHandler,
         RemoveWatermarkHandler removeWatermarkHandler,
         PromptFromImageHandler promptFromImageHandler,
         ChatGptHandler chatGptHandler,
@@ -41,6 +42,7 @@ namespace GPTipsBot.UpdateHandlers
         IJobService jobService,
         IGpt gptService,
         IGptImageSessionCache gptImageSessionCache,
+        IStickerPackSessionCache stickerPackSessionCache,
         IVisionImageCache visionImageCache,
         IImageCache imageCache,
         IAliceImageSessionCache aliceImageSessionCache,
@@ -114,6 +116,7 @@ namespace GPTipsBot.UpdateHandlers
                     aliceImageSessionCache.Remove(chatId);
                     imageCache.Remove(chatId);
                     gptImageSessionCache.Remove(update.UserChatKey.Id);
+                    stickerPackSessionCache.Remove(update.UserChatKey.Id);
 
                     if (update.IsGroupOrChannel)
                     {
@@ -234,6 +237,12 @@ namespace GPTipsBot.UpdateHandlers
                 case GptImageQualityMediumCommand:
                 case GptImageQualityHighCommand:
                     await HandleGptImageOptionAsync(update);
+                    return;
+                case StickersCommand:
+                case StickersHeroOkCommand:
+                case StickersHeroRedoCommand:
+                case StickersPublishCommand:
+                    await HandleStickersCommandAsync(update);
                     return;
                 case DepositCommand:
                 {
@@ -398,6 +407,8 @@ namespace GPTipsBot.UpdateHandlers
                 case CancelCommand:
                     aliceImageSessionCache.Remove(chatId);
                     imageCache.Remove(chatId);
+                    gptImageSessionCache.Remove(update.UserChatKey.Id);
+                    stickerPackSessionCache.Remove(update.UserChatKey.Id);
                     if (update.UserChatKey.IsAdmin())
                     {
                         broadcastDraftStore.Clear(update.UserChatKey.TelegramUserId ?? update.UserChatKey.Id);
@@ -546,6 +557,60 @@ namespace GPTipsBot.UpdateHandlers
                     chatId,
                     text,
                     keyboard,
+                    update.IsGroupOrChannel);
+            }
+        }
+
+        private async Task HandleStickersCommandAsync(UpdateDecorator update)
+        {
+            var command = update.Command!.Command;
+            if (command is StickersHeroOkCommand or StickersHeroRedoCommand or StickersPublishCommand)
+            {
+                SetNextHandler(stickerPackHandler);
+                await base.HandleAsync(update);
+                return;
+            }
+
+            var session = stickerPackSessionCache.GetOrCreate(update.UserChatKey.Id);
+            session.Reset();
+            if (update.FileId != null)
+            {
+                session.SourceFileId = update.FileId;
+            }
+
+            if (UpdateDecorator.TryGetCommandArgument(update.Message?.Text, StickersCommand, out var description))
+            {
+                session.Description = description;
+            }
+
+            stickerPackSessionCache.Set(update.UserChatKey.Id, session);
+
+            if (!string.IsNullOrWhiteSpace(session.SourceFileId) ||
+                !string.IsNullOrWhiteSpace(session.Description))
+            {
+                SetNextHandler(stickerPackHandler);
+                await base.HandleAsync(update);
+                return;
+            }
+
+            var intro = string.Format(
+                BotResponse.StickerPackIntro,
+                StickerPackConfig.HeroStars,
+                StickerPackConfig.PackRemainderStars);
+            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+            {
+                await botClient.EditMessageText(
+                    update.UserChatKey.ChatId,
+                    (int)update.Message.TelegramMessageId.Value,
+                    intro,
+                    replyMarkup: BackToImagesMenuInlineKeyboard);
+            }
+            else
+            {
+                await botClient.SendMessageWithMenuAsync(
+                    update.UserChatKey.ChatId,
+                    intro,
+                    BackToImagesMenuInlineKeyboard,
                     update.IsGroupOrChannel);
             }
         }

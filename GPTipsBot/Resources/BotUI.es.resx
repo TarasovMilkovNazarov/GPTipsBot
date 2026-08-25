@@ -210,4 +210,19 @@
   <data name="ChangePhotoButton" xml:space="preserve">
     <value>🖌 Redibujar · Alice · Free</value>
   </data>
+  <data name="Stickers" xml:space="preserve">
+    <value>Pack de stickers desde foto o descripción</value>
+  </data>
+  <data name="StickersButton" xml:space="preserve">
+    <value>🎭 Stickers · ⭐</value>
+  </data>
+  <data name="StickersHeroOkButton" xml:space="preserve">
+    <value>✅ Armar el pack</value>
+  </data>
+  <data name="StickersHeroRedoButton" xml:space="preserve">
+    <value>🔄 Otro personaje</value>
+  </data>
+  <data name="StickersPublishButton" xml:space="preserve">
+    <value>📌 Añadir a Telegram</value>
+  </data>
 </root>

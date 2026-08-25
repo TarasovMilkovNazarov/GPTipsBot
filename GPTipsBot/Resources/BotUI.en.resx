@@ -263,4 +263,19 @@
   <data name="ChangePhotoButton" xml:space="preserve">
     <value>🖌 Redraw · Alice · Free</value>
   </data>
+  <data name="Stickers" xml:space="preserve">
+    <value>Sticker pack from a photo or a description</value>
+  </data>
+  <data name="StickersButton" xml:space="preserve">
+    <value>🎭 Stickers · ⭐</value>
+  </data>
+  <data name="StickersHeroOkButton" xml:space="preserve">
+    <value>✅ Build the pack</value>
+  </data>
+  <data name="StickersHeroRedoButton" xml:space="preserve">
+    <value>🔄 Another character</value>
+  </data>
+  <data name="StickersPublishButton" xml:space="preserve">
+    <value>📌 Add to Telegram</value>
+  </data>
 </root>
