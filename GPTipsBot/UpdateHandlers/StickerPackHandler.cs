@@ -79,11 +79,7 @@ public class StickerPackHandler(
 
         if (string.IsNullOrWhiteSpace(session.SourceFileId) && string.IsNullOrWhiteSpace(session.Description))
         {
-            await botClient.SendUserReplyAsync(
-                update,
-                string.Format(BotResponse.StickerPackIntro, StickerPackConfig.HeroStars,
-                    StickerPackConfig.PackRemainderStars),
-                TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+            await SendIntroAsync(update);
             return;
         }
 
@@ -95,11 +91,7 @@ public class StickerPackHandler(
     {
         if (string.IsNullOrWhiteSpace(session.SourceFileId) && string.IsNullOrWhiteSpace(session.Description))
         {
-            await botClient.SendUserReplyAsync(
-                update,
-                string.Format(BotResponse.StickerPackIntro, StickerPackConfig.HeroStars,
-                    StickerPackConfig.PackRemainderStars),
-                TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+            await SendIntroAsync(update);
             return;
         }
 
@@ -199,11 +191,7 @@ public class StickerPackHandler(
     {
         if (session.HeroPng == null || session.Step == StickerPackStep.AwaitingSource)
         {
-            await botClient.SendUserReplyAsync(
-                update,
-                string.Format(BotResponse.StickerPackIntro, StickerPackConfig.HeroStars,
-                    StickerPackConfig.PackRemainderStars),
-                TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+            await SendIntroAsync(update);
             return;
         }
 
@@ -428,5 +416,28 @@ public class StickerPackHandler(
         {
             log.LogDebug(ex, "Failed to edit sticker progress {MessageId}", messageId);
         }
+    }
+
+    public async Task SendIntroAsync(UpdateDecorator update)
+    {
+        var intro = StickerPackService.IntroText;
+        var keyboard = TelegramBotUiService.BackToImagesMenuInlineKeyboard;
+
+        if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+        {
+            await botClient.EditMessageText(
+                update.UserChatKey.ChatId,
+                (int)update.Message.TelegramMessageId.Value,
+                intro,
+                replyMarkup: keyboard);
+        }
+        else
+        {
+            await botClient.SendUserReplyAsync(update, intro, keyboard);
+        }
+
+        await stickerPackService.TrySendExampleAsync(
+            update.UserChatKey.ChatId,
+            update.Message?.MessageThreadId is long tid ? (int)tid : null);
     }
 }

@@ -780,11 +780,7 @@ namespace GPTipsBot.UpdateHandlers
                         return true;
                     }
 
-                    await botClient.SendUserReplyAsync(
-                        update,
-                        string.Format(BotResponse.StickerPackIntro, StickerPackConfig.HeroStars,
-                            StickerPackConfig.PackRemainderStars),
-                        TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+                    await stickerPackHandler.SendIntroAsync(update);
                     return true;
 
                 case MediaToolIntent.ChangePhoto:

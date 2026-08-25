@@ -689,7 +689,10 @@ Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
 
 Envía una foto del personaje o descríbelo — dibujaré un sticker y te mostraré la vista previa.
 Personaje: {0:0.##}⭐, luego 7 emociones más: {1:0.##}⭐.
-Estilo: chibi adorable, contorno blanco, fondo transparente.</value>
+Estilo: chibi adorable, contorno blanco, fondo transparente.
+
+Ejemplo de pack:
+{2}</value>
   </data>
   <data name="StickerPackProgress" xml:space="preserve">
     <value>🎭 Dibujando sticker {0}/{1}…</value>

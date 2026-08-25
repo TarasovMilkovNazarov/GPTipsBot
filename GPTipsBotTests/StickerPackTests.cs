@@ -25,6 +25,14 @@ public class StickerPackTests
     }
 
     [Test]
+    public void IntroText_IncludesExamplePackUrl()
+    {
+        Assert.That(StickerPackService.IntroText, Does.Contain(StickerPackConfig.ExamplePackUrl));
+        Assert.That(StickerPackConfig.ExamplePackUrl, Is.EqualTo(
+            "https://t.me/addstickers/stkr486363646_4cb67c_by_GPTipsBot"));
+    }
+
+    [Test]
     public void TryMatch_DrawGiraffe_IsNotStickerPack()
     {
         var route = NaturalLanguageToolRouter.TryMatch("нарисуй жирафа", hasPhoto: false);

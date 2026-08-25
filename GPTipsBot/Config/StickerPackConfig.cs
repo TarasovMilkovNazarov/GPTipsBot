@@ -11,6 +11,9 @@ public static class StickerPackConfig
     public const string TransparentBackground = "transparent";
     public const string OutputPng = "png";
 
+    public const string ExampleSetName = "stkr486363646_4cb67c_by_GPTipsBot";
+    public const string ExamplePackUrl = "https://t.me/addstickers/" + ExampleSetName;
+
     public static double HeroStars => PaymentConfig.GptImageMedium;
     public static double VariantStars => PaymentConfig.GptImageLow;
     public static double PackRemainderStars => VariantStars * (EmotionCount - 1);

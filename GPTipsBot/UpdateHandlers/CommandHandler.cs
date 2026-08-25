@@ -593,26 +593,7 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
-            var intro = string.Format(
-                BotResponse.StickerPackIntro,
-                StickerPackConfig.HeroStars,
-                StickerPackConfig.PackRemainderStars);
-            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
-            {
-                await botClient.EditMessageText(
-                    update.UserChatKey.ChatId,
-                    (int)update.Message.TelegramMessageId.Value,
-                    intro,
-                    replyMarkup: BackToImagesMenuInlineKeyboard);
-            }
-            else
-            {
-                await botClient.SendMessageWithMenuAsync(
-                    update.UserChatKey.ChatId,
-                    intro,
-                    BackToImagesMenuInlineKeyboard,
-                    update.IsGroupOrChannel);
-            }
+            await stickerPackHandler.SendIntroAsync(update);
         }
 
         private async Task HandleGptImageOptionAsync(UpdateDecorator update)

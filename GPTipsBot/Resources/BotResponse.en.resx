@@ -691,7 +691,10 @@ Cost: {0:0.##}⭐ (no free quota)</value>
 
 Send a photo of the character or describe it in text — I’ll draw a sticker and show a preview.
 Character: {0:0.##}⭐, then 7 more emotions: {1:0.##}⭐.
-Style: cute chibi, white outline, transparent background.</value>
+Style: cute chibi, white outline, transparent background.
+
+Example pack:
+{2}</value>
   </data>
   <data name="StickerPackProgress" xml:space="preserve">
     <value>🎭 Drawing sticker {0}/{1}…</value>

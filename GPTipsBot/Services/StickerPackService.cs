@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using GPTipsBot.Config;
+using GPTipsBot.Resources;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -146,6 +147,46 @@ public class StickerPackService(
         }
 
         return $"https://t.me/addstickers/{name}";
+    }
+
+    public static string IntroText => string.Format(
+        BotResponse.StickerPackIntro,
+        StickerPackConfig.HeroStars,
+        StickerPackConfig.PackRemainderStars,
+        StickerPackConfig.ExamplePackUrl);
+
+    private string? _exampleStickerFileId;
+
+    public async Task TrySendExampleAsync(
+        long chatId,
+        int? messageThreadId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var fileId = _exampleStickerFileId;
+            if (string.IsNullOrEmpty(fileId))
+            {
+                var set = await botClient.GetStickerSet(StickerPackConfig.ExampleSetName, cancellationToken);
+                fileId = set.Stickers.FirstOrDefault()?.FileId;
+                if (string.IsNullOrEmpty(fileId))
+                {
+                    return;
+                }
+
+                _exampleStickerFileId = fileId;
+            }
+
+            await botClient.SendSticker(
+                chatId,
+                InputFile.FromFileId(fileId),
+                messageThreadId: messageThreadId,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            log.LogDebug(ex, "Failed to send example sticker from {SetName}", StickerPackConfig.ExampleSetName);
+        }
     }
 
     private static string TruncateTitle(string title)
