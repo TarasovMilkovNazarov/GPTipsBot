@@ -23,7 +23,7 @@ public class TelegramSink : ILogEventSink
             {
                 var text = $"""
 🚧🚧🚧 Я УПАЛ, иди чини:
-Подробнее: https://momskibana.milkov.uk/app/r/s/80eMV
+Подробнее: https://kibana.skolkokomu.ru/app/r/s/80eMV
 {logEvent.RenderMessage().Truncate(1000)}
 """;
                 botClient.SendMessage(adminId, text).GetAwaiter().GetResult();

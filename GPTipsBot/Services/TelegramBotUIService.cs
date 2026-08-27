@@ -159,10 +159,11 @@ namespace GPTipsBot.Services
             var keyboardMarkup = new ReplyKeyboardMarkup(
             [
                 [ResetContextButton, ProfileButton],
+                [StickersButton],
                 [ModelButton, ImagesMenuButton],
                 [PromptFromImageButton, AnimatePhotoButton],
                 [CombinePhotoButton, ChangePhotoButton],
-                [RemoveWatermarkButton, StickersButton],
+                [RemoveWatermarkButton],
                 [HelpButton],
             ]);
 
