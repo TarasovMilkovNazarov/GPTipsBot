@@ -58,6 +58,29 @@ public class StickerPackTests
     }
 
     [Test]
+    public void BuildSetTitle_AppendsBotMention()
+    {
+        var title = StickerPackConfig.BuildSetTitle("рыжий кот", "GPTipsBot");
+        Assert.That(title, Is.EqualTo("рыжий кот · @GPTipsBot"));
+        Assert.That(title.Length, Is.LessThanOrEqualTo(64));
+    }
+
+    [Test]
+    public void BuildSetTitle_DoesNotDuplicateMention()
+    {
+        var title = StickerPackConfig.BuildSetTitle("pack @GPTipsBot", "GPTipsBot");
+        Assert.That(title, Is.EqualTo("pack @GPTipsBot"));
+    }
+
+    [Test]
+    public void BuildSetTitle_TruncatesLongDescription()
+    {
+        var title = StickerPackConfig.BuildSetTitle(new string('а', 80), "GPTipsBot");
+        Assert.That(title, Does.EndWith(" · @GPTipsBot"));
+        Assert.That(title.Length, Is.LessThanOrEqualTo(64));
+    }
+
+    [Test]
     public void ToTelegramPng_ResizesSoOneSideIs512()
     {
         using var source = new Image<Rgba32>(1024, 1024);

@@ -126,14 +126,14 @@ public class StickerPackService(
                     StickerFormat.Static,
                     [sticker.Emoji])
                 {
-                    Keywords = [sticker.Keyword],
+                    Keywords = BuildKeywords(sticker.Keyword, botUsername),
                 };
             }).ToArray();
 
             await botClient.CreateNewStickerSet(
                 telegramUserId,
                 name,
-                TruncateTitle(title),
+                StickerPackConfig.BuildSetTitle(title, botUsername),
                 inputStickers,
                 stickerType: StickerType.Regular,
                 cancellationToken: cancellationToken);
@@ -189,9 +189,15 @@ public class StickerPackService(
         }
     }
 
-    private static string TruncateTitle(string title)
+    private static string[] BuildKeywords(string keyword, string? botUsername)
     {
-        var trimmed = string.IsNullOrWhiteSpace(title) ? "GPTips Stickers" : title.Trim();
-        return trimmed.Length <= 64 ? trimmed : trimmed[..64];
+        var bot = (botUsername ?? "GPTipsBot").Trim().TrimStart('@');
+        if (string.IsNullOrEmpty(bot) ||
+            keyword.Equals(bot, StringComparison.OrdinalIgnoreCase))
+        {
+            return [keyword];
+        }
+
+        return [keyword, bot];
     }
 }

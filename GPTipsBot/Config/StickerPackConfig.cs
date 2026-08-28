@@ -81,6 +81,39 @@ public static class StickerPackConfig
         return $"{prefix}_by_{bot}";
     }
 
+    /// <summary>
+    /// Sticker set title shown in Telegram. @bot is tappable in pack info — the viral attribution path.
+    /// </summary>
+    public static string BuildSetTitle(string? title, string? botUsername)
+    {
+        var bot = string.IsNullOrWhiteSpace(botUsername) ? "GPTipsBot" : botUsername.Trim().TrimStart('@');
+        if (string.IsNullOrEmpty(bot))
+        {
+            bot = "GPTipsBot";
+        }
+
+        var mention = "@" + bot;
+        var baseTitle = string.IsNullOrWhiteSpace(title) ? "GPTips" : title.Trim();
+        if (baseTitle.Contains(mention, StringComparison.OrdinalIgnoreCase))
+        {
+            return baseTitle.Length <= 64 ? baseTitle : baseTitle[..64].TrimEnd();
+        }
+
+        var suffix = " · " + mention;
+        var maxBase = 64 - suffix.Length;
+        if (maxBase < 1)
+        {
+            return mention.Length <= 64 ? mention : mention[..64];
+        }
+
+        if (baseTitle.Length > maxBase)
+        {
+            baseTitle = baseTitle[..maxBase].TrimEnd();
+        }
+
+        return baseTitle + suffix;
+    }
+
     private static readonly Regex NonNameChars = new("[^a-zA-Z0-9_]", RegexOptions.Compiled);
 
     private static string SanitizeToken(string? value)
