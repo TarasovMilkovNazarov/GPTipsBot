@@ -103,7 +103,6 @@ public class MoneyService
     private readonly UserService _userService;
     private readonly YooKassaClient _yooKassaClient;
     private readonly ILogger<MoneyService> _logger;
-    private event EventHandler<Wallet> UserBalanceChanged;
 
     public MoneyService(WalletRepository walletRepository, UserRepository userRepository,
         InvoiceRepository invoiceRepository, TransactionRepository transactionRepository,
@@ -119,7 +118,6 @@ public class MoneyService
         _userService = userService;
         _yooKassaClient = yooKassaClient;
         _logger = logger;
-        UserBalanceChanged += UserBalanceChangedHandler;
     }
 
     public async Task<bool> TryPay(long userId, int amount)
@@ -613,7 +611,7 @@ public class MoneyService
             return PaymentConfirmResult.DonateConfirmed;
         }
 
-        await AddMoneyAsync(userId, (int)payment.TotalAmount, Currency.Stars, cancellationToken);
+        await AddMoneyAsync(userId, (int)payment.TotalAmount, Currency.Stars, PaymentProvider.TelegramStars, cancellationToken);
         return PaymentConfirmResult.DepositCredited;
     }
 
@@ -750,7 +748,7 @@ public class MoneyService
             "ConfirmYooKassa: crediting userId={UserId} stars={Stars}",
             invoice.UserId,
             invoice.Amount);
-        await AddMoneyAsync(invoice.UserId, (int)invoice.Amount, Currency.Stars, cancellationToken);
+        await AddMoneyAsync(invoice.UserId, (int)invoice.Amount, Currency.Stars, PaymentProvider.YooKassa, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("ConfirmYooKassa: SaveChanges done for invoice {InvoiceId}", invoice.Id);
 
@@ -812,7 +810,7 @@ public class MoneyService
         return long.TryParse(payload, out invoiceId);
     }
 
-    public async Task AddMoneyAsync(long userId, int amount, string currency,  CancellationToken cancellationToken)
+    public async Task AddMoneyAsync(long userId, int amount, string currency, PaymentProvider provider, CancellationToken cancellationToken)
     {
         var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
 
@@ -840,7 +838,7 @@ public class MoneyService
             Amount = amount
         });
         await _walletRepository.UpdateAmountAsync(wallet, amount);
-        UserBalanceChanged?.Invoke(this, wallet);
+        NotifyAdminAboutDeposit(wallet, provider);
     }
 
     public static long ToKopecks(int starsCount)
@@ -872,10 +870,21 @@ public class MoneyService
         return true;
     }
 
-    private void UserBalanceChangedHandler(object? sender, Wallet wallet)
+    private void NotifyAdminAboutDeposit(Wallet wallet, PaymentProvider provider)
     {
-        var message = "#deposit" + Environment.NewLine + $"{wallet.UserId} balance: {wallet.Balance} stars";
+        var method = FormatPaymentMethod(provider);
+        var message = "#deposit" + Environment.NewLine
+            + $"{wallet.UserId} balance: {wallet.Balance} stars" + Environment.NewLine
+            + $"method: {method}";
 
         _botClient.SendMessage(AppConfig.AdminIds.First(), message);
     }
+
+    private static string FormatPaymentMethod(PaymentProvider provider) =>
+        provider switch
+        {
+            PaymentProvider.YooKassa => "YooKassa (карта / СБП / SberPay)",
+            PaymentProvider.TelegramStars => "Telegram Stars",
+            _ => provider.ToString()
+        };
 }

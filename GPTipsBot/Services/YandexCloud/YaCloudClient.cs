@@ -72,7 +72,7 @@ namespace GPTipsBot.Services.YandexCloud
             };
             var body = new YandexArtRequest
             {
-                ModelUri = $"art://{_folderId}/yandex-art/latest",
+                ModelUri = $"art://{_folderId}/yandex-art-2.0",
                 GenerationOptions = new GenerationOptions
                 {
                     Seed = "1863",

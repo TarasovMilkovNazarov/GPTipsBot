@@ -59,6 +59,8 @@ namespace GPTipsBot.Extensions
             services.AddTransient<SyncYooKassaPaymentsJob>();
             services.AddTransient<ReleaseExpiredPaymentHoldsJob>();
             services.AddTransient<BotUpdateInformerJob>();
+            services.AddTransient<YandexCloudBalanceAlertJob>();
+            services.AddSingleton<YandexBillingAlertState>();
             services.AddQuartz(q =>
             {
                 q.UsePersistentStore(opt =>
@@ -163,6 +165,7 @@ namespace GPTipsBot.Extensions
 
             services.AddDbContext<ApplicationContext>();
 
+            services.AddHttpClient<YandexBillingAccountClient>();
             services.AddHttpClient<GPTipsBot.Web.YandexOAuthClient>();
             services.AddHttpClient<YooKassaClient>(client =>
             {
