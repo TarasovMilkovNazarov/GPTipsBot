@@ -56,10 +56,14 @@ namespace GPTipsBotTests
             _imageGeneratorMock = new Mock<IImageGenerator>();
             _recognitionServiceMock.Setup(s => s.Recognize(It.IsAny<string>()))
                 .ReturnsAsync(TestConstants.ImageTextResponse);
+            _imageGeneratorMock.Setup(s => s.GenerateImageAsync(It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(TestConstants.GeneratedImageBase64);
+#pragma warning disable CS0618 // obsolete async path, still mocked while it exists
             _imageGeneratorMock.Setup(s => s.StartImageGenerationAsync(It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync("test-operation-id");
             _imageGeneratorMock.Setup(s => s.GetImageGenerationStatusAsync(It.IsAny<string>()))
                 .ReturnsAsync(new ImageGenerationStatus(true, TestConstants.GeneratedImageBase64));
+#pragma warning restore CS0618
             _gptMock = GptApiMock.CreateGptMock();
             var gramadsMockClient = new Mock<IAdvertisementClient>();
 
@@ -446,7 +450,7 @@ namespace GPTipsBotTests
 
             if (AppConfig.IsProduction)
             {
-                _imageGeneratorMock.Verify(g => g.StartImageGenerationAsync("гора", false),
+                _imageGeneratorMock.Verify(g => g.GenerateImageAsync("гора", false),
                     Times.Exactly(PaymentConfig.NewbieFreeImageGenerations));
             }
         }
@@ -489,7 +493,7 @@ namespace GPTipsBotTests
 
             await WaitForTodayImagesCount(update.Message!.From.Id, expectedCount: 1);
 
-            _imageGeneratorMock.Verify(g => g.StartImageGenerationAsync("кот в очках", false), Times.Once);
+            _imageGeneratorMock.Verify(g => g.GenerateImageAsync("кот в очках", false), Times.Once);
         }
 
         [Test]

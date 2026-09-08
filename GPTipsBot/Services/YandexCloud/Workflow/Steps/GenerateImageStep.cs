@@ -6,10 +6,13 @@ using WorkflowCore.Models;
 
 namespace GPTipsBot.Services.YandexCloud.Workflow.Steps;
 
-[Obsolete("Async imageGenerationAsync path: operations never complete. Use GenerateImageStep.")]
-public class StartGenerateImageStep(
+/// <summary>
+/// Generates the image in a single synchronous call to the Images API,
+/// replacing the StartGenerateImageStep + WaitForImageStep pair.
+/// </summary>
+public class GenerateImageStep(
     IImageGenerator imageGenerator,
-    ILogger<StartGenerateImageStep> logger) : StepBodyAsync
+    ILogger<GenerateImageStep> logger) : StepBodyAsync
 {
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
@@ -27,16 +30,16 @@ public class StartGenerateImageStep(
                 return ExecutionResult.Next();
             }
 
-            data.OperationId = await imageGenerator.StartImageGenerationAsync(data.Prompt, data.IsSquare);
+            data.ImageBase64 = await imageGenerator.GenerateImageAsync(data.Prompt, data.IsSquare);
         }
         catch (YandexArtRejectedException ex)
         {
-            logger.LogWarning(ex, "YandexART rejected image prompt for chat {ChatId}", data.ChatId);
+            logger.LogWarning(ex, "Images API rejected image prompt for chat {ChatId}", data.ChatId);
             data.ErrorMessage = ImageGenerationWorkflowErrors.Rejected;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to start image generation for chat {ChatId}", data.ChatId);
+            logger.LogError(ex, "Failed to generate image for chat {ChatId}", data.ChatId);
             data.ErrorMessage = ImageGenerationWorkflowErrors.Failed;
         }
 

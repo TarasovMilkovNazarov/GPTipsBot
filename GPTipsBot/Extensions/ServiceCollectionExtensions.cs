@@ -42,8 +42,11 @@ namespace GPTipsBot.Extensions
             services.AddTransient<PhotoAnimationSteps.GenerateAliceImageStep>();
             services.AddTransient<PhotoAnimationSteps.WaitForAliceImageStep>();
             services.AddTransient<PhotoAnimationSteps.NotifyAliceImageStep>();
+            services.AddTransient<GenerateImageStep>();
+#pragma warning disable CS0618 // kept registered for workflow instances started before the sync switch
             services.AddTransient<StartGenerateImageStep>();
             services.AddTransient<WaitForImageStep>();
+#pragma warning restore CS0618
             services.AddTransient<NotifyUserStep>();
             services.AddSingleton<PhotoAnimationProgressNotifier>();
             services.AddSingleton<PhotoAnimationWorkflowService>();

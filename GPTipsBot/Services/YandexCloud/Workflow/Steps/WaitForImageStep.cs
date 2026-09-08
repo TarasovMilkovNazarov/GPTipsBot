@@ -4,6 +4,7 @@ using WorkflowCore.Models;
 
 namespace GPTipsBot.Services.YandexCloud.Workflow.Steps;
 
+[Obsolete("Async imageGenerationAsync path: operations never complete. Use GenerateImageStep.")]
 public class WaitForImageStep(
     IImageGenerator imageGenerator,
     ILogger<WaitForImageStep> logger) : StepBodyAsync
