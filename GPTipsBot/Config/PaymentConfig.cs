@@ -31,7 +31,7 @@ public static class PaymentConfig
     /// <summary>
     /// Число бесплатных запросов на генерацию изображений, которое добавляется джобой обновления лимитов
     /// </summary>
-    public const int FreeImageGenerations = 10;
+    public const int FreeImageGenerations = 3;
     public const int FreeCombinePhotos = FreeImageGenerations;
     public const int FreeChangePhotos = FreeImageGenerations;
     public const int FreeTextRecognitions = 10;
@@ -40,7 +40,7 @@ public static class PaymentConfig
     /// <summary>
     /// Число бесплатных запросов для новых пользователей
     /// </summary>
-    public const int NewbieFreeImageGenerations = 10;
+    public const int NewbieFreeImageGenerations = 3;
     public const int NewbieFreeCombinePhotos = NewbieFreeImageGenerations;
     public const int NewbieFreeChangePhotos = NewbieFreeImageGenerations;
     public const int NewbieFreeTextRecognitions = 10;

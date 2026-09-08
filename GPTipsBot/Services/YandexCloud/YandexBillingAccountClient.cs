@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GPTipsBot.Config;
 using Microsoft.Extensions.Logging;
 
@@ -71,7 +72,8 @@ public class YandexBillingAccountClient(HttpClient httpClient, ILogger<YandexBil
 
         var parsed = JsonSerializer.Deserialize<MetadataTokenResponse>(body, JsonOptions);
         if (string.IsNullOrWhiteSpace(parsed?.AccessToken))
-            throw new InvalidOperationException("Yandex metadata did not return access_token");
+            throw new InvalidOperationException(
+                $"Yandex metadata did not return access_token (response length {body.Length})");
 
         logger.LogDebug("Got IAM token from VM metadata, expires_in={ExpiresIn}", parsed.ExpiresIn);
         return parsed.AccessToken;
@@ -92,7 +94,11 @@ public class YandexBillingAccountClient(HttpClient httpClient, ILogger<YandexBil
 
     private sealed class MetadataTokenResponse
     {
+        // Метадата отдаёт snake_case, а PropertyNameCaseInsensitive подчёркивания не игнорирует.
+        [JsonPropertyName("access_token")]
         public string AccessToken { get; set; } = "";
+
+        [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }
     }
 }

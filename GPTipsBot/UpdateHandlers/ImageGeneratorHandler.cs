@@ -23,7 +23,6 @@ namespace GPTipsBot.UpdateHandlers
         : BaseMessageHandler
     {
         public const int ImageTextDescriptionLimit = 500;
-        public const int ImagesPerDayLimit = 5;
 
         public override async Task HandleAsync(UpdateDecorator update)
         {
