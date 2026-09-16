@@ -88,6 +88,7 @@ if (Directory.Exists(webRoot))
 }
 
 app.MapYooKassaWebhook();
+app.MapLavaTopWebhook();
 app.MapWebApi();
 app.MapSeoFiles();
 
@@ -122,6 +123,8 @@ await schedulerService.ScheduleJob<RemoveOldRecordsJob>(scheduler, DateBuilder.F
 await schedulerService.ScheduleJob<DeactivateKickedUsersJob>(scheduler, DateBuilder.FutureDate(5, IntervalUnit.Day),
     TimeSpan.FromDays(5), CancellationToken.None);
 await schedulerService.ScheduleJob<SyncYooKassaPaymentsJob>(scheduler, DateBuilder.FutureDate(1, IntervalUnit.Minute),
+    TimeSpan.FromMinutes(2), CancellationToken.None);
+await schedulerService.ScheduleJob<SyncLavaTopPaymentsJob>(scheduler, DateBuilder.FutureDate(1, IntervalUnit.Minute),
     TimeSpan.FromMinutes(2), CancellationToken.None);
 await schedulerService.ScheduleJob<ReleaseExpiredPaymentHoldsJob>(scheduler, DateBuilder.FutureDate(5, IntervalUnit.Minute),
     TimeSpan.FromMinutes(5), CancellationToken.None);

@@ -146,7 +146,7 @@
     <value>ساخت پرامپت از تصویر</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
-    <value>⭐ شارژ</value>
+    <value>💎 شارژ</value>
   </data>
   <data name="DonateButton" xml:space="preserve">
     <value>🌟 از پروژه ما حمایت کنید! 💪
@@ -178,19 +178,19 @@
     <value>GPT Image — تولید</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image · ⭐</value>
+    <value>🎨 GPT Image · 💎</value>
   </data>
   <data name="EditImage" xml:space="preserve">
     <value>GPT Image — ویرایش عکس</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 ویرایش · GPT Image · ⭐</value>
+    <value>🛠 ویرایش · GPT Image · 💎</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>حذف واترمارک از عکس</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 حذف واترمارک · ⭐</value>
+    <value>🧼 حذف واترمارک · 💎</value>
   </data>
   <data name="CombinePhoto" xml:space="preserve">
     <value>ادغام دو عکس · Alice</value>
@@ -208,7 +208,7 @@
     <value>بسته استیکر از عکس یا توضیح</value>
   </data>
   <data name="StickersButton" xml:space="preserve">
-    <value>🎭 استیکر · ⭐</value>
+    <value>🎭 استیکر · 💎</value>
   </data>
   <data name="StickersHeroOkButton" xml:space="preserve">
     <value>✅ ساخت بسته</value>

@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + imágenes
 
 Solo escribe una pregunta — el bot responde con el contexto de la conversación.
-Menú: nuevo chat, modelos, imágenes (Yandex Art / GPT Image), animación, combinación y cambio de fotos, cuenta y recarga ⭐.
+Menú: nuevo chat, modelos, imágenes (Yandex Art / GPT Image), animación, combinación y cambio de fotos, cuenta y recarga 💎.
 
 Hay límites diarios gratuitos — ver /profile. Detalles: /help</value>
   </data>
@@ -131,7 +131,7 @@ Hay límites diarios gratuitos — ver /profile. Detalles: /help</value>
 🌐 Sitio web
 El mismo chat de ChatGPT y las herramientas de imagen también están disponibles en el navegador:
 https://gptips.skolkokomu.ru
-Inicia sesión con Telegram — tu saldo de ⭐ y las cuotas se comparten con el bot.
+Inicia sesión con Telegram — tu saldo de 💎 y las cuotas se comparten con el bot.
 
 💬 Chat con IA
 Solo envía un mensaje de texto — el bot responde usando el contexto actual de la conversación.
@@ -144,42 +144,45 @@ Solo envía un mensaje de texto — el bot responde usando el contexto actual de
 Abre «🎨 Imágenes» en el menú:
 • 🖼 Yandex Art — texto a imagen gratuito (dentro de la cuota diaria)
 • 🎨 GPT Image — generación de pago con opciones de tamaño y calidad
-• 🎭 Stickers · ⭐ — pack de 8 stickers desde una foto o una descripción. /stickers
+• 🎭 Stickers · 💎 — pack de 8 stickers desde una foto o una descripción. /stickers
 • 🛠 Editar foto — editar una foto con una instrucción de texto (de pago, GPT Image); en grupos: responde `/edit_image …` a una foto
 • 📝 Texto de la foto — OCR / extraer texto de una imagen
 • 💬 Prompt desde foto — crear un prompt de texto a imagen a partir de una foto
 
 💬 Prompt desde foto
-Envía una imagen — el bot escribe un prompt que puede generar una imagen similar (usa la cuota de ChatGPT o ⭐).
+Envía una imagen — el bot escribe un prompt que puede generar una imagen similar (usa la cuota de ChatGPT o 💎).
 En grupos y comentarios: responde a una foto con /prompt_from_image.
 
 ✨ Animar foto
-Convierte una foto en una animación corta (gratis dentro de la cuota o de pago con ⭐).
+Convierte una foto en una animación corta (gratis dentro de la cuota o de pago con 💎).
 
 🧩 Combinar fotos
-Une dos fotos en una según una descripción (usa la cuota de animación o ⭐).
+Une dos fotos en una según una descripción (usa la cuota de animación o 💎).
 Comando /combine: primera foto, luego la segunda, luego la descripción.
 
 🪄 Cambiar foto
-Rehace una foto con Alice (usa la cuota de animación o ⭐).
+Rehace una foto con Alice (usa la cuota de animación o 💎).
 No es «🛠 Editar foto» (GPT Image). Comando /change_photo.
 
 🧼 Quitar marca de agua
-Elimina rótulos, logotipos y capas semitransparentes de una foto (solo con ⭐, sin cuota gratuita).
+Elimina rótulos, logotipos y capas semitransparentes de una foto (solo con 💎, sin cuota gratuita).
 La foto se regenera, así que los detalles pequeños pueden cambiar un poco.
 Quita marcas de agua solo de imágenes que te pertenezcan.
 
 👤 Cuenta
-Muestra tu saldo de ⭐, cuotas gratuitas y modelo actual.
+Muestra tu saldo de 💎, cuotas gratuitas y modelo actual.
 Desde la cuenta puedes:
 • elegir un modelo
 • recargar el saldo
 • cambiar el idioma de la interfaz
 
-⭐ Saldo y límites
+💎 Saldo y límites
+💎 es la moneda propia del bot: 20💎 = 1 RUB. Recarga con tarjeta, SBP o Telegram Stars (1 Star = 20💎).
+Guía: 4💎 = 1 solicitud de ChatGPT, 100💎 = una generación de imagen o una animación de foto.
 Las solicitudes gratuitas son limitadas y se renuevan cada día.
-Cuando se agote la cuota, recarga ⭐ en Cuenta o con /deposit.
-Guía: 1⭐ ≈ 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto.
+Cuando se agote la cuota, recarga 💎 en Cuenta o con /deposit.
+
+Antes el saldo se contaba en ⭐. Cada ⭐ pasó a ser 200💎, así que todas las recargas anteriores se conservaron íntegras — solo cambió la escala.
 
 Comandos útiles
 /start — menú principal
@@ -242,7 +245,7 @@ Solo escribe una pregunta — o elige una acción:
 • ✨ Animar foto
 • 🧩 Combinar fotos
 • 🪄 Cambiar foto
-• 🧼 Quitar marca de agua — de pago con ⭐
+• 🧼 Quitar marca de agua — de pago con 💎
 • ✍️ /human — inglés simple y natural
 • 💬 Nuevo chat — restablecer contexto
 
@@ -256,7 +259,7 @@ https://gptips.skolkokomu.ru</value>
 
 También puedes preguntar en texto — por ejemplo, «¿Qué hay en la imagen?»
 
-Arriba: Free (cuota). Botones con ⭐: de pago.</value>
+Arriba: Free (cuota). Botones con 💎: de pago.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>La descripción de texto de la imagen no debe superar los {0} caracteres. Acórtala y envíala de nuevo</value>
@@ -338,17 +341,25 @@ También puedes responder con /prompt_from_image a un mensaje con foto (incluso 
     <value>Create a detailed text-to-image prompt for this image.</value>
   </data>
   <data name="InvoiceTitle" xml:space="preserve">
-    <value>Añadir estrellas a la cuenta</value>
+    <value>Recarga tu saldo</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>❗️La recarga mínima es {0} RUB ({1}⭐)
+    <value>❗️La recarga mínima es {0} RUB ({1}💎)
 Elige un paquete o introduce el importe de nuevo:</value>
+  </data>
+  <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
+    <value>
+
+O desde {0} {1} con tarjeta internacional / PayPal (lava.top).</value>
+  </data>
+  <data name="DepositAmountTooLargeResponse" xml:space="preserve">
+    <value>✨ El máximo por pago es {0}💎. Introduce una cantidad menor 👇</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Perfil: {0} {1}
 
 
-💵 Saldo: {2} Stars 💵
+💵 Saldo: {2}💎 💵  (20💎 = 1 RUB)
 🤖 Modelo: {8}
 Solicitudes gratuitas:
  -- ChatGpt: {3}
@@ -360,39 +371,43 @@ Solicitudes gratuitas:
  -- ediciones de foto: {10}
 </value>
   </data>
+  <data name="GemsMigrationNotice" xml:space="preserve">
+    <value>ℹ️ Antes el saldo se contaba en ⭐. Cada ⭐ pasó a ser 200💎 — todas las recargas anteriores se conservaron íntegras, solo cambió la escala.</value>
+  </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>1 estrella = 10 solicitudes de ChatGPT O 2 generaciones de imagen O 2 animaciones de foto</value>
+    <value>4💎 = 1 solicitud de ChatGPT, 100💎 = una generación de imagen o una animación de foto</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1⭐ = 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto
+    <value>20💎 = 1 RUB — la moneda propia del bot.
+4💎 = 1 solicitud de ChatGPT, 100💎 = una generación de imagen o una animación de foto
 
-Recarga mínima: {0} RUB ({1}⭐)
-Elige un paquete o introduce una cantidad entera de Stars:</value>
+Recarga mínima: {0} RUB ({1}💎)
+Elige un paquete o introduce una cantidad entera de 💎:</value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>Recarga tu saldo</value>
   </data>
   <data name="InsufficientBalance" xml:space="preserve">
-    <value>Necesitas tener {0} estrellas para realizar esta operación.
+    <value>Necesitas tener {0}💎 para realizar esta operación.
 
 Después de recargar, vuelve a introducir el comando.</value>
   </data>
   <data name="ChoosePaymentMethod" xml:space="preserve">
-    <value>Recargar {0}⭐ ({1} RUB)
+    <value>Recargar {0}💎 ({1} RUB)
 
 Elige un método de pago:</value>
   </data>
   <data name="PayWithStarsButton" xml:space="preserve">
-    <value>⭐ Telegram Stars</value>
+    <value>⭐ Telegram Stars · {0}</value>
   </data>
   <data name="DepositPackageButton" xml:space="preserve">
-    <value>{0}⭐ · {1} RUB</value>
+    <value>{0}💎 · {1} RUB</value>
   </data>
   <data name="PayWithYooKassaButton" xml:space="preserve">
     <value>💳 Tarjeta / SBP / SberPay · {0} RUB</value>
   </data>
   <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
-    <value>Pago de {0}⭐ ({1} RUB)
+    <value>Pago de {0}💎 ({1} RUB)
 
 Pulsa el botón de abajo para abrir el formulario de pago de YooKassa.
 Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
@@ -410,9 +425,33 @@ Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
     <value>Pago encontrado, saldo actualizado ✅</value>
   </data>
   <data name="YooKassaPaymentDescription" xml:space="preserve">
-    <value>Recarga de saldo GPTipsBot: {0} estrellas</value>
+    <value>Recarga de saldo GPTipsBot: {0}💎</value>
   </data>
   <data name="YooKassaPaymentSucceeded" xml:space="preserve">
+    <value>✅ ¡Pago exitoso! Tu saldo ha sido recargado.</value>
+  </data>
+  <data name="PayWithLavaTopButton" xml:space="preserve">
+    <value>🌍 Tarjeta internacional / PayPal · {0} {1}</value>
+  </data>
+  <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
+    <value>Pago de {0}💎 ({1} {2})
+
+Pulsa el botón de abajo para abrir el formulario de pago de lava.top.
+Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
+  </data>
+  <data name="OpenLavaTopPaymentButton" xml:space="preserve">
+    <value>Pagar ahora</value>
+  </data>
+  <data name="CheckLavaTopPaymentButton" xml:space="preserve">
+    <value>Comprobar pago</value>
+  </data>
+  <data name="LavaTopPaymentCheckPending" xml:space="preserve">
+    <value>Aún no se ha recibido el pago. Si ya pagaste, espera un minuto e inténtalo de nuevo.</value>
+  </data>
+  <data name="LavaTopPaymentCheckOk" xml:space="preserve">
+    <value>Pago encontrado, saldo actualizado ✅</value>
+  </data>
+  <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ ¡Pago exitoso! Tu saldo ha sido recargado.</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
@@ -422,13 +461,13 @@ Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
     <value>❗️Has agotado el límite de solicitudes gratuitas de hoy.
 Recarga tu saldo o espera a que se restablezcan los límites gratuitos.
 
-1⭐ = 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto.</value>
+4💎 = 1 solicitud de ChatGPT, 100💎 = una generación de imagen o una animación de foto.</value>
   </data>
   <data name="TimeNoFreeRequests" xml:space="preserve">
     <value>❗️Has usado todas tus solicitudes gratuitas de hoy.
 Recarga ahora o espera {0:%d} d {0:%h} h {0:%m} min para que se renueven.
 
-1⭐ = 10 solicitudes de ChatGPT, 2 generaciones de imagen o 2 animaciones de foto</value>
+4💎 = 1 solicitud de ChatGPT, 100💎 = una generación de imagen o una animación de foto</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
     <value>🌟 ¡Apoya nuestro proyecto! 💪
@@ -578,7 +617,7 @@ Ejemplo: @GPTipsBot image un gato en el espacio</value>
     <value>▶️ Obtener</value>
   </data>
   <data name="AccountLinkSuccess" xml:space="preserve">
-    <value>✅ Telegram está vinculado a tu cuenta del sitio web. Las Stars y las cuotas gratuitas ahora se comparten.</value>
+    <value>✅ Telegram está vinculado a tu cuenta del sitio web. Los 💎 y las cuotas gratuitas ahora se comparten.</value>
   </data>
   <data name="AccountLinkTokenInvalid" xml:space="preserve">
     <value>⚠️ Este enlace no es válido o ha expirado. Abre el bot de nuevo desde el sitio web.</value>
@@ -592,22 +631,22 @@ Ejemplo: @GPTipsBot image un gato en el espacio</value>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 Elige un modelo de ChatGPT
 
-Actual: {0} ({1:0.##}⭐ por mensaje)
+Actual: {0} ({1}💎 por mensaje)
 
 Las solicitudes gratuitas solo funcionan con {2}.
-Otros modelos gastan Stars de tu saldo.</value>
+Otros modelos gastan 💎 de tu saldo.</value>
   </data>
   <data name="ModelSelected" xml:space="preserve">
     <value>✅ Modelo seleccionado: {0}
-Coste por mensaje: {1:0.##}⭐</value>
+Coste por mensaje: {1}💎</value>
   </data>
   <data name="ModelSelectionRequiresBalance" xml:space="preserve">
-    <value>🔒 La selección de modelo está disponible cuando tu saldo de Stars es positivo.
+    <value>🔒 La selección de modelo está disponible cuando tu saldo de 💎 es positivo.
 
 Puedes cambiar a {0} o recargar tu saldo.</value>
   </data>
   <data name="ModelNeedsBalance" xml:space="preserve">
-    <value>❗️No hay suficientes Stars para {0} ({1:0.##}⭐ por mensaje).
+    <value>❗️No hay suficientes 💎 para {0} ({1}💎 por mensaje).
 
 Recarga tu saldo o cambia a {2}.</value>
   </data>
@@ -618,14 +657,14 @@ Recarga tu saldo o cambia a {2}.</value>
     <value>🎨 GPT Image — generar
 
 Elige tamaño y calidad, luego envía una descripción.
-Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
+Coste: {0}💎 (sin cuota gratuita)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
     <value>🛠 GPT Image — editar
 
 Envía una foto, luego elige tamaño/calidad y describe los cambios.
 O responde a una foto: /edit_image haz el cielo rosa
-Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
+Coste: {0}💎 (sin cuota gratuita)</value>
   </data>
   <data name="GptImageSendPhotoFirst" xml:space="preserve">
     <value>Envía primero una foto para editar</value>
@@ -635,10 +674,10 @@ Coste: {0:0.##}⭐ (sin cuota gratuita)</value>
   </data>
   <data name="GptImageSendEditPrompt" xml:space="preserve">
     <value>Describe qué cambiar en la foto.
-Coste: {0:0.##}⭐</value>
+Coste: {0}💎</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2}💎</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 Eliminación de marca de agua
@@ -646,16 +685,16 @@ Coste: {0:0.##}⭐</value>
 Envía una foto: quitaré textos, logotipos y las plantillas semitransparentes repetidas.
 Ten en cuenta que la foto se regenera, así que los detalles finos pueden cambiar un poco.
 Elimina marcas de agua solo de tus propias imágenes.
-Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
+Coste: {0}💎 (sin solicitudes gratuitas)</value>
   </data>
   <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
     <value>Envía la foto de la que quieres quitar la marca de agua</value>
   </data>
   <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
-    <value>🧼 Marca de agua eliminada · {0:0.##}⭐</value>
+    <value>🧼 Marca de agua eliminada · {0}💎</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>El modo de eliminación de marcas de agua sigue activo: puedes enviar otra foto, cada una cuesta {0:0.##}⭐. Pulsa «Atrás» para salir.</value>
+    <value>El modo de eliminación de marcas de agua sigue activo: puedes enviar otra foto, cada una cuesta {0}💎. Pulsa «Atrás» para salir.</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ La generación de imagen suele tardar unos segundos. Espera...</value>
@@ -688,7 +727,7 @@ Coste: {0:0.##}⭐ (sin solicitudes gratuitas)</value>
     <value>🎭 Pack de stickers
 
 Envía una foto del personaje o descríbelo — dibujaré un sticker y te mostraré la vista previa.
-Personaje: {0:0.##}⭐, luego 7 emociones más: {1:0.##}⭐.
+Personaje: {0}💎, luego 7 emociones más: {1}💎.
 Estilo: chibi adorable, contorno blanco, fondo transparente.
 
 Ejemplo de pack:
@@ -698,11 +737,11 @@ Ejemplo de pack:
     <value>🎭 Dibujando sticker {0}/{1}…</value>
   </data>
   <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>Personaje listo · {0:0.##}⭐
-¿Armar un pack de 8 emociones por {1:0.##}⭐ más?</value>
+    <value>Personaje listo · {0}💎
+¿Armar un pack de 8 emociones por {1}💎 más?</value>
   </data>
   <data name="StickerPackReady" xml:space="preserve">
-    <value>Pack de {0} stickers listo · {1:0.##}⭐
+    <value>Pack de {0} stickers listo · {1}💎
 Ya puedes añadirlo a Telegram.</value>
   </data>
   <data name="StickerPackAlbumCaption" xml:space="preserve">

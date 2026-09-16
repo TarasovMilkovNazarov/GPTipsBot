@@ -1,7 +1,7 @@
 namespace GPTipsBot.Config;
 
 /// <summary>
-/// GPT Image 2 options and Stars pricing (paid only).
+/// GPT Image 2 options and gem pricing (paid only).
 /// Prices map to OpenAI output cost tiers for ~1024px images.
 /// </summary>
 public static class GptImageConfig
@@ -39,9 +39,9 @@ public static class GptImageConfig
         Qualities.FirstOrDefault(q => string.Equals(q.Id, quality, StringComparison.OrdinalIgnoreCase))
         ?? Qualities[1];
 
-    public static double PriceFor(string? quality) => ResolveQuality(quality).StarsCost;
+    public static int PriceFor(string? quality) => ResolveQuality(quality).GemCost;
 }
 
 public sealed record GptImageSizeOption(string Id, string Label, string Emoji);
 
-public sealed record GptImageQualityOption(string Id, string Label, double StarsCost);
+public sealed record GptImageQualityOption(string Id, string Label, int GemCost);

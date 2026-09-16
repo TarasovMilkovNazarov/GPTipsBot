@@ -45,7 +45,7 @@ namespace GPTipsBot.UpdateHandlers
                             string.Format(
                                 BotResponse.ModelNeedsBalance,
                                 model.DisplayName,
-                                model.StarsCost,
+                                model.GemCost,
                                 GptModelCatalog.Default.DisplayName),
                             TelegramBotUiService.GetModelNeedsBalanceKeyboard(),
                             update.IsGroupOrChannel,

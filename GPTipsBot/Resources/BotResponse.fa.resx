@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + تصاویر
 
 فقط یک سوال تایپ کنید - ربات با زمینه گفتگو پاسخ می دهد.
-منو: گپ جدید، مدل‌ها، تصویر (Yandex Art / GPT Image)، انیمیشن، ادغام و تغییر عکس، حساب کاربری و ⭐ شارژ.
+منو: گپ جدید، مدل‌ها، تصویر (Yandex Art / GPT Image)، انیمیشن، ادغام و تغییر عکس، حساب کاربری و 💎 شارژ.
 
 محدودیت های روزانه رایگان اعمال می شود - /profile را ببینید. جزئیات: /help</value>
   </data>
@@ -131,7 +131,7 @@
 🌐 وب سایت
 همان چت ChatGPT و ابزار تصویر نیز در مرورگر موجود است:
 https://gptips.skolkokomu.ru
-با تلگرام وارد شوید — موجودی ⭐ و سهمیه شما با ربات به اشتراک گذاشته می شود.
+با تلگرام وارد شوید — موجودی 💎 و سهمیه شما با ربات به اشتراک گذاشته می شود.
 
 💬 با هوش مصنوعی چت کنید
 فقط یک پیام متنی ارسال کنید - ربات با استفاده از زمینه مکالمه فعلی پاسخ می دهد.
@@ -144,42 +144,45 @@ https://gptips.skolkokomu.ru
 "🎨 تصاویر" را در منو باز کنید:
 • 🖼 Yandex Art — ارسال متنی رایگان به تصویر (در سهمیه روزانه)
 • 🎨 GPT Image — نسل پولی با گزینه های اندازه و کیفیت
-• 🎭 استیکر · ⭐ — بسته ۸ استیکر از عکس یا توضیح. /stickers
+• 🎭 استیکر · 💎 — بسته ۸ استیکر از عکس یا توضیح. /stickers
 • 🛠 ویرایش عکس — ویرایش عکس از یک دستورالعمل متنی (پرداخت، GPT Image). در گروه ها: "/edit_image…" را به یک عکس پاسخ دهید
 • 📝 متن از عکس — OCR / استخراج متن از تصویر
 • 💬 درخواست از عکس — از یک عکس آپلود شده یک پیام متنی به تصویر ایجاد کنید
 
 💬 درخواست از عکس
-ارسال یک تصویر — ربات درخواستی می نویسد که می تواند تصویر مشابهی ایجاد کند (از سهمیه ChatGPT یا ⭐ استفاده می کند).
+ارسال یک تصویر — ربات درخواستی می نویسد که می تواند تصویر مشابهی ایجاد کند (از سهمیه ChatGPT یا 💎 استفاده می کند).
 در گروه ها و نظرات: با /prompt_from_image به عکس پاسخ دهید.
 
 ✨ عکس متحرک
-یک عکس را به یک انیمیشن کوتاه تبدیل کنید (رایگان در حد سهمیه یا پولی با ⭐).
+یک عکس را به یک انیمیشن کوتاه تبدیل کنید (رایگان در حد سهمیه یا پولی با 💎).
 
 🧩 ادغام عکس
-دو عکس را طبق توضیح متنی در یک تصویر ادغام می‌کند (از سهمیه انیمیشن یا ⭐).
+دو عکس را طبق توضیح متنی در یک تصویر ادغام می‌کند (از سهمیه انیمیشن یا 💎).
 دستور /combine: اول عکس اول، بعد عکس دوم، سپس توضیح.
 
 🖌 تغییر عکس
-یک عکس را با آلیسا بازنویسی می‌کند (از سهمیه انیمیشن یا ⭐).
+یک عکس را با آلیسا بازنویسی می‌کند (از سهمیه انیمیشن یا 💎).
 این «🛠 ویرایش عکس» (GPT Image) نیست. دستور /change_photo.
 
 🧼 حذف واترمارک
-نوشته‌ها، لوگوها و لایه‌های نیمه‌شفاف را از عکس پاک می‌کنم (فقط با ⭐، بدون سهمیه رایگان).
+نوشته‌ها، لوگوها و لایه‌های نیمه‌شفاف را از عکس پاک می‌کنم (فقط با 💎، بدون سهمیه رایگان).
 عکس دوباره ساخته می‌شود، بنابراین جزئیات ریز ممکن است کمی تغییر کند.
 واترمارک را فقط از تصاویر خودتان حذف کنید.
 
 👤 اکانت
-موجودی ⭐، سهمیه های رایگان و مدل فعلی شما را نشان می دهد.
+موجودی 💎، سهمیه های رایگان و مدل فعلی شما را نشان می دهد.
 از حساب شما می توانید:
 • یک مدل انتخاب کنید
 • بالا بردن تعادل
 • تغییر زبان رابط
 
-⭐ تعادل و محدودیت
+💎 تعادل و محدودیت
+💎 ارز داخلی ربات است: 20💎 = ۱ روبل. شارژ با کارت، SBP یا استارهای تلگرام (۱ Star = 20💎).
+راهنما: 4💎 = ۱ درخواست ChatGPT، 100💎 = تولید تصویر یا انیمیشن عکس.
 درخواست های رایگان محدود هستند و روزانه به روز می شوند.
-وقتی سهمیه تمام شد، ⭐ در حساب یا از طریق /deposit شارژ کنید.
-راهنما: 1⭐ ≈ 10 درخواست ChatGPT، 2 نسل تصویر، یا 2 انیمیشن عکس.
+وقتی سهمیه تمام شد، 💎 در حساب یا از طریق /deposit شارژ کنید.
+
+پیش‌تر موجودی با ⭐ شمرده می‌شد. هر ⭐ به 200💎 تبدیل شد، بنابراین همه شارژهای قبلی کامل حفظ شدند — فقط مقیاس تغییر کرد.
 
 دستورات مفید
 /start - منوی اصلی
@@ -242,7 +245,7 @@ https://gptips.skolkokomu.ru
 • ✨ عکس متحرک
 • 🧩 ادغام عکس
 • 🖌 تغییر عکس
-• 🧼 حذف واترمارک — با ⭐
+• 🧼 حذف واترمارک — با 💎
 • ✍️ /human - بازنویسی ساده انگلیسی طبیعی
 • 💬 گپ جدید — زمینه را بازنشانی کنید
 
@@ -256,7 +259,7 @@ https://gptips.skolkokomu.ru</value>
 
 می‌توانید فقط سوالی درباره عکس بپرسید — مثلاً «چه چیزی در تصویر است؟»
 
-بالا: Free (سهمیه). دکمه‌های ⭐: پولی.</value>
+بالا: Free (سهمیه). دکمه‌های 💎: پولی.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>توضیحات متنی تصویر نباید بیشتر از نویسه های {0} باشد. لطفا توضیحات را کوتاه کنید و دوباره ارسال کنید</value>
@@ -338,17 +341,25 @@ https://gptips.skolkokomu.ru</value>
     <value>Create a detailed text-to-image prompt for this image.</value>
   </data>
   <data name="InvoiceTitle" xml:space="preserve">
-    <value>ستاره ها را به حساب اضافه کنید</value>
+    <value>موجودی خود را شارژ کنید</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>❗️حداقل شارژ {0} RUB ({1}⭐) است
+    <value>❗️حداقل شارژ {0} RUB ({1}💎) است
 بسته ای را انتخاب کنید یا مقدار را دوباره وارد کنید:</value>
+  </data>
+  <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
+    <value>
+
+یا از {0} {1} با کارت بین‌المللی / PayPal (lava.top).</value>
+  </data>
+  <data name="DepositAmountTooLargeResponse" xml:space="preserve">
+    <value>✨ حداکثر {0}💎 در هر پرداخت. مبلغ کمتری وارد کنید 👇</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 مشخصات: {0} {1}
 
 
-💵 موجودی: {2} Stars 💵
+💵 موجودی: {2}💎 💵  (20💎 = ۱ روبل)
 🤖 مدل: {8}
 درخواست های رایگان:
  -- ChatGpt: {3}
@@ -359,39 +370,43 @@ https://gptips.skolkokomu.ru</value>
  -- ترکیب عکس: {9}
  -- ویرایش عکس: {10}</value>
   </data>
+  <data name="GemsMigrationNotice" xml:space="preserve">
+    <value>ℹ️ پیش‌تر موجودی با ⭐ شمرده می‌شد. هر ⭐ به 200💎 تبدیل شد — همه شارژهای قبلی کامل حفظ شدند، فقط مقیاس تغییر کرد.</value>
+  </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>1 ستاره = 10 درخواست ChatGPT یا 2 نسل تصویر یا 2 انیمیشن عکس</value>
+    <value>4💎 = ۱ درخواست ChatGPT، 100💎 = تولید تصویر یا انیمیشن عکس</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1⭐ = 10 درخواست ChatGPT، 2 نسل تصویر یا 2 انیمیشن عکس
+    <value>20💎 = ۱ روبل — ارز داخلی ربات.
+4💎 = ۱ درخواست ChatGPT، 100💎 = تولید تصویر یا انیمیشن عکس
 
-حداقل شارژ: {0} RUB ({1}⭐)
-یک بسته را انتخاب کنید یا یک مقدار کامل Stars را وارد کنید:</value>
+حداقل شارژ: {0} RUB ({1}💎)
+یک بسته را انتخاب کنید یا یک مقدار کامل 💎 را وارد کنید:</value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>موجودی خود را پر کنید</value>
   </data>
   <data name="InsufficientBalance" xml:space="preserve">
-    <value>برای انجام این عملیات باید ستاره های {0} داشته باشید.
+    <value>برای انجام این عملیات باید {0}💎 داشته باشید.
 
 پس از شارژ مجدد دستور را وارد کنید.</value>
   </data>
   <data name="ChoosePaymentMethod" xml:space="preserve">
-    <value>شارژ {0}⭐ ({1} RUB)
+    <value>شارژ {0}💎 ({1} RUB)
 
 روش پرداخت را انتخاب کنید:</value>
   </data>
   <data name="PayWithStarsButton" xml:space="preserve">
-    <value>⭐ Telegram Stars</value>
+    <value>⭐ Telegram Stars · {0}</value>
   </data>
   <data name="DepositPackageButton" xml:space="preserve">
-    <value>{0}⭐ · {1} RUB</value>
+    <value>{0}💎 · {1} RUB</value>
   </data>
   <data name="PayWithYooKassaButton" xml:space="preserve">
     <value>💳 کارت / SBP / SberPay · {0} RUB</value>
   </data>
   <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
-    <value>پرداخت برای {0}⭐ ({1} RUB)
+    <value>پرداخت برای {0}💎 ({1} RUB)
 
 روی دکمه زیر ضربه بزنید تا فرم پرداخت YooKassa باز شود.
 موجودی شما پس از پرداخت موفقیت آمیز به طور خودکار به روز می شود.</value>
@@ -409,9 +424,33 @@ https://gptips.skolkokomu.ru</value>
     <value>پرداخت پیدا شد، موجودی به روز شد ✅</value>
   </data>
   <data name="YooKassaPaymentDescription" xml:space="preserve">
-    <value>اضافه کردن موجودی GPTipsBot: ستاره های {0}</value>
+    <value>اضافه کردن موجودی GPTipsBot: {0}💎</value>
   </data>
   <data name="YooKassaPaymentSucceeded" xml:space="preserve">
+    <value>✅ پرداخت با موفقیت انجام شد موجودی شما پر شده است.</value>
+  </data>
+  <data name="PayWithLavaTopButton" xml:space="preserve">
+    <value>🌍 کارت بین‌المللی / PayPal · {0} {1}</value>
+  </data>
+  <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
+    <value>پرداخت برای {0}💎 ({1} {2})
+
+روی دکمه زیر ضربه بزنید تا فرم پرداخت lava.top باز شود.
+موجودی شما پس از پرداخت موفقیت آمیز به طور خودکار به روز می شود.</value>
+  </data>
+  <data name="OpenLavaTopPaymentButton" xml:space="preserve">
+    <value>اکنون پرداخت کنید</value>
+  </data>
+  <data name="CheckLavaTopPaymentButton" xml:space="preserve">
+    <value>پرداخت چک</value>
+  </data>
+  <data name="LavaTopPaymentCheckPending" xml:space="preserve">
+    <value>هنوز پرداختی دریافت نشده است اگر قبلاً پرداخت کرده اید، یک دقیقه صبر کنید و دوباره امتحان کنید.</value>
+  </data>
+  <data name="LavaTopPaymentCheckOk" xml:space="preserve">
+    <value>پرداخت پیدا شد، موجودی به روز شد ✅</value>
+  </data>
+  <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ پرداخت با موفقیت انجام شد موجودی شما پر شده است.</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
@@ -421,13 +460,13 @@ https://gptips.skolkokomu.ru</value>
     <value>❗️به سقف درخواست رایگان شما برای امروز رسیده است.
 موجودی خود را پر کنید یا منتظر بمانید تا محدودیت های رایگان بازنشانی شود.
 
-1⭐ = 10 درخواست ChatGPT، 2 نسل تصویر یا 2 انیمیشن عکس.</value>
+4💎 = ۱ درخواست ChatGPT، 100💎 = تولید تصویر یا انیمیشن عکس.</value>
   </data>
   <data name="TimeNoFreeRequests" xml:space="preserve">
     <value>❗️شما از تمام درخواست های رایگان امروز خود استفاده کرده اید.
 یا اکنون وجوه اضافه کنید یا منتظر بمانید {0:%d} d {0:%h} ساعت {0:%m} دقیقه برای بازخوانی درخواست های رایگان شما.
 
-1⭐ = 10 درخواست ChatGPT، 2 نسل تصویر یا 2 انیمیشن عکس</value>
+4💎 = ۱ درخواست ChatGPT، 100💎 = تولید تصویر یا انیمیشن عکس</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
     <value>🌟 از پروژه ما حمایت کنید 💪
@@ -577,7 +616,7 @@ https://gptips.skolkokomu.ru</value>
     <value>▶️ دریافت کنید</value>
   </data>
   <data name="AccountLinkSuccess" xml:space="preserve">
-    <value>✅ تلگرام به اکانت وبسایت شما لینک شده است. Stars و سهمیه های رایگان اکنون به اشتراک گذاشته شده اند.</value>
+    <value>✅ تلگرام به اکانت وبسایت شما لینک شده است. 💎 و سهمیه های رایگان اکنون به اشتراک گذاشته شده اند.</value>
   </data>
   <data name="AccountLinkTokenInvalid" xml:space="preserve">
     <value>⚠️ این لینک نامعتبر یا منقضی شده است. دوباره ربات را از وب سایت باز کنید.</value>
@@ -591,22 +630,22 @@ https://gptips.skolkokomu.ru</value>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 مدل ChatGPT را انتخاب کنید
 
-فعلی: {0} ({1:0.##}⭐ در هر پیام)
+فعلی: {0} ({1}💎 در هر پیام)
 
 درخواست های رایگان فقط با {2} کار می کنند.
-مدل های دیگر Stars را از موجودی شما خرج می کنند.</value>
+مدل های دیگر 💎 را از موجودی شما خرج می کنند.</value>
   </data>
   <data name="ModelSelected" xml:space="preserve">
     <value>✅ مدل انتخاب شده: {0}
-هزینه هر پیام: {1:0.##}⭐</value>
+هزینه هر پیام: {1}💎</value>
   </data>
   <data name="ModelSelectionRequiresBalance" xml:space="preserve">
-    <value>🔒 انتخاب مدل زمانی در دسترس است که موجودی Stars شما مثبت باشد.
+    <value>🔒 انتخاب مدل زمانی در دسترس است که موجودی 💎 شما مثبت باشد.
 
 می‌توانید به {0} بروید یا موجودی خود را شارژ کنید.</value>
   </data>
   <data name="ModelNeedsBalance" xml:space="preserve">
-    <value>❗️Stars برای {0} کافی نیست ({1:0.##}⭐ در هر پیام).
+    <value>❗️💎 برای {0} کافی نیست ({1}💎 در هر پیام).
 
 موجودی خود را پر کنید یا به {2} بروید.</value>
   </data>
@@ -617,14 +656,14 @@ https://gptips.skolkokomu.ru</value>
     <value>🎨 GPT Image - تولید کنید
 
 اندازه و کیفیت را انتخاب کنید، سپس توضیحات را ارسال کنید.
-هزینه: {0:0.##}⭐ (بدون سهمیه رایگان)</value>
+هزینه: {0}💎 (بدون سهمیه رایگان)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
     <value>🛠 GPT Image — ویرایش
 
 یک عکس ارسال کنید، سپس اندازه/کیفیت را انتخاب کنید و تغییرات را شرح دهید.
 یا به یک عکس پاسخ دهید: /edit_image آسمان را صورتی می کند
-هزینه: {0:0.##}⭐ (بدون سهمیه رایگان)</value>
+هزینه: {0}💎 (بدون سهمیه رایگان)</value>
   </data>
   <data name="GptImageSendPhotoFirst" xml:space="preserve">
     <value>ابتدا یک عکس برای ویرایش بفرستید</value>
@@ -634,10 +673,10 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="GptImageSendEditPrompt" xml:space="preserve">
     <value>توضیح دهید که چه چیزی را در عکس تغییر دهید.
-هزینه: {0:0.##}⭐</value>
+هزینه: {0}💎</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2}💎</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 حذف واترمارک
@@ -645,16 +684,16 @@ https://gptips.skolkokomu.ru</value>
 یک عکس ارسال کنید — نوشته‌ها، لوگوها و لایه‌های نیمه‌شفاف تکرارشونده را حذف می‌کنم.
 توجه: عکس بازسازی می‌شود، بنابراین جزئیات ریز ممکن است کمی تغییر کند.
 فقط واترمارک تصاویر خودتان را حذف کنید.
-هزینه: {0:0.##}⭐ (بدون درخواست رایگان)</value>
+هزینه: {0}💎 (بدون درخواست رایگان)</value>
   </data>
   <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
     <value>عکسی را ارسال کنید که می‌خواهید واترمارک آن حذف شود</value>
   </data>
   <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
-    <value>🧼 واترمارک حذف شد · {0:0.##}⭐</value>
+    <value>🧼 واترمارک حذف شد · {0}💎</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>حالت حذف واترمارک هنوز فعال است: می‌توانید عکس دیگری بفرستید، هر عکس {0:0.##}⭐ هزینه دارد. برای خروج «بازگشت» را بزنید.</value>
+    <value>حالت حذف واترمارک هنوز فعال است: می‌توانید عکس دیگری بفرستید، هر عکس {0}💎 هزینه دارد. برای خروج «بازگشت» را بزنید.</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ تولید تصویر معمولاً چند ثانیه طول می‌کشد. لطفاً صبر کنید...</value>
@@ -687,7 +726,7 @@ https://gptips.skolkokomu.ru</value>
     <value>🎭 بسته استیکر
 
 عکس شخصیت را بفرستید یا با متن توصیف کنید — استیکر می‌کشم و پیش‌نمایش نشان می‌دهم.
-شخصیت: {0:0.##}⭐، سپس ۷ احساس دیگر: {1:0.##}⭐.
+شخصیت: {0}💎، سپس ۷ احساس دیگر: {1}💎.
 سبک: چیبی بامزه، حاشیه سفید، پس‌زمینه شفاف.
 
 نمونه بسته آماده:
@@ -697,11 +736,11 @@ https://gptips.skolkokomu.ru</value>
     <value>🎭 در حال کشیدن استیکر {0}/{1}…</value>
   </data>
   <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>شخصیت آماده است · {0:0.##}⭐
-بسته ۸ احساسی را با {1:0.##}⭐ دیگر بسازم؟</value>
+    <value>شخصیت آماده است · {0}💎
+بسته ۸ احساسی را با {1}💎 دیگر بسازم؟</value>
   </data>
   <data name="StickerPackReady" xml:space="preserve">
-    <value>بسته {0} استیکر آماده است · {1:0.##}⭐
+    <value>بسته {0} استیکر آماده است · {1}💎
 می‌توانید آن را به تلگرام اضافه کنید.</value>
   </data>
   <data name="StickerPackAlbumCaption" xml:space="preserve">

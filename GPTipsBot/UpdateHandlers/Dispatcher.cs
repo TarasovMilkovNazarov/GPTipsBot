@@ -167,19 +167,44 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             if (update.CallbackQuery != null &&
-                PaymentCallbacks.TryParsePackage(update.CallbackQuery.Data, out var packageStars))
+                PaymentCallbacks.TryParseLavaTopCheck(update.CallbackQuery.Data, out var lavaCheckInvoiceId))
             {
-                await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
-                await botClient.SendUserReplyAsync(
-                    update,
-                    string.Format(BotResponse.ChoosePaymentMethod, packageStars,
-                        MoneyService.FormatRubAmount(packageStars)),
-                    moneyService.BuildPaymentMethodKeyboard(packageStars));
+                var syncResult = await moneyService.SyncLavaTopInvoiceAsync(
+                    lavaCheckInvoiceId,
+                    update.UserChatKey.Id,
+                    CancellationToken.None);
+
+                if (syncResult == PaymentConfirmResult.DepositCredited)
+                {
+                    await botClient.AnswerCallbackQuery(
+                        update.CallbackQuery.Id,
+                        BotResponse.LavaTopPaymentCheckOk);
+                }
+                else
+                {
+                    await botClient.AnswerCallbackQuery(
+                        update.CallbackQuery.Id,
+                        BotResponse.LavaTopPaymentCheckPending,
+                        showAlert: true);
+                }
+
                 return;
             }
 
             if (update.CallbackQuery != null &&
-                PaymentCallbacks.TryParse(update.CallbackQuery.Data, out var paymentProvider, out var payStarsCount))
+                PaymentCallbacks.TryParsePackage(update.CallbackQuery.Data, out var packageGems))
+            {
+                await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
+                await botClient.SendUserReplyAsync(
+                    update,
+                    string.Format(BotResponse.ChoosePaymentMethod, packageGems,
+                        MoneyService.FormatRubAmount(packageGems)),
+                    moneyService.BuildPaymentMethodKeyboard(packageGems));
+                return;
+            }
+
+            if (update.CallbackQuery != null &&
+                PaymentCallbacks.TryParse(update.CallbackQuery.Data, out var paymentProvider, out var payGemsCount))
             {
                 await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
 
@@ -188,14 +213,22 @@ namespace GPTipsBot.UpdateHandlers
                     await moneyService.SendInvoice(
                         update.UserChatKey.Id,
                         update.TelegramUserId,
-                        payStarsCount);
+                        payGemsCount);
                 }
                 else if (paymentProvider == PaymentCallbacks.YooKassaPrefix)
                 {
                     await moneyService.CreateYooKassaPaymentAsync(
                         update.UserChatKey.Id,
                         update.TelegramUserId,
-                        payStarsCount,
+                        payGemsCount,
+                        CancellationToken.None);
+                }
+                else if (paymentProvider == PaymentCallbacks.LavaTopPrefix)
+                {
+                    await moneyService.CreateLavaTopPaymentAsync(
+                        update.UserChatKey.Id,
+                        update.TelegramUserId,
+                        payGemsCount,
                         CancellationToken.None);
                 }
 
@@ -217,10 +250,7 @@ namespace GPTipsBot.UpdateHandlers
                 else if (confirmResult == PaymentConfirmResult.DepositCredited)
                 {
                     var profile = await userService.GetUserProfile(update.UserChatKey.Id);
-                    var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
-                        profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
-                        profile.CombinePhotos, profile.ChangePhotos);
+                    var reply = profile.Render();
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
@@ -286,7 +316,7 @@ namespace GPTipsBot.UpdateHandlers
                         {
                             await botClient.SendUserReplyAsync(
                                 update,
-                                string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost),
+                                string.Format(BotResponse.GptImageSendEditPrompt, session.GemCost),
                                 TelegramBotUiService.GetGptImageOptionsKeyboard(session));
                             return;
                         }
@@ -296,7 +326,7 @@ namespace GPTipsBot.UpdateHandlers
                     {
                         await botClient.SendUserReplyAsync(
                             update,
-                            string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost),
+                            string.Format(BotResponse.GptImageSendEditPrompt, session.GemCost),
                             TelegramBotUiService.GetGptImageOptionsKeyboard(session));
                         return;
                     }
@@ -345,27 +375,53 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
-                if (!int.TryParse(update.Message?.Text, out var starsCount) ||
-                    starsCount < PaymentConfig.MinRechargeStars ||
-                    MoneyService.ToKopecks(starsCount) < PaymentConfig.MinRechargeRub * 100L)
+                // Two independent floors: the RUB one Stars/YooKassa share (PaymentConfig.MinRechargeGems)
+                // and lava.top's own, much lower one (LavaTopConfig.MinRechargeAmount, e.g. $1) — an
+                // amount only has to clear one of them. BuildPaymentMethodKeyboard then shows only the
+                // buttons whose own rail the typed amount actually qualifies for.
+                string InvalidDepositAmountMessage()
+                {
+                    var message = string.Format(BotResponse.InvalidDepositAmountResponse,
+                        PaymentConfig.MinRechargeRub, PaymentConfig.MinRechargeGems);
+                    return LavaTopConfig.IsEnabled
+                        ? message + string.Format(BotResponse.InvalidDepositAmountLavaTopHint,
+                            LavaTopConfig.MinRechargeAmount, LavaTopConfig.Currency)
+                        : message;
+                }
+
+                if (!int.TryParse(update.Message?.Text, out var gemsCount))
+                {
+                    throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidDepositAmountMessage());
+                }
+
+                var meetsRubMinimum = MoneyService.ToKopecks(gemsCount) >= PaymentConfig.MinRechargeRub * 100L;
+                var meetsLavaTopMinimum = LavaTopConfig.IsEnabled &&
+                    MoneyService.ToLavaTopAmount(gemsCount) >= LavaTopConfig.MinRechargeAmount;
+
+                if (!meetsRubMinimum && !meetsLavaTopMinimum)
+                {
+                    throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidDepositAmountMessage());
+                }
+
+                if (gemsCount > TelegramStarsConfig.MaxGemsPerInvoice)
                 {
                     throw new ClientCanceledException(update.UserChatKey.ChatId,
-                        string.Format(BotResponse.InvalidDepositAmountResponse,
-                            PaymentConfig.MinRechargeRub, PaymentConfig.MinRechargeStars));
+                        string.Format(BotResponse.DepositAmountTooLargeResponse,
+                            TelegramStarsConfig.MaxGemsPerInvoice));
                 }
 
                 await botClient.SendUserReplyAsync(
                     update,
-                    string.Format(BotResponse.ChoosePaymentMethod, starsCount,
-                        MoneyService.FormatRubAmount(starsCount)),
-                    moneyService.BuildPaymentMethodKeyboard(starsCount));
+                    string.Format(BotResponse.ChoosePaymentMethod, gemsCount,
+                        MoneyService.FormatRubAmount(gemsCount)),
+                    moneyService.BuildPaymentMethodKeyboard(gemsCount));
 
                 return;
             }
             else if (lastCommand?.Type == CommandType.Donate)
             {
-                if (!int.TryParse(update.Message?.Text, out var starsCount) ||
-                    starsCount <= 0)
+                if (!int.TryParse(update.Message?.Text, out var gemsCount) ||
+                    gemsCount <= 0)
                 {
                     throw new ClientCanceledException(update.UserChatKey.ChatId, BotResponse.StarsDonationHint);
                 }
@@ -373,7 +429,7 @@ namespace GPTipsBot.UpdateHandlers
                 await moneyService.SendDonateInvoice(
                     update.UserChatKey.Id,
                     update.TelegramUserId,
-                    starsCount);
+                    gemsCount);
 
                 return;
             }
@@ -625,7 +681,7 @@ namespace GPTipsBot.UpdateHandlers
                         return true;
                     }
 
-                    if (profile is { Images: <= 0, Stars: <= 0 })
+                    if (profile is { Images: <= 0, Gems: <= 0 })
                     {
                         await SendNoFreeRequestsMessageAsync(update);
                         return true;
@@ -657,7 +713,7 @@ namespace GPTipsBot.UpdateHandlers
                         return true;
                     }
 
-                    if (profile is { ImageTexts: <= 0, Stars: <= 0 })
+                    if (profile is { ImageTexts: <= 0, Gems: <= 0 })
                     {
                         await SendNoFreeRequestsMessageAsync(update);
                         return true;
@@ -686,7 +742,7 @@ namespace GPTipsBot.UpdateHandlers
                         return true;
                     }
 
-                    if (profile is { GptRequests: <= 0, Stars: <= 0 })
+                    if (profile is { GptRequests: <= 0, Gems: <= 0 })
                     {
                         await SendNoFreeRequestsMessageAsync(update);
                         return true;
@@ -715,7 +771,7 @@ namespace GPTipsBot.UpdateHandlers
                         return true;
                     }
 
-                    if (profile.Stars < PaymentConfig.WatermarkRemoval)
+                    if (profile.Gems < PaymentConfig.WatermarkRemoval)
                     {
                         await botClient.SendMessage(
                             update.UserChatKey.ChatId,
@@ -747,11 +803,11 @@ namespace GPTipsBot.UpdateHandlers
                         return true;
                     }
 
-                    if (profile.Stars < StickerPackConfig.HeroStars)
+                    if (profile.Gems < StickerPackConfig.HeroGems)
                     {
                         await botClient.SendMessage(
                             update.UserChatKey.ChatId,
-                            string.Format(BotResponse.InsufficientBalance, StickerPackConfig.HeroStars),
+                            string.Format(BotResponse.InsufficientBalance, StickerPackConfig.HeroGems),
                             replyMarkup: TelegramBotUiService.DepositInlineKeyboard);
                         return true;
                     }

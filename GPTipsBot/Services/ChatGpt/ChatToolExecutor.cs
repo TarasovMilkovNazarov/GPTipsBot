@@ -33,7 +33,7 @@ public class ChatToolExecutor(
             Description =
                 "Generate a picture with GPT Image and send it directly to the user in this chat. " +
                 "Only call this when the user explicitly asks to draw/create/generate an image, picture, " +
-                "illustration or photo. It costs the user Telegram Stars, so do not call it speculatively " +
+                "illustration or photo. It costs the user gems, so do not call it speculatively " +
                 "or more than once per request. Do not use it for OCR or for describing a photo the user " +
                 "already sent.",
             Parameters = PropertyDefinition.DefineObject(
@@ -98,13 +98,13 @@ public class ChatToolExecutor(
         var size = GptImageConfig.ResolveSize(args.TryGetValue("size", out var sizeValue) ? sizeValue?.ToString() : null);
         var quality = GptImageConfig.ResolveQuality(
             args.TryGetValue("quality", out var qualityValue) ? qualityValue?.ToString() : null);
-        var starsCost = quality.StarsCost;
+        var gemCost = quality.GemCost;
 
         var chatId = update.UserChatKey.ChatId;
-        var hold = await userService.TryReserveGptImageAsync(update.UserChatKey.Id, starsCost);
+        var hold = await userService.TryReserveGptImageAsync(update.UserChatKey.Id, gemCost);
         if (hold is null)
         {
-            return $"error: insufficient_balance — the user needs {starsCost} Telegram Stars to generate " +
+            return $"error: insufficient_balance — the user needs {gemCost} gems to generate " +
                    "an image with GPT Image and does not have enough. Politely tell them the cost, in " +
                    "their own language, and that they can top up via /deposit. Do not claim an image was made.";
         }
@@ -125,7 +125,7 @@ public class ChatToolExecutor(
 
             await userService.ConfirmAsync(hold.Id);
             return "success: the image was generated and already sent to the user as a photo in this chat " +
-                   $"(quality={quality.Id}, size={size.Id}, cost={starsCost} Stars). Reply briefly — do not " +
+                   $"(quality={quality.Id}, size={size.Id}, cost={gemCost} gems). Reply briefly — do not " +
                    "restate the visual description in detail, the user can already see the picture.";
         }
         catch (ClientException ex)

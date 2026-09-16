@@ -17,16 +17,23 @@ public static class YooKassaConfig
         (SecretKey.StartsWith("test_", StringComparison.Ordinal) ||
          SecretKey.StartsWith("live_", StringComparison.Ordinal));
 
-    /// <summary>Rubles charged per 1 Star credited to the wallet.</summary>
-    public static decimal RubPerStar
+    /// <summary>
+    /// Gems credited per 1 ₽ paid on the fiat rail. A gem is therefore worth five kopecks at the
+    /// default rate: coarse enough that a balance reads as a four-digit number, fine enough that the
+    /// cheapest paid action (a chat turn, 4 gems) can still get four times cheaper before the scale
+    /// bottoms out and a redenomination is needed.
+    /// </summary>
+    /// <remarks>
+    /// Replaces <c>YOOKASSA_RUB_PER_STAR</c>, which priced the old coarse star unit at 10 ₽. Neither
+    /// that name nor a rubles-per-gem spelling is read as a fallback: a leftover value would be off by
+    /// orders of magnitude and silently mischarge.
+    /// </remarks>
+    public static int GemsPerRub
     {
         get
         {
-            var raw = Normalize(Environment.GetEnvironmentVariable("YOOKASSA_RUB_PER_STAR"));
-            return decimal.TryParse(raw, System.Globalization.NumberStyles.Number,
-                System.Globalization.CultureInfo.InvariantCulture, out var value) && value > 0
-                ? value
-                : 10m;
+            var raw = Normalize(Environment.GetEnvironmentVariable("YOOKASSA_GEMS_PER_RUB"));
+            return int.TryParse(raw, out var value) && value > 0 ? value : 20;
         }
     }
 

@@ -695,26 +695,27 @@ namespace GPTipsBotTests
             var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault()?.Balance ?? 0;
 
             await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
-            var starsToAdd = 10;
-            var invoice = await CreateInvoiceAsync(TestConstants.UserId, starsToAdd);
+            var gemsToAdd = 1000;
+            var invoice = await CreateInvoiceAsync(TestConstants.UserId, gemsToAdd);
 
-            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, gemsToAdd));
 
             var walletAfterPreCheckout = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
             (walletAfterPreCheckout?.Balance ?? 0).Should().Be(balanceBefore);
 
-            await _mainHandler.HandleUpdateAsync(CreateSuccessfulPaymentUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreateSuccessfulPaymentUpdate(invoice, gemsToAdd));
 
             var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
 
             walletUpdated.Should().NotBeNull();
-            walletUpdated.Balance.Should().Be(balanceBefore + starsToAdd);
+            walletUpdated.Balance.Should().Be(balanceBefore + gemsToAdd);
             invoiceRepository.GetById(invoice.Id)!.Status.Should().Be(InvoiceStatus.Paid);
         }
 
         [Test]
-        [TestCase("10", true)]
+        [TestCase("1000", true)]
         [TestCase("-10", false)]
+        [TestCase("10", false)]
         [TestCase("some random text", false)]
         public async Task DepositCommand_UserInput_BalanceChanged(string input, bool isValid)
         {
@@ -738,20 +739,20 @@ namespace GPTipsBotTests
                 await starsInputUpdateFunc();
             }
 
-            var starsToAdd = int.Parse(input);
+            var gemsToAdd = int.Parse(input);
             var invoice = invoiceRepository.Get(i => i.UserId == TestConstants.UserId).Single();
 
-            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, gemsToAdd));
 
             var walletAfterPreCheckout = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
             (walletAfterPreCheckout?.Balance ?? 0).Should().Be(balanceBefore);
 
-            await _mainHandler.HandleUpdateAsync(CreateSuccessfulPaymentUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreateSuccessfulPaymentUpdate(invoice, gemsToAdd));
 
             var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
 
             walletUpdated.Should().NotBeNull();
-            walletUpdated.Balance.Should().Be(balanceBefore + starsToAdd);
+            walletUpdated.Balance.Should().Be(balanceBefore + gemsToAdd);
         }
 
         [Test]
@@ -795,8 +796,8 @@ namespace GPTipsBotTests
             {
                 CreatedAt = DateTime.UtcNow,
                 User = user,
-                Balance = 10,
-                Currency = "XTR"
+                Balance = 1000,
+                Currency = CurrencyCode.Gem
             });
 
             await context.SaveChangesAsync();
@@ -804,18 +805,18 @@ namespace GPTipsBotTests
             var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).First().Balance;
 
             await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
-            var starsToAdd = 10;
-            var invoice = await CreateInvoiceAsync(TestConstants.UserId, starsToAdd);
+            var gemsToAdd = 1000;
+            var invoice = await CreateInvoiceAsync(TestConstants.UserId, gemsToAdd);
 
-            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, gemsToAdd));
             walletRepository.Get(w => w.UserId == TestConstants.UserId).First().Balance.Should().Be(balanceBefore);
 
-            await _mainHandler.HandleUpdateAsync(CreateSuccessfulPaymentUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreateSuccessfulPaymentUpdate(invoice, gemsToAdd));
 
             var walletUpdated = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault();
 
             walletUpdated.Should().NotBeNull();
-            walletUpdated.Balance.Should().Be(balanceBefore + starsToAdd);
+            walletUpdated.Balance.Should().Be(balanceBefore + gemsToAdd);
         }
 
         [Test]
@@ -825,16 +826,16 @@ namespace GPTipsBotTests
             var invoiceRepository = _services.GetRequiredService<InvoiceRepository>();
 
             await _mainHandler.HandleUpdateAsync(_startTelegramUpdate);
-            var starsToAdd = 10;
-            var invoice = await CreateInvoiceAsync(TestConstants.UserId, starsToAdd);
+            var gemsToAdd = 1000;
+            var invoice = await CreateInvoiceAsync(TestConstants.UserId, gemsToAdd);
 
-            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, starsToAdd));
+            await _mainHandler.HandleUpdateAsync(CreatePreCheckoutUpdate(invoice, gemsToAdd));
 
             walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault().Should().BeNull();
             invoiceRepository.GetById(invoice.Id)!.Status.Should().Be(InvoiceStatus.Created);
         }
 
-        private async Task<Invoice> CreateInvoiceAsync(long userId, int starsCount)
+        private async Task<Invoice> CreateInvoiceAsync(long userId, int gemsCount)
         {
             var invoiceRepository = _services.GetRequiredService<InvoiceRepository>();
             var context = _services.GetRequiredService<ApplicationContext>();
@@ -843,7 +844,7 @@ namespace GPTipsBotTests
             {
                 CreatedAt = DateTime.UtcNow,
                 UserId = userId,
-                Amount = starsCount,
+                Amount = gemsCount,
                 Currency = Currency.Stars,
                 Status = InvoiceStatus.Created
             };
@@ -852,7 +853,7 @@ namespace GPTipsBotTests
             return invoice;
         }
 
-        private static Update CreatePreCheckoutUpdate(Invoice invoice, int starsToAdd)
+        private static Update CreatePreCheckoutUpdate(Invoice invoice, int gemsToAdd)
         {
             return new Update
             {
@@ -865,13 +866,13 @@ namespace GPTipsBotTests
                         FirstName = "Test"
                     },
                     Currency = Currency.Stars,
-                    TotalAmount = starsToAdd,
+                    TotalAmount = TelegramStarsConfig.GemsToXtr(gemsToAdd),
                     InvoicePayload = invoice.Id.ToString()
                 },
             };
         }
 
-        private static Update CreateSuccessfulPaymentUpdate(Invoice invoice, int starsToAdd)
+        private static Update CreateSuccessfulPaymentUpdate(Invoice invoice, int gemsToAdd)
         {
             return new Update
             {
@@ -899,7 +900,7 @@ namespace GPTipsBotTests
                     SuccessfulPayment = new SuccessfulPayment
                     {
                         Currency = Currency.Stars,
-                        TotalAmount = starsToAdd,
+                        TotalAmount = TelegramStarsConfig.GemsToXtr(gemsToAdd),
                         InvoicePayload = invoice.Id.ToString(),
                         TelegramPaymentChargeId = "tg_charge_1",
                         ProviderPaymentChargeId = "provider_charge_1"

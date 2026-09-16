@@ -151,8 +151,8 @@ public class StickerPackService(
 
     public static string IntroText => string.Format(
         BotResponse.StickerPackIntro,
-        StickerPackConfig.HeroStars,
-        StickerPackConfig.PackRemainderStars,
+        StickerPackConfig.HeroGems,
+        StickerPackConfig.PackRemainderGems,
         StickerPackConfig.ExamplePackUrl);
 
     private string? _exampleStickerFileId;

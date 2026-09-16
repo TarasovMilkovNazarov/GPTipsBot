@@ -25,6 +25,7 @@ public class PaymentHold : Entity
     public long UserId { get; set; }
     public PaidFeature Feature { get; set; }
     public bool UsedFreeQuota { get; set; }
-    public double WalletAmount { get; set; }
+    /// <summary>Gems held for this operation, refunded on release.</summary>
+    public long WalletAmount { get; set; }
     public PaymentHoldStatus Status { get; set; } = PaymentHoldStatus.Held;
 }

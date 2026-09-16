@@ -16,7 +16,7 @@ public sealed class GptImageSession
     public string Quality { get; set; } = GptImageConfig.QualityMedium;
     public string? ImageFileId { get; set; }
 
-    public double StarsCost => GptImageConfig.PriceFor(Quality);
+    public int GemCost => GptImageConfig.PriceFor(Quality);
 }
 
 public interface IGptImageSessionCache

@@ -205,7 +205,7 @@
     <value>Составить промпт по изображению</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
-    <value>⭐ Пополнить</value>
+    <value>💎 Пополнить</value>
   </data>
   <data name="ProfileButton" xml:space="preserve">
     <value>👤 Кабинет</value>
@@ -237,19 +237,19 @@
     <value>GPT Image — генерация</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image · ⭐</value>
+    <value>🎨 GPT Image · 💎</value>
   </data>
   <data name="EditImage" xml:space="preserve">
     <value>GPT Image — редактирование фото</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 Редактировать · GPT Image · ⭐</value>
+    <value>🛠 Редактировать · GPT Image · 💎</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>Убрать водяной знак с фото</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 Убрать водяной знак · ⭐</value>
+    <value>🧼 Убрать водяной знак · 💎</value>
   </data>
   <data name="CombinePhoto" xml:space="preserve">
     <value>Объединить два фото · Алиса</value>
@@ -267,7 +267,7 @@
     <value>Стикерпак по фото или описанию</value>
   </data>
   <data name="StickersButton" xml:space="preserve">
-    <value>🎭 Стикеры · ⭐</value>
+    <value>🎭 Стикеры · 💎</value>
   </data>
   <data name="StickersHeroOkButton" xml:space="preserve">
     <value>✅ Собрать набор</value>

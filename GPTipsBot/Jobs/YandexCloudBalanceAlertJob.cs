@@ -34,15 +34,28 @@ public class YandexCloudBalanceAlertJob(
         var notified = state.Snapshot(account.Id);
         var crossed = YandexBillingBalanceAlerts.NewlyCrossed(account.Balance, notified);
         var recovered = YandexBillingBalanceAlerts.Recovered(account.Balance, notified);
-        if (crossed.Count == 0 && recovered.Count == 0)
-            return;
+        if (crossed.Count > 0 || recovered.Count > 0)
+        {
+            state.Apply(account.Id, crossed, recovered);
 
-        state.Apply(account.Id, crossed, recovered);
+            if (crossed.Count > 0)
+            {
+                var text = YandexBillingBalanceAlerts.FormatMessage(account.Name, account.Balance, crossed);
+                await NotifyAdminsAsync(text, token);
+            }
+        }
 
-        if (crossed.Count == 0)
-            return;
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var (spentToday, shouldAlert) = state.TrackDailyConsumption(account.Id, account.Balance, today);
+        if (shouldAlert)
+        {
+            var text = YandexBillingBalanceAlerts.FormatDailyConsumptionMessage(account.Name, spentToday);
+            await NotifyAdminsAsync(text, token);
+        }
+    }
 
-        var text = YandexBillingBalanceAlerts.FormatMessage(account.Name, account.Balance, crossed);
+    private async Task NotifyAdminsAsync(string text, CancellationToken token)
+    {
         foreach (var adminId in AppConfig.AdminIds)
         {
             try
@@ -51,7 +64,7 @@ public class YandexCloudBalanceAlertJob(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Could not send Yandex Cloud balance alert to admin {AdminId}", adminId);
+                logger.LogWarning(ex, "Could not send Yandex Cloud alert to admin {AdminId}", adminId);
             }
         }
     }

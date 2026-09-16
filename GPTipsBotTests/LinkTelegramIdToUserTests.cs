@@ -125,8 +125,8 @@ public class LinkTelegramIdToUserTests
         db.Wallets.Add(new Wallet
         {
             UserId = 555002,
-            Balance = 2.5,
-            Currency = Currency.Stars,
+            Balance = 25,
+            Currency = CurrencyCode.Gem,
             CreatedAt = DateTime.UtcNow,
         });
         await db.SaveChangesAsync();
@@ -143,7 +143,7 @@ public class LinkTelegramIdToUserTests
         Assert.That(loser.TelegramId, Is.Null);
 
         var survivorWallet = await db.Wallets.AsNoTracking().FirstOrDefaultAsync(w => w.UserId == emailUser.Id);
-        Assert.That(survivorWallet?.Balance, Is.EqualTo(2.5));
+        Assert.That(survivorWallet?.Balance, Is.EqualTo(25));
     }
 
     [Test]

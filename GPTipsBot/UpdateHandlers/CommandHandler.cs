@@ -106,10 +106,7 @@ namespace GPTipsBot.UpdateHandlers
                     await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
                     break;
                 case GetProfileCommand:
-                    reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
-                        profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                        profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
-                        profile.CombinePhotos, profile.ChangePhotos);
+                    reply = profile.Render();
                     await SendOrEditInlineMessageAsync(update, reply, GetProfileInlineKeyboard());
                     return;
                 case ImagesMenuCommand:
@@ -182,7 +179,7 @@ namespace GPTipsBot.UpdateHandlers
                     {
                         await botClient.SendUserReplyAsync(
                             update,
-                            string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost),
+                            string.Format(BotResponse.GptImageSendEditPrompt, session.GemCost),
                             GetGptImageOptionsKeyboard(session));
                         return;
                     }
@@ -204,7 +201,7 @@ namespace GPTipsBot.UpdateHandlers
                         return;
                     }
 
-                    if (profile.Stars < PaymentConfig.WatermarkRemoval)
+                    if (profile.Gems < PaymentConfig.WatermarkRemoval)
                     {
                         await botClient.SendMessageWithMenuAsync(
                             chatId,
@@ -249,7 +246,7 @@ namespace GPTipsBot.UpdateHandlers
                     var depositText = string.Format(
                         BotResponse.DepositResponse,
                         PaymentConfig.MinRechargeRub,
-                        PaymentConfig.MinRechargeStars);
+                        PaymentConfig.MinRechargeGems);
                     var packagesKeyboard = moneyService.BuildDepositPackagesKeyboard();
                     if (update.CallbackQuery == null)
                     {
@@ -299,7 +296,7 @@ namespace GPTipsBot.UpdateHandlers
                     await HandleHumanAsync(update, messageText);
                     return;
                 case ImageCommand:
-                    if (profile is { Images: <= 0, Stars: <= 0 })
+                    if (profile is { Images: <= 0, Gems: <= 0 })
                     {
                         await SendNoFreeRequestsMessage(update);
                         return;
@@ -353,7 +350,7 @@ namespace GPTipsBot.UpdateHandlers
                         replyMarkup: GetImageInstructionInlineKeyboard(false));
                     return;
                 case ImageTextRecognizeCommand:
-                    if (profile is { ImageTexts: <= 0, Stars: <= 0 })
+                    if (profile is { ImageTexts: <= 0, Gems: <= 0 })
                     {
                         await SendNoFreeRequestsMessage(update);
                         return;
@@ -363,7 +360,7 @@ namespace GPTipsBot.UpdateHandlers
                         update, BotResponse.SendTextRecognitionImage, BackToImagesMenuInlineKeyboard);
                     return;
                 case PromptFromImageCommand:
-                    if (profile is { GptRequests: <= 0, Stars: <= 0 })
+                    if (profile is { GptRequests: <= 0, Gems: <= 0 })
                     {
                         await SendNoFreeRequestsMessage(update);
                         return;
@@ -536,8 +533,8 @@ namespace GPTipsBot.UpdateHandlers
             gptImageSessionCache.Set(update.UserChatKey.Id, session);
 
             var text = mode == GptImageMode.Edit
-                ? string.Format(BotResponse.GptImageEditIntro, session.StarsCost)
-                : string.Format(BotResponse.GptImageGenerateIntro, session.StarsCost);
+                ? string.Format(BotResponse.GptImageEditIntro, session.GemCost)
+                : string.Format(BotResponse.GptImageGenerateIntro, session.GemCost);
 
             var keyboard = mode == GptImageMode.Edit
                 ? BackToImagesMenuInlineKeyboard
@@ -627,8 +624,8 @@ namespace GPTipsBot.UpdateHandlers
             gptImageSessionCache.Set(update.UserChatKey.Id, session);
 
             var text = session.Mode == GptImageMode.Edit
-                ? string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost)
-                : string.Format(BotResponse.GptImageGenerateIntro, session.StarsCost);
+                ? string.Format(BotResponse.GptImageSendEditPrompt, session.GemCost)
+                : string.Format(BotResponse.GptImageGenerateIntro, session.GemCost);
             var keyboard = GetGptImageOptionsKeyboard(session);
 
             if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
@@ -664,12 +661,12 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 }
 
-                if (!model.AllowFreeQuota && profile.Stars < model.StarsCost)
+                if (!model.AllowFreeQuota && profile.Gems < model.GemCost)
                 {
                     var text = string.Format(
                         BotResponse.ModelNeedsBalance,
                         model.DisplayName,
-                        model.StarsCost,
+                        model.GemCost,
                         GptModelCatalog.Default.DisplayName);
                     var needsBalanceKeyboard = GetModelNeedsBalanceKeyboard();
 
@@ -692,8 +689,8 @@ namespace GPTipsBot.UpdateHandlers
 
                 botSettingsRepository.SetPreferredGptModel(update.UserChatKey.Id, model.Id, language);
 
-                var selectedText = string.Format(BotResponse.ModelSelected, model.DisplayName, model.StarsCost);
-                var keyboard = profile.Stars > 0
+                var selectedText = string.Format(BotResponse.ModelSelected, model.DisplayName, model.GemCost);
+                var keyboard = profile.Gems > 0
                     ? GetModelSelectionKeyboard(model.Id)
                     : GetModelNeedsBalanceKeyboard();
 
@@ -724,7 +721,7 @@ namespace GPTipsBot.UpdateHandlers
             var chatId = update.UserChatKey.ChatId;
             var current = userService.GetPreferredGptModel(update.UserChatKey.Id);
 
-            if (profile.Stars <= 0)
+            if (profile.Gems <= 0)
             {
                 var text = string.Format(
                     BotResponse.ModelSelectionRequiresBalance,
@@ -751,7 +748,7 @@ namespace GPTipsBot.UpdateHandlers
             var pickerText = string.Format(
                 BotResponse.ChooseModel,
                 current.DisplayName,
-                current.StarsCost,
+                current.GemCost,
                 GptModelCatalog.Default.DisplayName);
             var pickerKeyboard = GetModelSelectionKeyboard(current.Id);
 

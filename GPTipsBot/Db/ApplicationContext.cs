@@ -32,6 +32,7 @@ namespace GPTipsBot.Db
             EnsureFreeAlicePhotoQuotasColumns();
             EnsureFreeSummaryRequestsColumn();
             EnsurePaymentHoldsTable();
+            EnsureGemWallets();
             EnsureMessageThreadIdColumn();
             EnsurePreferredGptModelColumn();
             EnsureConversationMetasTable();
@@ -124,12 +125,49 @@ namespace GPTipsBot.Db
                     "UserId" bigint NOT NULL,
                     "Feature" integer NOT NULL,
                     "UsedFreeQuota" boolean NOT NULL,
-                    "WalletAmount" double precision NOT NULL,
+                    "WalletAmount" bigint NOT NULL,
                     "Status" integer NOT NULL,
                     "CreatedAt" timestamp with time zone NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS "IX_PaymentHolds_Status_CreatedAt" ON "PaymentHolds" ("Status", "CreatedAt");
                 CREATE INDEX IF NOT EXISTS "IX_PaymentHolds_UserId" ON "PaymentHolds" ("UserId");
+                """);
+        }
+
+        /// <summary>
+        /// Converts the wallet from the old star unit (a double priced at 10 ₽) to gems (a whole
+        /// number priced at a kopeck), multiplying every stored balance and hold by a thousand so
+        /// purchasing power is unchanged. Keyed off the column type, so it runs exactly once per
+        /// database and is a no-op on a freshly created one.
+        /// </summary>
+        private void EnsureGemWallets()
+        {
+            Database.ExecuteSqlRaw("""
+                DO $$
+                BEGIN
+                    LOCK TABLE "Wallets" IN ACCESS EXCLUSIVE MODE;
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'Wallets' AND column_name = 'Balance'
+                          AND data_type = 'double precision'
+                    ) THEN
+                        ALTER TABLE "Wallets"
+                            ALTER COLUMN "Balance" TYPE bigint
+                            USING COALESCE(ROUND(("Balance" * 200)::numeric), 0)::bigint;
+                        UPDATE "Wallets" SET "Currency" = 'GEM';
+                    END IF;
+
+                    LOCK TABLE "PaymentHolds" IN ACCESS EXCLUSIVE MODE;
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'PaymentHolds' AND column_name = 'WalletAmount'
+                          AND data_type = 'double precision'
+                    ) THEN
+                        ALTER TABLE "PaymentHolds"
+                            ALTER COLUMN "WalletAmount" TYPE bigint
+                            USING COALESCE(ROUND(("WalletAmount" * 200)::numeric), 0)::bigint;
+                    END IF;
+                END $$;
                 """);
         }
 

@@ -55,8 +55,9 @@ public class Wallet: Entity
     [ForeignKey("User")]
     public long UserId { get; set; }
     public User User { get; set; }
-    public double Balance { get; set; }
-    public string Currency { get; set; }
+    /// <summary>Balance in gems. Whole numbers — see <see cref="GPTipsBot.Config.PaymentConfig"/>.</summary>
+    public long Balance { get; set; }
+    public string Currency { get; set; } = CurrencyCode.Gem;
 }
 
 public class Transaction: Entity

@@ -45,6 +45,7 @@ public static class WebApiEndpoints
         api.MapGet("/config/public", GetPublicConfigAsync);
         api.MapGet("/payments/packages", GetPaymentPackagesAsync);
         api.MapPost("/payments/yookassa", CreateYooKassaPaymentAsync);
+        api.MapPost("/payments/lavatop", CreateLavaTopPaymentAsync);
         api.MapPost("/payments/{invoiceId:long}/sync", SyncPaymentAsync);
     }
 
@@ -505,7 +506,7 @@ public static class WebApiEndpoints
             {
                 m.Id,
                 m.DisplayName,
-                m.StarsCost,
+                m.GemCost,
                 m.AllowFreeQuota,
                 m.Emoji,
             }),
@@ -734,7 +735,7 @@ public static class WebApiEndpoints
             {
                 mimeType = result.MimeType,
                 base64 = result.Base64,
-                starsCharged = result.StarsCharged,
+                gemsCharged = result.GemsCharged,
             });
         }
         catch (InsufficientQuotaException ex)
@@ -882,6 +883,7 @@ public static class WebApiEndpoints
             telegramLoginEnabled = !string.IsNullOrWhiteSpace(AppConfig.TelegramToken),
             yandexLoginEnabled = YandexOAuthConfig.IsEnabled,
             yookassaEnabled = YooKassaConfig.IsEnabled,
+            lavatopEnabled = LavaTopConfig.IsEnabled,
         });
     }
 
@@ -892,24 +894,24 @@ public static class WebApiEndpoints
 
     private static IResult GetPaymentPackagesAsync()
     {
-        var packages = PaymentConfig.DepositStarPackages
-            .Where(stars =>
-                stars >= PaymentConfig.MinRechargeStars &&
-                MoneyService.ToKopecks(stars) >= PaymentConfig.MinRechargeRub * 100L)
-            .Select(stars => new
+        var packages = PaymentConfig.DepositGemPackages
+            .Where(gems =>
+                gems >= PaymentConfig.MinRechargeGems &&
+                MoneyService.ToKopecks(gems) >= PaymentConfig.MinRechargeRub * 100L)
+            .Select(gems => new
             {
-                stars,
-                rub = MoneyService.FormatRubAmount(stars),
-                rubPerStar = YooKassaConfig.RubPerStar,
+                gems,
+                rub = MoneyService.FormatRubAmount(gems),
+                gemsPerRub = YooKassaConfig.GemsPerRub,
             })
             .ToList();
 
         return Results.Ok(new
         {
             enabled = YooKassaConfig.IsEnabled,
-            rubPerStar = YooKassaConfig.RubPerStar,
+            gemsPerRub = YooKassaConfig.GemsPerRub,
             minRub = PaymentConfig.MinRechargeRub,
-            minStars = PaymentConfig.MinRechargeStars,
+            minGems = PaymentConfig.MinRechargeGems,
             packages,
         });
     }
@@ -930,11 +932,11 @@ public static class WebApiEndpoints
             return Results.BadRequest(new { message = "YooKassa is not configured" });
         }
 
-        if (body.Stars < PaymentConfig.MinRechargeStars)
+        if (body.Gems < PaymentConfig.MinRechargeGems)
         {
             return Results.BadRequest(new
             {
-                message = $"Minimum top-up is {PaymentConfig.MinRechargeStars} Stars ({PaymentConfig.MinRechargeRub} RUB)",
+                message = $"Minimum top-up is {PaymentConfig.MinRechargeGems} gems ({PaymentConfig.MinRechargeRub} RUB)",
             });
         }
 
@@ -943,7 +945,7 @@ public static class WebApiEndpoints
             var returnUrl = BuildCabinetReturnUrl(http);
             var checkout = await money.CreateYooKassaCheckoutAsync(
                 userId.Value,
-                body.Stars,
+                body.Gems,
                 returnUrl,
                 http.RequestAborted);
 
@@ -951,8 +953,56 @@ public static class WebApiEndpoints
             {
                 invoiceId = checkout.InvoiceId,
                 confirmationUrl = checkout.ConfirmationUrl,
-                stars = checkout.Stars,
+                gems = checkout.Gems,
                 rub = checkout.RubAmount,
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    }
+
+    private static async Task<IResult> CreateLavaTopPaymentAsync(
+        HttpContext http,
+        CreateLavaTopWebRequest body,
+        MoneyService money)
+    {
+        var userId = RequireTelegramUser(http);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (!LavaTopConfig.IsEnabled)
+        {
+            return Results.BadRequest(new { message = "lava.top is not configured" });
+        }
+
+        if (MoneyService.ToLavaTopAmount(body.Gems) < LavaTopConfig.MinRechargeAmount)
+        {
+            return Results.BadRequest(new
+            {
+                message = $"Minimum top-up is {LavaTopConfig.MinRechargeAmount} {LavaTopConfig.Currency}",
+            });
+        }
+
+        try
+        {
+            var returnUrl = BuildCabinetReturnUrl(http);
+            var checkout = await money.CreateLavaTopCheckoutAsync(
+                userId.Value,
+                body.Gems,
+                returnUrl,
+                http.RequestAborted);
+
+            return Results.Ok(new
+            {
+                invoiceId = checkout.InvoiceId,
+                confirmationUrl = checkout.PaymentUrl,
+                gems = checkout.Gems,
+                amount = checkout.Amount,
+                currency = checkout.Currency,
             });
         }
         catch (InvalidOperationException ex)
@@ -973,7 +1023,7 @@ public static class WebApiEndpoints
             return Results.Unauthorized();
         }
 
-        var result = await money.SyncYooKassaInvoiceAsync(invoiceId, userId.Value, http.RequestAborted);
+        var result = await money.SyncInvoiceAsync(invoiceId, userId.Value, http.RequestAborted);
         var profile = await BuildMeAsync(userId.Value, webUsers, http);
         return Results.Ok(new
         {
@@ -1068,7 +1118,7 @@ public static class WebApiEndpoints
             telegramLinked = dbUser?.TelegramId is not null,
             yandexId = dbUser?.YandexId,
             yandexLinked = dbUser?.YandexId is not null,
-            stars = profile.Stars,
+            gems = profile.Gems,
             free = new
             {
                 gpt = profile.GptRequests,
@@ -1104,7 +1154,8 @@ public static class WebApiEndpoints
 
     public sealed record EnsureGuestRequest(bool GrantFreeQuota = true, string? Fingerprint = null);
 
-    public sealed record CreateYooKassaWebRequest(int Stars);
+    public sealed record CreateYooKassaWebRequest(int Gems);
+    public sealed record CreateLavaTopWebRequest(int Gems);
 
     public sealed record SetModelRequest(string ModelId);
 

@@ -299,6 +299,26 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("InvalidDepositAmountResponse", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to
+
+        ///Либо от {0} {1} через зарубежную карту / PayPal (lava.top)..
+        /// </summary>
+        public static string InvalidDepositAmountLavaTopHint {
+            get {
+                return ResourceManager.GetString("InvalidDepositAmountLavaTopHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ✨ Максимум {0}⭐ за один платёж. Введите сумму поменьше 👇.
+        /// </summary>
+        public static string DepositAmountTooLargeResponse {
+            get {
+                return ResourceManager.GetString("DepositAmountTooLargeResponse", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to 1 stars  = 20 запросов к ChatGpt или 2 генерации изображения.
@@ -431,6 +451,16 @@ namespace GPTipsBot.Resources {
         public static string ProfileResponse {
             get {
                 return ResourceManager.GetString("ProfileResponse", resourceCulture);
+            }
+        }
+
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ℹ️ Баланс раньше считался в ⭐. Каждая ⭐ стала 10💎 — все прошлые пополнения сохранились полностью, изменился только масштаб.
+        /// </summary>
+        public static string GemsMigrationNotice {
+            get {
+                return ResourceManager.GetString("GemsMigrationNotice", resourceCulture);
             }
         }
         
@@ -759,7 +789,73 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("YooKassaPaymentSucceeded", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to 🌍 Зарубежная карта / PayPal · {0} {1}.
+        /// </summary>
+        public static string PayWithLavaTopButton {
+            get {
+                return ResourceManager.GetString("PayWithLavaTopButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Оплата {0}💎 ({1} {2})
+        ///
+        ///Нажмите кнопку ниже, чтобы открыть платёжную форму lava.top.
+        ///После успешной оплаты баланс пополнится автоматически..
+        /// </summary>
+        public static string LavaTopPaymentLinkResponse {
+            get {
+                return ResourceManager.GetString("LavaTopPaymentLinkResponse", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Перейти к оплате.
+        /// </summary>
+        public static string OpenLavaTopPaymentButton {
+            get {
+                return ResourceManager.GetString("OpenLavaTopPaymentButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Проверить оплату.
+        /// </summary>
+        public static string CheckLavaTopPaymentButton {
+            get {
+                return ResourceManager.GetString("CheckLavaTopPaymentButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Оплата ещё не поступила. Если вы уже заплатили — подождите минуту и нажмите снова..
+        /// </summary>
+        public static string LavaTopPaymentCheckPending {
+            get {
+                return ResourceManager.GetString("LavaTopPaymentCheckPending", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Оплата найдена, баланс обновлён ✅.
+        /// </summary>
+        public static string LavaTopPaymentCheckOk {
+            get {
+                return ResourceManager.GetString("LavaTopPaymentCheckOk", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ✅ Оплата прошла успешно! Баланс пополнен..
+        /// </summary>
+        public static string LavaTopPaymentSucceeded {
+            get {
+                return ResourceManager.GetString("LavaTopPaymentSucceeded", resourceCulture);
+            }
+        }
+
         public static string ReplySentPrivately {
             get {
                 return ResourceManager.GetString("ReplySentPrivately", resourceCulture);

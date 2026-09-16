@@ -146,7 +146,7 @@
     <value>Crear un prompt a partir de una imagen</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
-    <value>⭐ Recargar</value>
+    <value>💎 Recargar</value>
   </data>
   <data name="DonateButton" xml:space="preserve">
     <value>🌟 ¡Apoya nuestro proyecto! 💪
@@ -175,19 +175,19 @@
     <value>GPT Image — generar</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image · ⭐</value>
+    <value>🎨 GPT Image · 💎</value>
   </data>
   <data name="EditImage" xml:space="preserve">
     <value>GPT Image — editar foto</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 Editar · GPT Image · ⭐</value>
+    <value>🛠 Editar · GPT Image · 💎</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>Quitar la marca de agua de una foto</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 Quitar marca de agua · ⭐</value>
+    <value>🧼 Quitar marca de agua · 💎</value>
   </data>
   <data name="Ask" xml:space="preserve">
     <value>Preguntar a la IA</value>
@@ -214,7 +214,7 @@
     <value>Pack de stickers desde foto o descripción</value>
   </data>
   <data name="StickersButton" xml:space="preserve">
-    <value>🎭 Stickers · ⭐</value>
+    <value>🎭 Stickers · 💎</value>
   </data>
   <data name="StickersHeroOkButton" xml:space="preserve">
     <value>✅ Armar el pack</value>

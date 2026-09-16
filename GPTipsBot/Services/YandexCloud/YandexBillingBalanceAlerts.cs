@@ -30,4 +30,17 @@ public static class YandexBillingBalanceAlerts
 
     public static string FormatThreshold(decimal threshold) =>
         $"ниже {threshold.ToString("0.##", CultureInfo.GetCultureInfo("ru-RU"))} ₽";
+
+    /// <summary>Уведомлять, если расход лицевого счёта с начала суток (UTC) достиг этой суммы.</summary>
+    public const decimal DailyConsumptionThreshold = 500m;
+
+    public static bool DailyConsumptionCrossed(decimal spentToday) =>
+        spentToday >= DailyConsumptionThreshold;
+
+    public static string FormatDailyConsumptionMessage(string accountName, decimal spentToday)
+    {
+        var spentText = spentToday.ToString("0.##", CultureInfo.GetCultureInfo("ru-RU"));
+        var thresholdText = DailyConsumptionThreshold.ToString("0.##", CultureInfo.GetCultureInfo("ru-RU"));
+        return $"Yandex Cloud: расход «{accountName}» за сегодня {spentText} ₽ (порог {thresholdText} ₽)";
+    }
 }

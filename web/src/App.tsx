@@ -95,7 +95,7 @@ export default function App() {
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [paymentInfo, setPaymentInfo] = useState<PaymentPackages | null>(null)
-  const [payingStars, setPayingStars] = useState<number | null>(null)
+  const [payingGems, setPayingGems] = useState<number | null>(null)
   const [paymentNotice, setPaymentNotice] = useState<'success' | 'pending' | 'failed' | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authView, setAuthView] = useState<'method' | 'telegram' | 'email'>('method')
@@ -493,7 +493,7 @@ export default function App() {
         ...prev,
         {
           role: 'assistant',
-          text: `Image generated (${result.starsCharged}⭐)`,
+          text: `Image generated (${result.gemsCharged}💎)`,
           imageUrl: `data:${result.mimeType};base64,${result.base64}`,
         },
       ])
@@ -623,22 +623,22 @@ export default function App() {
     }
   }
 
-  async function startTopUp(stars: number) {
+  async function startTopUp(gems: number) {
     if (!me || me.isGuest) {
       openAuth('method')
       setError(t(lang, 'loginToTopUp'))
       return
     }
-    setPayingStars(stars)
+    setPayingGems(gems)
     setError(null)
     setPaymentNotice(null)
     try {
-      const checkout = await api.createYooKassaPayment(stars)
+      const checkout = await api.createYooKassaPayment(gems)
       localStorage.setItem(PENDING_INVOICE_KEY, String(checkout.invoiceId))
       window.location.href = checkout.confirmationUrl
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Payment failed')
-      setPayingStars(null)
+      setPayingGems(null)
     }
   }
 
@@ -803,7 +803,7 @@ export default function App() {
             {me && (
               <>
                 <button className="stat balance-chip" type="button" onClick={() => void openCabinet()}>
-                  {me.isGuest ? t(lang, 'guest') : me.firstName} · {me.stars.toFixed(1)} {t(lang, 'stars')}
+                  {me.isGuest ? t(lang, 'guest') : me.firstName} · {me.gems} {t(lang, 'gems')}
                 </button>
                 <span className="stat">
                   {t(lang, 'freeGpt')}: {me.free.gpt}
@@ -1137,11 +1137,13 @@ export default function App() {
                   <div className="cabinet-card">
                     <div className="cabinet-label">{t(lang, 'balance')}</div>
                     <div className="cabinet-balance">
-                      {me.stars.toFixed(1)} <span>{t(lang, 'stars')}</span>
+                      {me.gems} <span>{t(lang, 'gems')}</span>
                     </div>
                     <div className="cabinet-user">
                       {me.isGuest ? t(lang, 'guest') : [me.firstName, me.lastName].filter(Boolean).join(' ')}
                     </div>
+                    <p className="cabinet-hint">{t(lang, 'gemsAbout')}</p>
+                    {me.gems > 0 && <p className="cabinet-hint">{t(lang, 'gemsMigrated')}</p>}
                   </div>
                 )}
 
@@ -1195,15 +1197,15 @@ export default function App() {
                     <div className="package-grid">
                       {paymentInfo.packages.map((p) => (
                         <button
-                          key={p.stars}
+                          key={p.gems}
                           type="button"
                           className="package-card"
-                          disabled={payingStars !== null}
-                          onClick={() => void startTopUp(p.stars)}
+                          disabled={payingGems !== null}
+                          onClick={() => void startTopUp(p.gems)}
                         >
-                          <strong>{p.stars} {t(lang, 'stars')}</strong>
+                          <strong>{p.gems} {t(lang, 'gems')}</strong>
                           <span>{p.rub} ₽</span>
-                          <em>{payingStars === p.stars ? t(lang, 'paying') : t(lang, 'pay')}</em>
+                          <em>{payingGems === p.gems ? t(lang, 'paying') : t(lang, 'pay')}</em>
                         </button>
                       ))}
                     </div>
@@ -1296,7 +1298,7 @@ export default function App() {
                   >
                     {models.map((m) => (
                       <option key={m.id} value={m.id}>
-                        {m.emoji} {m.displayName} · {m.starsCost}⭐
+                        {m.emoji} {m.displayName} · {m.gemCost}💎
                       </option>
                     ))}
                   </select>

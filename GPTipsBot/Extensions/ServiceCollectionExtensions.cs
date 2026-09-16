@@ -1,4 +1,5 @@
 using GPTipsBot.Services.YooKassa;
+using GPTipsBot.Services.LavaTop;
 using GPTipsBot.Db;
 using GPTipsBot.Localization;
 using GPTipsBot.Repositories;
@@ -60,6 +61,7 @@ namespace GPTipsBot.Extensions
             services.AddTransient<RemoveOldRecordsJob>();
             services.AddTransient<DeactivateKickedUsersJob>();
             services.AddTransient<SyncYooKassaPaymentsJob>();
+            services.AddTransient<SyncLavaTopPaymentsJob>();
             services.AddTransient<ReleaseExpiredPaymentHoldsJob>();
             services.AddTransient<BotUpdateInformerJob>();
             services.AddTransient<YandexCloudBalanceAlertJob>();
@@ -173,6 +175,10 @@ namespace GPTipsBot.Extensions
             services.AddHttpClient<YooKassaClient>(client =>
             {
                 client.BaseAddress = new Uri("https://api.yookassa.ru/v3/");
+            });
+            services.AddHttpClient<LavaTopClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://gate.lava.top/");
             });
             services.AddHttpClient<GPTipsBot.Services.OpenRouter.OpenRouterImageClient>(client =>
             {

@@ -29,6 +29,16 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ReceiverServiceBase<TUpdateHandler>> _log;
 
+    /// <summary>Repeat polling failures are logged at most this often while an outage lasts.</summary>
+    private static readonly TimeSpan PollingErrorLogInterval = TimeSpan.FromMinutes(1);
+
+    /// <summary>A quiet period longer than this starts counting a new outage from scratch.</summary>
+    private static readonly TimeSpan PollingIncidentGap = TimeSpan.FromMinutes(2);
+
+    private DateTime _lastPollingFailureAt = DateTime.MinValue;
+    private DateTime _lastPollingErrorLoggedAt = DateTime.MinValue;
+    private int _consecutivePollingFailures;
+
     internal ReceiverServiceBase(
         ITelegramBotClient botClient,
         IServiceProvider serviceProvider,
@@ -115,6 +125,10 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
                                 var userRepository = scope.ServiceProvider.GetRequiredService<UserRepository>();
                                 await userRepository.SoftlyRemoveUser(userId);
                             }
+                            else if (IsBenignEditError(e))
+                            {
+                                _log.LogDebug("Telegram edit no-op [{Code}] {Message}", e.ErrorCode, e.Message);
+                            }
                             else
                             {
                                 _log.LogError(e, "Telegram API Error [{Code}] {Message}", e.ErrorCode, e.Message);
@@ -199,9 +213,46 @@ public abstract class ReceiverServiceBase<TUpdateHandler> : IReceiverService
         return timeoutTask;
     }
 
-    private Task PollingErrorHandler(Exception e, CancellationToken arg2)
+    private async Task PollingErrorHandler(Exception e, CancellationToken cancellationToken)
     {
-        _log.LogError(e, "Update receiving operation has error");
-        return Task.CompletedTask;
+        var now = DateTime.UtcNow;
+
+        // A gap without failures means the previous outage is over and this is a fresh incident.
+        if (now - _lastPollingFailureAt > PollingIncidentGap)
+        {
+            _consecutivePollingFailures = 0;
+        }
+
+        _lastPollingFailureAt = now;
+        _consecutivePollingFailures++;
+
+        if (_consecutivePollingFailures == 1 || now - _lastPollingErrorLoggedAt >= PollingErrorLogInterval)
+        {
+            _lastPollingErrorLoggedAt = now;
+            _log.LogError(e, "Update receiving operation has error ({FailureCount} consecutive failures)",
+                _consecutivePollingFailures);
+        }
+
+        // When Telegram is unreachable the receiver retries immediately, so one outage used to
+        // produce hundreds of thousands of identical error logs. Back off instead of hot-looping.
+        var backoffSeconds = Math.Min(30d, Math.Pow(2, Math.Min(_consecutivePollingFailures, 5)));
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(backoffSeconds), cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // shutting down
+        }
     }
+
+    /// <summary>
+    /// 400s that mean "the message is already in the state we wanted" — harmless, and they used to
+    /// be the single noisiest error in the logs.
+    /// </summary>
+    private static bool IsBenignEditError(ApiRequestException e) =>
+        e.ErrorCode == 400 &&
+        (e.Message.Contains("message is not modified", StringComparison.OrdinalIgnoreCase) ||
+         e.Message.Contains("there is no text in the message to edit", StringComparison.OrdinalIgnoreCase) ||
+         e.Message.Contains("message to edit not found", StringComparison.OrdinalIgnoreCase));
 }

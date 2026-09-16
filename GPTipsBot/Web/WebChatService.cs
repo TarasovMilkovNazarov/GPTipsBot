@@ -53,8 +53,8 @@ public class WebChatService(
                 message = freeQuotaExhausted
                     ? isGuest
                         ? "Free GPT quota exhausted. Sign up to restore free limits."
-                        : "Free GPT quota exhausted. Top up Stars or wait for daily reset."
-                    : $"Model {model.DisplayName} requires {model.StarsCost} Stars.",
+                        : "Free GPT quota exhausted. Top up gems or wait for daily reset."
+                    : $"Model {model.DisplayName} requires {model.GemCost} gems.",
             });
             yield break;
         }

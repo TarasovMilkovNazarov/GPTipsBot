@@ -205,7 +205,7 @@
     <value>Create a prompt from an image</value>
   </data>
   <data name="DepositButton" xml:space="preserve">
-    <value>⭐ Top up</value>
+    <value>💎 Top up</value>
   </data>
   <data name="DonateButton" xml:space="preserve">
     <value>🌟 Support our project! 💪
@@ -237,19 +237,19 @@
     <value>GPT Image — generate</value>
   </data>
   <data name="GptImageButton" xml:space="preserve">
-    <value>🎨 GPT Image · ⭐</value>
+    <value>🎨 GPT Image · 💎</value>
   </data>
   <data name="EditImage" xml:space="preserve">
     <value>GPT Image — edit photo</value>
   </data>
   <data name="EditImageButton" xml:space="preserve">
-    <value>🛠 Edit · GPT Image · ⭐</value>
+    <value>🛠 Edit · GPT Image · 💎</value>
   </data>
   <data name="RemoveWatermark" xml:space="preserve">
     <value>Remove watermark from a photo</value>
   </data>
   <data name="RemoveWatermarkButton" xml:space="preserve">
-    <value>🧼 Remove watermark · ⭐</value>
+    <value>🧼 Remove watermark · 💎</value>
   </data>
   <data name="CombinePhoto" xml:space="preserve">
     <value>Combine two photos · Alice</value>
@@ -267,7 +267,7 @@
     <value>Sticker pack from a photo or a description</value>
   </data>
   <data name="StickersButton" xml:space="preserve">
-    <value>🎭 Stickers · ⭐</value>
+    <value>🎭 Stickers · 💎</value>
   </data>
   <data name="StickersHeroOkButton" xml:space="preserve">
     <value>✅ Build the pack</value>

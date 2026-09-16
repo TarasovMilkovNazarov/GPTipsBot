@@ -296,7 +296,7 @@ namespace GPTipsBot.Services
 
         public static InlineKeyboardMarkup GetImagesMenuInlineKeyboard()
         {
-            // Free / quota tools first; paid (⭐) last — labels name the real engine.
+            // Free / quota tools first; paid (💎) last — labels name the real engine.
             return new InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton.WithCallbackData(BotUI.ImageTextRecognizeButton, BotMenu.ImageTextRecognizeCommand)],
@@ -342,7 +342,7 @@ namespace GPTipsBot.Services
             var qualityRow = GptImageConfig.Qualities.Select(quality =>
             {
                 var selected = string.Equals(quality.Id, session.Quality, StringComparison.OrdinalIgnoreCase);
-                var label = $"{(selected ? "✅ " : "")}{quality.Label} · {quality.StarsCost:0.##}⭐";
+                var label = $"{(selected ? "✅ " : "")}{quality.Label} · {quality.GemCost}💎";
                 var command = quality.Id switch
                 {
                     GptImageConfig.QualityLow => BotMenu.GptImageQualityLowCommand,

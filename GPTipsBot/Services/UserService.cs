@@ -54,7 +54,7 @@ namespace GPTipsBot.Services
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Stars = user.Wallet?.Balance ?? 0.0,
+                Gems = user.Wallet?.Balance ?? 0,
                 Images = user.FreeImageGenerations,
                 CombinePhotos = user.FreeCombinePhotos,
                 ChangePhotos = user.FreeChangePhotos,
@@ -80,7 +80,7 @@ namespace GPTipsBot.Services
             TryReserveGptAsync(userId, GetPreferredGptModel(userId));
 
         public Task<PaymentHold?> TryReserveGptAsync(long userId, GptModelOption model) =>
-            TryReserveAsync(userId, PaidFeature.Gpt, model.StarsCost, allowFreeQuota: model.AllowFreeQuota);
+            TryReserveAsync(userId, PaidFeature.Gpt, model.GemCost, allowFreeQuota: model.AllowFreeQuota);
 
         public Task<PaymentHold?> TryReserveImageAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.Image, PaymentConfig.Image);
@@ -100,8 +100,8 @@ namespace GPTipsBot.Services
         public Task<PaymentHold?> TryReserveSummaryAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.Summary, PaymentConfig.Summary);
 
-        public Task<PaymentHold?> TryReserveGptImageAsync(long userId, double starsCost) =>
-            TryReserveAsync(userId, PaidFeature.GptImage, starsCost, allowFreeQuota: false);
+        public Task<PaymentHold?> TryReserveGptImageAsync(long userId, int gemCost) =>
+            TryReserveAsync(userId, PaidFeature.GptImage, gemCost, allowFreeQuota: false);
 
         public Task<PaymentHold?> TryReserveWatermarkRemovalAsync(long userId) =>
             TryReserveAsync(userId, PaidFeature.WatermarkRemoval, PaymentConfig.WatermarkRemoval,
@@ -169,7 +169,7 @@ namespace GPTipsBot.Services
         private async Task<PaymentHold?> TryReserveAsync(
             long userId,
             PaidFeature feature,
-            double walletPrice,
+            long walletPrice,
             bool allowFreeQuota = true)
         {
             await using var tx = await BeginOwnedTransactionAsync();
@@ -298,7 +298,7 @@ namespace GPTipsBot.Services
             }
         }
 
-        private static PaymentHold NewHold(long userId, PaidFeature feature, bool usedFreeQuota, double walletAmount) =>
+        private static PaymentHold NewHold(long userId, PaidFeature feature, bool usedFreeQuota, long walletAmount) =>
             new()
             {
                 UserId = userId,
@@ -465,7 +465,7 @@ namespace GPTipsBot.Services
                     {
                         UserId = survivor.Id,
                         Balance = loserBalance,
-                        Currency = Currency.Stars,
+                        Currency = CurrencyCode.Gem,
                         CreatedAt = DateTime.UtcNow,
                     };
                     _context.Wallets.Add(survivor.Wallet);

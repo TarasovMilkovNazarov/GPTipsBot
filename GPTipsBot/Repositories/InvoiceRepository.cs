@@ -15,12 +15,13 @@ public class InvoiceRepository(ApplicationContext context) : GenericRepository<I
         _context.Invoices.AsNoTracking()
             .FirstOrDefault(i => i.ExternalPaymentId == externalPaymentId);
 
-    public List<Invoice> GetPendingYooKassa(TimeSpan maxAge)
+    /// <summary>Created invoices with a known external id, for a provider's catch-up poll job.</summary>
+    public List<Invoice> GetPending(PaymentProvider provider, TimeSpan maxAge)
     {
         var since = DateTime.UtcNow - maxAge;
         return _context.Invoices.AsNoTracking()
             .Where(i =>
-                i.Provider == PaymentProvider.YooKassa &&
+                i.Provider == provider &&
                 i.Status == InvoiceStatus.Created &&
                 i.ExternalPaymentId != null &&
                 i.CreatedAt >= since)

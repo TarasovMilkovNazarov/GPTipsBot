@@ -9,7 +9,7 @@ export type Me = {
   telegramLinked?: boolean
   yandexId?: string | null
   yandexLinked?: boolean
-  stars: number
+  gems: number
   free: { gpt: number; images: number; ocr: number; animations: number; summaries: number }
   model: { id: string; name: string }
 }
@@ -17,7 +17,7 @@ export type Me = {
 export type GptModel = {
   id: string
   displayName: string
-  starsCost: number
+  gemCost: number
   allowFreeQuota: boolean
   emoji: string
 }
@@ -33,13 +33,13 @@ export type ChatMessage = {
 
 export type ImagePreset = { id: string; title: string; prompt: string }
 
-export type PaymentPackage = { stars: number; rub: string; rubPerStar: number }
+export type PaymentPackage = { gems: number; rub: string; gemsPerRub: number }
 
 export type PaymentPackages = {
   enabled: boolean
-  rubPerStar: number
+  gemsPerRub: number
   minRub: number
-  minStars: number
+  minGems: number
   packages: PaymentPackage[]
 }
 
@@ -177,20 +177,33 @@ export const api = {
         telegramLoginEnabled: boolean
         yandexLoginEnabled?: boolean
         yookassaEnabled?: boolean
+        lavatopEnabled?: boolean
       }>(r),
     ),
 
   paymentPackages: () =>
     fetch('/api/payments/packages', { credentials: 'include' }).then((r) => json<PaymentPackages>(r)),
 
-  createYooKassaPayment: (stars: number) =>
+  createYooKassaPayment: (gems: number) =>
     fetch('/api/payments/yookassa', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stars }),
+      body: JSON.stringify({ gems }),
     }).then((r) =>
-      json<{ invoiceId: number; confirmationUrl: string; stars: number; rub: string }>(r),
+      json<{ invoiceId: number; confirmationUrl: string; gems: number; rub: string }>(r),
+    ),
+
+  // International cards / PayPal, priced in USD/EUR/RUB — meant for larger top-ups only (see
+  // LavaTopConfig.MinRechargeAmount server-side). Not yet wired into a method picker in App.tsx.
+  createLavaTopPayment: (gems: number) =>
+    fetch('/api/payments/lavatop', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gems }),
+    }).then((r) =>
+      json<{ invoiceId: number; confirmationUrl: string; gems: number; amount: string; currency: string }>(r),
     ),
 
   syncPayment: (invoiceId: number) =>
@@ -210,7 +223,7 @@ export const api = {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, size, quality }),
-    }).then((r) => json<{ mimeType: string; base64: string; starsCharged: number }>(r)),
+    }).then((r) => json<{ mimeType: string; base64: string; gemsCharged: number }>(r)),
 
   ocr: async (file: File) => {
     const form = new FormData()

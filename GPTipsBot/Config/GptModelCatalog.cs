@@ -1,7 +1,7 @@
 namespace GPTipsBot.Config;
 
 /// <summary>
-/// Selectable chat models and Stars pricing aligned with OpenAI API $/1M rates.
+/// Selectable chat models and gem pricing aligned with OpenAI API $/1M rates.
 /// Free quota applies only to the default model.
 /// See https://developers.openai.com/api/docs/models/all
 /// </summary>
@@ -13,7 +13,7 @@ public static class GptModelCatalog
 
     /// <summary>
     /// Popular Chat Completions models, cheapest → strongest.
-    /// Stars ≈ relative blended cost vs gpt-4o-mini (typical short chat turn).
+    /// Gem cost ≈ relative blended cost vs gpt-4o-mini (typical short chat turn).
     /// </summary>
     public static IReadOnlyList<GptModelOption> All { get; } =
     [
@@ -21,35 +21,35 @@ public static class GptModelCatalog
         new(
             Id: DefaultModelId,
             DisplayName: "GPT-4o mini",
-            StarsCost: PaymentConfig.Gpt,
+            GemCost: PaymentConfig.Gpt,
             AllowFreeQuota: true,
             Emoji: "⚡"),
         // $0.25 / $2.00 — ~3× baseline
         new(
             Id: "gpt-5-mini",
             DisplayName: "GPT-5 mini",
-            StarsCost: PaymentConfig.Gpt5Mini,
+            GemCost: PaymentConfig.Gpt5Mini,
             AllowFreeQuota: false,
             Emoji: "🚀"),
         // $2.00 / $8.00 — smart non-reasoning, ~10×
         new(
             Id: "gpt-4.1",
             DisplayName: "GPT-4.1",
-            StarsCost: PaymentConfig.Gpt41,
+            GemCost: PaymentConfig.Gpt41,
             AllowFreeQuota: false,
             Emoji: "🧠"),
         // $1.25 / $10.00 — flagship, ~12× (output-heavy)
         new(
             Id: "gpt-5",
             DisplayName: "GPT-5",
-            StarsCost: PaymentConfig.Gpt5,
+            GemCost: PaymentConfig.Gpt5,
             AllowFreeQuota: false,
             Emoji: "✨"),
         // $2.00 / $8.00 + reasoning tokens — ~20×
         new(
             Id: "o3",
             DisplayName: "o3",
-            StarsCost: PaymentConfig.GptReasoning,
+            GemCost: PaymentConfig.GptReasoning,
             AllowFreeQuota: false,
             Emoji: "🧮"),
     ];
@@ -87,13 +87,13 @@ public static class GptModelCatalog
 public sealed record GptModelOption(
     string Id,
     string DisplayName,
-    double StarsCost,
+    int GemCost,
     bool AllowFreeQuota,
     string Emoji)
 {
     public string FormatButtonLabel(bool selected)
     {
         var check = selected ? "✅ " : "";
-        return $"{check}{Emoji} {DisplayName} · {StarsCost:0.##}⭐";
+        return $"{check}{Emoji} {DisplayName} · {GemCost}💎";
     }
 }

@@ -30,11 +30,11 @@ public class WebMediaService(
 
         var resolvedSize = GptImageConfig.ResolveSize(size).Id;
         var resolvedQuality = GptImageConfig.ResolveQuality(quality);
-        var hold = await userService.TryReserveGptImageAsync(userId, resolvedQuality.StarsCost);
+        var hold = await userService.TryReserveGptImageAsync(userId, resolvedQuality.GemCost);
         if (hold is null)
         {
             throw new InsufficientQuotaException(
-                $"Not enough Stars for image generation ({resolvedQuality.StarsCost}⭐ required).");
+                $"Not enough gems for image generation ({resolvedQuality.GemCost}💎 required).");
         }
 
         try
@@ -63,7 +63,7 @@ public class WebMediaService(
             });
 
             await userService.ConfirmAsync(hold.Id);
-            return new WebImageResult(Convert.ToBase64String(bytes), "image/png", resolvedQuality.StarsCost);
+            return new WebImageResult(Convert.ToBase64String(bytes), "image/png", resolvedQuality.GemCost);
         }
         catch
         {
@@ -82,7 +82,7 @@ public class WebMediaService(
         var hold = await userService.TryReserveTextRecognitionAsync(userId);
         if (hold is null)
         {
-            throw new InsufficientQuotaException("OCR free quota exhausted or insufficient Stars.");
+            throw new InsufficientQuotaException("OCR free quota exhausted or insufficient gems.");
         }
 
         try
@@ -120,7 +120,7 @@ public class WebMediaService(
         var hold = await userService.TryReserveGptAsync(userId, GptModelCatalog.Default);
         if (hold is null)
         {
-            throw new InsufficientQuotaException("GPT free quota exhausted or insufficient Stars.");
+            throw new InsufficientQuotaException("GPT free quota exhausted or insufficient gems.");
         }
 
         try
@@ -183,6 +183,6 @@ public class WebMediaService(
     }
 }
 
-public sealed record WebImageResult(string Base64, string MimeType, double StarsCharged);
+public sealed record WebImageResult(string Base64, string MimeType, double GemsCharged);
 
 public class InsufficientQuotaException(string message) : Exception(message);

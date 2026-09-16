@@ -95,12 +95,12 @@ public class StickerPackHandler(
             return;
         }
 
-        var hold = await userService.TryReserveGptImageAsync(update.UserChatKey.Id, StickerPackConfig.HeroStars);
+        var hold = await userService.TryReserveGptImageAsync(update.UserChatKey.Id, StickerPackConfig.HeroGems);
         if (hold is null)
         {
             await botClient.SendMessageWithMenuAsync(
                 update.UserChatKey.ChatId,
-                string.Format(BotResponse.InsufficientBalance, StickerPackConfig.HeroStars),
+                string.Format(BotResponse.InsufficientBalance, StickerPackConfig.HeroGems),
                 TelegramBotUiService.DepositInlineKeyboard,
                 update.IsGroupOrChannel);
             return;
@@ -142,8 +142,8 @@ public class StickerPackHandler(
             await botClient.SendPhoto(
                 update.UserChatKey.ChatId,
                 InputFile.FromStream(stream, "sticker-hero.png"),
-                caption: string.Format(BotResponse.StickerPackHeroCaption, StickerPackConfig.HeroStars,
-                    StickerPackConfig.PackRemainderStars),
+                caption: string.Format(BotResponse.StickerPackHeroCaption, StickerPackConfig.HeroGems,
+                    StickerPackConfig.PackRemainderGems),
                 messageThreadId: threadId,
                 replyMarkup: TelegramBotUiService.GetStickerHeroKeyboard(),
                 replyParameters: update.Message?.TelegramMessageId is long mid
@@ -196,12 +196,12 @@ public class StickerPackHandler(
         }
 
         var hold = await userService.TryReserveGptImageAsync(
-            update.UserChatKey.Id, StickerPackConfig.PackRemainderStars);
+            update.UserChatKey.Id, StickerPackConfig.PackRemainderGems);
         if (hold is null)
         {
             await botClient.SendMessageWithMenuAsync(
                 update.UserChatKey.ChatId,
-                string.Format(BotResponse.InsufficientBalance, StickerPackConfig.PackRemainderStars),
+                string.Format(BotResponse.InsufficientBalance, StickerPackConfig.PackRemainderGems),
                 TelegramBotUiService.DepositInlineKeyboard,
                 update.IsGroupOrChannel);
             return;
@@ -264,7 +264,7 @@ public class StickerPackHandler(
             await botClient.SendUserReplyAsync(
                 update,
                 string.Format(BotResponse.StickerPackReady, session.Stickers.Count,
-                    StickerPackConfig.PackRemainderStars),
+                    StickerPackConfig.PackRemainderGems),
                 TelegramBotUiService.GetStickerPublishKeyboard());
 
             await userService.ConfirmAsync(hold.Id);

@@ -2,31 +2,38 @@
 
 public static class PaymentConfig
 {
-    public const double Gpt = 0.1;
+    // Prices are whole gems. A gem is an abstract unit; at the published fiat rate of
+    // YooKassaConfig.GemsPerRub (20) a gem is five kopecks, so divide any price here by 20 for rubles.
+    // The unit is deliberately finer than the cheapest action: a chat turn costs 4 gems and could get
+    // four times cheaper before the scale runs out and a redenomination is needed.
+
+    /// <summary>gpt-4o-mini. ~4 kopecks of tokens per turn (1000-token context cap + the tool schema),
+    /// priced at ~5× that. Every model below is a multiple of this one.</summary>
+    public const int Gpt = 4;
     /// <summary>gpt-5-mini (~3× gpt-4o-mini API cost).</summary>
-    public const double Gpt5Mini = 0.3;
+    public const int Gpt5Mini = 12;
     /// <summary>gpt-4.1 (~10× gpt-4o-mini).</summary>
-    public const double Gpt41 = 1.0;
+    public const int Gpt41 = 40;
     /// <summary>gpt-5 flagship (~12×, output-heavy).</summary>
-    public const double Gpt5 = 1.2;
+    public const int Gpt5 = 48;
     /// <summary>o3 reasoning (~20× with reasoning tokens).</summary>
-    public const double GptReasoning = 2.0;
+    public const int GptReasoning = 80;
     /// <summary>Day summary is a larger one-off prompt (~3× a normal GPT reply).</summary>
-    public const double Summary = 0.3;
-    public const double Image = 0.5;
-    public const double Animation = 0.5;
-    public const double CombinePhoto = Image;
-    public const double ChangePhoto = Image;
+    public const int Summary = 12;
+    public const int Image = 100;
+    public const int Animation = 100;
+    public const int CombinePhoto = Image;
+    public const int ChangePhoto = Image;
 
     /// <summary>GPT Image 2 low quality (~$0.006 / 1024²).</summary>
-    public const double GptImageLow = 1.0;
+    public const int GptImageLow = 200;
     /// <summary>GPT Image 2 medium quality (~$0.053 / 1024²).</summary>
-    public const double GptImageMedium = 2.0;
+    public const int GptImageMedium = 400;
     /// <summary>GPT Image 2 high quality (~$0.211 / 1024²).</summary>
-    public const double GptImageHigh = 4.0;
+    public const int GptImageHigh = 800;
 
-    /// <summary>Watermark removal via Seedream 4.5 (13.9 ₽ per image at the provider).</summary>
-    public const double WatermarkRemoval = 2.0;
+    /// <summary>Watermark removal via Seedream 4.5 on OpenRouter ($0.04 / image, ~3.6 ₽ with the top-up fee).</summary>
+    public const int WatermarkRemoval = 400;
 
     /// <summary>
     /// Число бесплатных запросов на генерацию изображений, которое добавляется джобой обновления лимитов
@@ -55,13 +62,13 @@ public static class PaymentConfig
     /// <summary>Minimum YooKassa top-up in rubles.</summary>
     public const int MinRechargeRub = 50;
 
-    /// <summary>Star packages shown on /deposit (filtered by <see cref="MinRechargeStars"/>).</summary>
-    public static readonly int[] DepositStarPackages = [5, 10, 25, 50, 100];
+    /// <summary>Gem packages shown on /deposit — 50, 100, 250, 500 and 1000 ₽ worth.</summary>
+    public static int[] DepositGemPackages =>
+        [.. new[] { 50, 100, 250, 500, 1_000 }.Select(rub => rub * YooKassaConfig.GemsPerRub)];
 
-    /// <summary>Minimum stars so that stars × rub-per-star ≥ <see cref="MinRechargeRub"/>.</summary>
-    public static int MinRechargeStars =>
-        Math.Max(1, (int)Math.Ceiling(MinRechargeRub / YooKassaConfig.RubPerStar));
+    /// <summary>Fewest gems worth at least <see cref="MinRechargeRub"/>.</summary>
+    public static int MinRechargeGems => MinRechargeRub * YooKassaConfig.GemsPerRub;
 
     /// <summary>Alias used across the codebase / tests.</summary>
-    public static int MinRechargeAmount => MinRechargeStars;
+    public static int MinRechargeAmount => MinRechargeGems;
 }

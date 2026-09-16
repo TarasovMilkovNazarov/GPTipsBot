@@ -5,6 +5,7 @@ using GPTipsBot.Db;
 using GPTipsBot.Models;
 using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
+using GPTipsBot.Services.LavaTop;
 using GPTipsBot.Services.YooKassa;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -25,29 +26,39 @@ public enum PaymentConfirmResult
 public sealed record YooKassaCheckoutResult(
     long InvoiceId,
     string ConfirmationUrl,
-    int Stars,
+    int Gems,
     string RubAmount,
+    string ExternalPaymentId);
+
+public sealed record LavaTopCheckoutResult(
+    long InvoiceId,
+    string PaymentUrl,
+    int Gems,
+    string Amount,
+    string Currency,
     string ExternalPaymentId);
 
 public static class PaymentCallbacks
 {
     public const string StarsPrefix = "pay_stars_";
     public const string YooKassaPrefix = "pay_yk_";
+    public const string LavaTopPrefix = "pay_lt_";
     public const string PackagePrefix = "dep_";
     public const string YooKassaCheckPrefix = "yk_check_";
+    public const string LavaTopCheckPrefix = "lt_check_";
 
-    public static bool TryParsePackage(string? data, out int starsCount)
+    public static bool TryParsePackage(string? data, out int gemsCount)
     {
-        starsCount = 0;
+        gemsCount = 0;
         if (string.IsNullOrWhiteSpace(data) ||
             !data.StartsWith(PackagePrefix, StringComparison.Ordinal) ||
-            !int.TryParse(data[PackagePrefix.Length..], out starsCount))
+            !int.TryParse(data[PackagePrefix.Length..], out gemsCount))
         {
             return false;
         }
 
-        return starsCount >= PaymentConfig.MinRechargeStars &&
-               MoneyService.ToKopecks(starsCount) >= PaymentConfig.MinRechargeRub * 100L;
+        return gemsCount >= PaymentConfig.MinRechargeGems &&
+               MoneyService.ToKopecks(gemsCount) >= PaymentConfig.MinRechargeRub * 100L;
     }
 
     public static bool TryParseCheck(string? data, out long invoiceId)
@@ -59,10 +70,19 @@ public static class PaymentCallbacks
                invoiceId > 0;
     }
 
-    public static bool TryParse(string? data, out string provider, out int starsCount)
+    public static bool TryParseLavaTopCheck(string? data, out long invoiceId)
+    {
+        invoiceId = 0;
+        return !string.IsNullOrWhiteSpace(data) &&
+               data.StartsWith(LavaTopCheckPrefix, StringComparison.Ordinal) &&
+               long.TryParse(data[LavaTopCheckPrefix.Length..], out invoiceId) &&
+               invoiceId > 0;
+    }
+
+    public static bool TryParse(string? data, out string provider, out int gemsCount)
     {
         provider = string.Empty;
-        starsCount = 0;
+        gemsCount = 0;
 
         if (string.IsNullOrWhiteSpace(data))
         {
@@ -70,19 +90,29 @@ public static class PaymentCallbacks
         }
 
         if (data.StartsWith(StarsPrefix, StringComparison.Ordinal) &&
-            int.TryParse(data[StarsPrefix.Length..], out starsCount) &&
-            starsCount >= PaymentConfig.MinRechargeStars)
+            int.TryParse(data[StarsPrefix.Length..], out gemsCount) &&
+            gemsCount >= PaymentConfig.MinRechargeGems &&
+            gemsCount <= TelegramStarsConfig.MaxGemsPerInvoice)
         {
             provider = StarsPrefix;
             return true;
         }
 
         if (data.StartsWith(YooKassaPrefix, StringComparison.Ordinal) &&
-            int.TryParse(data[YooKassaPrefix.Length..], out starsCount) &&
-            starsCount >= PaymentConfig.MinRechargeStars &&
-            MoneyService.ToKopecks(starsCount) >= PaymentConfig.MinRechargeRub * 100L)
+            int.TryParse(data[YooKassaPrefix.Length..], out gemsCount) &&
+            gemsCount >= PaymentConfig.MinRechargeGems &&
+            MoneyService.ToKopecks(gemsCount) >= PaymentConfig.MinRechargeRub * 100L)
         {
             provider = YooKassaPrefix;
+            return true;
+        }
+
+        if (data.StartsWith(LavaTopPrefix, StringComparison.Ordinal) &&
+            int.TryParse(data[LavaTopPrefix.Length..], out gemsCount) &&
+            gemsCount > 0 &&
+            MoneyService.ToLavaTopAmount(gemsCount) >= LavaTopConfig.MinRechargeAmount)
+        {
+            provider = LavaTopPrefix;
             return true;
         }
 
@@ -102,12 +132,13 @@ public class MoneyService
     private readonly ITelegramBotClient _botClient;
     private readonly UserService _userService;
     private readonly YooKassaClient _yooKassaClient;
+    private readonly LavaTopClient _lavaTopClient;
     private readonly ILogger<MoneyService> _logger;
 
     public MoneyService(WalletRepository walletRepository, UserRepository userRepository,
         InvoiceRepository invoiceRepository, TransactionRepository transactionRepository,
         ApplicationContext context, ITelegramBotClient botClient, UserService userService,
-        YooKassaClient yooKassaClient, ILogger<MoneyService> logger)
+        YooKassaClient yooKassaClient, LavaTopClient lavaTopClient, ILogger<MoneyService> logger)
     {
         _walletRepository = walletRepository;
         _userRepository = userRepository;
@@ -117,6 +148,7 @@ public class MoneyService
         _botClient = botClient;
         _userService = userService;
         _yooKassaClient = yooKassaClient;
+        _lavaTopClient = lavaTopClient;
         _logger = logger;
     }
 
@@ -148,10 +180,10 @@ public class MoneyService
     public InlineKeyboardMarkup BuildDepositPackagesKeyboard()
     {
         var rows = new List<IEnumerable<InlineKeyboardButton>>();
-        foreach (var stars in PaymentConfig.DepositStarPackages)
+        foreach (var gems in PaymentConfig.DepositGemPackages)
         {
-            if (stars < PaymentConfig.MinRechargeStars ||
-                ToKopecks(stars) < PaymentConfig.MinRechargeRub * 100L)
+            if (gems < PaymentConfig.MinRechargeGems ||
+                ToKopecks(gems) < PaymentConfig.MinRechargeRub * 100L)
             {
                 continue;
             }
@@ -159,8 +191,8 @@ public class MoneyService
             rows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(
-                    string.Format(BotResponse.DepositPackageButton, stars, FormatRubAmount(stars)),
-                    $"{PaymentCallbacks.PackagePrefix}{stars}")
+                    string.Format(BotResponse.DepositPackageButton, gems, FormatRubAmount(gems)),
+                    $"{PaymentCallbacks.PackagePrefix}{gems}")
             });
         }
 
@@ -171,39 +203,78 @@ public class MoneyService
         return new InlineKeyboardMarkup(rows);
     }
 
-    public InlineKeyboardMarkup BuildPaymentMethodKeyboard(int starsCount)
+    /// <summary>
+    /// Each rail has its own minimum (YooKassa/Stars share a RUB-derived floor, lava.top has its own
+    /// independent one — see <see cref="LavaTopConfig.MinRechargeAmount"/>), so every button is gated by
+    /// the rail it belongs to rather than shown unconditionally. The gem-package flow always clears the
+    /// RUB floor already; this only matters for the free-text "type any amount" deposit flow, where a
+    /// small amount meant for lava.top must not surface Stars/YooKassa buttons that would just error out.
+    /// </summary>
+    public InlineKeyboardMarkup BuildPaymentMethodKeyboard(int gemsCount)
     {
-        var rubAmount = FormatRubAmount(starsCount);
-        var rows = new List<IEnumerable<InlineKeyboardButton>>
+        var rubAmount = FormatRubAmount(gemsCount);
+        var rows = new List<IEnumerable<InlineKeyboardButton>>();
+
+        if (gemsCount >= PaymentConfig.MinRechargeGems && gemsCount <= TelegramStarsConfig.MaxGemsPerInvoice)
         {
-            new[]
+            rows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(
-                    BotResponse.PayWithStarsButton,
-                    $"{PaymentCallbacks.StarsPrefix}{starsCount}")
-            },
-            new[]
+                    string.Format(
+                        BotResponse.PayWithStarsButton,
+                        TelegramStarsConfig.GemsToXtr(gemsCount)),
+                    $"{PaymentCallbacks.StarsPrefix}{gemsCount}")
+            });
+        }
+
+        if (gemsCount >= PaymentConfig.MinRechargeGems)
+        {
+            rows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(
                     string.Format(BotResponse.PayWithYooKassaButton, rubAmount),
-                    $"{PaymentCallbacks.YooKassaPrefix}{starsCount}")
-            },
-            new[]
+                    $"{PaymentCallbacks.YooKassaPrefix}{gemsCount}")
+            });
+        }
+
+        if (LavaTopConfig.IsEnabled && ToLavaTopAmount(gemsCount) >= LavaTopConfig.MinRechargeAmount)
+        {
+            rows.Add(new[]
             {
-                TelegramBotUiService.BackToDepositButton
-            }
-        };
+                InlineKeyboardButton.WithCallbackData(
+                    string.Format(
+                        BotResponse.PayWithLavaTopButton,
+                        FormatLavaTopAmount(gemsCount),
+                        LavaTopConfig.Currency),
+                    $"{PaymentCallbacks.LavaTopPrefix}{gemsCount}")
+            });
+        }
+
+        rows.Add(new[]
+        {
+            TelegramBotUiService.BackToDepositButton
+        });
 
         return new InlineKeyboardMarkup(rows);
     }
 
-    public async Task SendInvoice(long userId, long telegramChatId, int starsCount = 100)
+    public async Task SendInvoice(long userId, long telegramChatId, int gemsCount = 100)
     {
+        if (gemsCount < 1 || gemsCount > TelegramStarsConfig.MaxGemsPerInvoice)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(gemsCount),
+                gemsCount,
+                $"A Telegram invoice tops out at {TelegramStarsConfig.MaxGemsPerInvoice} gems");
+        }
+
+        // Amount is what lands in the wallet; Telegram is billed the matching number of stars.
+        var xtrPrice = TelegramStarsConfig.GemsToXtr(gemsCount);
         var invoice = new Invoice
         {
             CreatedAt = DateTime.UtcNow,
             UserId = userId,
-            Amount = starsCount,
+            Amount = gemsCount,
             Currency = Currency.Stars,
             Status = InvoiceStatus.Created,
             Provider = PaymentProvider.TelegramStars
@@ -219,20 +290,24 @@ public class MoneyService
             payload: invoice.Id.ToString(),
             providerToken: "",
             currency: Currency.Stars,
-            prices: new[] { new LabeledPrice("Premium Access", starsCount) }
+            prices: new[] { new LabeledPrice("Premium Access", xtrPrice) }
             ,
             startParameter: "premium_subscription"
         );
 
     }
 
-    public async Task SendDonateInvoice(long userId, long telegramChatId, int starsCount = 100)
+    /// <summary>
+    /// A donation is never credited to the wallet, so <paramref name="xtrCount"/> is Telegram Stars as
+    /// typed by the user and is not converted through <see cref="TelegramStarsConfig.GemsPerXtr"/>.
+    /// </summary>
+    public async Task SendDonateInvoice(long userId, long telegramChatId, int xtrCount = 100)
     {
         var invoice = new Invoice
         {
             CreatedAt = DateTime.UtcNow,
             UserId = userId,
-            Amount = starsCount,
+            Amount = xtrCount,
             Currency = Currency.Stars,
             Status = InvoiceStatus.Created,
             Provider = PaymentProvider.TelegramStars
@@ -243,12 +318,12 @@ public class MoneyService
 
         await _botClient.SendInvoice(
             chatId: telegramChatId,
-            title: string.Format(BotResponse.DonateTitle, starsCount),
+            title: string.Format(BotResponse.DonateTitle, xtrCount),
             description: BotResponse.DonateText,
             payload: $"{DonatePayloadPrefix}{invoice.Id}",
             providerToken: "",
             currency: Currency.Stars,
-            prices: new[] { new LabeledPrice("Donate", starsCount) }
+            prices: new[] { new LabeledPrice("Donate", xtrCount) }
         );
 
     }
@@ -256,18 +331,18 @@ public class MoneyService
     public async Task CreateYooKassaPaymentAsync(
         long userId,
         long telegramChatId,
-        int starsCount,
+        int gemsCount,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "CreateYooKassa: start userId={UserId} stars={Stars} enabled={Enabled} rubPerStar={RubPerStar}",
+            "CreateYooKassa: start userId={UserId} gems={Gems} enabled={Enabled} rubPerGem={RubPerGem}",
             userId,
-            starsCount,
+            gemsCount,
             YooKassaConfig.IsEnabled,
-            YooKassaConfig.RubPerStar);
+            YooKassaConfig.GemsPerRub);
 
-        if (starsCount < PaymentConfig.MinRechargeStars ||
-            ToKopecks(starsCount) < PaymentConfig.MinRechargeRub * 100L)
+        if (gemsCount < PaymentConfig.MinRechargeGems ||
+            ToKopecks(gemsCount) < PaymentConfig.MinRechargeRub * 100L)
         {
             throw new InvalidOperationException(
                 $"Minimum YooKassa top-up is {PaymentConfig.MinRechargeRub} RUB");
@@ -277,14 +352,14 @@ public class MoneyService
         if (!YooKassaConfig.IsEnabled)
         {
             _logger.LogInformation("CreateYooKassa: keys missing → sending UI stub");
-            await SendYooKassaPaymentStubAsync(telegramChatId, starsCount, cancellationToken);
+            await SendYooKassaPaymentStubAsync(telegramChatId, gemsCount, cancellationToken);
             return;
         }
 
-        var checkout = await CreateYooKassaCheckoutAsync(userId, starsCount, returnUrl: null, cancellationToken);
+        var checkout = await CreateYooKassaCheckoutAsync(userId, gemsCount, returnUrl: null, cancellationToken);
         await SendYooKassaPaymentLinkAsync(
             telegramChatId,
-            starsCount,
+            gemsCount,
             checkout.RubAmount,
             checkout.ConfirmationUrl,
             checkout.InvoiceId,
@@ -301,7 +376,7 @@ public class MoneyService
     /// </summary>
     public async Task<YooKassaCheckoutResult> CreateYooKassaCheckoutAsync(
         long userId,
-        int starsCount,
+        int gemsCount,
         string? returnUrl,
         CancellationToken cancellationToken)
     {
@@ -310,19 +385,19 @@ public class MoneyService
             throw new InvalidOperationException("YooKassa is not configured");
         }
 
-        if (starsCount < PaymentConfig.MinRechargeStars ||
-            ToKopecks(starsCount) < PaymentConfig.MinRechargeRub * 100L)
+        if (gemsCount < PaymentConfig.MinRechargeGems ||
+            ToKopecks(gemsCount) < PaymentConfig.MinRechargeRub * 100L)
         {
             throw new InvalidOperationException(
                 $"Minimum YooKassa top-up is {PaymentConfig.MinRechargeRub} RUB");
         }
 
-        var fiatKopecks = ToKopecks(starsCount);
+        var fiatKopecks = ToKopecks(gemsCount);
         var invoice = new Invoice
         {
             CreatedAt = DateTime.UtcNow,
             UserId = userId,
-            Amount = starsCount,
+            Amount = gemsCount,
             Currency = Currency.Stars,
             Status = InvoiceStatus.Created,
             Provider = PaymentProvider.YooKassa,
@@ -359,12 +434,12 @@ public class MoneyService
                     Type = "redirect",
                     ReturnUrl = effectiveReturnUrl
                 },
-                Description = string.Format(BotResponse.YooKassaPaymentDescription, starsCount),
+                Description = string.Format(BotResponse.YooKassaPaymentDescription, gemsCount),
                 Metadata = new Dictionary<string, string>
                 {
                     ["invoice_id"] = invoice.Id.ToString(CultureInfo.InvariantCulture),
                     ["user_id"] = userId.ToString(CultureInfo.InvariantCulture),
-                    ["stars"] = starsCount.ToString(CultureInfo.InvariantCulture)
+                    ["gems"] = gemsCount.ToString(CultureInfo.InvariantCulture)
                 }
             },
             idempotenceKey: $"invoice-{invoice.Id}",
@@ -393,26 +468,26 @@ public class MoneyService
         return new YooKassaCheckoutResult(
             invoice.Id,
             payment.Confirmation.ConfirmationUrl,
-            starsCount,
+            gemsCount,
             rubValue,
             payment.Id);
     }
 
     private async Task SendYooKassaPaymentStubAsync(
-        long telegramChatId, int starsCount, CancellationToken cancellationToken)
+        long telegramChatId, int gemsCount, CancellationToken cancellationToken)
     {
-        var rubValue = FormatRubAmount(starsCount);
+        var rubValue = FormatRubAmount(gemsCount);
         // Placeholder URL so the "Pay" button renders for screenshots.
         var stubUrl = string.IsNullOrWhiteSpace(AppConfig.BotName)
             ? "https://yookassa.ru/"
             : $"https://t.me/{AppConfig.BotName.TrimStart('@')}";
 
-        await SendYooKassaPaymentLinkAsync(telegramChatId, starsCount, rubValue, stubUrl, invoiceId: null, cancellationToken);
+        await SendYooKassaPaymentLinkAsync(telegramChatId, gemsCount, rubValue, stubUrl, invoiceId: null, cancellationToken);
     }
 
     private async Task SendYooKassaPaymentLinkAsync(
         long telegramChatId,
-        int starsCount,
+        int gemsCount,
         string rubValue,
         string paymentUrl,
         long? invoiceId,
@@ -438,7 +513,7 @@ public class MoneyService
 
         await _botClient.SendMessage(
             telegramChatId,
-            string.Format(BotResponse.YooKassaPaymentLinkResponse, starsCount, rubValue),
+            string.Format(BotResponse.YooKassaPaymentLinkResponse, gemsCount, rubValue),
             replyMarkup: new InlineKeyboardMarkup(rows),
             cancellationToken: cancellationToken);
     }
@@ -491,7 +566,7 @@ public class MoneyService
             return 0;
         }
 
-        var pending = _invoiceRepository.GetPendingYooKassa(TimeSpan.FromHours(24));
+        var pending = _invoiceRepository.GetPending(PaymentProvider.YooKassa, TimeSpan.FromHours(24));
         _logger.LogInformation("SyncYooKassa: pending invoices to poll={Count}", pending.Count);
 
         var credited = 0;
@@ -523,11 +598,340 @@ public class MoneyService
         return credited;
     }
 
+    public async Task CreateLavaTopPaymentAsync(
+        long userId, long telegramChatId, int gemsCount, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "CreateLavaTop: start userId={UserId} gems={Gems} enabled={Enabled}",
+            userId, gemsCount, LavaTopConfig.IsEnabled);
+
+        if (!LavaTopConfig.IsEnabled)
+        {
+            _logger.LogWarning("CreateLavaTop: not configured, ignoring");
+            return;
+        }
+
+        var checkout = await CreateLavaTopCheckoutAsync(userId, gemsCount, returnUrl: null, cancellationToken);
+        await SendLavaTopPaymentLinkAsync(
+            telegramChatId,
+            gemsCount,
+            checkout.Amount,
+            checkout.Currency,
+            checkout.PaymentUrl,
+            checkout.InvoiceId,
+            cancellationToken);
+        _logger.LogInformation(
+            "CreateLavaTop: link sent to userId={UserId} invoiceId={InvoiceId} contractId={ContractId}",
+            userId,
+            checkout.InvoiceId,
+            checkout.ExternalPaymentId);
+    }
+
+    /// <summary>
+    /// Creates a lava.top invoice against the single dynamic-price offer and returns the payment widget
+    /// URL (shared by bot + web).
+    /// </summary>
+    public async Task<LavaTopCheckoutResult> CreateLavaTopCheckoutAsync(
+        long userId, int gemsCount, string? returnUrl, CancellationToken cancellationToken)
+    {
+        if (!LavaTopConfig.IsEnabled)
+        {
+            throw new InvalidOperationException("lava.top is not configured");
+        }
+
+        var amount = ToLavaTopAmount(gemsCount);
+        if (gemsCount <= 0 || amount < LavaTopConfig.MinRechargeAmount)
+        {
+            throw new InvalidOperationException(
+                $"Minimum lava.top top-up is {LavaTopConfig.MinRechargeAmount} {LavaTopConfig.Currency}");
+        }
+
+        var currency = LavaTopConfig.Currency;
+        var user = _userRepository.Get(userId);
+        Guard.Against.Null(user);
+        var email = ResolveLavaTopEmail(user);
+
+        var invoice = new Invoice
+        {
+            CreatedAt = DateTime.UtcNow,
+            UserId = userId,
+            Amount = gemsCount,
+            Currency = currency,
+            Status = InvoiceStatus.Created,
+            Provider = PaymentProvider.LavaTop,
+            FiatAmountKopecks = (long)decimal.Round(amount * 100m, 0, MidpointRounding.AwayFromZero)
+        };
+        _invoiceRepository.Create(invoice);
+        await _context.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation(
+            "CreateLavaTop: invoice created id={InvoiceId} amount={Amount} {Currency}",
+            invoice.Id,
+            amount,
+            currency);
+
+        var effectiveReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? LavaTopConfig.ReturnUrl : returnUrl.Trim();
+
+        var payment = await _lavaTopClient.CreateInvoiceAsync(
+            new CreateLavaTopInvoiceRequest
+            {
+                Email = email,
+                OfferId = LavaTopConfig.OfferId!,
+                Currency = currency,
+                Amount = amount,
+                SuccessfulReturnUrl = effectiveReturnUrl,
+                FailureReturnUrl = effectiveReturnUrl,
+                CancelReturnUrl = effectiveReturnUrl
+            },
+            cancellationToken);
+
+        _logger.LogInformation(
+            "CreateLavaTop: API contract id={ContractId} status={Status} paymentUrl={HasUrl}",
+            payment.Id,
+            payment.Status,
+            !string.IsNullOrWhiteSpace(payment.PaymentUrl));
+
+        if (string.IsNullOrWhiteSpace(payment.PaymentUrl))
+        {
+            invoice.Status = InvoiceStatus.Failed;
+            await _context.SaveChangesAsync(cancellationToken);
+            throw new InvalidOperationException("lava.top did not return a paymentUrl");
+        }
+
+        invoice.ExternalPaymentId = payment.Id;
+        await _context.Invoices
+            .Where(i => i.Id == invoice.Id)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(i => i.ExternalPaymentId, payment.Id),
+                cancellationToken);
+
+        return new LavaTopCheckoutResult(
+            invoice.Id,
+            payment.PaymentUrl,
+            gemsCount,
+            FormatLavaTopAmount(gemsCount),
+            currency,
+            payment.Id);
+    }
+
+    private async Task SendLavaTopPaymentLinkAsync(
+        long telegramChatId,
+        int gemsCount,
+        string amount,
+        string currency,
+        string paymentUrl,
+        long invoiceId,
+        CancellationToken cancellationToken)
+    {
+        var rows = new List<IEnumerable<InlineKeyboardButton>>
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithUrl(BotResponse.OpenLavaTopPaymentButton, paymentUrl)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    BotResponse.CheckLavaTopPaymentButton,
+                    $"{PaymentCallbacks.LavaTopCheckPrefix}{invoiceId}")
+            }
+        };
+
+        await _botClient.SendMessage(
+            telegramChatId,
+            string.Format(BotResponse.LavaTopPaymentLinkResponse, gemsCount, amount, currency),
+            replyMarkup: new InlineKeyboardMarkup(rows),
+            cancellationToken: cancellationToken);
+    }
+
+    /// <summary>Poll lava.top for an invoice (manual button / background sync when the webhook is missed).</summary>
+    public async Task<PaymentConfirmResult> SyncLavaTopInvoiceAsync(
+        long invoiceId, long userId, CancellationToken cancellationToken)
+    {
+        var invoice = _invoiceRepository.GetById(invoiceId);
+        if (invoice == null || invoice.Provider != PaymentProvider.LavaTop || invoice.UserId != userId)
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        if (invoice.Status == InvoiceStatus.Paid)
+        {
+            return PaymentConfirmResult.DepositCredited;
+        }
+
+        if (string.IsNullOrWhiteSpace(invoice.ExternalPaymentId))
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        return await ConfirmLavaTopPaymentAsync(invoice.ExternalPaymentId, cancellationToken);
+    }
+
+    /// <summary>Background catch-up for Created lava.top invoices with a known contract id.</summary>
+    public async Task<int> SyncPendingLavaTopPaymentsAsync(CancellationToken cancellationToken)
+    {
+        if (!LavaTopConfig.IsEnabled)
+        {
+            return 0;
+        }
+
+        var pending = _invoiceRepository.GetPending(PaymentProvider.LavaTop, TimeSpan.FromHours(24));
+        var credited = 0;
+        foreach (var invoice in pending)
+        {
+            if (string.IsNullOrWhiteSpace(invoice.ExternalPaymentId))
+            {
+                continue;
+            }
+
+            try
+            {
+                var result = await ConfirmLavaTopPaymentAsync(invoice.ExternalPaymentId, cancellationToken);
+                if (result == PaymentConfirmResult.DepositCredited)
+                {
+                    credited++;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SyncLavaTop: failed for invoice {InvoiceId} contract {ContractId}",
+                    invoice.Id,
+                    invoice.ExternalPaymentId);
+            }
+        }
+
+        return credited;
+    }
+
+    /// <summary>
+    /// Re-fetches the contract from lava.top — never trusts a caller-supplied amount/status, since
+    /// lava.top's own docs warn the return-URL query string is forgeable — and on a genuinely completed
+    /// payment atomically credits the wallet exactly once.
+    /// </summary>
+    public async Task<PaymentConfirmResult> ConfirmLavaTopPaymentAsync(
+        string contractId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(contractId))
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        var details = await _lavaTopClient.GetInvoiceAsync(contractId, cancellationToken);
+        if (!string.Equals(details.Status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation(
+                "ConfirmLavaTop: contract {ContractId} not completed (status={Status})",
+                contractId,
+                details.Status);
+            return PaymentConfirmResult.Ignored;
+        }
+
+        var invoice = _invoiceRepository.GetByExternalPaymentId(contractId);
+        if (invoice == null || invoice.Provider != PaymentProvider.LavaTop)
+        {
+            _logger.LogWarning("ConfirmLavaTop: no matching invoice for contract {ContractId}", contractId);
+            return PaymentConfirmResult.Ignored;
+        }
+
+        if (invoice.Status == InvoiceStatus.Paid)
+        {
+            return PaymentConfirmResult.DepositCredited;
+        }
+
+        if (invoice.Status != InvoiceStatus.Created)
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        if (invoice.FiatAmountKopecks is long expectedMinorUnits)
+        {
+            var paidMinorUnits = (long)decimal.Round(
+                (details.Receipt?.Amount ?? 0m) * 100m, 0, MidpointRounding.AwayFromZero);
+            var paidCurrency = details.Receipt?.Currency;
+
+            if (paidMinorUnits != expectedMinorUnits ||
+                !string.Equals(paidCurrency, invoice.Currency, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning(
+                    "ConfirmLavaTop: amount mismatch contract={ContractId} invoice={InvoiceId} expected={Expected} paid={Paid} {Currency}",
+                    contractId,
+                    invoice.Id,
+                    expectedMinorUnits,
+                    paidMinorUnits,
+                    paidCurrency);
+                return PaymentConfirmResult.Ignored;
+            }
+        }
+
+        var claimed = await _context.Invoices
+            .Where(i => i.Id == invoice.Id && i.Status == InvoiceStatus.Created)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(i => i.Status, InvoiceStatus.Paid),
+                cancellationToken);
+
+        if (claimed == 0)
+        {
+            return PaymentConfirmResult.DepositCredited;
+        }
+
+        await AddMoneyAsync(invoice.UserId, (int)invoice.Amount, PaymentProvider.LavaTop, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var profile = await _userService.GetUserProfile(invoice.UserId);
+            var reply = profile.Render();
+            var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
+                .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
+
+            var telegramChatId = ResolveTelegramChatId(invoice.UserId);
+            if (telegramChatId is not null)
+            {
+                await _botClient.SendMessage(telegramChatId.Value,
+                    BotResponse.LavaTopPaymentSucceeded + Environment.NewLine + Environment.NewLine + reply,
+                    replyMarkup: replyMarkup,
+                    cancellationToken: cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to notify user {UserId} about lava.top payment", invoice.UserId);
+        }
+
+        return PaymentConfirmResult.DepositCredited;
+    }
+
+    /// <summary>Dispatches to the right rail's sync — backs the one generic web /sync route.</summary>
+    public async Task<PaymentConfirmResult> SyncInvoiceAsync(
+        long invoiceId, long userId, CancellationToken cancellationToken)
+    {
+        var invoice = _invoiceRepository.GetById(invoiceId);
+        if (invoice == null || invoice.UserId != userId)
+        {
+            return PaymentConfirmResult.Ignored;
+        }
+
+        return invoice.Provider switch
+        {
+            PaymentProvider.YooKassa => await SyncYooKassaInvoiceAsync(invoiceId, userId, cancellationToken),
+            PaymentProvider.LavaTop => await SyncLavaTopInvoiceAsync(invoiceId, userId, cancellationToken),
+            _ => PaymentConfirmResult.Ignored
+        };
+    }
+
+    /// <summary>
+    /// lava.top requires an email for the receipt. Telegram users rarely have one on file, so a stable
+    /// per-user placeholder under the reserved .invalid TLD (RFC 2606 — guaranteed to never resolve or
+    /// receive mail) stands in; a real confirmed address is preferred when the account has one.
+    /// </summary>
+    private static string ResolveLavaTopEmail(User user) =>
+        !string.IsNullOrWhiteSpace(user.Email) ? user.Email! : $"u{user.Id}@telegram.invalid";
+
     public bool TryValidatePreCheckout(PreCheckoutQuery query, out string? errorMessage)
     {
         errorMessage = null;
 
-        if (!TryParseInvoicePayload(query.InvoicePayload, out var invoiceId, out _))
+        if (!TryParseInvoicePayload(query.InvoicePayload, out var invoiceId, out var isDonate))
         {
             errorMessage = "Invalid invoice";
             return false;
@@ -552,7 +956,7 @@ public class MoneyService
             }
         }
 
-        if (invoice.Amount != query.TotalAmount || query.Currency != Currency.Stars)
+        if (ExpectedXtr(invoice, isDonate) != query.TotalAmount || query.Currency != Currency.Stars)
         {
             errorMessage = "Invoice amount mismatch";
             return false;
@@ -578,7 +982,7 @@ public class MoneyService
         }
 
         if (invoice.UserId != userId ||
-            invoice.Amount != payment.TotalAmount ||
+            ExpectedXtr(invoice, isDonate) != payment.TotalAmount ||
             payment.Currency != Currency.Stars)
         {
             return PaymentConfirmResult.Ignored;
@@ -611,8 +1015,66 @@ public class MoneyService
             return PaymentConfirmResult.DonateConfirmed;
         }
 
-        await AddMoneyAsync(userId, (int)payment.TotalAmount, Currency.Stars, PaymentProvider.TelegramStars, cancellationToken);
+        // payment.TotalAmount is XTR; the wallet is credited the gems the invoice was raised for.
+        await AddMoneyAsync(userId, (int)invoice.Amount, PaymentProvider.TelegramStars, cancellationToken);
         return PaymentConfirmResult.DepositCredited;
+    }
+
+    private Invoice? FindInvoiceForPayment(string paymentId, YooKassaPayment payment)
+    {
+        var invoice = _invoiceRepository.GetByExternalPaymentId(paymentId);
+        _logger.LogInformation(
+            "ConfirmYooKassa: lookup by ExternalPaymentId → {Found}",
+            invoice == null ? "not found" : $"invoiceId={invoice.Id} status={invoice.Status} userId={invoice.UserId}");
+
+        if (invoice == null &&
+            payment.Metadata != null &&
+            payment.Metadata.TryGetValue("invoice_id", out var invoiceIdRaw) &&
+            long.TryParse(invoiceIdRaw, out var invoiceId))
+        {
+            invoice = _invoiceRepository.GetById(invoiceId);
+            _logger.LogInformation(
+                "ConfirmYooKassa: lookup by metadata.invoice_id={InvoiceId} → {Found}",
+                invoiceId,
+                invoice == null ? "not found" : $"status={invoice.Status} userId={invoice.UserId}");
+        }
+
+        return invoice;
+    }
+
+    /// <summary>
+    /// Moves a still-Created invoice to Failed once YooKassa reports the payment as canceled,
+    /// so the background poller stops asking about it.
+    /// </summary>
+    private async Task CloseCanceledYooKassaInvoiceAsync(
+        string paymentId,
+        YooKassaPayment payment,
+        CancellationToken cancellationToken)
+    {
+        var invoice = FindInvoiceForPayment(paymentId, payment);
+        if (invoice == null || invoice.Provider != PaymentProvider.YooKassa)
+        {
+            _logger.LogInformation(
+                "ConfirmYooKassa: payment {PaymentId} canceled, no matching YooKassa invoice → Ignored",
+                paymentId);
+            return;
+        }
+
+        if (invoice.Status != InvoiceStatus.Created)
+        {
+            return;
+        }
+
+        await _context.Invoices
+            .Where(i => i.Id == invoice.Id && i.Status == InvoiceStatus.Created)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(i => i.Status, InvoiceStatus.Failed),
+                cancellationToken);
+
+        _logger.LogInformation(
+            "ConfirmYooKassa: payment {PaymentId} canceled → invoice {InvoiceId} Created→Failed",
+            paymentId,
+            invoice.Id);
     }
 
     public async Task<PaymentConfirmResult> ConfirmYooKassaPaymentAsync(
@@ -641,29 +1103,24 @@ public class MoneyService
 
         if (!string.Equals(payment.Status, "succeeded", StringComparison.OrdinalIgnoreCase) || !payment.Paid)
         {
-            _logger.LogWarning(
-                "ConfirmYooKassa: payment not succeeded/paid → Ignored (status={Status}, paid={Paid})",
-                payment.Status,
-                payment.Paid);
+            // "canceled" is terminal on YooKassa's side. Unless the invoice is closed locally too,
+            // SyncPendingYooKassaPaymentsAsync keeps re-polling it on every tick for the next 24 hours.
+            if (string.Equals(payment.Status, "canceled", StringComparison.OrdinalIgnoreCase))
+            {
+                await CloseCanceledYooKassaInvoiceAsync(paymentId, payment, cancellationToken);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "ConfirmYooKassa: payment not succeeded/paid → Ignored (status={Status}, paid={Paid})",
+                    payment.Status,
+                    payment.Paid);
+            }
+
             return PaymentConfirmResult.Ignored;
         }
 
-        var invoice = _invoiceRepository.GetByExternalPaymentId(paymentId);
-        _logger.LogInformation(
-            "ConfirmYooKassa: lookup by ExternalPaymentId → {Found}",
-            invoice == null ? "not found" : $"invoiceId={invoice.Id} status={invoice.Status} userId={invoice.UserId}");
-
-        if (invoice == null &&
-            payment.Metadata != null &&
-            payment.Metadata.TryGetValue("invoice_id", out var invoiceIdRaw) &&
-            long.TryParse(invoiceIdRaw, out var invoiceId))
-        {
-            invoice = _invoiceRepository.GetById(invoiceId);
-            _logger.LogInformation(
-                "ConfirmYooKassa: lookup by metadata.invoice_id={InvoiceId} → {Found}",
-                invoiceId,
-                invoice == null ? "not found" : $"status={invoice.Status} userId={invoice.UserId}");
-        }
+        var invoice = FindInvoiceForPayment(paymentId, payment);
 
         if (invoice == null || invoice.Provider != PaymentProvider.YooKassa)
         {
@@ -745,20 +1202,17 @@ public class MoneyService
         }
 
         _logger.LogInformation(
-            "ConfirmYooKassa: crediting userId={UserId} stars={Stars}",
+            "ConfirmYooKassa: crediting userId={UserId} gems={Gems}",
             invoice.UserId,
             invoice.Amount);
-        await AddMoneyAsync(invoice.UserId, (int)invoice.Amount, Currency.Stars, PaymentProvider.YooKassa, cancellationToken);
+        await AddMoneyAsync(invoice.UserId, (int)invoice.Amount, PaymentProvider.YooKassa, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("ConfirmYooKassa: SaveChanges done for invoice {InvoiceId}", invoice.Id);
 
         try
         {
             var profile = await _userService.GetUserProfile(invoice.UserId);
-            var reply = string.Format(BotResponse.ProfileResponse, profile.FirstName,
-                profile.LastName, profile.Stars, profile.GptRequests, profile.Images, profile.ImageTexts,
-                profile.PhotoAnimations, profile.Summaries, profile.GptModelDisplayName,
-                profile.CombinePhotos, profile.ChangePhotos);
+            var reply = profile.Render();
             var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                 .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
@@ -810,7 +1264,8 @@ public class MoneyService
         return long.TryParse(payload, out invoiceId);
     }
 
-    public async Task AddMoneyAsync(long userId, int amount, string currency, PaymentProvider provider, CancellationToken cancellationToken)
+    /// <summary>Credits <paramref name="gems"/> to the wallet, whichever rail the payer used.</summary>
+    public async Task AddMoneyAsync(long userId, int gems, PaymentProvider provider, CancellationToken cancellationToken)
     {
         var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
 
@@ -823,7 +1278,7 @@ public class MoneyService
             {
                 CreatedAt = DateTime.UtcNow,
                 UserId = userId,
-                Currency = currency
+                Currency = CurrencyCode.Gem
             };
             _walletRepository.Create(wallet);
             await _context.SaveChangesAsync(cancellationToken);
@@ -835,20 +1290,45 @@ public class MoneyService
         {
             CreatedAt = DateTime.UtcNow,
             WalletId = wallet.Id,
-            Amount = amount
+            Amount = gems
         });
-        await _walletRepository.UpdateAmountAsync(wallet, amount);
+        await _walletRepository.UpdateAmountAsync(wallet, gems);
         NotifyAdminAboutDeposit(wallet, provider);
     }
 
-    public static long ToKopecks(int starsCount)
+    /// <summary>
+    /// XTR Telegram is billed for an invoice. A deposit stores gems in
+    /// <see cref="Invoice.Amount"/> and is charged through <see cref="TelegramStarsConfig.GemsToXtr"/>;
+    /// a donation stores XTR directly.
+    /// </summary>
+    private static long ExpectedXtr(Invoice invoice, bool isDonate) =>
+        isDonate ? invoice.Amount : TelegramStarsConfig.GemsToXtr(invoice.Amount);
+
+    /// <summary>Fiat price of a gem amount, in kopecks. At the default rate a gem is one kopeck.</summary>
+    public static long ToKopecks(int gemsCount)
     {
-        var rub = starsCount * YooKassaConfig.RubPerStar;
+        var rub = gemsCount / (decimal)YooKassaConfig.GemsPerRub;
         return (long)decimal.Round(rub * 100m, 0, MidpointRounding.AwayFromZero);
     }
 
-    public static string FormatRubAmount(int starsCount) =>
-        (ToKopecks(starsCount) / 100m).ToString("0.##", CultureInfo.InvariantCulture);
+    public static string FormatRubAmount(int gemsCount) =>
+        (ToKopecks(gemsCount) / 100m).ToString("0.##", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Price of a gem amount in <see cref="LavaTopConfig.Currency"/> units. Returns
+    /// <see cref="decimal.MaxValue"/> when the rate isn't configured, so an unpriced rail never looks
+    /// affordable to a min-amount check instead of throwing mid-comparison.
+    /// </summary>
+    public static decimal ToLavaTopAmount(int gemsCount)
+    {
+        var perUnit = LavaTopConfig.GemsPerUnit;
+        return perUnit > 0
+            ? decimal.Round(gemsCount / (decimal)perUnit, 2, MidpointRounding.AwayFromZero)
+            : decimal.MaxValue;
+    }
+
+    public static string FormatLavaTopAmount(int gemsCount) =>
+        ToLavaTopAmount(gemsCount).ToString("0.00", CultureInfo.InvariantCulture);
 
     private long? ResolveTelegramChatId(long userId) =>
         _userRepository.Get(userId)?.TelegramId;
@@ -874,7 +1354,7 @@ public class MoneyService
     {
         var method = FormatPaymentMethod(provider);
         var message = "#deposit" + Environment.NewLine
-            + $"{wallet.UserId} balance: {wallet.Balance} stars" + Environment.NewLine
+            + $"{wallet.UserId} balance: {wallet.Balance} gems" + Environment.NewLine
             + $"method: {method}";
 
         _botClient.SendMessage(AppConfig.AdminIds.First(), message);
@@ -884,6 +1364,7 @@ public class MoneyService
         provider switch
         {
             PaymentProvider.YooKassa => "YooKassa (карта / СБП / SberPay)",
+            PaymentProvider.LavaTop => "lava.top (международная карта / PayPal)",
             PaymentProvider.TelegramStars => "Telegram Stars",
             _ => provider.ToString()
         };

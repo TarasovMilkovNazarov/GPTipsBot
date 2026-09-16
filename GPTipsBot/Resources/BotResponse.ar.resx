@@ -121,7 +121,7 @@
     <value>🤖 ChatGPT + صور
 
 ما عليك سوى كتابة سؤال - يقوم الروبوت بالرد بسياق المحادثة.
-القائمة: دردشة جديدة، نماذج، صور (Yandex Art / GPT Image)، تحريك ودمج وتغيير الصور، حساب و⭐ تعبئة رصيد.
+القائمة: دردشة جديدة، نماذج، صور (Yandex Art / GPT Image)، تحريك ودمج وتغيير الصور، حساب و💎 تعبئة رصيد.
 
 تنطبق الحدود اليومية المجانية - راجع /profile. التفاصيل: /help</value>
   </data>
@@ -144,42 +144,45 @@ https://gptips.skolkokomu.ru
 افتح "🎨 الصور" في القائمة:
 • 🖼 Yandex Art — إرسال رسالة نصية مجانية إلى صورة (ضمن الحصة اليومية)
 • 🎨 GPT Image — جيل مدفوع مع خيارات الحجم والجودة
-• 🎭 ملصقات · ⭐ — حزمة 8 ملصقات من صورة أو وصف. /stickers
+• 🎭 ملصقات · 💎 — حزمة 8 ملصقات من صورة أو وصف. /stickers
 • 🛠 تحرير الصورة — تحرير صورة من تعليمات نصية (مدفوعة، GPT Image)؛ في المجموعات: قم بالرد بـ "/edit_image ..." على صورة
 • 📝 نص من الصورة — OCR / استخراج النص من صورة
 • 💬 مطالبة من الصورة - أنشئ رسالة نصية إلى صورة من صورة تم تحميلها
 
 💬 موجه من الصورة
-أرسل صورة - يكتب الروبوت مطالبة يمكنها إنشاء صورة مماثلة (يستخدم حصة ChatGPT أو ⭐).
+أرسل صورة - يكتب الروبوت مطالبة يمكنها إنشاء صورة مماثلة (يستخدم حصة ChatGPT أو 💎).
 في المجموعات والتعليقات: قم بالرد على الصورة باستخدام /prompt_from_image.
 
 ✨ تحريك الصورة
-قم بتحويل الصورة إلى رسم متحرك قصير (مجانًا ضمن الحصة النسبية أو مدفوعًا بـ ⭐).
+قم بتحويل الصورة إلى رسم متحرك قصير (مجانًا ضمن الحصة النسبية أو مدفوعًا بـ 💎).
 
 🧩 دمج الصور
-دمج صورتين في صورة واحدة حسب الوصف (يستخدم حصة التحريك أو ⭐).
+دمج صورتين في صورة واحدة حسب الوصف (يستخدم حصة التحريك أو 💎).
 الأمر /combine: الصورة الأولى ثم الثانية ثم الوصف.
 
 🖌 تغيير الصورة
-إعادة رسم صورة واحدة مع أليس (يستخدم حصة التحريك أو ⭐).
+إعادة رسم صورة واحدة مع أليس (يستخدم حصة التحريك أو 💎).
 هذا ليس «🛠 تحرير الصورة» (GPT Image). الأمر /change_photo.
 
 🧼 إزالة العلامة المائية
-أزل الكتابات والشعارات والطبقات شبه الشفافة من الصورة (بـ ⭐ فقط، بدون حصة مجانية).
+أزل الكتابات والشعارات والطبقات شبه الشفافة من الصورة (بـ 💎 فقط، بدون حصة مجانية).
 تتم إعادة إنشاء الصورة، لذلك قد تتغير التفاصيل الصغيرة قليلاً.
 أزل العلامات المائية من صورك أنت فقط.
 
 👤 الحساب
-يُظهر رصيدك ⭐ والحصص المجانية والنموذج الحالي.
+يُظهر رصيدك 💎 والحصص المجانية والنموذج الحالي.
 من الحساب يمكنك:
 • اختيار النموذج
 • تعبئة الرصيد
 • تبديل لغة الواجهة
 
-⭐التوازن والحدود
+💎التوازن والحدود
+💎 هي العملة الداخلية للبوت: 20💎 = 1 روبل. يمكن التعبئة بالبطاقة أو SBP أو نجوم تيليجرام (نجمة واحدة = 20💎).
+الدليل: 4💎 = طلب ChatGPT واحد، 100💎 = توليد صورة أو صورة متحركة.
 الطلبات المجانية محدودة ويتم تحديثها يوميًا.
-عند نفاذ الحصة، قم بالتعبئة ⭐ في الحساب أو عبر /deposit.
-الدليل: 1⭐ ≈ 10 طلبات ChatGPT، أو جيلين من صورة، أو صورتين متحركتين.
+عند نفاذ الحصة، قم بالتعبئة 💎 في الحساب أو عبر /deposit.
+
+كان الرصيد يُحسب سابقًا بـ ⭐. أصبحت كل ⭐ تساوي 200💎، لذلك بقيت جميع التعبئات السابقة كاملة — تغيّر المقياس فقط.
 
 أوامر مفيدة
 /start — القائمة الرئيسية
@@ -242,7 +245,7 @@ https://gptips.skolkokomu.ru
 • ✨ تحريك الصورة
 • 🧩 دمج الصور
 • 🖌 تغيير الصورة
-• 🧼 إزالة العلامة المائية — مدفوعة بـ ⭐
+• 🧼 إزالة العلامة المائية — مدفوعة بـ 💎
 • ✍️ /human — إعادة كتابة بسيطة باللغة الإنجليزية بشكل طبيعي
 • 💬 دردشة جديدة — إعادة ضبط السياق
 
@@ -256,7 +259,7 @@ https://gptips.skolkokomu.ru</value>
 
 يمكنك أيضاً السؤال بالنص — مثلاً «ماذا يوجد في الصورة؟»
 
-الأعلى: Free (حصة). الأزرار مع ⭐ مدفوعة.</value>
+الأعلى: Free (حصة). الأزرار مع 💎 مدفوعة.</value>
   </data>
   <data name="ImageDescriptionLimitWarning" xml:space="preserve">
     <value>يجب ألا يتجاوز الوصف النصي لـ صورة أحرف {0}. يرجى اختصار الوصف وإرساله مرة أخرى</value>
@@ -341,14 +344,22 @@ https://gptips.skolkokomu.ru</value>
     <value>إضافة النجوم إلى الحساب</value>
   </data>
   <data name="InvalidDepositAmountResponse" xml:space="preserve">
-    <value>❗️الحد الأدنى للتعبئة هو {0} RUB ({1}⭐)
+    <value>❗️الحد الأدنى للتعبئة هو {0} RUB ({1}💎)
 اختر الحزمة أو أدخل المبلغ مرة أخرى:</value>
+  </data>
+  <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
+    <value>
+
+أو من {0} {1} عبر بطاقة دولية / PayPal (lava.top).</value>
+  </data>
+  <data name="DepositAmountTooLargeResponse" xml:space="preserve">
+    <value>✨ الحد الأقصى {0}💎 لكل عملية دفع. أدخل مبلغًا أصغر 👇</value>
   </data>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 الملف الشخصي: {0} {1}
 
 
-💵 الرصيد : {2} Stars 💵
+💵 الرصيد : {2}💎 💵  (20💎 = 1 روبل)
 🤖 الموديل: {8}
 الطلبات المجانية:
  --ChatGpt: {3}
@@ -359,39 +370,43 @@ https://gptips.skolkokomu.ru</value>
  -- دمج الصور: {9}
  -- تعديل الصور: {10}</value>
   </data>
+  <data name="GemsMigrationNotice" xml:space="preserve">
+    <value>ℹ️ كان الرصيد يُحسب سابقًا بـ ⭐. أصبحت كل ⭐ تساوي 200💎 — بقيت جميع التعبئات السابقة كاملة، تغيّر المقياس فقط.</value>
+  </data>
   <data name="InvoiceText" xml:space="preserve">
-    <value>نجمة واحدة = 10 طلبات ChatGPT أو جيلين من صورة أو صورتين رسوم متحركة</value>
+    <value>4💎 = طلب ChatGPT واحد، 100💎 = توليد صورة أو صورة متحركة</value>
   </data>
   <data name="DepositResponse" xml:space="preserve">
-    <value>1⭐ = 10 طلبات ChatGPT، جيلين صورة أو 2 صورة متحركة
+    <value>20💎 = 1 روبل — العملة الداخلية للبوت.
+4💎 = طلب ChatGPT واحد، 100💎 = توليد صورة أو صورة متحركة
 
-الحد الأدنى للتعبئة: {0} RUB ({1}⭐)
-اختر حزمة أو أدخل مبلغ Stars كاملاً:</value>
+الحد الأدنى للتعبئة: {0} RUB ({1}💎)
+اختر حزمة أو أدخل مبلغ 💎 كاملاً:</value>
   </data>
   <data name="AddMoneyResponse" xml:space="preserve">
     <value>قم بتعبئة رصيدك</value>
   </data>
   <data name="InsufficientBalance" xml:space="preserve">
-    <value>يجب أن يكون لديك نجوم {0} لتنفيذ هذه العملية.
+    <value>يجب أن يكون لديك {0}💎 لتنفيذ هذه العملية.
 
 بعد التعبئة، أدخل الأمر مرة أخرى.</value>
   </data>
   <data name="ChoosePaymentMethod" xml:space="preserve">
-    <value>قم بتعبئة {0}⭐ ({1} RUB)
+    <value>قم بتعبئة {0}💎 ({1} RUB)
 
 اختر طريقة الدفع:</value>
   </data>
   <data name="PayWithStarsButton" xml:space="preserve">
-    <value>⭐Telegram Stars</value>
+    <value>⭐Telegram Stars · {0}</value>
   </data>
   <data name="DepositPackageButton" xml:space="preserve">
-    <value>{0}⭐ · {1} RUB</value>
+    <value>{0}💎 · {1} RUB</value>
   </data>
   <data name="PayWithYooKassaButton" xml:space="preserve">
     <value>💳 البطاقة / SBP / SberPay · {0} RUB</value>
   </data>
   <data name="YooKassaPaymentLinkResponse" xml:space="preserve">
-    <value>الدفع مقابل {0}⭐ ({1} RUB)
+    <value>الدفع مقابل {0}💎 ({1} RUB)
 
 اضغط على الزر أدناه لفتح نموذج الدفع YooKassa.
 سيتم تحديث رصيدك تلقائيًا بعد إتمام عملية الدفع بنجاح.</value>
@@ -409,9 +424,33 @@ https://gptips.skolkokomu.ru</value>
     <value>تم العثور على الدفع، وتم تحديث الرصيد ✅</value>
   </data>
   <data name="YooKassaPaymentDescription" xml:space="preserve">
-    <value>تعبئة رصيد GPTipsBot: نجوم {0}</value>
+    <value>تعبئة رصيد GPTipsBot: {0}💎</value>
   </data>
   <data name="YooKassaPaymentSucceeded" xml:space="preserve">
+    <value>✅ تم الدفع بنجاح! لقد تمت تعبئة رصيدك.</value>
+  </data>
+  <data name="PayWithLavaTopButton" xml:space="preserve">
+    <value>🌍 بطاقة دولية / PayPal · {0} {1}</value>
+  </data>
+  <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
+    <value>الدفع مقابل {0}💎 ({1} {2})
+
+اضغط على الزر أدناه لفتح نموذج الدفع lava.top.
+سيتم تحديث رصيدك تلقائيًا بعد إتمام عملية الدفع بنجاح.</value>
+  </data>
+  <data name="OpenLavaTopPaymentButton" xml:space="preserve">
+    <value>ادفع الآن</value>
+  </data>
+  <data name="CheckLavaTopPaymentButton" xml:space="preserve">
+    <value>التحقق من الدفع</value>
+  </data>
+  <data name="LavaTopPaymentCheckPending" xml:space="preserve">
+    <value>لم يتم استلام الدفعة بعد. إذا كنت قد دفعت بالفعل، انتظر دقيقة وحاول مرة أخرى.</value>
+  </data>
+  <data name="LavaTopPaymentCheckOk" xml:space="preserve">
+    <value>تم العثور على الدفع، وتم تحديث الرصيد ✅</value>
+  </data>
+  <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ تم الدفع بنجاح! لقد تمت تعبئة رصيدك.</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
@@ -421,13 +460,13 @@ https://gptips.skolkokomu.ru</value>
     <value>❗️لقد تم الوصول إلى الحد الأقصى للطلب المجاني لهذا اليوم.
 قم بتعبئة رصيدك أو انتظر إعادة ضبط الحدود المجانية.
 
-1⭐ = 10 طلبات ChatGPT، جيلين صورة أو 2 صورة متحركة.</value>
+4💎 = طلب ChatGPT واحد، 100💎 = توليد صورة أو صورة متحركة.</value>
   </data>
   <data name="TimeNoFreeRequests" xml:space="preserve">
     <value>❗️لقد استخدمت جميع طلباتك المجانية لهذا اليوم.
 قم بإضافة الأموال الآن أو انتظر {0:%d} d {0:%h} h {0:%m} min حتى يتم تحديث طلباتك المجانية.
 
-1⭐ = 10 طلبات ChatGPT، جيلين صورة أو 2 صورة متحركة</value>
+4💎 = طلب ChatGPT واحد، 100💎 = توليد صورة أو صورة متحركة</value>
   </data>
   <data name="DonateResponse" xml:space="preserve">
     <value>🌟 ادعم مشروعنا! 💪
@@ -577,7 +616,7 @@ https://gptips.skolkokomu.ru</value>
     <value>◀️ احصل على</value>
   </data>
   <data name="AccountLinkSuccess" xml:space="preserve">
-    <value>✅تيليجرام مرتبط بحسابك على الموقع. تتم الآن مشاركة Stars والحصص المجانية.</value>
+    <value>✅تيليجرام مرتبط بحسابك على الموقع. تتم الآن مشاركة 💎 والحصص المجانية.</value>
   </data>
   <data name="AccountLinkTokenInvalid" xml:space="preserve">
     <value>⚠️ هذا الرابط غير صالح أو منتهي الصلاحية. افتح البوت مرة أخرى من الموقع.</value>
@@ -591,22 +630,22 @@ https://gptips.skolkokomu.ru</value>
   <data name="ChooseModel" xml:space="preserve">
     <value>🤖 اختر موديل ChatGPT
 
-الحالي: {0} ({1:0.##}⭐ لكل رسالة)
+الحالي: {0} ({1}💎 لكل رسالة)
 
 الطلبات المجانية تعمل فقط مع {2}.
-الموديلات الأخرى تنفق Stars من رصيدك.</value>
+الموديلات الأخرى تنفق 💎 من رصيدك.</value>
   </data>
   <data name="ModelSelected" xml:space="preserve">
     <value>✅ الموديل المحدد: {0}
-التكلفة لكل رسالة: {1:0.##}⭐</value>
+التكلفة لكل رسالة: {1}💎</value>
   </data>
   <data name="ModelSelectionRequiresBalance" xml:space="preserve">
-    <value>🔒 اختيار الموديل متاح عندما يكون رصيد Stars الخاص بك موجبًا.
+    <value>🔒 اختيار الموديل متاح عندما يكون رصيد 💎 الخاص بك موجبًا.
 
 يمكنك التبديل إلى {0} أو زيادة رصيدك.</value>
   </data>
   <data name="ModelNeedsBalance" xml:space="preserve">
-    <value>❗️لا يكفي Stars لـ {0} ({1:0.##}⭐ لكل رسالة).
+    <value>❗️لا يكفي 💎 لـ {0} ({1}💎 لكل رسالة).
 
 قم بتعبئة رصيدك أو قم بالتبديل إلى {2}.</value>
   </data>
@@ -617,14 +656,14 @@ https://gptips.skolkokomu.ru</value>
     <value>🎨 GPT Image — إنشاء
 
 اختر الحجم والجودة، ثم أرسل الوصف.
-التكلفة: {0:0.##}⭐ (لا توجد حصة مجانية)</value>
+التكلفة: {0}💎 (لا توجد حصة مجانية)</value>
   </data>
   <data name="GptImageEditIntro" xml:space="preserve">
     <value>🛠 GPT Image – تعديل
 
 أرسل صورة، ثم اختر الحجم/الجودة وقم بوصف التغييرات.
 أو قم بالرد على الصورة: /edit_image تجعل السماء وردية
-التكلفة: {0:0.##}⭐ (لا توجد حصة مجانية)</value>
+التكلفة: {0}💎 (لا توجد حصة مجانية)</value>
   </data>
   <data name="GptImageSendPhotoFirst" xml:space="preserve">
     <value>أرسل صورة لتعديلها أولاً</value>
@@ -634,10 +673,10 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="GptImageSendEditPrompt" xml:space="preserve">
     <value>صف ما يجب تغييره في الصورة.
-التكلفة: {0:0.##}⭐</value>
+التكلفة: {0}💎</value>
   </data>
   <data name="GptImageDoneCaption" xml:space="preserve">
-    <value>GPT Image · {0} · {1} · {2:0.##}⭐</value>
+    <value>GPT Image · {0} · {1} · {2}💎</value>
   </data>
   <data name="RemoveWatermarkIntro" xml:space="preserve">
     <value>🧼 إزالة العلامة المائية
@@ -645,16 +684,16 @@ https://gptips.skolkokomu.ru</value>
 أرسل صورة — سأزيل النصوص والشعارات والطبقات نصف الشفافة المتكررة.
 لاحظ أن الصورة يُعاد إنشاؤها، لذا قد تتغير التفاصيل الدقيقة قليلًا.
 أزل العلامات المائية من صورك الخاصة فقط.
-التكلفة: {0:0.##}⭐ (بدون طلبات مجانية)</value>
+التكلفة: {0}💎 (بدون طلبات مجانية)</value>
   </data>
   <data name="RemoveWatermarkSendPhoto" xml:space="preserve">
     <value>أرسل الصورة التي تريد إزالة العلامة المائية منها</value>
   </data>
   <data name="RemoveWatermarkDoneCaption" xml:space="preserve">
-    <value>🧼 تمت إزالة العلامة المائية · {0:0.##}⭐</value>
+    <value>🧼 تمت إزالة العلامة المائية · {0}💎</value>
   </data>
   <data name="RemoveWatermarkModeActive" xml:space="preserve">
-    <value>وضع إزالة العلامة المائية ما زال مفعّلاً: يمكنك إرسال صورة أخرى، وكل صورة تكلّف {0:0.##}⭐. اضغط «رجوع» للخروج.</value>
+    <value>وضع إزالة العلامة المائية ما زال مفعّلاً: يمكنك إرسال صورة أخرى، وكل صورة تكلّف {0}💎. اضغط «رجوع» للخروج.</value>
   </data>
   <data name="PleaseWaitImageMsg" xml:space="preserve">
     <value>⌛️ يستغرق إنشاء الصورة عادةً بضع ثوانٍ. انتظر...</value>
@@ -687,7 +726,7 @@ https://gptips.skolkokomu.ru</value>
     <value>🎭 حزمة ملصقات
 
 أرسل صورة الشخصية أو صفها نصاً — سأرسم ملصقاً وأعرض معاينة.
-الشخصية: {0:0.##}⭐، ثم 7 تعبيرات أخرى: {1:0.##}⭐.
+الشخصية: {0}💎، ثم 7 تعبيرات أخرى: {1}💎.
 النمط: تشيبي لطيف، إطار أبيض، خلفية شفافة.
 
 مثال على الحزمة:
@@ -697,11 +736,11 @@ https://gptips.skolkokomu.ru</value>
     <value>🎭 جارٍ رسم الملصق {0}/{1}…</value>
   </data>
   <data name="StickerPackHeroCaption" xml:space="preserve">
-    <value>الشخصية جاهزة · {0:0.##}⭐
-هل نبني حزمة من 8 تعبيرات مقابل {1:0.##}⭐ إضافية؟</value>
+    <value>الشخصية جاهزة · {0}💎
+هل نبني حزمة من 8 تعبيرات مقابل {1}💎 إضافية؟</value>
   </data>
   <data name="StickerPackReady" xml:space="preserve">
-    <value>حزمة من {0} ملصقات جاهزة · {1:0.##}⭐
+    <value>حزمة من {0} ملصقات جاهزة · {1}💎
 يمكنك إضافتها إلى تيليجرام.</value>
   </data>
   <data name="StickerPackAlbumCaption" xml:space="preserve">

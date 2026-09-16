@@ -32,7 +32,7 @@ public class GptImageHandler(
             if (string.IsNullOrWhiteSpace(update.Message?.Text))
             {
                 var hint = session.Mode == GptImageMode.Edit
-                    ? string.Format(BotResponse.GptImageSendEditPrompt, session.StarsCost)
+                    ? string.Format(BotResponse.GptImageSendEditPrompt, session.GemCost)
                     : BotResponse.GptImageSendPrompt;
                 await botClient.SendMessageWithMenuAsync(
                     chatId,
@@ -63,12 +63,12 @@ public class GptImageHandler(
             return;
         }
 
-        var hold = await userService.TryReserveGptImageAsync(userId, session.StarsCost);
+        var hold = await userService.TryReserveGptImageAsync(userId, session.GemCost);
         if (hold is null)
         {
             await botClient.SendMessageWithMenuAsync(
                 chatId,
-                string.Format(BotResponse.InsufficientBalance, session.StarsCost),
+                string.Format(BotResponse.InsufficientBalance, session.GemCost),
                 TelegramBotUiService.DepositInlineKeyboard,
                 update.IsGroupOrChannel);
             return;
@@ -123,7 +123,7 @@ public class GptImageHandler(
                     BotResponse.GptImageDoneCaption,
                     session.Quality,
                     session.Size,
-                    session.StarsCost),
+                    session.GemCost),
                 messageThreadId: threadId,
                 replyMarkup: TelegramBotUiService.MenuIfPrivate(chatId),
                 replyParameters: update.Message.TelegramMessageId is long mid

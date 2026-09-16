@@ -182,7 +182,7 @@ public class InlineQueryHandler(
                 : string.Format(
                     BotResponse.ModelNeedsBalance,
                     model.DisplayName,
-                    model.StarsCost,
+                    model.GemCost,
                     GptModelCatalog.Default.DisplayName);
 
             await botClient.EditMessageText(inlineMessageId, message, replyMarkup: null);
