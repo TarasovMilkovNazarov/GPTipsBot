@@ -62,9 +62,13 @@ public static class PaymentConfig
     /// <summary>Minimum YooKassa top-up in rubles.</summary>
     public const int MinRechargeRub = 50;
 
-    /// <summary>Gem packages shown on /deposit — 50, 100, 250, 500 and 1000 ₽ worth.</summary>
+    /// <summary>
+    /// Gem packages shown on /deposit for YooKassa — 50, 100 and 250 ₽ worth. Kept short on purpose: real
+    /// top-ups to date have all landed at or below 250 ₽ (50, 50, 250), so 500/1000 ₽ tiers sat unused —
+    /// a bigger amount is still one manual entry away, not a missing feature.
+    /// </summary>
     public static int[] DepositGemPackages =>
-        [.. new[] { 50, 100, 250, 500, 1_000 }.Select(rub => rub * YooKassaConfig.GemsPerRub)];
+        [.. new[] { 50, 100, 250 }.Select(rub => rub * YooKassaConfig.GemsPerRub)];
 
     /// <summary>Fewest gems worth at least <see cref="MinRechargeRub"/>.</summary>
     public static int MinRechargeGems => MinRechargeRub * YooKassaConfig.GemsPerRub;

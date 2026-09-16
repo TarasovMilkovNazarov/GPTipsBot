@@ -57,6 +57,27 @@ namespace GPTipsBot.Repositories
         public string GetPreferredGptModelId(long userId) =>
             GptModelCatalog.Resolve(Get(userId)?.PreferredGptModel).Id;
 
+        public BotSettings SetPreferredPaymentProvider(
+            long userId, PaymentProvider provider, string fallbackLanguage = "ru")
+        {
+            logger.LogInformation("Set preferred payment provider userId={UserId} provider={Provider}",
+                userId, provider);
+
+            var settings = GetTracked(userId);
+            if (settings == null)
+            {
+                settings = Create(userId, fallbackLanguage);
+            }
+
+            settings.PreferredPaymentProvider = provider.ToString();
+            return settings;
+        }
+
+        public PaymentProvider? GetPreferredPaymentProvider(long userId) =>
+            Enum.TryParse<PaymentProvider>(Get(userId)?.PreferredPaymentProvider, out var provider)
+                ? provider
+                : null;
+
         public void Delete(long id)
         {
             var settings = _context.BotSettings.FirstOrDefault(x => x.Id == id);

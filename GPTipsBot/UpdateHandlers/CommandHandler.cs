@@ -243,11 +243,21 @@ namespace GPTipsBot.UpdateHandlers
                     return;
                 case DepositCommand:
                 {
-                    var depositText = string.Format(
-                        BotResponse.DepositResponse,
-                        PaymentConfig.MinRechargeRub,
-                        PaymentConfig.MinRechargeGems);
-                    var packagesKeyboard = moneyService.BuildDepositPackagesKeyboard();
+                    var preferredProvider = botSettingsRepository.GetPreferredPaymentProvider(update.UserChatKey.Id);
+                    string depositText;
+                    InlineKeyboardMarkup packagesKeyboard;
+                    if (preferredProvider is { } provider &&
+                        (provider != PaymentProvider.LavaTop || LavaTopConfig.IsEnabled))
+                    {
+                        depositText = MoneyService.GetDepositAmountHeader(provider);
+                        packagesKeyboard = moneyService.BuildDepositAmountKeyboard(provider);
+                    }
+                    else
+                    {
+                        depositText = BotResponse.ChoosePaymentMethodTitle;
+                        packagesKeyboard = moneyService.BuildPaymentMethodChoiceKeyboard();
+                    }
+
                     if (update.CallbackQuery == null)
                     {
                         await botClient.SendMessageWithMenuAsync(

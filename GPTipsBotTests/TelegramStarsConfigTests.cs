@@ -30,7 +30,7 @@ public class TelegramStarsConfigTests
     [Test]
     public void DepositPackages_AreWholeNumbersOfStars()
     {
-        foreach (var gems in PaymentConfig.DepositGemPackages)
+        foreach (var gems in TelegramStarsConfig.DepositPackages)
         {
             (gems % TelegramStarsConfig.GemsPerXtr).Should().Be(
                 0,
@@ -42,7 +42,7 @@ public class TelegramStarsConfigTests
     [Test]
     public void DepositPackages_FitIntoASingleTelegramInvoice()
     {
-        foreach (var gems in PaymentConfig.DepositGemPackages)
+        foreach (var gems in TelegramStarsConfig.DepositPackages)
         {
             TelegramStarsConfig.GemsToXtr(gems).Should().BeLessThanOrEqualTo(
                 TelegramStarsConfig.MaxXtrPerInvoice,

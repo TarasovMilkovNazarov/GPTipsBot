@@ -350,7 +350,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
     <value>
 
-أو من {0} {1} عبر بطاقة دولية / PayPal (lava.top).</value>
+أو من {0} {1} عبر البطاقة / PayPal (lava.top).</value>
   </data>
   <data name="DepositAmountTooLargeResponse" xml:space="preserve">
     <value>✨ الحد الأقصى {0}💎 لكل عملية دفع. أدخل مبلغًا أصغر 👇</value>
@@ -430,7 +430,7 @@ https://gptips.skolkokomu.ru</value>
     <value>✅ تم الدفع بنجاح! لقد تمت تعبئة رصيدك.</value>
   </data>
   <data name="PayWithLavaTopButton" xml:space="preserve">
-    <value>🌍 بطاقة دولية / PayPal · {0} {1}</value>
+    <value>🌍 بطاقة / PayPal · {0} {1}</value>
   </data>
   <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
     <value>الدفع مقابل {0}💎 ({1} {2})
@@ -452,6 +452,50 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ تم الدفع بنجاح! لقد تمت تعبئة رصيدك.</value>
+  </data>
+  <data name="ChoosePaymentMethodTitle" xml:space="preserve">
+    <value>4💎 = طلب واحد لـ ChatGPT، 100💎 = إنشاء صورة أو تحريك صورة
+
+كيف تريد شحن رصيدك؟</value>
+  </data>
+  <data name="PaymentMethodStarsOption" xml:space="preserve">
+    <value>⭐ Telegram Stars</value>
+  </data>
+  <data name="PaymentMethodYooKassaOption" xml:space="preserve">
+    <value>💳 بطاقة روسية / SBP / SberPay</value>
+  </data>
+  <data name="PaymentMethodLavaTopOption" xml:space="preserve">
+    <value>🌍 بطاقة / PayPal</value>
+  </data>
+  <data name="DepositAmountHeaderStars" xml:space="preserve">
+    <value>⭐ الدفع عبر Telegram Stars
+{0}💎 = 1⭐
+
+اختر حزمة أو أدخل مبلغًا صحيحًا من 💎:</value>
+  </data>
+  <data name="DepositAmountHeaderYooKassa" xml:space="preserve">
+    <value>💳 الدفع بالبطاقة / SBP
+{0}💎 = 1 RUB
+
+اختر حزمة أو أدخل مبلغًا صحيحًا من 💎:</value>
+  </data>
+  <data name="DepositAmountHeaderLavaTop" xml:space="preserve">
+    <value>🌍 الدفع بالبطاقة / PayPal
+{0}💎 = 1 {1}
+
+اختر حزمة أو أدخل مبلغًا بـ {1}:</value>
+  </data>
+  <data name="DepositPackageButtonGeneric" xml:space="preserve">
+    <value>{0}💎 · {1}</value>
+  </data>
+  <data name="BackToPaymentMethodButton" xml:space="preserve">
+    <value>◀ العودة إلى اختيار طريقة الشحن</value>
+  </data>
+  <data name="InvalidLavaTopAmountResponse" xml:space="preserve">
+    <value>❗️يجب أن يكون المبلغ بين {0} و {1} {2}. أدخل المبلغ مرة أخرى:</value>
+  </data>
+  <data name="InvalidStarsAmountResponse" xml:space="preserve">
+    <value>❗️أدخل رقمًا صحيحًا موجبًا من 💎. حاول مرة أخرى:</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
     <value>⌛️ يستغرق إنشاء الفيديو عادةً ما بين 5 إلى 10 دقائق. برجاء الإنتظار، جاري إعداد الرد...</value>

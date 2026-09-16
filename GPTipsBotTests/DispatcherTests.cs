@@ -111,6 +111,45 @@ namespace GPTipsBotTests
             };
         }
 
+        private static Update CreateCallbackUpdate(
+            int updateId,
+            string data,
+            long chatId = TestConstants.UserId)
+        {
+            var user = new User
+            {
+                Id = chatId,
+                IsBot = false,
+                FirstName = "Aleksandr",
+                LastName = "Tarasov",
+                Username = "alanextar",
+                LanguageCode = "ru"
+            };
+            return new Update
+            {
+                Id = updateId,
+                CallbackQuery = new CallbackQuery
+                {
+                    Id = updateId.ToString(),
+                    From = user,
+                    Data = data,
+                    Message = new Message
+                    {
+                        Id = updateId,
+                        Chat = new Chat
+                        {
+                            Id = chatId,
+                            Type = Telegram.Bot.Types.Enums.ChatType.Private,
+                            Username = "alanextar",
+                            FirstName = "Aleksandr",
+                            LastName = "Tarasov"
+                        },
+                        Date = DateTime.UtcNow
+                    }
+                }
+            };
+        }
+
         [SetUp]
         public async Task Setup()
         {
@@ -715,7 +754,9 @@ namespace GPTipsBotTests
         [Test]
         [TestCase("1000", true)]
         [TestCase("-10", false)]
-        [TestCase("10", false)]
+        // Stars has no RUB-derived floor (its own package ladder starts at 10⭐ = 200💎), so a small
+        // positive amount is valid here — unlike YooKassa, which the "10" case used to test against.
+        [TestCase("10", true)]
         [TestCase("some random text", false)]
         public async Task DepositCommand_UserInput_BalanceChanged(string input, bool isValid)
         {
@@ -725,9 +766,12 @@ namespace GPTipsBotTests
             var balanceBefore = walletRepository.Get(w => w.UserId == TestConstants.UserId).FirstOrDefault()?.Balance ?? 0;
 
             await _mainHandler.HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, BotMenu.DepositCommand));
+            // /deposit shows the method-choice screen first; pick Stars before the amount is meaningful.
+            await _mainHandler.HandleUpdateAsync(CreateCallbackUpdate(
+                1235, $"{PaymentCallbacks.MethodChoicePrefix}{PaymentProvider.TelegramStars}"));
 
             var starsInputUpdateFunc = async () => await _mainHandler
-                .HandleUpdateAsync(CreateTelegramUpdate(1234, 1234, input));
+                .HandleUpdateAsync(CreateTelegramUpdate(1236, 1236, input));
 
             if (!isValid)
             {

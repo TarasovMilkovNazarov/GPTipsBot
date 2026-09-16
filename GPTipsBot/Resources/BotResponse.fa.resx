@@ -350,7 +350,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
     <value>
 
-یا از {0} {1} با کارت بین‌المللی / PayPal (lava.top).</value>
+یا از {0} {1} با کارت / PayPal (lava.top).</value>
   </data>
   <data name="DepositAmountTooLargeResponse" xml:space="preserve">
     <value>✨ حداکثر {0}💎 در هر پرداخت. مبلغ کمتری وارد کنید 👇</value>
@@ -430,7 +430,7 @@ https://gptips.skolkokomu.ru</value>
     <value>✅ پرداخت با موفقیت انجام شد موجودی شما پر شده است.</value>
   </data>
   <data name="PayWithLavaTopButton" xml:space="preserve">
-    <value>🌍 کارت بین‌المللی / PayPal · {0} {1}</value>
+    <value>🌍 کارت / PayPal · {0} {1}</value>
   </data>
   <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
     <value>پرداخت برای {0}💎 ({1} {2})
@@ -452,6 +452,50 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ پرداخت با موفقیت انجام شد موجودی شما پر شده است.</value>
+  </data>
+  <data name="ChoosePaymentMethodTitle" xml:space="preserve">
+    <value>4💎 = 1 درخواست ChatGPT، 100💎 = یک تولید تصویر یا انیمیشن عکس
+
+چگونه می‌خواهید شارژ کنید؟</value>
+  </data>
+  <data name="PaymentMethodStarsOption" xml:space="preserve">
+    <value>⭐ Telegram Stars</value>
+  </data>
+  <data name="PaymentMethodYooKassaOption" xml:space="preserve">
+    <value>💳 کارت روسی / SBP / SberPay</value>
+  </data>
+  <data name="PaymentMethodLavaTopOption" xml:space="preserve">
+    <value>🌍 کارت / PayPal</value>
+  </data>
+  <data name="DepositAmountHeaderStars" xml:space="preserve">
+    <value>⭐ پرداخت با Telegram Stars
+{0}💎 = 1⭐
+
+یک بسته را انتخاب کنید یا مقدار 💎 را وارد کنید:</value>
+  </data>
+  <data name="DepositAmountHeaderYooKassa" xml:space="preserve">
+    <value>💳 پرداخت با کارت / SBP
+{0}💎 = 1 RUB
+
+یک بسته را انتخاب کنید یا مقدار 💎 را وارد کنید:</value>
+  </data>
+  <data name="DepositAmountHeaderLavaTop" xml:space="preserve">
+    <value>🌍 پرداخت با کارت / PayPal
+{0}💎 = 1 {1}
+
+یک بسته را انتخاب کنید یا مبلغی به {1} وارد کنید:</value>
+  </data>
+  <data name="DepositPackageButtonGeneric" xml:space="preserve">
+    <value>{0}💎 · {1}</value>
+  </data>
+  <data name="BackToPaymentMethodButton" xml:space="preserve">
+    <value>◀ بازگشت به انتخاب روش شارژ</value>
+  </data>
+  <data name="InvalidLavaTopAmountResponse" xml:space="preserve">
+    <value>❗️مبلغ باید بین {0} تا {1} {2} باشد. دوباره مبلغ را وارد کنید:</value>
+  </data>
+  <data name="InvalidStarsAmountResponse" xml:space="preserve">
+    <value>❗️یک عدد صحیح مثبت 💎 وارد کنید. دوباره امتحان کنید:</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
     <value>⌛️ تولید ویدئو معمولا بین 5 تا 10 دقیقه طول می کشد. لطفاً منتظر بمانید و پاسخ را آماده کنید...</value>

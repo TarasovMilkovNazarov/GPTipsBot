@@ -422,7 +422,7 @@ https://gptips.skolkokomu.ru</value>
   <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
     <value>
 
-Либо от {0} {1} через зарубежную карту / PayPal (lava.top).</value>
+Либо от {0} {1} картой / PayPal (lava.top).</value>
   </data>
   <data name="DepositAmountTooLargeResponse" xml:space="preserve">
     <value>✨ Максимум {0}💎 за один платёж. Введите сумму поменьше 👇</value>
@@ -474,7 +474,7 @@ https://gptips.skolkokomu.ru</value>
     <value>✅ Оплата прошла успешно! Баланс пополнен.</value>
   </data>
   <data name="PayWithLavaTopButton" xml:space="preserve">
-    <value>🌍 Зарубежная карта / PayPal · {0} {1}</value>
+    <value>🌍 Карта / PayPal · {0} {1}</value>
   </data>
   <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
     <value>Оплата {0}💎 ({1} {2})
@@ -496,6 +496,50 @@ https://gptips.skolkokomu.ru</value>
   </data>
   <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ Оплата прошла успешно! Баланс пополнен.</value>
+  </data>
+  <data name="ChoosePaymentMethodTitle" xml:space="preserve">
+    <value>4💎 = 1 запрос к ChatGPT, 100💎 = генерация изображения или анимация фото
+
+Как хотите пополнить баланс?</value>
+  </data>
+  <data name="PaymentMethodStarsOption" xml:space="preserve">
+    <value>⭐ Telegram Stars</value>
+  </data>
+  <data name="PaymentMethodYooKassaOption" xml:space="preserve">
+    <value>💳 Карта РФ / СБП / SberPay</value>
+  </data>
+  <data name="PaymentMethodLavaTopOption" xml:space="preserve">
+    <value>🌍 Карта / PayPal</value>
+  </data>
+  <data name="DepositAmountHeaderStars" xml:space="preserve">
+    <value>⭐ Оплата через Telegram Stars
+{0}💎 = 1⭐
+
+Выберите пакет или введите сумму в 💎:</value>
+  </data>
+  <data name="DepositAmountHeaderYooKassa" xml:space="preserve">
+    <value>💳 Оплата картой / СБП
+{0}💎 = 1 ₽
+
+Выберите пакет или введите сумму в 💎:</value>
+  </data>
+  <data name="DepositAmountHeaderLavaTop" xml:space="preserve">
+    <value>🌍 Оплата картой / PayPal
+{0}💎 = 1 {1}
+
+Выберите пакет или введите сумму в {1}:</value>
+  </data>
+  <data name="DepositPackageButtonGeneric" xml:space="preserve">
+    <value>{0}💎 · {1}</value>
+  </data>
+  <data name="BackToPaymentMethodButton" xml:space="preserve">
+    <value>◀ Назад к выбору способа пополнения</value>
+  </data>
+  <data name="InvalidLavaTopAmountResponse" xml:space="preserve">
+    <value>❗️Сумма должна быть от {0} до {1} {2}. Введите сумму снова:</value>
+  </data>
+  <data name="InvalidStarsAmountResponse" xml:space="preserve">
+    <value>❗️Введите целое положительное число 💎. Попробуйте снова:</value>
   </data>
   <data name="SendPhotoToAnimate" xml:space="preserve">
     <value>Пример: фото → «Дети радостно прыгают и обнимаются» → результат

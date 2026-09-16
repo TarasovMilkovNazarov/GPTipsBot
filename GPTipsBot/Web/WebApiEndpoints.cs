@@ -906,6 +906,20 @@ public static class WebApiEndpoints
             })
             .ToList();
 
+        var lavatop = LavaTopConfig.IsEnabled
+            ? new
+            {
+                enabled = true,
+                currency = LavaTopConfig.Currency,
+                gemsPerUnit = LavaTopConfig.GemsPerUnit,
+                minAmount = LavaTopConfig.MinRechargeAmount,
+                maxAmount = LavaTopConfig.MaxRechargeAmount,
+                packages = LavaTopConfig.DepositPackages
+                    .Select(gems => new { gems, amount = MoneyService.FormatLavaTopAmount(gems) })
+                    .ToList(),
+            }
+            : (object?)null;
+
         return Results.Ok(new
         {
             enabled = YooKassaConfig.IsEnabled,
@@ -913,6 +927,7 @@ public static class WebApiEndpoints
             minRub = PaymentConfig.MinRechargeRub,
             minGems = PaymentConfig.MinRechargeGems,
             packages,
+            lavatop,
         });
     }
 
@@ -979,11 +994,12 @@ public static class WebApiEndpoints
             return Results.BadRequest(new { message = "lava.top is not configured" });
         }
 
-        if (MoneyService.ToLavaTopAmount(body.Gems) < LavaTopConfig.MinRechargeAmount)
+        if (!MoneyService.IsLavaTopAmountAllowed(body.Gems))
         {
             return Results.BadRequest(new
             {
-                message = $"Minimum top-up is {LavaTopConfig.MinRechargeAmount} {LavaTopConfig.Currency}",
+                message = $"Top-up must be between {LavaTopConfig.MinRechargeAmount} and " +
+                    $"{LavaTopConfig.MaxRechargeAmount} {LavaTopConfig.Currency}",
             });
         }
 

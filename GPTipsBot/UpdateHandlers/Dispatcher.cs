@@ -192,14 +192,27 @@ namespace GPTipsBot.UpdateHandlers
             }
 
             if (update.CallbackQuery != null &&
-                PaymentCallbacks.TryParsePackage(update.CallbackQuery.Data, out var packageGems))
+                PaymentCallbacks.TryParseMethodChoice(update.CallbackQuery.Data, out var chosenProvider))
+            {
+                botSettingsRepository.SetPreferredPaymentProvider(update.UserChatKey.Id, chosenProvider);
+                await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
+                await botClient.SendUserReplyAsync(
+                    update,
+                    MoneyService.GetDepositAmountHeader(chosenProvider),
+                    moneyService.BuildDepositAmountKeyboard(chosenProvider));
+                // Keep the "type a number" fallback armed for the amount screen just shown.
+                await userCommandRepository.AddAsync(update.UserChatKey, CommandType.Deposit);
+                return;
+            }
+
+            if (update.CallbackQuery?.Data == PaymentCallbacks.BackToMethodChoice)
             {
                 await botClient.AnswerCallbackQuery(update.CallbackQuery.Id);
                 await botClient.SendUserReplyAsync(
                     update,
-                    string.Format(BotResponse.ChoosePaymentMethod, packageGems,
-                        MoneyService.FormatRubAmount(packageGems)),
-                    moneyService.BuildPaymentMethodKeyboard(packageGems));
+                    BotResponse.ChoosePaymentMethodTitle,
+                    moneyService.BuildPaymentMethodChoiceKeyboard());
+                await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
                 return;
             }
 
@@ -375,47 +388,67 @@ namespace GPTipsBot.UpdateHandlers
             }
             else if (lastCommand?.Type == CommandType.Deposit)
             {
-                // Two independent floors: the RUB one Stars/YooKassa share (PaymentConfig.MinRechargeGems)
-                // and lava.top's own, much lower one (LavaTopConfig.MinRechargeAmount, e.g. $1) — an
-                // amount only has to clear one of them. BuildPaymentMethodKeyboard then shows only the
-                // buttons whose own rail the typed amount actually qualifies for.
-                string InvalidDepositAmountMessage()
+                // The rail is already fixed (chosen on the method screen, remembered in BotSettings), so
+                // a typed number is read in that rail's own unit — gems for Stars/YooKassa, whole USD/EUR
+                // for lava.top — and goes straight to creating that rail's payment, no extra step.
+                var provider = botSettingsRepository.GetPreferredPaymentProvider(update.UserChatKey.Id)
+                    ?? PaymentProvider.YooKassa;
+
+                string InvalidAmountMessage() => provider switch
                 {
-                    var message = string.Format(BotResponse.InvalidDepositAmountResponse,
-                        PaymentConfig.MinRechargeRub, PaymentConfig.MinRechargeGems);
-                    return LavaTopConfig.IsEnabled
-                        ? message + string.Format(BotResponse.InvalidDepositAmountLavaTopHint,
-                            LavaTopConfig.MinRechargeAmount, LavaTopConfig.Currency)
-                        : message;
+                    PaymentProvider.LavaTop => string.Format(BotResponse.InvalidLavaTopAmountResponse,
+                        LavaTopConfig.MinRechargeAmount, LavaTopConfig.MaxRechargeAmount, LavaTopConfig.Currency),
+                    PaymentProvider.TelegramStars => BotResponse.InvalidStarsAmountResponse,
+                    _ => string.Format(BotResponse.InvalidDepositAmountResponse,
+                        PaymentConfig.MinRechargeRub, PaymentConfig.MinRechargeGems),
+                };
+
+                if (!int.TryParse(update.Message?.Text, out var typedAmount) || typedAmount <= 0)
+                {
+                    throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidAmountMessage());
                 }
 
-                if (!int.TryParse(update.Message?.Text, out var gemsCount))
+                if (provider == PaymentProvider.LavaTop)
                 {
-                    throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidDepositAmountMessage());
+                    var lavaGems = typedAmount * LavaTopConfig.GemsPerUnit;
+                    if (!LavaTopConfig.IsEnabled || !MoneyService.IsLavaTopAmountAllowed(lavaGems))
+                    {
+                        throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidAmountMessage());
+                    }
+
+                    await moneyService.CreateLavaTopPaymentAsync(
+                        update.UserChatKey.Id, update.TelegramUserId, lavaGems, CancellationToken.None);
+                    await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
+                    return;
                 }
 
-                var meetsRubMinimum = MoneyService.ToKopecks(gemsCount) >= PaymentConfig.MinRechargeRub * 100L;
-                var meetsLavaTopMinimum = LavaTopConfig.IsEnabled &&
-                    MoneyService.ToLavaTopAmount(gemsCount) >= LavaTopConfig.MinRechargeAmount;
+                var gemsCount = typedAmount;
 
-                if (!meetsRubMinimum && !meetsLavaTopMinimum)
+                // Stars has its own floor (effectively "at least 1 XTR"), never the RUB-derived
+                // PaymentConfig.MinRechargeGems — real Stars packages start at 10⭐, well under it.
+                if (provider == PaymentProvider.TelegramStars)
                 {
-                    throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidDepositAmountMessage());
+                    if (gemsCount > TelegramStarsConfig.MaxGemsPerInvoice)
+                    {
+                        throw new ClientCanceledException(update.UserChatKey.ChatId,
+                            string.Format(BotResponse.DepositAmountTooLargeResponse,
+                                TelegramStarsConfig.MaxGemsPerInvoice));
+                    }
+
+                    await moneyService.SendInvoice(update.UserChatKey.Id, update.TelegramUserId, gemsCount);
+                }
+                else
+                {
+                    if (MoneyService.ToKopecks(gemsCount) < PaymentConfig.MinRechargeRub * 100L)
+                    {
+                        throw new ClientCanceledException(update.UserChatKey.ChatId, InvalidAmountMessage());
+                    }
+
+                    await moneyService.CreateYooKassaPaymentAsync(
+                        update.UserChatKey.Id, update.TelegramUserId, gemsCount, CancellationToken.None);
                 }
 
-                if (gemsCount > TelegramStarsConfig.MaxGemsPerInvoice)
-                {
-                    throw new ClientCanceledException(update.UserChatKey.ChatId,
-                        string.Format(BotResponse.DepositAmountTooLargeResponse,
-                            TelegramStarsConfig.MaxGemsPerInvoice));
-                }
-
-                await botClient.SendUserReplyAsync(
-                    update,
-                    string.Format(BotResponse.ChoosePaymentMethod, gemsCount,
-                        MoneyService.FormatRubAmount(gemsCount)),
-                    moneyService.BuildPaymentMethodKeyboard(gemsCount));
-
+                await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);
                 return;
             }
             else if (lastCommand?.Type == CommandType.Donate)

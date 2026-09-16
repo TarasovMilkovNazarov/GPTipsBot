@@ -32,19 +32,43 @@ public class LavaTopConfigTests
     public void ToLavaTopAmount_LooksUnaffordableWhenUnpriced()
     {
         // An unset rate must never look like it clears a min-amount check — that would let
-        // BuildPaymentMethodKeyboard show a button for a rail with no real price.
+        // BuildDepositAmountKeyboard/IsLavaTopAmountAllowed treat a rail with no real price as usable.
         MoneyService.ToLavaTopAmount(1_000_000).Should().Be(decimal.MaxValue);
     }
 
     [Test]
-    public void MinRechargeAmount_DefaultsToAPositiveAmount()
+    public void MinRechargeAmount_DefaultsToLavaTopsOwnUsdFloor()
     {
-        LavaTopConfig.MinRechargeAmount.Should().BePositive();
+        // Not our own choice — lava.top's API itself rejects a USD invoice below $5
+        // ("Amount=1.25 not in allowed limits=(5, 10000) for USD", confirmed live).
+        LavaTopConfig.MinRechargeAmount.Should().Be(5m);
+    }
+
+    [Test]
+    public void MaxRechargeAmount_DefaultsToLavaTopsOwnUsdCeiling()
+    {
+        LavaTopConfig.MaxRechargeAmount.Should().Be(10_000m);
+    }
+
+    [Test]
+    public void IsLavaTopAmountAllowed_IsFalseWhenUnpriced()
+    {
+        // ToLavaTopAmount sentinel (decimal.MaxValue) must fail the upper bound too, not just look
+        // affordable enough to clear the lower one.
+        MoneyService.IsLavaTopAmountAllowed(1_000).Should().BeFalse();
     }
 
     [Test]
     public void Currency_DefaultsToUsd()
     {
         LavaTopConfig.Currency.Should().Be(CurrencyCode.Usd);
+    }
+
+    [Test]
+    public void DepositPackages_IsEmptyWhenUnpriced()
+    {
+        // GemsPerUnit is 0 in the test process (no LAVATOP_GEMS_PER_UNIT set) — must degrade to an
+        // empty list, not a package ladder priced at 0 gems per package.
+        LavaTopConfig.DepositPackages.Should().BeEmpty();
     }
 }

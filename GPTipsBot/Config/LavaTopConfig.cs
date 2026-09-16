@@ -59,9 +59,15 @@ public static class LavaTopConfig
     /// <summary>
     /// Smallest top-up lava.top is offered for, in <see cref="Currency"/> units. Independent of
     /// <see cref="PaymentConfig.MinRechargeGems"/> — that floor is YooKassa/Stars' own RUB minimum
-    /// expressed in gems and must never gate this rail, or a $1 lava.top top-up would be rejected for
-    /// not clearing a 50 ₽ floor it was never priced against. Default $1, override per currency.
+    /// expressed in gems and must never gate this rail.
     /// </summary>
+    /// <remarks>
+    /// $5 is not our own choice — lava.top's own API rejects a USD invoice below it (confirmed live:
+    /// <c>POST /api/v3/invoice</c> returns <c>"Amount=1.25 not in allowed limits=(5, 10000) for USD"</c>).
+    /// Setting this below lava.top's real per-currency floor just moves the failure from a clean
+    /// client-side message to a raw API error, so re-check the actual limits before lowering it,
+    /// especially if <see cref="Currency"/> is changed to RUB or EUR — their floors may differ.
+    /// </remarks>
     public static decimal MinRechargeAmount
     {
         get
@@ -70,9 +76,37 @@ public static class LavaTopConfig
             return decimal.TryParse(raw, System.Globalization.NumberStyles.Number,
                 System.Globalization.CultureInfo.InvariantCulture, out var value) && value > 0
                 ? value
-                : 1m;
+                : 5m;
         }
     }
+
+    /// <summary>
+    /// Largest top-up lava.top is offered for, in <see cref="Currency"/> units — same reasoning as
+    /// <see cref="MinRechargeAmount"/>: lava.top's own USD ceiling is 10000, confirmed by the same error.
+    /// </summary>
+    public static decimal MaxRechargeAmount
+    {
+        get
+        {
+            var raw = Normalize(Environment.GetEnvironmentVariable("LAVATOP_MAX_AMOUNT"));
+            return decimal.TryParse(raw, System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture, out var value) && value > 0
+                ? value
+                : 10_000m;
+        }
+    }
+
+    /// <summary>
+    /// Gem packages shown on /deposit for this rail — 5, 10 and 25 units of <see cref="Currency"/>,
+    /// anchored just above lava.top's own $5 floor. No usage data exists yet for this rail (unlike the
+    /// RUB/Stars ladders, which were trimmed to their real payment history), so this mirrors that same
+    /// "start small" pattern rather than assuming international payers spend more; a bigger amount is
+    /// still one manual entry away. Empty while unpriced, same as every other lava.top-gated list here.
+    /// </summary>
+    public static int[] DepositPackages =>
+        GemsPerUnit > 0
+            ? [.. new[] { 5, 10, 25 }.Select(units => units * GemsPerUnit)]
+            : [];
 
     /// <summary>URL where the user returns after paying. Falls back to the YooKassa one — same bot/cabinet.</summary>
     public static string ReturnUrl =>

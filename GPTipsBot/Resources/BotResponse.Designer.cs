@@ -856,6 +856,72 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        public static string ChoosePaymentMethodTitle {
+            get {
+                return ResourceManager.GetString("ChoosePaymentMethodTitle", resourceCulture);
+            }
+        }
+
+        public static string PaymentMethodStarsOption {
+            get {
+                return ResourceManager.GetString("PaymentMethodStarsOption", resourceCulture);
+            }
+        }
+
+        public static string PaymentMethodYooKassaOption {
+            get {
+                return ResourceManager.GetString("PaymentMethodYooKassaOption", resourceCulture);
+            }
+        }
+
+        public static string PaymentMethodLavaTopOption {
+            get {
+                return ResourceManager.GetString("PaymentMethodLavaTopOption", resourceCulture);
+            }
+        }
+
+        public static string DepositAmountHeaderStars {
+            get {
+                return ResourceManager.GetString("DepositAmountHeaderStars", resourceCulture);
+            }
+        }
+
+        public static string DepositAmountHeaderYooKassa {
+            get {
+                return ResourceManager.GetString("DepositAmountHeaderYooKassa", resourceCulture);
+            }
+        }
+
+        public static string DepositAmountHeaderLavaTop {
+            get {
+                return ResourceManager.GetString("DepositAmountHeaderLavaTop", resourceCulture);
+            }
+        }
+
+        public static string DepositPackageButtonGeneric {
+            get {
+                return ResourceManager.GetString("DepositPackageButtonGeneric", resourceCulture);
+            }
+        }
+
+        public static string BackToPaymentMethodButton {
+            get {
+                return ResourceManager.GetString("BackToPaymentMethodButton", resourceCulture);
+            }
+        }
+
+        public static string InvalidLavaTopAmountResponse {
+            get {
+                return ResourceManager.GetString("InvalidLavaTopAmountResponse", resourceCulture);
+            }
+        }
+
+        public static string InvalidStarsAmountResponse {
+            get {
+                return ResourceManager.GetString("InvalidStarsAmountResponse", resourceCulture);
+            }
+        }
+
         public static string ReplySentPrivately {
             get {
                 return ResourceManager.GetString("ReplySentPrivately", resourceCulture);

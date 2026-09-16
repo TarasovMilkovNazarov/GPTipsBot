@@ -42,4 +42,12 @@ public static class TelegramStarsConfig
     /// </summary>
     public static int GemsToXtr(long gems) =>
         checked((int)((gems + GemsPerXtr - 1) / GemsPerXtr));
+
+    /// <summary>
+    /// Gem packages shown on /deposit for Stars — 10, 25, 50 and 100 XTR. Deliberately its own ladder
+    /// rather than a reuse of <see cref="PaymentConfig.DepositGemPackages"/> (RUB-anchored, so its
+    /// cheapest tier already sits at 50⭐): real Stars payments have topped out at 100⭐, most often 10⭐.
+    /// </summary>
+    public static int[] DepositPackages =>
+        [.. new[] { 10, 25, 50, 100 }.Select(xtr => xtr * GemsPerXtr)];
 }

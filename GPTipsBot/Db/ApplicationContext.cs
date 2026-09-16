@@ -42,6 +42,7 @@ namespace GPTipsBot.Db
             EnsureYandexIdColumn();
             EnsureGuestFingerprintQuotasTable();
             EnsureBroadcastCampaignsTable();
+            EnsurePreferredPaymentProviderColumn();
             Guid = Guid.NewGuid();
         }
 
@@ -304,6 +305,13 @@ namespace GPTipsBot.Db
                 );
                 CREATE INDEX IF NOT EXISTS "IX_GuestFingerprintQuotas_IpHash_CreatedAt"
                     ON "GuestFingerprintQuotas" ("IpHash", "CreatedAt");
+                """);
+        }
+
+        private void EnsurePreferredPaymentProviderColumn()
+        {
+            Database.ExecuteSqlRaw("""
+                ALTER TABLE "BotSettings" ADD COLUMN IF NOT EXISTS "PreferredPaymentProvider" text NULL;
                 """);
         }
 

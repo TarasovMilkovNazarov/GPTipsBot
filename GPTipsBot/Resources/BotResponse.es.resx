@@ -350,7 +350,7 @@ Elige un paquete o introduce el importe de nuevo:</value>
   <data name="InvalidDepositAmountLavaTopHint" xml:space="preserve">
     <value>
 
-O desde {0} {1} con tarjeta internacional / PayPal (lava.top).</value>
+O desde {0} {1} con tarjeta / PayPal (lava.top).</value>
   </data>
   <data name="DepositAmountTooLargeResponse" xml:space="preserve">
     <value>✨ El máximo por pago es {0}💎. Introduce una cantidad menor 👇</value>
@@ -431,7 +431,7 @@ Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
     <value>✅ ¡Pago exitoso! Tu saldo ha sido recargado.</value>
   </data>
   <data name="PayWithLavaTopButton" xml:space="preserve">
-    <value>🌍 Tarjeta internacional / PayPal · {0} {1}</value>
+    <value>🌍 Tarjeta / PayPal · {0} {1}</value>
   </data>
   <data name="LavaTopPaymentLinkResponse" xml:space="preserve">
     <value>Pago de {0}💎 ({1} {2})
@@ -453,6 +453,50 @@ Tu saldo se actualizará automáticamente tras un pago exitoso.</value>
   </data>
   <data name="LavaTopPaymentSucceeded" xml:space="preserve">
     <value>✅ ¡Pago exitoso! Tu saldo ha sido recargado.</value>
+  </data>
+  <data name="ChoosePaymentMethodTitle" xml:space="preserve">
+    <value>4💎 = 1 solicitud a ChatGPT, 100💎 = una generación de imagen o animación de foto
+
+¿Cómo quieres recargar?</value>
+  </data>
+  <data name="PaymentMethodStarsOption" xml:space="preserve">
+    <value>⭐ Telegram Stars</value>
+  </data>
+  <data name="PaymentMethodYooKassaOption" xml:space="preserve">
+    <value>💳 Tarjeta rusa / SBP / SberPay</value>
+  </data>
+  <data name="PaymentMethodLavaTopOption" xml:space="preserve">
+    <value>🌍 Tarjeta / PayPal</value>
+  </data>
+  <data name="DepositAmountHeaderStars" xml:space="preserve">
+    <value>⭐ Pago con Telegram Stars
+{0}💎 = 1⭐
+
+Elige un paquete o introduce una cantidad entera de 💎:</value>
+  </data>
+  <data name="DepositAmountHeaderYooKassa" xml:space="preserve">
+    <value>💳 Pago con tarjeta / SBP
+{0}💎 = 1 RUB
+
+Elige un paquete o introduce una cantidad entera de 💎:</value>
+  </data>
+  <data name="DepositAmountHeaderLavaTop" xml:space="preserve">
+    <value>🌍 Pago con tarjeta / PayPal
+{0}💎 = 1 {1}
+
+Elige un paquete o introduce un importe en {1}:</value>
+  </data>
+  <data name="DepositPackageButtonGeneric" xml:space="preserve">
+    <value>{0}💎 · {1}</value>
+  </data>
+  <data name="BackToPaymentMethodButton" xml:space="preserve">
+    <value>◀ Volver a elegir el método de recarga</value>
+  </data>
+  <data name="InvalidLavaTopAmountResponse" xml:space="preserve">
+    <value>❗️El importe debe estar entre {0} y {1} {2}. Introduce el importe de nuevo:</value>
+  </data>
+  <data name="InvalidStarsAmountResponse" xml:space="preserve">
+    <value>❗️Introduce una cantidad entera positiva de 💎. Inténtalo de nuevo:</value>
   </data>
   <data name="PleaseWaitVideoMsg" xml:space="preserve">
     <value>⌛️ La generación de vídeo suele tardar entre 5 y 10 minutos. Por favor espera, preparando la respuesta...</value>

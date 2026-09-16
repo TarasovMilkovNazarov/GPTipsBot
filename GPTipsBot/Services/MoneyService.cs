@@ -43,22 +43,19 @@ public static class PaymentCallbacks
     public const string StarsPrefix = "pay_stars_";
     public const string YooKassaPrefix = "pay_yk_";
     public const string LavaTopPrefix = "pay_lt_";
-    public const string PackagePrefix = "dep_";
     public const string YooKassaCheckPrefix = "yk_check_";
     public const string LavaTopCheckPrefix = "lt_check_";
+    public const string MethodChoicePrefix = "dep_method_";
+    /// <summary>Goes back to the method-choice screen without touching the saved preference.</summary>
+    public const string BackToMethodChoice = "dep_back_method";
 
-    public static bool TryParsePackage(string? data, out int gemsCount)
+    /// <summary>Parses a payment-method pick on the /deposit method-choice screen.</summary>
+    public static bool TryParseMethodChoice(string? data, out PaymentProvider provider)
     {
-        gemsCount = 0;
-        if (string.IsNullOrWhiteSpace(data) ||
-            !data.StartsWith(PackagePrefix, StringComparison.Ordinal) ||
-            !int.TryParse(data[PackagePrefix.Length..], out gemsCount))
-        {
-            return false;
-        }
-
-        return gemsCount >= PaymentConfig.MinRechargeGems &&
-               MoneyService.ToKopecks(gemsCount) >= PaymentConfig.MinRechargeRub * 100L;
+        provider = default;
+        return !string.IsNullOrWhiteSpace(data) &&
+               data.StartsWith(MethodChoicePrefix, StringComparison.Ordinal) &&
+               Enum.TryParse(data[MethodChoicePrefix.Length..], out provider);
     }
 
     public static bool TryParseCheck(string? data, out long invoiceId)
@@ -89,9 +86,12 @@ public static class PaymentCallbacks
             return false;
         }
 
+        // Stars has its own floor (effectively "at least 1 XTR" — TelegramStarsConfig.GemsToXtr rounds
+        // up), never the RUB-derived PaymentConfig.MinRechargeGems: real Stars packages start at 10⭐,
+        // well under that 1000-gem floor.
         if (data.StartsWith(StarsPrefix, StringComparison.Ordinal) &&
             int.TryParse(data[StarsPrefix.Length..], out gemsCount) &&
-            gemsCount >= PaymentConfig.MinRechargeGems &&
+            gemsCount > 0 &&
             gemsCount <= TelegramStarsConfig.MaxGemsPerInvoice)
         {
             provider = StarsPrefix;
@@ -110,7 +110,7 @@ public static class PaymentCallbacks
         if (data.StartsWith(LavaTopPrefix, StringComparison.Ordinal) &&
             int.TryParse(data[LavaTopPrefix.Length..], out gemsCount) &&
             gemsCount > 0 &&
-            MoneyService.ToLavaTopAmount(gemsCount) >= LavaTopConfig.MinRechargeAmount)
+            MoneyService.IsLavaTopAmountAllowed(gemsCount))
         {
             provider = LavaTopPrefix;
             return true;
@@ -177,86 +177,96 @@ public class MoneyService
         return true;
     }
 
-    public InlineKeyboardMarkup BuildDepositPackagesKeyboard()
+    /// <summary>
+    /// /deposit's first screen: pick a rail (Stars / RUB card / international card) before ever talking
+    /// about an amount. RUB and international minimums differ by an order of magnitude (50 ₽ vs $5), so
+    /// a single amount-first list could never cleanly serve both — see the /deposit refactor discussion.
+    /// </summary>
+    public InlineKeyboardMarkup BuildPaymentMethodChoiceKeyboard()
     {
-        var rows = new List<IEnumerable<InlineKeyboardButton>>();
-        foreach (var gems in PaymentConfig.DepositGemPackages)
+        var rows = new List<IEnumerable<InlineKeyboardButton>>
         {
-            if (gems < PaymentConfig.MinRechargeGems ||
-                ToKopecks(gems) < PaymentConfig.MinRechargeRub * 100L)
+            new[]
             {
-                continue;
+                InlineKeyboardButton.WithCallbackData(
+                    BotResponse.PaymentMethodStarsOption,
+                    $"{PaymentCallbacks.MethodChoicePrefix}{PaymentProvider.TelegramStars}")
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    BotResponse.PaymentMethodYooKassaOption,
+                    $"{PaymentCallbacks.MethodChoicePrefix}{PaymentProvider.YooKassa}")
             }
+        };
 
+        if (LavaTopConfig.IsEnabled)
+        {
             rows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(
-                    string.Format(BotResponse.DepositPackageButton, gems, FormatRubAmount(gems)),
-                    $"{PaymentCallbacks.PackagePrefix}{gems}")
+                    BotResponse.PaymentMethodLavaTopOption,
+                    $"{PaymentCallbacks.MethodChoicePrefix}{PaymentProvider.LavaTop}")
             });
         }
 
-        rows.Add(
-        [
-            TelegramBotUiService.BackToProfileButton
-        ]);
+        rows.Add(new[] { TelegramBotUiService.BackToProfileButton });
         return new InlineKeyboardMarkup(rows);
     }
 
     /// <summary>
-    /// Each rail has its own minimum (YooKassa/Stars share a RUB-derived floor, lava.top has its own
-    /// independent one — see <see cref="LavaTopConfig.MinRechargeAmount"/>), so every button is gated by
-    /// the rail it belongs to rather than shown unconditionally. The gem-package flow always clears the
-    /// RUB floor already; this only matters for the free-text "type any amount" deposit flow, where a
-    /// small amount meant for lava.top must not surface Stars/YooKassa buttons that would just error out.
+    /// /deposit's second screen, once a rail is chosen (or remembered from <see cref="BotSettings"/>):
+    /// packages priced natively for that rail, each button already carrying the create-payment callback
+    /// (<see cref="PaymentCallbacks.TryParse"/>) — no more "which method for this amount" step needed.
     /// </summary>
-    public InlineKeyboardMarkup BuildPaymentMethodKeyboard(int gemsCount)
+    public InlineKeyboardMarkup BuildDepositAmountKeyboard(PaymentProvider provider)
     {
-        var rubAmount = FormatRubAmount(gemsCount);
         var rows = new List<IEnumerable<InlineKeyboardButton>>();
 
-        if (gemsCount >= PaymentConfig.MinRechargeGems && gemsCount <= TelegramStarsConfig.MaxGemsPerInvoice)
+        var (packages, prefix, formatPrice) = provider switch
         {
-            rows.Add(new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    string.Format(
-                        BotResponse.PayWithStarsButton,
-                        TelegramStarsConfig.GemsToXtr(gemsCount)),
-                    $"{PaymentCallbacks.StarsPrefix}{gemsCount}")
-            });
-        }
+            PaymentProvider.TelegramStars => (
+                TelegramStarsConfig.DepositPackages,
+                PaymentCallbacks.StarsPrefix,
+                (Func<int, string>)(gems => $"{TelegramStarsConfig.GemsToXtr(gems)}⭐")),
+            PaymentProvider.LavaTop => (
+                LavaTopConfig.DepositPackages,
+                PaymentCallbacks.LavaTopPrefix,
+                (Func<int, string>)(gems => $"{FormatLavaTopAmount(gems)} {LavaTopConfig.Currency}")),
+            _ => (
+                PaymentConfig.DepositGemPackages,
+                PaymentCallbacks.YooKassaPrefix,
+                (Func<int, string>)(gems => $"{FormatRubAmount(gems)} ₽")),
+        };
 
-        if (gemsCount >= PaymentConfig.MinRechargeGems)
+        foreach (var gems in packages)
         {
             rows.Add(new[]
             {
                 InlineKeyboardButton.WithCallbackData(
-                    string.Format(BotResponse.PayWithYooKassaButton, rubAmount),
-                    $"{PaymentCallbacks.YooKassaPrefix}{gemsCount}")
-            });
-        }
-
-        if (LavaTopConfig.IsEnabled && ToLavaTopAmount(gemsCount) >= LavaTopConfig.MinRechargeAmount)
-        {
-            rows.Add(new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    string.Format(
-                        BotResponse.PayWithLavaTopButton,
-                        FormatLavaTopAmount(gemsCount),
-                        LavaTopConfig.Currency),
-                    $"{PaymentCallbacks.LavaTopPrefix}{gemsCount}")
+                    string.Format(BotResponse.DepositPackageButtonGeneric, gems, formatPrice(gems)),
+                    $"{prefix}{gems}")
             });
         }
 
         rows.Add(new[]
         {
-            TelegramBotUiService.BackToDepositButton
+            InlineKeyboardButton.WithCallbackData(
+                BotResponse.BackToPaymentMethodButton, PaymentCallbacks.BackToMethodChoice)
         });
 
         return new InlineKeyboardMarkup(rows);
     }
+
+    /// <summary>Header for <see cref="BuildDepositAmountKeyboard"/>, stating that rail's own gem rate.</summary>
+    public static string GetDepositAmountHeader(PaymentProvider provider) => provider switch
+    {
+        PaymentProvider.TelegramStars => string.Format(
+            BotResponse.DepositAmountHeaderStars, TelegramStarsConfig.GemsPerXtr),
+        PaymentProvider.LavaTop => string.Format(
+            BotResponse.DepositAmountHeaderLavaTop, LavaTopConfig.GemsPerUnit, LavaTopConfig.Currency),
+        _ => string.Format(BotResponse.DepositAmountHeaderYooKassa, YooKassaConfig.GemsPerRub),
+    };
 
     public async Task SendInvoice(long userId, long telegramChatId, int gemsCount = 100)
     {
@@ -640,10 +650,11 @@ public class MoneyService
         }
 
         var amount = ToLavaTopAmount(gemsCount);
-        if (gemsCount <= 0 || amount < LavaTopConfig.MinRechargeAmount)
+        if (gemsCount <= 0 || !IsLavaTopAmountAllowed(gemsCount))
         {
             throw new InvalidOperationException(
-                $"Minimum lava.top top-up is {LavaTopConfig.MinRechargeAmount} {LavaTopConfig.Currency}");
+                $"lava.top top-up must be between {LavaTopConfig.MinRechargeAmount} and " +
+                $"{LavaTopConfig.MaxRechargeAmount} {LavaTopConfig.Currency}");
         }
 
         var currency = LavaTopConfig.Currency;
@@ -1329,6 +1340,18 @@ public class MoneyService
 
     public static string FormatLavaTopAmount(int gemsCount) =>
         ToLavaTopAmount(gemsCount).ToString("0.00", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Both bounds lava.top itself enforces server-side on <c>amount</c> (confirmed live: a USD invoice
+    /// below $5 or above $10000 is rejected by their API, not just a convention of ours) — checked here
+    /// once so every caller (button gating, callback parsing, checkout) fails the same clean way instead
+    /// of surfacing lava.top's raw error.
+    /// </summary>
+    public static bool IsLavaTopAmountAllowed(int gemsCount)
+    {
+        var amount = ToLavaTopAmount(gemsCount);
+        return amount >= LavaTopConfig.MinRechargeAmount && amount <= LavaTopConfig.MaxRechargeAmount;
+    }
 
     private long? ResolveTelegramChatId(long userId) =>
         _userRepository.Get(userId)?.TelegramId;
