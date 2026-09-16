@@ -358,8 +358,8 @@ O desde {0} {1} con tarjeta / PayPal (lava.top).</value>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Perfil: {0} {1}
 
+{2}
 
-💵 Saldo: {2}💎 💵  (20💎 = 1 RUB)
 🤖 Modelo: {8}
 Solicitudes gratuitas:
  -- ChatGpt: {3}
@@ -370,6 +370,9 @@ Solicitudes gratuitas:
  -- combinaciones de foto: {9}
  -- ediciones de foto: {10}
 </value>
+  </data>
+  <data name="ProfileBalanceLine" xml:space="preserve">
+    <value>*Saldo: {0}💎* (≈{1} solicitudes a ChatGPT)</value>
   </data>
   <data name="GemsMigrationNotice" xml:space="preserve">
     <value>ℹ️ Antes el saldo se contaba en ⭐. Cada ⭐ pasó a ser 200💎 — todas las recargas anteriores se conservaron íntegras, solo cambió la escala.</value>

@@ -10,6 +10,7 @@ using GPTipsBot.Services.YooKassa;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 using Invoice = GPTipsBot.Models.Invoice;
@@ -900,6 +901,7 @@ public class MoneyService
             {
                 await _botClient.SendMessage(telegramChatId.Value,
                     BotResponse.LavaTopPaymentSucceeded + Environment.NewLine + Environment.NewLine + reply,
+                    parseMode: ParseMode.Markdown,
                     replyMarkup: replyMarkup,
                     cancellationToken: cancellationToken);
             }
@@ -1238,6 +1240,7 @@ public class MoneyService
             {
                 await _botClient.SendMessage(telegramChatId.Value,
                     BotResponse.YooKassaPaymentSucceeded + Environment.NewLine + Environment.NewLine + reply,
+                    parseMode: ParseMode.Markdown,
                     replyMarkup: replyMarkup,
                     cancellationToken: cancellationToken);
                 _logger.LogInformation("ConfirmYooKassa: user {UserId} notified", invoice.UserId);

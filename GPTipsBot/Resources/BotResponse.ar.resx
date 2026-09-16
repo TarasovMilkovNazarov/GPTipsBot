@@ -358,8 +358,8 @@ https://gptips.skolkokomu.ru</value>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 الملف الشخصي: {0} {1}
 
+{2}
 
-💵 الرصيد : {2}💎 💵  (20💎 = 1 روبل)
 🤖 الموديل: {8}
 الطلبات المجانية:
  --ChatGpt: {3}
@@ -369,6 +369,9 @@ https://gptips.skolkokomu.ru</value>
  -- ملخصات اليوم : {7}
  -- دمج الصور: {9}
  -- تعديل الصور: {10}</value>
+  </data>
+  <data name="ProfileBalanceLine" xml:space="preserve">
+    <value>*الرصيد: {0}💎* (≈{1} طلبات ChatGPT)</value>
   </data>
   <data name="GemsMigrationNotice" xml:space="preserve">
     <value>ℹ️ كان الرصيد يُحسب سابقًا بـ ⭐. أصبحت كل ⭐ تساوي 200💎 — بقيت جميع التعبئات السابقة كاملة، تغيّر المقياس فقط.</value>

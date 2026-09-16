@@ -267,7 +267,8 @@ namespace GPTipsBot.UpdateHandlers
                     var replyMarkup = new InlineKeyboardMarkup(InlineKeyboardButton
                         .WithCallbackData(BotResponse.AddMoneyResponse, BotMenu.DepositCommand));
 
-                    await botClient.SendUserReplyAsync(update, reply, replyMarkup);
+                    await botClient.SendUserReplyAsync(
+                        update, reply, replyMarkup, parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
                 }
 
                 await userCommandRepository.AddAsync(update.UserChatKey, CommandType.CancelPreviousCommand);

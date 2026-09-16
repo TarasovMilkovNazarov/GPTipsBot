@@ -360,8 +360,8 @@ Or from {0} {1} by card / PayPal (lava.top).</value>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Profile: {0} {1}
 
+{2}
 
-💵 Balance: {2}💎 💵  (20💎 = 1 RUB)
 🤖 Model: {8}
 Free requests:
  -- ChatGpt: {3}
@@ -372,6 +372,9 @@ Free requests:
  -- photo combines: {9}
  -- photo edits: {10}
 </value>
+  </data>
+  <data name="ProfileBalanceLine" xml:space="preserve">
+    <value>*Balance: {0}💎* (≈{1} ChatGPT requests)</value>
   </data>
   <data name="GemsMigrationNotice" xml:space="preserve">
     <value>ℹ️ Balances used to be counted in ⭐. Every ⭐ became 200💎 — every past top-up carried over in full, only the scale changed.</value>

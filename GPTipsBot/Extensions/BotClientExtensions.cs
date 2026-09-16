@@ -32,13 +32,15 @@ namespace GPTipsBot.Extensions
             bool isGroupOrChannel = false,
             int? messageThreadId = null,
             ReplyParameters? replyParameters = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            ParseMode? parseMode = null)
         {
             if (isGroupOrChannel || chatId < 0)
             {
                 return await botClient.SendMessage(
                     chatId,
                     text,
+                    parseMode: parseMode ?? ParseMode.None,
                     messageThreadId: messageThreadId,
                     replyMarkup: replyMarkup,
                     replyParameters: replyParameters,
@@ -48,6 +50,7 @@ namespace GPTipsBot.Extensions
             return await botClient.SendMessage(
                 chatId,
                 text,
+                parseMode: parseMode ?? ParseMode.None,
                 messageThreadId: messageThreadId,
                 replyMarkup: replyMarkup ?? TelegramBotUiService.StartKeyboard,
                 replyParameters: replyParameters,
@@ -75,7 +78,8 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
             UpdateDecorator update,
             string text,
             ReplyMarkup? replyMarkup = null,
-            bool acknowledgeInGroup = true)
+            bool acknowledgeInGroup = true,
+            ParseMode? parseMode = null)
         {
             await botClient.SendMessageWithMenuAsync(
                 update.UserChatKey.ChatId,
@@ -83,7 +87,8 @@ CommitHash: [{AppConfig.CommitHash}](https://github.com/TarasovMilkovNazarov/GPT
                 replyMarkup,
                 update.IsGroupOrChannel,
                 update.Message?.MessageThreadId is long tid ? (int)tid : null,
-                ToReplyParameters(update));
+                ToReplyParameters(update),
+                parseMode: parseMode);
             return true;
         }
 

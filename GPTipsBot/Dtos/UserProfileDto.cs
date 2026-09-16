@@ -16,16 +16,40 @@ public class UserProfileDto
     public string GptModelId { get; set; } = GptModelCatalog.DefaultModelId;
 
     /// <summary>
-    /// Renders the /profile card. Anyone holding a balance carried it over from the old ⭐ unit, so
-    /// they get the conversion note appended; a brand new user with nothing on the balance does not
-    /// need it. Drop the notice once the switch is old news.
+    /// Renders the /profile card. Sent with ParseMode.Markdown (legacy) so the balance line can be
+    /// bold — see <see cref="EscapeMarkdown"/> for why FirstName/LastName go through it first.
+    /// Anyone holding a balance carried it over from the old ⭐ unit, so they get the conversion note
+    /// appended; a brand new user with nothing on the balance does not need it. Drop the notice once
+    /// the switch is old news.
     /// </summary>
-    public string Render() =>
-        string.Format(
+    public string Render()
+    {
+        var approxMessages = Gems / PaymentConfig.Gpt;
+        var balanceBlock = string.Format(
+            GPTipsBot.Resources.BotResponse.ProfileBalanceLine, Gems, approxMessages);
+
+        return string.Format(
             GPTipsBot.Resources.BotResponse.ProfileResponse,
-            FirstName, LastName, Gems, GptRequests, Images, ImageTexts,
-            PhotoAnimations, Summaries, GptModelDisplayName, CombinePhotos, ChangePhotos)
+            EscapeMarkdown(FirstName), EscapeMarkdown(LastName), balanceBlock, GptRequests, Images,
+            ImageTexts, PhotoAnimations, Summaries, GptModelDisplayName, CombinePhotos, ChangePhotos)
         + (Gems > 0
             ? Environment.NewLine + Environment.NewLine + GPTipsBot.Resources.BotResponse.GemsMigrationNotice
             : string.Empty);
+    }
+
+    /// <summary>
+    /// The card is sent under legacy Markdown so the balance line can be bold. That mode only reserves
+    /// four characters (unlike MarkdownV2, which would require escaping the punctuation already used
+    /// throughout the static template) — but a first/last name is free text from Telegram and could
+    /// still contain one, so it's escaped before going anywhere near the format string.
+    /// </summary>
+    private static string EscapeMarkdown(string? text) =>
+        string.IsNullOrEmpty(text)
+            ? string.Empty
+            : text
+                .Replace("\\", "\\\\")
+                .Replace("_", "\\_")
+                .Replace("*", "\\*")
+                .Replace("`", "\\`")
+                .Replace("[", "\\[");
 }

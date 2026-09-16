@@ -358,8 +358,8 @@ https://gptips.skolkokomu.ru</value>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 مشخصات: {0} {1}
 
+{2}
 
-💵 موجودی: {2}💎 💵  (20💎 = ۱ روبل)
 🤖 مدل: {8}
 درخواست های رایگان:
  -- ChatGpt: {3}
@@ -369,6 +369,9 @@ https://gptips.skolkokomu.ru</value>
  -- خلاصه روز: {7}
  -- ترکیب عکس: {9}
  -- ویرایش عکس: {10}</value>
+  </data>
+  <data name="ProfileBalanceLine" xml:space="preserve">
+    <value>*موجودی: {0}💎* (≈{1} درخواست ChatGPT)</value>
   </data>
   <data name="GemsMigrationNotice" xml:space="preserve">
     <value>ℹ️ پیش‌تر موجودی با ⭐ شمرده می‌شد. هر ⭐ به 200💎 تبدیل شد — همه شارژهای قبلی کامل حفظ شدند، فقط مقیاس تغییر کرد.</value>

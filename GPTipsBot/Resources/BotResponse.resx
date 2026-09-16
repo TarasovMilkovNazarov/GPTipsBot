@@ -357,8 +357,8 @@ https://gptips.skolkokomu.ru</value>
   <data name="ProfileResponse" xml:space="preserve">
     <value>👤 Профиль: {0} {1}
 
+{2}
 
-💵 Баланс: {2}💎 💵  (20💎 = 1 ₽)
 🤖 Модель: {8}
 Количество бесплатных запросов:
  -- запросов к ChatGpt: {3}
@@ -369,6 +369,9 @@ https://gptips.skolkokomu.ru</value>
  -- объединений фото: {9}
  -- изменений фото: {10}
 </value>
+  </data>
+  <data name="ProfileBalanceLine" xml:space="preserve">
+    <value>*Баланс: {0}💎* (≈{1} запросов к ChatGPT)</value>
   </data>
   <data name="GemsMigrationNotice" xml:space="preserve">
     <value>ℹ️ Баланс раньше считался в ⭐. Каждая ⭐ стала 200💎 — все прошлые пополнения сохранились полностью, изменился только масштаб.</value>

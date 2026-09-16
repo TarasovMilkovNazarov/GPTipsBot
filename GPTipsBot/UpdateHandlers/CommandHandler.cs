@@ -16,6 +16,7 @@ using GPTipsBot.Services.Cache;
 using GPTipsBot.Services.Broadcast;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GPTipsBot.UpdateHandlers
@@ -107,7 +108,8 @@ namespace GPTipsBot.UpdateHandlers
                     break;
                 case GetProfileCommand:
                     reply = profile.Render();
-                    await SendOrEditInlineMessageAsync(update, reply, GetProfileInlineKeyboard());
+                    await SendOrEditInlineMessageAsync(
+                        update, reply, GetProfileInlineKeyboard(), ParseMode.Markdown);
                     return;
                 case ImagesMenuCommand:
                     aliceImageSessionCache.Remove(chatId);
@@ -510,7 +512,8 @@ namespace GPTipsBot.UpdateHandlers
         private async Task SendOrEditInlineMessageAsync(
             UpdateDecorator update,
             string text,
-            InlineKeyboardMarkup keyboard)
+            InlineKeyboardMarkup keyboard,
+            ParseMode? parseMode = null)
         {
             var chatId = update.UserChatKey.ChatId;
             if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
@@ -519,6 +522,7 @@ namespace GPTipsBot.UpdateHandlers
                     chatId,
                     (int)update.Message.TelegramMessageId.Value,
                     text,
+                    parseMode: parseMode ?? ParseMode.None,
                     replyMarkup: keyboard);
                 return;
             }
@@ -527,7 +531,8 @@ namespace GPTipsBot.UpdateHandlers
                 chatId,
                 text,
                 keyboard,
-                update.IsGroupOrChannel);
+                update.IsGroupOrChannel,
+                parseMode: parseMode);
         }
 
         private async Task HandleGptImageStartAsync(UpdateDecorator update, GptImageMode mode)

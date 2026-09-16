@@ -136,6 +136,9 @@ namespace GPTipsBotTests
                     Message = new Message
                     {
                         Id = updateId,
+                        // MessageMapper.Map dereferences From.Id even for the bot's own message that a
+                        // button is attached to — real Telegram updates always populate it.
+                        From = user,
                         Chat = new Chat
                         {
                             Id = chatId,
@@ -960,7 +963,12 @@ namespace GPTipsBotTests
             foreach (var entityType in entityTypes)
             {
                 var tableName = entityType.GetTableName();
-                await context.Database.ExecuteSqlRawAsync($"TRUNCATE TABLE \"{tableName}\" CASCADE;");
+                // RESTART IDENTITY resets auto-increment sequences too — without it a long-lived
+                // container's counters keep climbing across runs, drifting tests that assert on
+                // hardcoded ids (e.g. "the new context id is 70") even though the rows themselves are
+                // gone.
+                await context.Database.ExecuteSqlRawAsync(
+                    $"TRUNCATE TABLE \"{tableName}\" RESTART IDENTITY CASCADE;");
             }
 
             await context.SaveChangesAsync();

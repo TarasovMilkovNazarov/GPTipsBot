@@ -454,6 +454,12 @@ namespace GPTipsBot.Resources {
             }
         }
 
+        public static string ProfileBalanceLine {
+            get {
+                return ResourceManager.GetString("ProfileBalanceLine", resourceCulture);
+            }
+        }
+
         
         /// <summary>
         ///   Looks up a localized string similar to ℹ️ Баланс раньше считался в ⭐. Каждая ⭐ стала 10💎 — все прошлые пополнения сохранились полностью, изменился только масштаб.
