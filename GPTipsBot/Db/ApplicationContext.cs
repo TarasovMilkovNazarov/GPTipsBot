@@ -140,6 +140,13 @@ namespace GPTipsBot.Db
         /// purchasing power is unchanged. Keyed off the column type, so it runs exactly once per
         /// database and is a no-op on a freshly created one.
         /// </summary>
+        /// <remarks>
+        /// A finite balance can never overflow bigint at this multiplier — only NaN/±Infinity (both
+        /// legal to store in a double precision column, both meaningless as a wallet balance) or a
+        /// pre-existing astronomically large value can. Those are clamped to 0 rather than left to
+        /// crash the whole app on every future startup; investigate how they got there separately
+        /// (see GPTipsBotTests or an ad-hoc SELECT for the affected UserId) before assuming 0 is final.
+        /// </remarks>
         private void EnsureGemWallets()
         {
             Database.ExecuteSqlRaw("""
@@ -153,7 +160,15 @@ namespace GPTipsBot.Db
                     ) THEN
                         ALTER TABLE "Wallets"
                             ALTER COLUMN "Balance" TYPE bigint
-                            USING COALESCE(ROUND(("Balance" * 200)::numeric), 0)::bigint;
+                            USING CASE
+                                WHEN "Balance" IS NULL
+                                  OR "Balance" != "Balance"
+                                  OR "Balance" = 'Infinity'::float8
+                                  OR "Balance" = '-Infinity'::float8
+                                  OR abs("Balance") > 1e15
+                                THEN 0::bigint
+                                ELSE ROUND(("Balance" * 200)::numeric)::bigint
+                            END;
                         UPDATE "Wallets" SET "Currency" = 'GEM';
                     END IF;
 
@@ -165,7 +180,15 @@ namespace GPTipsBot.Db
                     ) THEN
                         ALTER TABLE "PaymentHolds"
                             ALTER COLUMN "WalletAmount" TYPE bigint
-                            USING COALESCE(ROUND(("WalletAmount" * 200)::numeric), 0)::bigint;
+                            USING CASE
+                                WHEN "WalletAmount" IS NULL
+                                  OR "WalletAmount" != "WalletAmount"
+                                  OR "WalletAmount" = 'Infinity'::float8
+                                  OR "WalletAmount" = '-Infinity'::float8
+                                  OR abs("WalletAmount") > 1e15
+                                THEN 0::bigint
+                                ELSE ROUND(("WalletAmount" * 200)::numeric)::bigint
+                            END;
                     END IF;
                 END $$;
                 """);
