@@ -367,7 +367,8 @@ public class MoneyService
             return;
         }
 
-        var checkout = await CreateYooKassaCheckoutAsync(userId, gemsCount, returnUrl: null, cancellationToken);
+        var checkout = await CreateYooKassaCheckoutAsync(
+            userId, gemsCount, returnUrl: AppConfig.BotDeepLink, cancellationToken);
         await SendYooKassaPaymentLinkAsync(
             telegramChatId,
             gemsCount,
@@ -622,7 +623,8 @@ public class MoneyService
             return;
         }
 
-        var checkout = await CreateLavaTopCheckoutAsync(userId, gemsCount, returnUrl: null, cancellationToken);
+        var checkout = await CreateLavaTopCheckoutAsync(
+            userId, gemsCount, returnUrl: AppConfig.BotDeepLink, cancellationToken);
         await SendLavaTopPaymentLinkAsync(
             telegramChatId,
             gemsCount,
@@ -835,6 +837,24 @@ public class MoneyService
                 "ConfirmLavaTop: contract {ContractId} not completed (status={Status})",
                 contractId,
                 details.Status);
+
+            // FAILED is terminal — lava.top never turns it into COMPLETED later, so retrying it every
+            // job run for up to 24h (see SyncPendingLavaTopPaymentsAsync) just wastes API calls and
+            // repeats this same log line. NEW/IN_PROGRESS are genuinely still pending and stay Created
+            // so the job keeps polling them.
+            if (string.Equals(details.Status, "FAILED", StringComparison.OrdinalIgnoreCase))
+            {
+                var staleInvoice = _invoiceRepository.GetByExternalPaymentId(contractId);
+                if (staleInvoice is { Provider: PaymentProvider.LavaTop })
+                {
+                    await _context.Invoices
+                        .Where(i => i.Id == staleInvoice.Id && i.Status == InvoiceStatus.Created)
+                        .ExecuteUpdateAsync(
+                            setters => setters.SetProperty(i => i.Status, InvoiceStatus.Failed),
+                            cancellationToken);
+                }
+            }
+
             return PaymentConfirmResult.Ignored;
         }
 

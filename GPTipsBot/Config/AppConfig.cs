@@ -30,6 +30,24 @@ namespace GPTipsBot.Config
         public static string? HappProxyLogin => Environment.GetEnvironmentVariable("HAPP_PROXY_LOGIN");
         public static string? HappProxyPassword => Environment.GetEnvironmentVariable("HAPP_PROXY_PASSWORD");
 
+        /// <summary>
+        /// t.me deep link back to this bot — the return destination for a payment actually started from
+        /// Telegram. Deliberately independent of YOOKASSA_RETURN_URL/LAVATOP_RETURN_URL: those are meant
+        /// for the web cabinet flow (see WebApiEndpoints.BuildCabinetReturnUrl) and, when set to the
+        /// cabinet's own URL, would otherwise bounce a bot-initiated payment out to the website instead
+        /// of back into the chat it started from.
+        /// </summary>
+        public static string BotDeepLink
+        {
+            get
+            {
+                var username =
+                    Environment.GetEnvironmentVariable("TELEGRAM_BOT_USERNAME")?.Trim().TrimStart('@')
+                    ?? BotName?.TrimStart('@');
+                return string.IsNullOrWhiteSpace(username) ? "https://t.me/" : $"https://t.me/{username}";
+            }
+        }
+
         private static string GetEnvStrict(string name)
         {
             var env = Environment.GetEnvironmentVariable(name);

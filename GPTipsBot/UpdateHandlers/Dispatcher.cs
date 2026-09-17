@@ -169,10 +169,29 @@ namespace GPTipsBot.UpdateHandlers
             if (update.CallbackQuery != null &&
                 PaymentCallbacks.TryParseLavaTopCheck(update.CallbackQuery.Data, out var lavaCheckInvoiceId))
             {
-                var syncResult = await moneyService.SyncLavaTopInvoiceAsync(
-                    lavaCheckInvoiceId,
-                    update.UserChatKey.Id,
-                    CancellationToken.None);
+                PaymentConfirmResult syncResult;
+                try
+                {
+                    syncResult = await moneyService.SyncLavaTopInvoiceAsync(
+                        lavaCheckInvoiceId,
+                        update.UserChatKey.Id,
+                        CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    // Without this, an exception here (e.g. a bad LAVATOP_API_KEY) would bubble up
+                    // unlabeled and leave the "Проверить оплату" button spinning forever in Telegram —
+                    // the job and webhook paths already log with their own context, this one didn't.
+                    logger.LogError(ex,
+                        "LavaTopCheckButton: failed invoiceId={InvoiceId} userId={UserId}",
+                        lavaCheckInvoiceId,
+                        update.UserChatKey.Id);
+                    await botClient.AnswerCallbackQuery(
+                        update.CallbackQuery.Id,
+                        BotResponse.LavaTopPaymentCheckPending,
+                        showAlert: true);
+                    return;
+                }
 
                 if (syncResult == PaymentConfirmResult.DepositCredited)
                 {

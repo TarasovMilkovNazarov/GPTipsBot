@@ -40,7 +40,9 @@ public class LavaTopClient
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("lava.top create invoice failed: {Status} {Body}", response.StatusCode, body);
+            _logger.LogError(
+                "lava.top create invoice failed: {Status} {Body} offerId={OfferId} apiKey={MaskedKey}",
+                response.StatusCode, body, request.OfferId, MaskSecret(LavaTopConfig.ApiKey));
             var error = TryParseError(body);
             throw new InvalidOperationException(
                 $"lava.top create invoice failed: {response.StatusCode} {error ?? body}");
@@ -72,7 +74,9 @@ public class LavaTopClient
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogError("lava.top get invoice failed: {Status} {Body}", response.StatusCode, body);
+            _logger.LogError(
+                "lava.top get invoice failed: {Status} {Body} invoiceId={InvoiceId} apiKey={MaskedKey}",
+                response.StatusCode, body, invoiceId, MaskSecret(LavaTopConfig.ApiKey));
             var error = TryParseError(body);
             throw new InvalidOperationException(
                 $"lava.top get invoice failed: {response.StatusCode} {error ?? body}");
@@ -89,6 +93,26 @@ public class LavaTopClient
         }
 
         return invoice;
+    }
+
+    /// <summary>
+    /// First/last 4 chars with the middle blanked out — enough to confirm in logs which configured key
+    /// actually went out on the wire (e.g. distinguishing it from LAVATOP_WEBHOOK_API_KEY, a common
+    /// mix-up) without ever writing the real secret anywhere.
+    /// </summary>
+    private static string MaskSecret(string? value, int visibleChars = 4)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return "(unset)";
+        }
+
+        if (value.Length <= visibleChars * 2)
+        {
+            return new string('*', value.Length);
+        }
+
+        return $"{value[..visibleChars]}...........{value[^visibleChars..]}";
     }
 
     private static string? TryParseError(string body)
