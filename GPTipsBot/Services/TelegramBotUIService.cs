@@ -35,7 +35,6 @@ namespace GPTipsBot.Services
         private static KeyboardButton AnimatePhotoButton => new(BotUI.AnimateButton);
         private static KeyboardButton CombinePhotoButton => new(BotUI.CombinePhotoButton);
         private static KeyboardButton ChangePhotoButton => new(BotUI.ChangePhotoButton);
-        private static KeyboardButton RemoveWatermarkButton => new(BotUI.RemoveWatermarkButton);
         private static KeyboardButton StickersButton => new(BotUI.StickersButton);
         private static KeyboardButton PromptFromImageButton => new(BotUI.PromptFromImageButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
@@ -167,7 +166,7 @@ namespace GPTipsBot.Services
                 [ModelButton, ImagesMenuButton],
                 [PromptFromImageButton, AnimatePhotoButton],
                 [CombinePhotoButton, ChangePhotoButton],
-                [RemoveWatermarkButton],
+                // Watermark removal: images menu only (inline button), not on the main keyboard.
                 [HelpButton],
             ]);
 
