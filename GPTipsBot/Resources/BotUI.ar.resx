@@ -219,4 +219,13 @@
   <data name="StickersPublishButton" xml:space="preserve">
     <value>📌 إضافة إلى تيليجرام</value>
   </data>
+  <data name="TryOn" xml:space="preserve">
+    <value>تجربة الملابس افتراضيًا</value>
+  </data>
+  <data name="TryOnButton" xml:space="preserve">
+    <value>👗 تجربة الملابس · 💎</value>
+  </data>
+  <data name="TryOnNewPhotoButton" xml:space="preserve">
+    <value>📸 تغيير صورتي</value>
+  </data>
 </root>

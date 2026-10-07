@@ -278,4 +278,13 @@
   <data name="StickersPublishButton" xml:space="preserve">
     <value>📌 Добавить в Telegram</value>
   </data>
+  <data name="TryOn" xml:space="preserve">
+    <value>Виртуальная примерка одежды</value>
+  </data>
+  <data name="TryOnButton" xml:space="preserve">
+    <value>👗 Примерка · 💎</value>
+  </data>
+  <data name="TryOnNewPhotoButton" xml:space="preserve">
+    <value>📸 Сменить моё фото</value>
+  </data>
 </root>

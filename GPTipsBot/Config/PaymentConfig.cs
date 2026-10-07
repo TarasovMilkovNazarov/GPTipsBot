@@ -31,6 +31,8 @@ public static class PaymentConfig
     public const int GptImageMedium = 400;
     /// <summary>GPT Image 2 high quality (~$0.211 / 1024²).</summary>
     public const int GptImageHigh = 800;
+    /// <summary>Virtual try-on: GPT Image 2 medium, 2:3 portrait output plus two input photos (~$0.08).</summary>
+    public const int TryOn = 600;
 
     /// <summary>Watermark removal via Seedream 4.5 on OpenRouter ($0.04 / image, ~3.6 ₽ with the top-up fee).</summary>
     public const int WatermarkRemoval = 400;

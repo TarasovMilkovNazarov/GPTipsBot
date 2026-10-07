@@ -1251,5 +1251,33 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("StickerPackDefaultTitle", resourceCulture);
             }
         }
+    
+
+        /// <summary>
+        ///   Looks up a localized string similar to 👗 Виртуальная примерка  Отправьте своё фото в полный рост: стоите прямо, лицом к камере, хорошее освещение. Потом пришлите фото вещи — снимок товара или скриншот из магазина. Фото сохранится, чтобы примерить несколько вещей подряд. Стоимость: {0}💎 за примерку.
+        /// </summary>
+        public static string TryOnIntro {
+            get {
+                return ResourceManager.GetString("TryOnIntro", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Пришлите фото вещи, которую хотите примерить: снимок товара или скриншот из магазина. В подписи можно добавить пожелания, например «заправить в брюки».
+        /// </summary>
+        public static string TryOnSendClothesPhoto {
+            get {
+                return ResourceManager.GetString("TryOnSendClothesPhoto", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 👗 Примерка · {0}💎 Пришлите следующую вещь, чтобы примерить её.
+        /// </summary>
+        public static string TryOnDoneCaption {
+            get {
+                return ResourceManager.GetString("TryOnDoneCaption", resourceCulture);
+            }
+        }
     }
 }

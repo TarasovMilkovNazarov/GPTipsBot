@@ -219,4 +219,13 @@
   <data name="StickersPublishButton" xml:space="preserve">
     <value>📌 افزودن به تلگرام</value>
   </data>
+  <data name="TryOn" xml:space="preserve">
+    <value>پرو مجازی لباس</value>
+  </data>
+  <data name="TryOnButton" xml:space="preserve">
+    <value>👗 پرو لباس · 💎</value>
+  </data>
+  <data name="TryOnNewPhotoButton" xml:space="preserve">
+    <value>📸 تغییر عکس من</value>
+  </data>
 </root>

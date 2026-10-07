@@ -11,6 +11,7 @@ public enum PaidFeature
     WatermarkRemoval = 6,
     CombinePhoto = 7,
     ChangePhoto = 8,
+    TryOn = 9,
 }
 
 public enum PaymentHoldStatus

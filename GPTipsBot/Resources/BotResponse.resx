@@ -817,4 +817,18 @@ https://gptips.skolkokomu.ru</value>
   <data name="StickerPackDefaultTitle" xml:space="preserve">
     <value>GPTips Stickers</value>
   </data>
+  <data name="TryOnIntro" xml:space="preserve">
+    <value>👗 Виртуальная примерка
+
+Отправьте своё фото в полный рост: стоите прямо, лицом к камере, хорошее освещение. Потом пришлите фото вещи — снимок товара или скриншот из магазина.
+Фото сохранится, чтобы примерить несколько вещей подряд.
+Стоимость: {0}💎 за примерку</value>
+  </data>
+  <data name="TryOnSendClothesPhoto" xml:space="preserve">
+    <value>Пришлите фото вещи, которую хотите примерить: снимок товара или скриншот из магазина. В подписи можно добавить пожелания, например «заправить в брюки»</value>
+  </data>
+  <data name="TryOnDoneCaption" xml:space="preserve">
+    <value>👗 Примерка · {0}💎
+Пришлите следующую вещь, чтобы примерить её</value>
+  </data>
 </root>

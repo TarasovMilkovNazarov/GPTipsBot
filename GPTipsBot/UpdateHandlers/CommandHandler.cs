@@ -44,6 +44,7 @@ namespace GPTipsBot.UpdateHandlers
         IGpt gptService,
         IGptImageSessionCache gptImageSessionCache,
         IStickerPackSessionCache stickerPackSessionCache,
+        ITryOnSessionCache tryOnSessionCache,
         IVisionImageCache visionImageCache,
         IImageCache imageCache,
         IAliceImageSessionCache aliceImageSessionCache,
@@ -337,6 +338,26 @@ namespace GPTipsBot.UpdateHandlers
                     aliceImageSessionCache.Remove(chatId);
                     await SendOrEditInlineMessageAsync(
                         update, BotResponse.SendFirstPhotoToCombine, BackToImagesMenuInlineKeyboard);
+                    return;
+                case TryOnCommand:
+                {
+                    var hasPersonPhoto = !string.IsNullOrWhiteSpace(
+                        tryOnSessionCache.GetOrCreate(update.UserChatKey.Id).PersonFileId);
+                    await SendOrEditInlineMessageAsync(
+                        update,
+                        hasPersonPhoto
+                            ? BotResponse.TryOnSendClothesPhoto
+                            : string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn),
+                        hasPersonPhoto ? TryOnInlineKeyboard : BackToImagesMenuInlineKeyboard);
+                    return;
+                }
+                case TryOnNewPhotoCommand:
+                    tryOnSessionCache.Remove(update.UserChatKey.Id);
+                    // Pressed under the result photo: a photo message has no text to edit, so send a new one.
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn),
+                        BackToImagesMenuInlineKeyboard);
                     return;
                 case ChangePhotoCommand:
                     imageCache.Remove(chatId);

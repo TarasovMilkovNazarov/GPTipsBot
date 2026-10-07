@@ -809,4 +809,18 @@ https://gptips.skolkokomu.ru</value>
   <data name="StickerPackDefaultTitle" xml:space="preserve">
     <value>GPTips Stickers</value>
   </data>
+  <data name="TryOnIntro" xml:space="preserve">
+    <value>👗 تجربة الملابس افتراضيًا
+
+أرسل صورة لك بالطول الكامل: واقفًا باستقامة، مواجهًا للكاميرا، وبإضاءة جيدة. ثم أرسل صورة القطعة — صورة المنتج أو لقطة شاشة من المتجر.
+ستُحفظ صورتك لتتمكن من تجربة عدة قطع متتالية.
+السعر: {0}💎 لكل تجربة</value>
+  </data>
+  <data name="TryOnSendClothesPhoto" xml:space="preserve">
+    <value>أرسل صورة القطعة التي تريد تجربتها: صورة المنتج أو لقطة شاشة من المتجر. يمكنك إضافة طلباتك في التعليق، مثلًا «مدسوسة في البنطال»</value>
+  </data>
+  <data name="TryOnDoneCaption" xml:space="preserve">
+    <value>👗 تجربة · {0}💎
+أرسل القطعة التالية لتجربتها</value>
+  </data>
 </root>

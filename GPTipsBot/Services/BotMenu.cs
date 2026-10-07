@@ -17,6 +17,8 @@ public class BotMenu
     public const string AnimatePhotoCommand = "/animate";
     public const string CombinePhotoCommand = "/combine";
     public const string ChangePhotoCommand = "/change_photo";
+    public const string TryOnCommand = "/try_on";
+    public const string TryOnNewPhotoCommand = "/try_on_new_photo";
     public const string ResetContextCommand = "/reset_context";
     public const string HelpCommand = "/help";
     public const string ChooseLangCommand = "/setLang";
@@ -61,6 +63,8 @@ public class BotMenu
     public static CustomBotCommand AnimatePhoto => new() { Command = AnimatePhotoCommand, Description = BotUI.AnimateButton, Type = CommandType.AnimatePhoto };
     public static CustomBotCommand CombinePhoto => new() { Command = CombinePhotoCommand, Description = BotUI.CombinePhotoButton, Type = CommandType.CombinePhoto };
     public static CustomBotCommand ChangePhoto => new() { Command = ChangePhotoCommand, Description = BotUI.ChangePhotoButton, Type = CommandType.ChangePhoto };
+    public static CustomBotCommand TryOn => new() { Command = TryOnCommand, Description = BotUI.TryOn, Type = CommandType.TryOn };
+    public static CustomBotCommand TryOnNewPhoto => new() { Command = TryOnNewPhotoCommand, Type = CommandType.TryOn };
     public static CustomBotCommand ImageRectangle => new() { Command = ImageRectangleCommand, Type = CommandType.ImageRectangle };
     public static CustomBotCommand ImageSquare => new() { Command = ImageSquareCommand, Type = CommandType.ImageSquare };
     public static CustomBotCommand ImageRecText => new() { Command = ImageTextRecognizeCommand, Description = BotUI.ImageTextRecognize, Type = CommandType.TextRecognition};
@@ -117,6 +121,7 @@ public class BotMenu
             AnimatePhoto,
             CombinePhoto,
             ChangePhoto,
+            TryOn,
             ResetContext,
             Help,
             Deposit,

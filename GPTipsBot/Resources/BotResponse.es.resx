@@ -810,4 +810,18 @@ Ya puedes añadirlo a Telegram.</value>
   <data name="StickerPackDefaultTitle" xml:space="preserve">
     <value>GPTips Stickers</value>
   </data>
+  <data name="TryOnIntro" xml:space="preserve">
+    <value>👗 Probador virtual
+
+Envía una foto tuya de cuerpo entero: de pie, mirando a la cámara y con buena luz. Luego envía una foto de la prenda: una foto del producto o una captura de la tienda.
+Tu foto se guarda para que puedas probarte varias prendas seguidas.
+Precio: {0}💎 por prueba</value>
+  </data>
+  <data name="TryOnSendClothesPhoto" xml:space="preserve">
+    <value>Envía una foto de la prenda que quieres probarte: una foto del producto o una captura de la tienda. Puedes añadir indicaciones en el pie de foto, por ejemplo «metida en el pantalón»</value>
+  </data>
+  <data name="TryOnDoneCaption" xml:space="preserve">
+    <value>👗 Probador · {0}💎
+Envía la siguiente prenda para probártela</value>
+  </data>
 </root>

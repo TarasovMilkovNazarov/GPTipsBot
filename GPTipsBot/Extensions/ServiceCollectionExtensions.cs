@@ -101,6 +101,7 @@ namespace GPTipsBot.Extensions
             .AddScoped<ChatGptHandler>()
             .AddScoped<GptImageHandler>()
             .AddScoped<StickerPackHandler>()
+            .AddScoped<TryOnHandler>()
             .AddScoped<RemoveWatermarkHandler>()
             .AddScoped<InlineQueryHandler>()
             // services
@@ -111,6 +112,7 @@ namespace GPTipsBot.Extensions
             .AddSingleton<StickerPackService>()
             .AddSingleton<IGptImageSessionCache, GptImageSessionCache>()
             .AddSingleton<IStickerPackSessionCache, StickerPackSessionCache>()
+            .AddSingleton<ITryOnSessionCache, TryOnSessionCache>()
             .AddSingleton<IImageGenerator, YaCloudClient>()
             .AddSingleton<ITextRecognizer, YaCloudClient>()
             .AddScoped<UserStatusActivator>()

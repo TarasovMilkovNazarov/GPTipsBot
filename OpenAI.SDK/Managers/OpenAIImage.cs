@@ -43,10 +43,20 @@ public partial class OpenAIService : IImageService
         }
 
         multipartContent.Add(new StringContent(imageEditCreateRequest.Prompt), "prompt");
-        multipartContent.Add(
-            new ByteArrayContent(imageEditCreateRequest.Image),
-            "image",
-            string.IsNullOrWhiteSpace(imageEditCreateRequest.ImageName) ? "image.png" : imageEditCreateRequest.ImageName);
+
+        var imageName = string.IsNullOrWhiteSpace(imageEditCreateRequest.ImageName) ? "image.png" : imageEditCreateRequest.ImageName;
+        if (imageEditCreateRequest.AdditionalImages is { Count: > 0 } additionalImages)
+        {
+            multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image[]", imageName);
+            foreach (var additionalImage in additionalImages)
+            {
+                multipartContent.Add(new ByteArrayContent(additionalImage.Image), "image[]", additionalImage.ImageName);
+            }
+        }
+        else
+        {
+            multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image", imageName);
+        }
 
         return await _httpClient.PostFileAndReadAsAsync<ImageCreateResponse>(
             _endpointProvider.ImageEditCreate(),

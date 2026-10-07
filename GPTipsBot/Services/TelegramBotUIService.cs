@@ -15,6 +15,8 @@ namespace GPTipsBot.Services
         public static InlineKeyboardMarkup DepositInlineKeyboard => GetDepositInlineKeyboard();
         public static InlineKeyboardMarkup CancelInlineKeyboard => GetCancelInlineKeyboard();
         public static InlineKeyboardMarkup BackToImagesMenuInlineKeyboard => GetBackToImagesMenuInlineKeyboard();
+        public static InlineKeyboardMarkup TryOnInlineKeyboard => GetTryOnInlineKeyboard();
+        public static InlineKeyboardMarkup TryOnResultInlineKeyboard => GetTryOnResultInlineKeyboard();
 
         public static ReplyMarkup? GetMenuMarkup(bool isGroupOrChannel) =>
             isGroupOrChannel ? null : StartKeyboard;
@@ -81,6 +83,7 @@ namespace GPTipsBot.Services
                 { BotMenu.ImagesMenuCommand, new() },
                 { BotMenu.RemoveWatermarkCommand, new() },
                 { BotMenu.StickersCommand, new() },
+                { BotMenu.TryOnCommand, new() },
             };
 
             var savedCulture = CultureInfo.CurrentUICulture;
@@ -112,6 +115,7 @@ namespace GPTipsBot.Services
                 ButtonToLocalizations[BotMenu.ImagesMenuCommand].Add(BotUI.ImagesMenuButton);
                 ButtonToLocalizations[BotMenu.RemoveWatermarkCommand].Add(BotUI.RemoveWatermarkButton);
                 ButtonToLocalizations[BotMenu.StickersCommand].Add(BotUI.StickersButton);
+                ButtonToLocalizations[BotMenu.TryOnCommand].Add(BotUI.TryOnButton);
             }
 
             // Keep old reply-keyboard labels working until users get the new menu via /start.
@@ -198,6 +202,24 @@ namespace GPTipsBot.Services
         private static InlineKeyboardMarkup GetBackToImagesMenuInlineKeyboard()
         {
             return new InlineKeyboardMarkup(BackToImagesMenuButton);
+        }
+
+        private static InlineKeyboardButton TryOnNewPhotoButton =>
+            InlineKeyboardButton.WithCallbackData(BotUI.TryOnNewPhotoButton, BotMenu.TryOnNewPhotoCommand);
+
+        private static InlineKeyboardMarkup GetTryOnInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(
+            [
+                [TryOnNewPhotoButton],
+                [BackToImagesMenuButton],
+            ]);
+        }
+
+        /// <summary>Under the result photo: "back" edits the message text, which a photo doesn't have.</summary>
+        private static InlineKeyboardMarkup GetTryOnResultInlineKeyboard()
+        {
+            return new InlineKeyboardMarkup(TryOnNewPhotoButton);
         }
 
         public static InlineKeyboardMarkup GetLanguageInlineKeyboard()
@@ -306,6 +328,7 @@ namespace GPTipsBot.Services
                 [InlineKeyboardButton.WithCallbackData(BotUI.ChangePhotoButton, BotMenu.ChangePhotoCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.GptImageButton, BotMenu.GptImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.StickersButton, BotMenu.StickersCommand)],
+                [InlineKeyboardButton.WithCallbackData(BotUI.TryOnButton, BotMenu.TryOnCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.EditImageButton, BotMenu.EditImageCommand)],
                 [InlineKeyboardButton.WithCallbackData(BotUI.RemoveWatermarkButton, BotMenu.RemoveWatermarkCommand)],
             ]);

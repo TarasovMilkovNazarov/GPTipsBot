@@ -48,6 +48,7 @@ public enum CommandType
     CombinePhoto = 34,
     ChangePhoto = 35,
     StickerPack = 36,
+    TryOn = 37,
 }
 
 public class Wallet: Entity

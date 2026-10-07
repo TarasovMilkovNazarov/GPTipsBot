@@ -809,4 +809,18 @@ https://gptips.skolkokomu.ru</value>
   <data name="StickerPackDefaultTitle" xml:space="preserve">
     <value>GPTips Stickers</value>
   </data>
+  <data name="TryOnIntro" xml:space="preserve">
+    <value>👗 پرو مجازی
+
+یک عکس تمام‌قد از خودتان بفرستید: صاف ایستاده، رو به دوربین و با نور خوب. سپس عکس لباس را بفرستید — عکس محصول یا اسکرین‌شات از فروشگاه.
+عکس شما ذخیره می‌شود تا بتوانید چند لباس را پشت سر هم پرو کنید.
+هزینه: {0}💎 برای هر پرو</value>
+  </data>
+  <data name="TryOnSendClothesPhoto" xml:space="preserve">
+    <value>عکس لباسی را که می‌خواهید پرو کنید بفرستید: عکس محصول یا اسکرین‌شات از فروشگاه. می‌توانید خواسته‌هایتان را در کپشن بنویسید، مثلاً «داخل شلوار»</value>
+  </data>
+  <data name="TryOnDoneCaption" xml:space="preserve">
+    <value>👗 پرو · {0}💎
+لباس بعدی را بفرستید تا پرو کنید</value>
+  </data>
 </root>

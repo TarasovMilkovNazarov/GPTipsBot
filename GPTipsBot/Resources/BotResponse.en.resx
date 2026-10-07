@@ -812,4 +812,18 @@ You can add it to Telegram.</value>
   <data name="StickerPackDefaultTitle" xml:space="preserve">
     <value>GPTips Stickers</value>
   </data>
+  <data name="TryOnIntro" xml:space="preserve">
+    <value>👗 Virtual try-on
+
+Send a full-height photo of yourself: standing straight, facing the camera, good lighting. Then send a photo of the item — a product photo or a store screenshot.
+Your photo is kept so you can try on several items in a row.
+Price: {0}💎 per try-on</value>
+  </data>
+  <data name="TryOnSendClothesPhoto" xml:space="preserve">
+    <value>Send a photo of the item you want to try on: a product photo or a store screenshot. You can add wishes in the caption, e.g. "tucked into trousers"</value>
+  </data>
+  <data name="TryOnDoneCaption" xml:space="preserve">
+    <value>👗 Try-on · {0}💎
+Send the next item to try it on</value>
+  </data>
 </root>

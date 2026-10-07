@@ -43,13 +43,15 @@ public class ImageCreatorService(
         string quality,
         long chatId,
         CancellationToken cancellationToken = default,
-        string? background = null)
+        string? background = null,
+        List<ImageEditInput>? additionalImages = null)
     {
         var imageResult = await openAiService.Image.CreateImageEdit(new ImageEditCreateRequest
         {
             Prompt = prompt,
             Image = imageBytes,
             ImageName = imageFileName,
+            AdditionalImages = additionalImages,
             N = 1,
             Size = size,
             Quality = quality,

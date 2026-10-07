@@ -31,6 +31,7 @@ namespace GPTipsBot.UpdateHandlers
         ImageGeneratorHandler imageGeneratorHandler,
         GptImageHandler gptImageHandler,
         StickerPackHandler stickerPackHandler,
+        TryOnHandler tryOnHandler,
         RemoveWatermarkHandler removeWatermarkHandler,
         CommandHandler commandHandler,
         ChatGptHandler chatGptHandler,
@@ -48,6 +49,7 @@ namespace GPTipsBot.UpdateHandlers
         IVisionImageCache visionImageCache,
         IGptImageSessionCache gptImageSessionCache,
         IStickerPackSessionCache stickerPackSessionCache,
+        ITryOnSessionCache tryOnSessionCache,
         MessageRepository messageRepository,
         PhotoAnimationProgressNotifier photoAnimationProgressNotifier,
         IJobService jobService,
@@ -384,6 +386,31 @@ namespace GPTipsBot.UpdateHandlers
             {
                 SetNextHandler(stickerPackHandler);
             }
+            else if (lastCommand?.Type == CommandType.TryOn && !update.IsGroupOrChannel)
+            {
+                var session = tryOnSessionCache.GetOrCreate(userKey.Id);
+                if (string.IsNullOrWhiteSpace(session.PersonFileId))
+                {
+                    if (update.FileId == null)
+                    {
+                        await botClient.SendUserReplyAsync(
+                            update,
+                            string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn),
+                            TelegramBotUiService.BackToImagesMenuInlineKeyboard);
+                        return;
+                    }
+
+                    session.PersonFileId = update.FileId;
+                    tryOnSessionCache.Set(userKey.Id, session);
+                    await botClient.SendUserReplyAsync(
+                        update,
+                        BotResponse.TryOnSendClothesPhoto,
+                        TelegramBotUiService.TryOnInlineKeyboard);
+                    return;
+                }
+
+                SetNextHandler(tryOnHandler);
+            }
             else if (update.IsGroupOrChannel &&
                      lastCommand?.Type is CommandType.TextRecognition
                          or CommandType.Deposit
@@ -393,7 +420,8 @@ namespace GPTipsBot.UpdateHandlers
                          or CommandType.ChangePhoto
                          or CommandType.GptImage
                          or CommandType.RemoveWatermark
-                         or CommandType.StickerPack)
+                         or CommandType.StickerPack
+                         or CommandType.TryOn)
             {
                 await botClient.SendMessage(userKey.ChatId, BotResponse.GroupCommandNotAvailable);
                 return;

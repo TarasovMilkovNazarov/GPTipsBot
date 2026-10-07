@@ -474,5 +474,33 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("StopRequestButton", resourceCulture);
             }
         }
+    
+
+        /// <summary>
+        ///   Looks up a localized string similar to Виртуальная примерка одежды.
+        /// </summary>
+        internal static string TryOn {
+            get {
+                return ResourceManager.GetString("TryOn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 👗 Примерка · 💎.
+        /// </summary>
+        internal static string TryOnButton {
+            get {
+                return ResourceManager.GetString("TryOnButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to 📸 Сменить моё фото.
+        /// </summary>
+        internal static string TryOnNewPhotoButton {
+            get {
+                return ResourceManager.GetString("TryOnNewPhotoButton", resourceCulture);
+            }
+        }
     }
 }

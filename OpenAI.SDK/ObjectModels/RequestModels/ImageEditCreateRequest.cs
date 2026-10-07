@@ -16,6 +16,11 @@ public record ImageEditCreateRequest : SharedImageRequestBaseModel
     public string ImageName { get; set; }
 
     /// <summary>
+    ///     Extra reference images (gpt-image models only). When set, all images are sent as <c>image[]</c>.
+    /// </summary>
+    public List<ImageEditInput>? AdditionalImages { get; set; }
+
+    /// <summary>
     ///     An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
     ///     Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
     /// </summary>
@@ -31,4 +36,17 @@ public record ImageEditCreateRequest : SharedImageRequestBaseModel
     /// </summary>
     [JsonPropertyName("prompt")]
     public string Prompt { get; set; }
+}
+
+public class ImageEditInput
+{
+    public ImageEditInput(byte[] image, string imageName)
+    {
+        Image = image;
+        ImageName = imageName;
+    }
+
+    public byte[] Image { get; }
+
+    public string ImageName { get; }
 }
