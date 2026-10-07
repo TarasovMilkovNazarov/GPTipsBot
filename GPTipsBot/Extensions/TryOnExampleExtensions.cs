@@ -4,8 +4,9 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+// Not the whole Telegram.Bot.Types namespace: its Color clashes with ImageSharp's.
+using InputFile = Telegram.Bot.Types.InputFile;
 
 namespace GPTipsBot.Extensions;
 
