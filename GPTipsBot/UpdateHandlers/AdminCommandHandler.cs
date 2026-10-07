@@ -129,9 +129,11 @@ namespace GPTipsBot.UpdateHandlers
             var chatKey = update.UserChatKey;
             var adminId = chatKey.TelegramUserId ?? chatKey.Id;
 
+            // Silent for everyone else (other admins included) so the command stays invisible.
             if (adminId != AppConfig.GemsGrantAdminId || update.IsGroupOrChannel)
             {
-                await botClient.SendMessage(chatKey.ChatId, "⛔ Нет прав на начисление гемов.");
+                logger.LogWarning("Ignored {Command} from {UserId} in chat {ChatId}",
+                    BotMenu.AddGemsCommand, adminId, chatKey.ChatId);
                 return;
             }
 

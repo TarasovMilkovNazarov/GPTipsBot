@@ -162,6 +162,10 @@ namespace GPTipsBot.Extensions
                 SetBotMenus(botClient, "ar");
 
                 CultureInfo.CurrentUICulture = LocalizationManager.Ru;
+                // Admin-only commands live in the admin's own chat menu; everyone else keeps the default one.
+                botClient.SetMyCommands(
+                    new BotMenu().GetBotCommands(AppConfig.GemsGrantAdminId),
+                    BotCommandScope.Chat(AppConfig.GemsGrantAdminId));
                 CultureInfo.DefaultThreadCurrentUICulture = LocalizationManager.Ru;
 
                 return botClient;

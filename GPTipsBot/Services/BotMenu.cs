@@ -1,4 +1,5 @@
 ﻿using GPTipsBot.Dtos;
+using GPTipsBot.Config;
 using GPTipsBot.Models;
 using GPTipsBot.Resources;
 using Newtonsoft.Json;
@@ -106,7 +107,8 @@ public class BotMenu
     public static CustomBotCommand Fix => new() { Command = FixCommand, Type = CommandType.Admin };
     public static CustomBotCommand Version => new() { Command = VersionCommand, Type = CommandType.Admin };
     public static CustomBotCommand Broadcast => new() { Command = BroadcastCommand, Type = CommandType.Broadcast };
-    public static CustomBotCommand AddGems => new() { Command = AddGemsCommand, Type = CommandType.Admin };
+    // Shown only in GemsGrantAdminId's own chat menu, see GetBotCommands(long).
+    public static CustomBotCommand AddGems => new() { Command = AddGemsCommand, Description = "💎 Начислить гемы", Type = CommandType.Admin };
 
     public BotMenu()
     {
@@ -138,6 +140,10 @@ public class BotMenu
             Human
         ];
     }
+
+    /// <summary>Private-chat menu for <paramref name="chatId"/>: admin-only commands appear in their owner's chat only.</summary>
+    public BotCommand[] GetBotCommands(long chatId) =>
+        chatId == AppConfig.GemsGrantAdminId ? [.. GetBotCommands(), AddGems] : GetBotCommands();
 
     public BotCommand[] GetGroupBotCommands()
     {

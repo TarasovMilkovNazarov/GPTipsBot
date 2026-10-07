@@ -102,7 +102,7 @@ namespace GPTipsBot.UpdateHandlers
                     await botClient.SetMyCommands(
                         update.IsGroupOrChannel
                             ? new BotMenu().GetGroupBotCommands()
-                            : new BotMenu().GetBotCommands(),
+                            : new BotMenu().GetBotCommands(chatId),
                         BotCommandScope.Chat(chatId));
                     reply = await HandleStartDeepLinkAsync(update);
                     await userCommandRepository.AddAsync(update.UserChatKey, update.Command.Type);
@@ -494,7 +494,7 @@ namespace GPTipsBot.UpdateHandlers
                 await botClient.SetMyCommands(
                     update.IsGroupOrChannel
                         ? new BotMenu().GetGroupBotCommands()
-                        : new BotMenu().GetBotCommands(),
+                        : new BotMenu().GetBotCommands(chatId),
                     BotCommandScope.Chat(chatId));
                 replyMarkup = GetMenuMarkup(update.IsGroupOrChannel);
 
