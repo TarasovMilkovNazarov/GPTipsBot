@@ -5,7 +5,9 @@ namespace GPTipsBot.Config
     public static class AppConfig
     {
         public static string BotName { get;set; }
-        public static readonly long[] AdminIds = [486363646, 396539949]; // Саня, Даня
+        /// <summary>The only admin allowed to grant gems (/add_gems).</summary>
+        public const long GemsGrantAdminId = 486363646; // Саня
+        public static readonly long[] AdminIds = [GemsGrantAdminId, 396539949]; // Саня, Даня
         public static bool IsOnMaintenance = false;
         public static readonly bool IsDevelopment = Env != "Production";
         public static readonly bool IsProduction = Env == "Production";

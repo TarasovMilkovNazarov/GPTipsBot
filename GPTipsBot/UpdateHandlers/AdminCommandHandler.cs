@@ -7,6 +7,7 @@ using GPTipsBot.Repositories;
 using GPTipsBot.Resources;
 using GPTipsBot.Services;
 using GPTipsBot.Services.Broadcast;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 
 namespace GPTipsBot.UpdateHandlers
@@ -17,9 +18,24 @@ namespace GPTipsBot.UpdateHandlers
         BroadcastDraftStore draftStore,
         BroadcastService broadcastService,
         BroadcastRunner broadcastRunner,
-        BotSettingsRepository botSettingsRepository)
+        BotSettingsRepository botSettingsRepository,
+        UserRepository userRepository,
+        MoneyService moneyService,
+        ILogger<AdminCommandHandler> logger)
         : BaseMessageHandler
     {
+        /// <summary>Sanity cap for a single /add_gems so a typo can't mint millions of gems.</summary>
+        private const int MaxGemsGrant = 100_000;
+
+        private const string AddGemsUsage =
+            """
+            Использование:
+            /add_gems <telegramId> <гемы>
+            /add_gems u<userId> <гемы> — по внутреннему id (как в #deposit)
+
+            Например: /add_gems 123456789 500
+            """;
+
         private const string HelpText =
             """
             📢 Рассылка (только админам)
@@ -95,11 +111,63 @@ namespace GPTipsBot.UpdateHandlers
                 return;
             }
 
+            if (update.Command?.Command == BotMenu.AddGemsCommand)
+            {
+                await HandleAddGemsCommandAsync(update);
+                return;
+            }
+
             if (draftStore.IsAwaitingText(chatKey.TelegramUserId ?? chatKey.Id) &&
                 !update.IsCommand)
             {
                 await ApplyTextAsync(update, text);
             }
+        }
+
+        private async Task HandleAddGemsCommandAsync(UpdateDecorator update)
+        {
+            var chatKey = update.UserChatKey;
+            var adminId = chatKey.TelegramUserId ?? chatKey.Id;
+
+            if (adminId != AppConfig.GemsGrantAdminId || update.IsGroupOrChannel)
+            {
+                await botClient.SendMessage(chatKey.ChatId, "⛔ Нет прав на начисление гемов.");
+                return;
+            }
+
+            UpdateDecorator.TryGetCommandArgument(update.Message.Text, BotMenu.AddGemsCommand, out var argument);
+            var parts = (argument ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var target = parts.Length == 2 ? parts[0] : "";
+            var byInternalId = target.StartsWith('u') || target.StartsWith('U');
+
+            if (parts.Length != 2 ||
+                !long.TryParse(byInternalId ? target[1..] : target, out var id) ||
+                !int.TryParse(parts[1], out var gems) ||
+                gems <= 0 || gems > MaxGemsGrant)
+            {
+                await botClient.SendMessage(chatKey.ChatId, AddGemsUsage + $"\nМаксимум за раз: {MaxGemsGrant}💎");
+                return;
+            }
+
+            var user = byInternalId ? userRepository.Get(id) : userRepository.GetByTelegramId(id);
+            if (user == null)
+            {
+                await botClient.SendMessage(chatKey.ChatId,
+                    $"Пользователь {(byInternalId ? "userId" : "telegramId")}={id} не найден.");
+                return;
+            }
+
+            var balance = await moneyService.GrantGemsAsync(user.Id, gems, CancellationToken.None);
+
+            logger.LogInformation(
+                "Admin {AdminId} granted {Gems} gems to userId={UserId} telegramId={TelegramId}, balance={Balance}",
+                adminId, gems, user.Id, user.TelegramId, balance);
+
+            await botClient.SendMessage(chatKey.ChatId,
+                $"✅ Начислено {gems}💎\n" +
+                $"{user.FirstName} {user.LastName}".TrimEnd() + "\n" +
+                $"userId={user.Id}, telegramId={user.TelegramId?.ToString() ?? "—"}\n" +
+                $"Баланс: {balance}💎");
         }
 
         private async Task HandleBroadcastCommandAsync(UpdateDecorator update)

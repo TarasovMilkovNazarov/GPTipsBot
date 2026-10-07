@@ -1301,24 +1301,7 @@ public class MoneyService
     /// <summary>Credits <paramref name="gems"/> to the wallet, whichever rail the payer used.</summary>
     public async Task AddMoneyAsync(long userId, int gems, PaymentProvider provider, CancellationToken cancellationToken)
     {
-        var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
-
-        if (wallet == null)
-        {
-            var user = _userRepository.Get(userId);
-            Guard.Against.Null(user);
-
-            wallet = new Wallet
-            {
-                CreatedAt = DateTime.UtcNow,
-                UserId = userId,
-                Currency = CurrencyCode.Gem
-            };
-            _walletRepository.Create(wallet);
-            await _context.SaveChangesAsync(cancellationToken);
-            user.Wallet = wallet;
-            _context.Users.Update(user);
-        }
+        var wallet = await GetOrCreateWalletAsync(userId, cancellationToken);
 
         _transactionRepository.Create(new Transaction
         {
@@ -1328,6 +1311,70 @@ public class MoneyService
         });
         await _walletRepository.UpdateAmountAsync(wallet, gems);
         NotifyAdminAboutDeposit(wallet, provider);
+    }
+
+    /// <summary>
+    /// Admin grant (/add_gems): credits gems without any payment and returns the new balance.
+    /// The increment is a single UPDATE so it can't race with payment holds of the same wallet.
+    /// </summary>
+    public async Task<long> GrantGemsAsync(long userId, int gems, CancellationToken cancellationToken)
+    {
+        Guard.Against.NegativeOrZero(gems);
+
+        await using var tx = _context.Database.CurrentTransaction is null
+            ? await _context.Database.BeginTransactionAsync(cancellationToken)
+            : null;
+
+        var wallet = await GetOrCreateWalletAsync(userId, cancellationToken);
+        _transactionRepository.Create(new Transaction
+        {
+            CreatedAt = DateTime.UtcNow,
+            WalletId = wallet.Id,
+            Amount = gems
+        });
+        // Flush tracked changes (incl. a just-created wallet) before the UPDATE:
+        // saving them afterwards would write the stale in-memory balance back.
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await _context.Wallets
+            .Where(w => w.Id == wallet.Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(w => w.Balance, w => w.Balance + gems), cancellationToken);
+
+        if (tx is not null)
+        {
+            await tx.CommitAsync(cancellationToken);
+        }
+
+        return await _context.Wallets
+            .AsNoTracking()
+            .Where(w => w.Id == wallet.Id)
+            .Select(w => w.Balance)
+            .SingleAsync(cancellationToken);
+    }
+
+    private async Task<Wallet> GetOrCreateWalletAsync(long userId, CancellationToken cancellationToken)
+    {
+        var wallet = _walletRepository.Get(w => w.UserId == userId).SingleOrDefault();
+        if (wallet != null)
+        {
+            return wallet;
+        }
+
+        var user = _userRepository.Get(userId);
+        Guard.Against.Null(user);
+
+        wallet = new Wallet
+        {
+            CreatedAt = DateTime.UtcNow,
+            UserId = userId,
+            Currency = CurrencyCode.Gem
+        };
+        _walletRepository.Create(wallet);
+        await _context.SaveChangesAsync(cancellationToken);
+        user.Wallet = wallet;
+        _context.Users.Update(user);
+
+        return wallet;
     }
 
     /// <summary>
