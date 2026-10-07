@@ -823,4 +823,7 @@ https://gptips.skolkokomu.ru</value>
     <value>👗 تجربة · {0}💎
 أرسل القطعة التالية لتجربتها</value>
   </data>
+  <data name="TryOnExampleLegend" xml:space="preserve">
+    <value>👆 مثال: على اليسار قبل التجربة، وعلى اليمين بعدها</value>
+  </data>
 </root>

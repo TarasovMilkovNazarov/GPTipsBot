@@ -826,4 +826,7 @@ Price: {0}💎 per try-on</value>
     <value>👗 Try-on · {0}💎
 Send the next item to try it on</value>
   </data>
+  <data name="TryOnExampleLegend" xml:space="preserve">
+    <value>👆 Example: left — before the try-on, right — after</value>
+  </data>
 </root>

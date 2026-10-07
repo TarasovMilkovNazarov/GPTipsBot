@@ -340,24 +340,20 @@ namespace GPTipsBot.UpdateHandlers
                         update, BotResponse.SendFirstPhotoToCombine, BackToImagesMenuInlineKeyboard);
                     return;
                 case TryOnCommand:
-                {
-                    var hasPersonPhoto = !string.IsNullOrWhiteSpace(
-                        tryOnSessionCache.GetOrCreate(update.UserChatKey.Id).PersonFileId);
-                    await SendOrEditInlineMessageAsync(
-                        update,
-                        hasPersonPhoto
-                            ? BotResponse.TryOnSendClothesPhoto
-                            : string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn),
-                        hasPersonPhoto ? TryOnInlineKeyboard : BackToImagesMenuInlineKeyboard);
+                    if (!string.IsNullOrWhiteSpace(tryOnSessionCache.GetOrCreate(update.UserChatKey.Id).PersonFileId))
+                    {
+                        await SendOrEditInlineMessageAsync(update, BotResponse.TryOnSendClothesPhoto, TryOnInlineKeyboard);
+                        return;
+                    }
+
+                    // New message with the before/after example: a text message can't be edited into a photo.
+                    await botClient.SendTryOnInstructionsAsync(
+                        chatId, string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn), BackToImagesMenuInlineKeyboard);
                     return;
-                }
                 case TryOnNewPhotoCommand:
                     tryOnSessionCache.Remove(update.UserChatKey.Id);
-                    // Pressed under the result photo: a photo message has no text to edit, so send a new one.
-                    await botClient.SendUserReplyAsync(
-                        update,
-                        string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn),
-                        BackToImagesMenuInlineKeyboard);
+                    await botClient.SendTryOnInstructionsAsync(
+                        chatId, string.Format(BotResponse.TryOnIntro, PaymentConfig.TryOn), BackToImagesMenuInlineKeyboard);
                     return;
                 case ChangePhotoCommand:
                     imageCache.Remove(chatId);
@@ -537,7 +533,9 @@ namespace GPTipsBot.UpdateHandlers
             ParseMode? parseMode = null)
         {
             var chatId = update.UserChatKey.ChatId;
-            if (update.CallbackQuery != null && update.Message.TelegramMessageId.HasValue)
+            // Only a text message can be edited into another text: a button under a photo
+            // (e.g. the try-on example) gets a new message instead.
+            if (update.CallbackQuery?.Message?.Text != null && update.Message.TelegramMessageId.HasValue)
             {
                 await botClient.EditMessageText(
                     chatId,

@@ -824,4 +824,7 @@ Precio: {0}💎 por prueba</value>
     <value>👗 Probador · {0}💎
 Envía la siguiente prenda para probártela</value>
   </data>
+  <data name="TryOnExampleLegend" xml:space="preserve">
+    <value>👆 Ejemplo: a la izquierda, antes del probador; a la derecha, después</value>
+  </data>
 </root>

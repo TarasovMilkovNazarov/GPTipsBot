@@ -823,4 +823,7 @@ https://gptips.skolkokomu.ru</value>
     <value>👗 پرو · {0}💎
 لباس بعدی را بفرستید تا پرو کنید</value>
   </data>
+  <data name="TryOnExampleLegend" xml:space="preserve">
+    <value>👆 نمونه: سمت چپ قبل از پرو، سمت راست بعد از آن</value>
+  </data>
 </root>

@@ -1279,5 +1279,15 @@ namespace GPTipsBot.Resources {
                 return ResourceManager.GetString("TryOnDoneCaption", resourceCulture);
             }
         }
+    
+
+        /// <summary>
+        ///   Looks up a localized string similar to 👆 Пример: слева — до примерки, справа — после.
+        /// </summary>
+        public static string TryOnExampleLegend {
+            get {
+                return ResourceManager.GetString("TryOnExampleLegend", resourceCulture);
+            }
+        }
     }
 }

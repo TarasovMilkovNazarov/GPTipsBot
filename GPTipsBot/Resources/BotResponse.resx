@@ -831,4 +831,7 @@ https://gptips.skolkokomu.ru</value>
     <value>👗 Примерка · {0}💎
 Пришлите следующую вещь, чтобы примерить её</value>
   </data>
+  <data name="TryOnExampleLegend" xml:space="preserve">
+    <value>👆 Пример: слева — до примерки, справа — после</value>
+  </data>
 </root>
