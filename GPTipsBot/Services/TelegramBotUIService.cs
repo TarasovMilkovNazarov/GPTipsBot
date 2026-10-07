@@ -36,6 +36,7 @@ namespace GPTipsBot.Services
         private static KeyboardButton CombinePhotoButton => new(BotUI.CombinePhotoButton);
         private static KeyboardButton ChangePhotoButton => new(BotUI.ChangePhotoButton);
         private static KeyboardButton StickersButton => new(BotUI.StickersButton);
+        private static KeyboardButton TryOnButton => new(BotUI.TryOnButton);
         private static KeyboardButton PromptFromImageButton => new(BotUI.PromptFromImageButton);
         private static KeyboardButton ResetContextButton => new(BotUI.ResetContextButton);
         private static KeyboardButton HelpButton => new(BotUI.HelpButton);
@@ -162,7 +163,7 @@ namespace GPTipsBot.Services
             var keyboardMarkup = new ReplyKeyboardMarkup(
             [
                 [ResetContextButton, ProfileButton],
-                [StickersButton],
+                [StickersButton, TryOnButton],
                 [ModelButton, ImagesMenuButton],
                 [PromptFromImageButton, AnimatePhotoButton],
                 [CombinePhotoButton, ChangePhotoButton],
