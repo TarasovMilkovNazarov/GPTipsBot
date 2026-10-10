@@ -954,11 +954,13 @@ public class MoneyService
 
     /// <summary>
     /// lava.top requires an email for the receipt. Telegram users rarely have one on file, so a stable
-    /// per-user placeholder under the reserved .invalid TLD (RFC 2606 — guaranteed to never resolve or
-    /// receive mail) stands in; a real confirmed address is preferred when the account has one.
+    /// per-user placeholder on our own domain stands in; a real confirmed address is preferred when the
+    /// account has one. Not the reserved .invalid TLD: lava.top rejects it with 400 "Invalid customer email".
     /// </summary>
     private static string ResolveLavaTopEmail(User user) =>
-        !string.IsNullOrWhiteSpace(user.Email) ? user.Email! : $"u{user.Id}@telegram.invalid";
+        !string.IsNullOrWhiteSpace(user.Email)
+            ? user.Email!
+            : $"u{user.Id}@{LavaTopConfig.PlaceholderEmailDomain}";
 
     public bool TryValidatePreCheckout(PreCheckoutQuery query, out string? errorMessage)
     {

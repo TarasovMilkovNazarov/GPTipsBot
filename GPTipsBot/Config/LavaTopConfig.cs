@@ -108,6 +108,14 @@ public static class LavaTopConfig
             ? [.. new[] { 5, 10, 25 }.Select(units => units * GemsPerUnit)]
             : [];
 
+    /// <summary>
+    /// Domain for the placeholder email of users without one (lava.top requires an email). Must be a
+    /// real domain we own: lava.top rejects reserved TLDs like .invalid, and a third-party domain
+    /// would send our users' receipts to strangers.
+    /// </summary>
+    public static string PlaceholderEmailDomain =>
+        Normalize(Environment.GetEnvironmentVariable("LAVATOP_PLACEHOLDER_EMAIL_DOMAIN")) ?? "skolkokomu.ru";
+
     /// <summary>URL where the user returns after paying. Falls back to the YooKassa one — same bot/cabinet.</summary>
     public static string ReturnUrl =>
         Normalize(Environment.GetEnvironmentVariable("LAVATOP_RETURN_URL")) ?? YooKassaConfig.ReturnUrl;
