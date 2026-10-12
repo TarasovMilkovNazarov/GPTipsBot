@@ -831,6 +831,12 @@ public class MoneyService
         }
 
         var details = await _lavaTopClient.GetInvoiceAsync(contractId, cancellationToken);
+        if (details == null)
+        {
+            // Left in Created: the 24h window in SyncPendingLavaTopPaymentsAsync retires it by itself.
+            return PaymentConfirmResult.Ignored;
+        }
+
         if (!string.Equals(details.Status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogInformation(

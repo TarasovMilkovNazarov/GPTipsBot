@@ -10,12 +10,20 @@ public class HappProxyClientHandler : HttpClientHandler
 {
     public HappProxyClientHandler()
     {
-        var proxy = new WebProxy(AppConfig.HappProxyIp, AppConfig.HappProxyPort);
-        if (!string.IsNullOrWhiteSpace(AppConfig.HappProxyLogin))
-            proxy.Credentials = new NetworkCredential(AppConfig.HappProxyLogin, AppConfig.HappProxyPassword);
+        if (AppConfig.HappProxyEnabled)
+        {
+            var proxy = new WebProxy(AppConfig.HappProxyIp, AppConfig.HappProxyPort);
+            if (!string.IsNullOrWhiteSpace(AppConfig.HappProxyLogin))
+                proxy.Credentials = new NetworkCredential(AppConfig.HappProxyLogin, AppConfig.HappProxyPassword);
 
-        Proxy = proxy;
-        UseProxy = true;
+            Proxy = proxy;
+            UseProxy = true;
+        }
+        else
+        {
+            UseProxy = false;
+        }
+
         ServerCertificateCustomValidationCallback += (_, _, _, _) => true;
     }
 }

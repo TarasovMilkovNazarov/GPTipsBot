@@ -64,13 +64,22 @@ public class LavaTopClient
     /// Authoritative status/amount lookup — lava.top's own docs warn the return-URL query string is
     /// forgeable and only the webhook + this call are a source of truth for the payment state.
     /// </summary>
-    public async Task<LavaTopInvoiceDetails> GetInvoiceAsync(string invoiceId, CancellationToken cancellationToken)
+    /// <returns>Null when lava.top answers 404 — the invoice is unknown to it (expired/purged or never
+    /// really created), which is a normal outcome for stale pending invoices, not a failure.</returns>
+    public async Task<LavaTopInvoiceDetails?> GetInvoiceAsync(string invoiceId, CancellationToken cancellationToken)
     {
         using var message = new HttpRequestMessage(HttpMethod.Get, $"api/v1/invoices/{invoiceId}");
         ApplyAuth(message);
 
         using var response = await _httpClient.SendAsync(message, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning(
+                "lava.top get invoice: not found invoiceId={InvoiceId} body={Body}", invoiceId, body);
+            return null;
+        }
 
         if (!response.IsSuccessStatusCode)
         {

@@ -28,6 +28,10 @@ namespace GPTipsBot.Config
         public static string? TelejetApiKey => Environment.GetEnvironmentVariable("TELEJET_API_KEY");
         public static string? GramadsBearerToken => Environment.GetEnvironmentVariable("GRAMADS_BEARER");
         public static string HappProxyIp => Environment.GetEnvironmentVariable("HAPP_PROXY_IP") ?? "127.0.0.1";
+        /// <summary>Empty <c>HAPP_PROXY_IP</c> or <c>none</c> means a direct connection (server can reach Telegram/OpenAI itself).</summary>
+        public static bool HappProxyEnabled =>
+            !string.IsNullOrWhiteSpace(HappProxyIp) &&
+            !string.Equals(HappProxyIp.Trim(), "none", StringComparison.OrdinalIgnoreCase);
         public static int HappProxyPort => int.TryParse(Environment.GetEnvironmentVariable("HAPP_PROXY_PORT"), out var port) ? port : 10809;
         public static string? HappProxyLogin => Environment.GetEnvironmentVariable("HAPP_PROXY_LOGIN");
         public static string? HappProxyPassword => Environment.GetEnvironmentVariable("HAPP_PROXY_PASSWORD");
