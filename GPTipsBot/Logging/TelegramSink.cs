@@ -53,7 +53,7 @@ public class TelegramSink : ILogEventSink
         {
             var text = $"""
 🚧🚧🚧 Я УПАЛ, иди чини:
-Подробнее: https://kibana.skolkokomu.ru/app/r/s/80eMV
+Подробнее: https://kibana.skolkokomu.ru/app/r/s/Eeniz
 {message}
 """;
             if (suppressedSinceLastAlert > 0)
